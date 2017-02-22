@@ -26,6 +26,7 @@ if __name__ == '__main__':
           # packages=find_packages(),
           package_dir={'': 'lib'},
           packages=[
+              'crtomo',
           ],
           scripts=scripts,
           # install_requires=['numpy', 'scipy', 'matplotlib'],
