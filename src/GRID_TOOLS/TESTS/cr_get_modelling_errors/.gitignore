@@ -1,0 +1,5 @@
+*.png
+grid1_modelling_error.dat
+grid2_modelling_error.dat
+grid1_modelling_error_sorted.dat
+grid2_modelling_error_sorted.dat
