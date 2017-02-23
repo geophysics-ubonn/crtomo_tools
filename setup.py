@@ -8,7 +8,7 @@ import glob
 # python.exe setup.py bdist --format msi
 # to create a windows installer
 
-scripts = glob.glob('src/*.py')
+scripts = glob.glob('src/GRID_TOOLS/*.py')
 
 version_short = '0.1'
 version_long = '0.1.0'
