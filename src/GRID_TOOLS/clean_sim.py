@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
-Clean a simulation directory of all modeling/inversion files
-END DOCUMENTATION
+"""Clean a simulation directory of all modeling/inversion files
 """
 import numpy as np
 import os
 import glob
 
-if __name__ == '__main__':
+
+def main():
     rm_list = []
 
     required_files_inversion = (
@@ -52,3 +51,7 @@ if __name__ == '__main__':
         if os.path.isfile(filename):
             # print('Removing file {0}'.format(filename))
             os.remove(filename)
+
+
+if __name__ == '__main__':
+    main()

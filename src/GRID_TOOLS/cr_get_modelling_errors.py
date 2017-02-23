@@ -25,7 +25,6 @@ Usage example
 cr_get_modelling_errors.py --elem grid1/elem.dat --elec grid1/elec.dat\
         --config grid1/config.dat -o grid1_modelling_error.png
 
-END DOCUMENTATION
 """
 from optparse import OptionParser
 
@@ -183,12 +182,21 @@ def plot_and_save_deviations(rho0, rho_mod, Kfactors, filename, configs):
         )
 
 
-if __name__ == '__main__':
+def main():
     # homogeneous background resistivity [Ohm m]
     rho0 = 100
     options = handle_cmd_options()
     Kfactors, configs = compute_K_factors(options)
     Rmod = get_R_mod(options, rho0)
     rho_mod = np.abs(Kfactors) * Rmod
-    plot_and_save_deviations(rho0, rho_mod, Kfactors, options.output_file,
-                             configs)
+    plot_and_save_deviations(
+        rho0,
+        rho_mod,
+        Kfactors,
+        options.output_file,
+        configs
+    )
+
+
+if __name__ == '__main__':
+    main()

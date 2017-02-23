@@ -49,7 +49,7 @@ def sip_copy(fname, options):
             shutil.copy('~/.sip/{0}'.format(fname), 'exe')
 
 
-if (__name__ == '__main__'):
+def main():
     (options, args) = handle_cmd_options()
     for i in ['config', 'exe', 'grid', 'mod', 'mod/sens', 'mod/pot',
               'inv', 'rho']:
@@ -67,3 +67,7 @@ if (__name__ == '__main__'):
         shutil.move('crtomo.cfg', 'exe')
     else:
         sip_copy('crtomo.cfg', options)
+
+
+if __name__ == '__main__':
+    main()
