@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from setuptools import setup
-import glob
+from setuptools import find_packages
+# import glob
 # from setuptools import find_packages
 # find_packages
 
@@ -9,10 +10,15 @@ import glob
 # to create a windows installer
 
 # scripts = glob.glob('src/GRID_TOOLS/*.py')
-scripts = ['src/GRID_TOOLS/td_test.py', ]
+# scripts = ['src/GRID_TOOLS/td_test.py', ]
+scripts = [],
 
 version_short = '0.1'
 version_long = '0.1.0'
+
+# generate entry points
+entry_points = {'console_scripts': []}
+
 
 if __name__ == '__main__':
     setup(
@@ -30,11 +36,16 @@ if __name__ == '__main__':
         },
         # find_packages() somehow does not work under Win7 when creating a
         # msi # installer
-        # packages=find_packages(),
-        package_dir={'': 'lib'},
-        packages=[
-            'crtomo',
-        ],
-        scripts=scripts,
+        package_dir={'': 'src/', 'crtomo': 'lib/crtomo'},
+        # packages=[''],
+        # package_dir={'': 'lib', 'grid_tools': 'src/GRID_TOOLS'},
+        packages=find_packages(),
+        # py_modules=[
+        #     splitext(basename(i))[0] for i in glob.glob("src/*.py")
+        # ]
+        # packages=[
+        #     'crtomo',
+        # ],
+        # scripts=scripts,
         # install_requires=['numpy', 'scipy', 'matplotlib'],
     )
