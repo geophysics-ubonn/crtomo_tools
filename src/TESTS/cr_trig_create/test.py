@@ -26,7 +26,8 @@ def test_success_generator():
     """
     directories = sorted(glob.glob('Test_*'))
     for directory in directories:
-        yield check_grid_creation, directory, 0
+        if os.path.isdir(directory):
+            yield check_grid_creation, directory, 0
 
 
 def test_fail_generator():
