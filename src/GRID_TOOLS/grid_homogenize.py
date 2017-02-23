@@ -1,14 +1,19 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """
-Create homogenised version of a CRTomoMod grid.
-END DOCUMENTATION
+Create homogenized version of a CRTomo grid.
+
+Examples
+--------
+
+
 """
 import os
 import shutil
 from optparse import OptionParser
 import subprocess
 import numpy as np
-from crlab_py.mpl import *
+
+from crtomo.mpl_setup import *
 
 
 class grid_container():
@@ -55,20 +60,34 @@ class grid_container():
 
 def handle_cmd_options():
     parser = OptionParser()
-    parser.add_option('-d', "--data_dir", dest="data_dir", type="string",
-                      help="data dir containing the file electrodes.dat " +
-                      "and boundaries.dat' (default: data/)",
-                      default="data")
-    parser.add_option("-o", "--output", dest="output",
-                      help="Output directory (default: grid_hom)",
-                      metavar="DIR", default="grid_hom")
-    parser.add_option("--dx", dest="dx",
-                      help="dx", type="float",
-                      metavar="FLOAT", default=50)
-    parser.add_option("--dy", dest="dy",
-                      help="Depth of grid below electrodes (default: 100 m)",
-                      type="float",
-                      metavar="FLOAT", default=100)
+    parser.add_option(
+        '-d', "--data_dir",
+        dest="data_dir",
+        type="string",
+        help="data dir containing the file electrodes.dat " +
+        "and boundaries.dat' (default: data/)",
+        default="data",
+    )
+    parser.add_option(
+        "-o", "--output", dest="output",
+        help="Output directory (default: grid_hom)",
+        metavar="DIR",
+        default="grid_hom",
+    )
+    parser.add_option(
+        "--dx", dest="dx",
+        help="dx",
+        type="float",
+        metavar="FLOAT",
+        default=50,
+    )
+    parser.add_option(
+        "--dy", dest="dy",
+        help="Depth of grid below electrodes (default: 100 m)",
+        type="float",
+        metavar="FLOAT",
+        default=100,
+    )
 
     (options, args) = parser.parse_args()
     return options
