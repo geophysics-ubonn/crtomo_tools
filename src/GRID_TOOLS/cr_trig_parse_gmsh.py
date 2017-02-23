@@ -12,9 +12,9 @@ TODO
   funtions in "grid_extralines_gen_decouplings.py" can be used here (code
   deduplication and speed improvements)
 
-END DOCUMENTATION
+
 """
-from crlab_py.mpl import *
+from crtomo.mpl_setup import *
 mpl.rcParams['font.size'] = 6.0
 import numpy as np
 
@@ -206,7 +206,7 @@ class _line():
 
 
 def debug_plot_mesh(mesh, boundary_elements):
-    plot_large = False
+    plot_large = True
 
     # prepare nodes
     nodes = np.array(mesh['nodes'])
@@ -218,7 +218,7 @@ def debug_plot_mesh(mesh, boundary_elements):
     ty_size = np.abs(np.max(ty) - np.min(ty))
 
     if(plot_large):
-        width = 17
+        width = 10
     else:
         width = 7
     size_x = width
@@ -243,7 +243,7 @@ def debug_plot_mesh(mesh, boundary_elements):
         line_obj = _line([lx[index, 0], ly[index, 0]],
                          [lx[index, 1], ly[index, 1]])
         center = line_obj.get_center()
-        ntri = np.array(mesh['elements']['2'])[boundary_elements[index]]
+        ntri = np.array(mesh['elements']['2'])[int(boundary_elements[index])]
         ntri_x = nodes[ntri - 1, 1]
         ntri_y = nodes[ntri - 1, 2]
 
@@ -398,6 +398,7 @@ def write_elec_file(filename, mesh):
     for i in elecs:
         fid.write('{0}\n'.format(i))
     fid.close()
+
 
 if __name__ == '__main__':
     mesh = parse_gmsh('../commands.msh', '../boundary_lines.dat')

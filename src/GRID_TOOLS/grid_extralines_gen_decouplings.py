@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-"""
+"""Generate a decouplings.dat for CRTomo
+
 From a given extra_lines.dat file (see triangular grid generation in manual),
 generate a decouplings.dat for the decoupling of cell interfaces from the
 regularisation.
@@ -17,13 +18,21 @@ For convenience this threshold can be overwritten using the --eps option.
 Some of the for-loops can probably be optimized or replaced by some numpy
 broadcasting rules.
 
-END DOCUMENTATION
+Examples
+--------
+
+    # enter the output directory of cr_trig_create.py
+    grid_extralines_gen_decouplings.py
+    # this create the file decouplings.dat
+
+    grid_extralines_gen_decouplings.py --plot_node_nrs --plot_elm_nrs
+
 """
 import os
 from optparse import OptionParser
 import numpy as np
-from crlab_py.mpl import *
-from crlab_py import elem2
+from crtomo.mpl_setup import *
+import crtomo.grid as CRGrid
 
 
 def handle_cmd_options():
@@ -74,6 +83,31 @@ def handle_cmd_options():
         help="Process only one line with index N (zero indexed)",
         default=None,
     )
+
+    parser.add_option(
+        '--debug_plot',
+        action='store_true',
+        dest='debug_plot',
+        default=True,
+        help='plot a debug plot',
+    )
+
+    parser.add_option(
+        '--plot_node_nrs',
+        action='store_true',
+        dest='plot_node_nrs',
+        default=False,
+        help='plot node numbers in the debug plot. default: False',
+    )
+
+    parser.add_option(
+        '--plot_elm_nrs',
+        action='store_true',
+        dest='plot_elm_nrs',
+        default=False,
+        help='plot elements numbers in the debug plot. default: False',
+    )
+
     (options, args) = parser.parse_args()
     return options
 
@@ -118,14 +152,10 @@ def distances(x, y, px, py, plot=False):
     distances: list of distances
     """
 
-    print('line', x, y)
     length_line = np.sqrt((x[1] - x[0]) ** 2 + (y[1] - y[0]) ** 2)
-    print('length line', length_line)
 
     horizontal = (np.diff(y) == 0)
     vertical = (np.diff(x) == 0)
-    print('horizontal', horizontal)
-    print('vertical', vertical)
 
     dist = []
     dpl = []
@@ -133,15 +163,11 @@ def distances(x, y, px, py, plot=False):
     for xp, yp in zip(px, py):
         # compute distances to the end points
         dp = np.sqrt((xp - x) ** 2 + (yp - y) ** 2)
-        if counter == 1069:
-            print('1069: dp', dp)
 
         dpl.append(dp)
         if np.any(dp > length_line):
             point_dist = np.min(dp)
         elif horizontal:
-            if counter == 1069:
-                print('horizontal')
             point_dist = np.abs(yp - y[0])
         elif vertical:
             point_dist = np.abs(xp - x[0])
@@ -180,7 +206,7 @@ def get_decouplings_for_line(grid, line, settings, fids=None):
 
     Parameters
     ----------
-    grid: a crlab_py.elem2.crt_grid object
+    grid: a crtomo.grid.crt_grid object
     line: np.array/list with 4 entries: x1, y1, x2, x2, denoting start and end
           point
     fids: None, or: list with file ids for
@@ -205,7 +231,6 @@ def get_decouplings_for_line(grid, line, settings, fids=None):
 
     # shortest distance of all nodes to this line
     dist = np.array(distances(x, y, nx, ny))
-    print('number of distances: ', dist.shape)
 
     # set the epsilon environment
     if settings.get('eps', None) is not None:
@@ -227,16 +252,10 @@ def get_decouplings_for_line(grid, line, settings, fids=None):
 
     # only consider nodes that lie in the eps environment
     indices = np.where(dist < eps)[0]
-    print('indices', indices)
 
     # extract these nodes
     nodes = grid.nodes[key][indices, 0]
     nodes = indices
-    print('distances', dist[indices])
-    print('node pool (x/y)', nodes)
-    print(
-        grid.nodes[key][nodes.astype(int), 1:3],
-    )
 
     nodes_full = np.hstack((
         grid.nodes[key][indices, :].squeeze(),
@@ -257,46 +276,37 @@ def get_decouplings_for_line(grid, line, settings, fids=None):
     # find elements with two nodes in it
     for elmnr, element in enumerate(grid.elements):
         if len(np.intersect1d(element, nodes)) == 2:
-            print(
-                'element found', elmnr, element)
-            print(
-                grid.nodes[key][element, 1:3],
-            )
             elm_indices.append(elmnr)
             elm_nodes.append(element)
 
     elms = np.array(elm_nodes)
 
-    print('Looking for neighbors:')
     # find neighboring elements
     neighbors = []
     eta = options.eta
     # for each element on the line
     for index, elm in enumerate(elms):
-        print('element:', elm)
         found_it = False
         for index1, elm1 in enumerate(elms):
-            print('checking element:', elm1)
             ints = np.intersect1d(elm, elm1)
             # only two nodes can be on a line
             if len(ints) == 2:
-                print('found two common nodes', elm)
                 # this check ensures that we do not identify the
                 # boundary between two adjacent cells on the line
                 # as a decoupling line.
                 if np.all(dist[ints] < eps):
-                    print('keeping it')
                     found_it = True
                     break
                 else:
-                    print(
-                        'distances of neighbor not correct:', dist[ints], eps
-                    )
+                    pass
+                    # print(
+                    #     'distances of neighbor not correct:', dist[ints], eps
+                    # )
             # probably the element itself
             elif len(ints) > 2:
-                print('found more than two common nodes!')
-                print('element nodes:', elm)
-                print('element1 nodes:', elm1)
+                # print('found more than two common nodes!')
+                # print('element nodes:', elm)
+                # print('element1 nodes:', elm1)
                 pass
         if found_it:
             nb = (elm_indices[index] + 1, elm_indices[index1] + 1, eta)
@@ -311,8 +321,6 @@ def get_decouplings_for_line(grid, line, settings, fids=None):
             pass
             print('No neighbors found. Strange...')
 
-    import IPython
-    IPython.embed()
     return np.array(neighbors)
 
 
@@ -322,10 +330,135 @@ def check_options(options):
             raise IOError('File not found: {0}'.format(filename))
 
 
+def debug_plot(grid, extra_lines, decoupling_elements, options,):
+    print('Creating debug plot...')
+    fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+
+    all_xz = []
+    for x, z in zip(grid.grid['x'], grid.grid['z']):
+        tmp = np.vstack((x, z)).T
+        all_xz.append(tmp)
+
+    collection = mpl.collections.PolyCollection(
+        all_xz,
+        edgecolor='k',
+        facecolor='none',
+        linewidth=0.4,
+    )
+    ax.add_collection(collection)
+    if grid.electrodes is not None:
+        ax.scatter(
+            grid.electrodes[:, 1],
+            grid.electrodes[:, 2],
+            color='k',
+            clip_on=False,
+            label='electrodes',
+        )
+
+    # plot extra lines
+    for line in np.atleast_2d(extra_lines):
+        ax.plot(
+            [line[0], line[2]],
+            [line[1], line[3]],
+            '.-',
+            color='c',
+            label='extra line',
+        )
+        # only line 0
+        break
+
+    # plot decouplings
+    label = 'decoupling line'
+    for (el1, el2, coef) in decoupling_elements:
+        n1 = grid.elements[int(el1) - 1]
+        n2 = grid.elements[int(el2) - 1]
+
+        ints = np.intersect1d(n1, n2)
+
+        x = grid.nodes['presort'][ints, 1]
+        z = grid.nodes['presort'][ints, 2]
+
+        ax.plot(
+            x,
+            z,
+            '.-',
+            color='r',
+            linestyle='dashed',
+            label=label,
+        )
+        label = ''
+
+    # plot search nodes
+    nodes = np.loadtxt('debug_search_nodes.dat')
+    ax.scatter(
+        nodes[:, 1],
+        nodes[:, 2],
+        color='g',
+        s=40,
+        clip_on=False,
+        label='search nodes for decoupling',
+    )
+    for node in nodes:
+        circle = plt.Circle(
+            (node[1], node[2]),
+            radius=node[3],
+            fc='none',
+        )
+        ax.add_patch(circle)
+
+    # plot grid numbers
+    if options.plot_elm_nrs:
+        for nr, quads in enumerate(grid.elements):
+            # nr = grid.nodes['presort'][quads, 0],
+            x = grid.nodes['presort'][quads, 1],
+            z = grid.nodes['presort'][quads, 2],
+
+            # print('NXZ', nr, x, z)
+            ax.annotate(
+                '{0}'.format(nr + 1),
+                xy=(
+                    np.mean(x),
+                    np.mean(z),
+                ),
+                xycoords='data',
+            )
+
+    # # plot node numbers
+    if options.plot_node_nrs:
+        for nr, node in enumerate(grid.nodes['sorted']):
+            ax.annotate(
+                '{0}({1})'.format(nr, node[0]),
+                xy=(
+                    node[1],
+                    node[2],
+                ),
+                xycoords='data',
+                color='y',
+            )
+
+    ax.set_xlim(grid.grid['x'].min(), grid.grid['x'].max())
+    ax.set_ylim(grid.grid['z'].min(), grid.grid['z'].max())
+    # ax.autoscale_view()
+    ax.set_aspect('equal')
+    ax.set_xlabel('x')
+    ax.set_ylabel('z')
+    ax.set_title('Debug plot decoupling lines')
+    fig.tight_layout()
+    ax.legend(
+        loc="lower center",
+        ncol=4,
+        bbox_to_anchor=(0, 0, 1, 1),
+        bbox_transform=fig.transFigure,
+    )
+    fig.subplots_adjust(bottom=0.1)
+
+    fig.savefig('debug_plot_decoupling.png', dpi=300, bbox_inches='tight')
+
+
 if __name__ == '__main__':
     options = handle_cmd_options()
     check_options(options)
-    grid = elem2.crt_grid()
+    grid = CRGrid.crt_grid()
     grid.load_elem_file(options.elem_file)
 
     extra_lines = np.atleast_2d(np.loadtxt(options.linefile))
@@ -356,7 +489,18 @@ if __name__ == '__main__':
                 import IPython
                 IPython.embed()
 
+    for fid in fids:
+        fid.close()
+
     with open(options.output, 'w') as fid:
         fid.write('{0}\n'.format(neighbors.shape[0]))
     with open(options.output, 'ab') as fid:
         np.savetxt(fid, np.array(neighbors), fmt='%i %i %.2f')
+
+    if options.debug_plot:
+        debug_plot(
+            grid=grid,
+            extra_lines=extra_lines,
+            decoupling_elements=np.array(neighbors),
+            options=options,
+        )

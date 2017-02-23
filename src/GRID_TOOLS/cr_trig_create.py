@@ -1,17 +1,14 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Create irregular (triangular) grids for CRMod/CRTomo from simple ascii input
 files.
 
-Usage
-=====
-
 Create the input files "electrodes.dat", "boundaries.dat", "char_length.dat"
 according to the CRLab manual. An optional file "gmsh_commands.dat" file can be
-used to append GMSH command at the end of the generated gmsh command file. Note
-that these command will be executed only after the initial meshing, but can be
-used to refine the mesh.
+used to append GMSH commands at the end of the generated gmsh command file.
+Note that these command will be executed only after the initial meshing, but
+can be used to refine the mesh.
 
 Then run cr_trig_create.py.
 
@@ -21,84 +18,33 @@ directory using the uuid module.
 
 The output directory is printed in the last line of program output.
 
-END DOCUMENTATION
+Examples:
+---------
 
-Todo
-====
+>>> # note that this is a shell example, not Python!
+    cat electrodes.dat
+1.0 0.0
+2.0 0.0
+>>> cat boundaries.dat
+0.0 0.0 12
+1.0 0.0 12
+2.0 0.0 11
+2.0 -2.0 11
+0.0 -2.0 11
+>>> cat char_length.dat
+0.5
+>>> cat extra_lines.dat
+0.5 -0.5 1.5 -1.5
+>>> cr_trig_create.py
+
+
+TODO
+----
 
 * this file needs to be restructured. The complexity has outgrown the initial
   structure.
-* investigate attractors to set characteristic lengths (see notes below)
-
-Notes regarding gmsh
-====================
-
-//Feld 1 ist ein Attraktor
-Field[1] = Attractor;
-//Um die Punkte 21, 22, 23 soll der Attraktor angelegt werden
-Field[1].NodesList = {21,22,23};
-
-// Feld 2 ist eine mathematische Funktion
-Field[2] = MathEval;
-// Funktion des Feldes 2, F1 verbindet hier Feld 1 mit Feld 2
-Field[2].F = Sprintf("F1^2 + %g", lc / 25);
-
-//Aus Feld 2 ein Background-Mesh berechnen/erstellen
-Background Field = 2;
-
-Alte Notizen:
-
-//Feld 1 ist ein Attractor am Punkt 5 und Linie 1
-Field[1] = Attractor;
-//hier wird der Punkt bestimmt, der gegittert werden soll
-Field[1].NodesList = {5};
-//?
-Field[1].NNodesByEdge = 100;
-//hier wird die Linie bestimmt, die gegittert werden soll
-Field[1].EdgesList = {1};
-
-
-// We then define a Threshold field, which uses the return value of
-// the Attractor Field[1] in order to define a simple change in
-// element size around the attractors (i.e., around point 5 and line
-// 1)
-//
-// LcMax -                         /------------------
-//                               /
-//                             /
-//                           /
-// LcMin -o----------------/
-//        |                |       |
-//     Attractor       DistMin   DistMax
-
-
-//LcMax gibt die Grenze an (je kleiner der Wert, desto schärfer die Grenze)
-//LcMin die Dichte des Netzes
-//DistMin = Radius
-//DistMax = Verlauf vom DistMin
-//Wenn Dist Min und Max gleichen Wert haben, dann gibt es eine sehr scharfe
-//Abgrenzung]
-
-/*[Feld 2 beeinflusst das Gitter bei Punkt 5 und Linie 1
-DistMin = Radius oder Entfernung vom inneren Einflussbereich
-DistMax = Radius oder Entfernung vom äußersten Einflussbereich
-Wenn Dist Min und Max gleichen Wert haben, dann gibt es eine sehr scharfe
-Abgrenzung, ist der Wert weit auseinander gibt es einen hohen Verlauf
-
-LcMin = Anzahl der Gitterpunkte im inneren Einflussbereich - lc Abhängig
-(lc/100 [kleinerer Wert] = dichteres Gitternetz im Inneren; lc/1 = gröberes
-Gitternetz)
-LcMax = Anzahl der Gitterpunkte im äußeren Einflussbereich - lc Abhängig
-(lc/100 [kleinerer Wert]= dichteres Gitternetz im Inneren; lc/1 = gröberes
-Gitternetz)]
-*/
-Field[2] = Threshold;
-//ist auf Feld 1 bezogen
-Field[2].IField = 1;
-Field[2].LcMin = lc / 30;
-Field[2].LcMax = lc;
-Field[2].DistMin = 0.15;
-Field[2].DistMax = 0.5;
+* investigate the ' attractor field' to set characteristic lengths (see notes
+  below) http://gmsh.info/doc/texinfo/gmsh.html
 """
 import numpy as np
 import uuid
@@ -106,6 +52,8 @@ import shutil
 import os
 import subprocess
 from optparse import OptionParser
+
+import crtomo.binaries as cBin
 
 
 def handle_cmd_options():
@@ -436,13 +384,14 @@ def check_boundaries(boundaries):
     doublets = np.where(counts > 1)
     if doublets[0].size > 0:
         print('ERROR: Duplicate boundary coordinates found!')
+        print('ERROR: Debug information')
         for doublet in doublets[0]:
             print('================')
             print('x y type:')
             print(boundaries[doublet, :])
             print('lines: ')
             print(np.where(indices_rev == doublet)[0])
-        exit()
+        raise Exception('Duplicate boundary coordinates found!')
 
 
 def add_stabilizer_nodes(boundaries_raw, electrodes, nr_nodes_between):
@@ -459,7 +408,7 @@ def add_stabilizer_nodes(boundaries_raw, electrodes, nr_nodes_between):
 
     boundaries = boundaries_raw
     # find first electrode in boundary
-    for nr in xrange(electrodes.shape[0] - 1):
+    for nr in range(electrodes.shape[0] - 1):
         index0 = np.where((boundaries[:, 0] == electrodes[nr, 0]) &
                           (boundaries[:, 1] == electrodes[nr, 1]))[0]
 
@@ -515,7 +464,7 @@ if __name__ == '__main__':
         boundaries = boundaries_raw
 
     # create output directory
-    directory = str(uuid.uuid4())
+    directory = 'tmp_grid_' + str(uuid.uuid4())
     print('Using directory: ' + directory)
     os.makedirs(directory)
 
@@ -562,17 +511,35 @@ if __name__ == '__main__':
     mesh.write_boundaries('step1/boundary_lines.dat')
     os.chdir('step1')
 
-    subprocess.call('gmsh -2 commands.geo', shell=True)
+    gmsh_binary = cBin.get('gmsh')
+    print('Calling binary: {0}'.format(gmsh_binary))
+    return_code = subprocess.call(
+        '{0} -2 commands.geo'.format(gmsh_binary),
+        shell=True
+    )
+    if return_code != 0:
+        raise Exception('There was an error during execution of GMSH')
     os.makedirs('step2')
     os.chdir('step2')
-    subprocess.call('cr_trig_parse_gmsh.py', shell=True)
+    return_code = subprocess.call('cr_trig_parse_gmsh.py', shell=True)
+    if return_code != 0:
+        raise Exception(
+            'There was an error during execution of cr_trig_parse_gmsh.sh'
+        )
 
     #
     os.makedirs('grid')
     shutil.copy('elec.dat', 'grid/elec.dat')
     shutil.copy('../elem.dat', 'grid/elem.dat')
     os.chdir('grid')
-    subprocess.call('CutMcK', shell=True)
+    cutmck_binary = cBin.get('CutMcK')
+    print('Calling binary: {0}'.format(cutmck_binary))
+    return_code = subprocess.call(cutmck_binary, shell=True)
+    if return_code != 0:
+        raise Exception(
+            'There was an error during execution of CutMcK'
+        )
+
     # for convenience, copy the final grid files to the top level
     shutil.copy('elem.dat', '../../../elem.dat')
     shutil.copy('elec.dat', '../../../elec.dat')
