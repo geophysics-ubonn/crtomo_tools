@@ -9,9 +9,10 @@ Welcome to crtomo tools's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-   api/modules.rst
+    scripts/grid_tools/modules.rst
+    api/modules.rst
 
 
 Indices and tables

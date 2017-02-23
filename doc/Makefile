@@ -48,11 +48,14 @@ help:
 
 clean:
 	rm -rf $(BUILDDIR)/*
-	rm api/*.rst
+	rm -f api/*.rst
+	rm -f scripts/grid_tools/*.rst
 
 html:
 	rm -f api/*.rst
+	rm -f scripts/grid_tools/*.rst
 	SPHINX_APIDOC_OPTIONS='members,private-members,undoc-members,show-inheritance' sphinx-apidoc -P -o api ../lib/
+	SPHINX_APIDOC_OPTIONS='members,private-members,undoc-members,show-inheritance' sphinx-apidoc -P -o scripts/grid_tools ../src/GRID_TOOLS
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
