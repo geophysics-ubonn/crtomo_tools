@@ -1,10 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
-Compute analytical solutions of the homogeneous half-space corresponding to
+"""Compute analytical solutions of the homogeneous half-space corresponding to
 electrode positions as recovered from a CRTomo FE-grid. Also, export potentials
 at each node for each current injection.
-END DOCUMENTATION
 """
 import os
 from optparse import OptionParser
@@ -51,7 +49,7 @@ def load_grid(options):
 
 def load_configs(options):
     configs_raw = np.loadtxt(options.config_file, skiprows=1)
-    print configs_raw.shape
+    print(configs_raw.shape)
     configs = np.vstack((np.round(configs_raw[:, 0] / 1e4),
                          configs_raw[:, 0] % 1e4,
                          np.round(configs_raw[:, 1] / 1e4),
@@ -86,7 +84,7 @@ def save_potentials(grid, potentials_raw):
     os.chdir(pwd)
 
 
-if __name__ == '__main__':
+def main():
     options = handle_cmd_options()
     grid = load_grid(options)
     configs = load_configs(options)
@@ -95,3 +93,7 @@ if __name__ == '__main__':
     voltages = am.compute_voltages(grid, configs, potentials_raw)
     save_voltages(grid, voltages)
     save_potentials(grid, potentials_raw)
+
+
+if __name__ == '__main__':
+    main()
