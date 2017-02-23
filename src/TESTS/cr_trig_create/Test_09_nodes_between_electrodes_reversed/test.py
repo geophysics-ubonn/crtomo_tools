@@ -12,7 +12,7 @@ def check_grid_creation(expect_return_code, m):
         os.chdir(test_dir)
     print(os.getcwd())
     return_code = subprocess.call(
-        'cr_trig_create.py -m {0}'.format(m),
+        'cr_trig_create -m {0}'.format(m),
         shell=True,
     )
     # clean output directories

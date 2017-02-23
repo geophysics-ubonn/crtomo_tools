@@ -8,7 +8,7 @@ def check_grid_creation(directory, expect_return_code):
     pwd = os.getcwd()
     os.chdir(directory)
     return_code = subprocess.call(
-        'cr_trig_create.py',
+        'cr_trig_create',
         shell=True,
     )
     # clean output directories
