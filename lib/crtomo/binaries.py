@@ -5,6 +5,22 @@ GMSH oder CRTomo.
 
 At the moment all paths are hardcoded, but this interface could be extended
 using a configuration file.
+
+At the moment the following binaries have hardcoded default paths:
+
+    * gmsh
+    * CRTomo
+    * CRMod
+    * CutMcK
+
+Examples
+--------
+
+>>> import crtomo.binaries as cBin
+    gmsh_binary = cBin.get('gmsh')
+    print(gmsh_binary)
+/usr/bin/gmsh'
+
 """
 import platform
 import os
@@ -25,6 +41,7 @@ binaries = {
         ],
         'Windows': [
             r'C:\crtomo\bin\gmsh.exe',
+            'gmsh.exe',
         ],
     },
     'CRTomo': {
@@ -75,7 +92,7 @@ def get(binary_name):
     if binary_name not in binaries:
         raise Exception('binary_name: {0} not found'.format(binary_name))
 
-    system = platform.system
+    system = platform.system()
     binary_list = binaries[binary_name][system]
 
     # check list for a valid entry
