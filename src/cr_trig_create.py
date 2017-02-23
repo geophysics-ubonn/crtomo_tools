@@ -409,11 +409,16 @@ def add_stabilizer_nodes(boundaries_raw, electrodes, nr_nodes_between):
     boundaries = boundaries_raw
     # find first electrode in boundary
     for nr in range(electrodes.shape[0] - 1):
-        index0 = np.where((boundaries[:, 0] == electrodes[nr, 0]) &
-                          (boundaries[:, 1] == electrodes[nr, 1]))[0]
+        index0 = np.where(
+            (boundaries[:, 0] == electrodes[nr, 0]) &
+            (boundaries[:, 1] == electrodes[nr, 1])
+        )[0]
 
-        index1 = np.where((boundaries[:, 0] == electrodes[nr + 1, 0]) &
-                          (boundaries[:, 1] == electrodes[nr + 1, 1]))[0]
+        index1 = np.where(
+            (boundaries[:, 0] == electrodes[nr + 1, 0]) &
+            (boundaries[:, 1] == electrodes[nr + 1, 1])
+        )[0]
+
         index0 = index0[0]
         index1 = index1[0]
         if index1 - index0 < 0:
@@ -445,7 +450,7 @@ def add_stabilizer_nodes(boundaries_raw, electrodes, nr_nodes_between):
     return boundaries
 
 
-if __name__ == '__main__':
+def main():
     options, args = handle_cmd_options()
 
     # determine a unique directory name
@@ -521,11 +526,13 @@ if __name__ == '__main__':
         raise Exception('There was an error during execution of GMSH')
     os.makedirs('step2')
     os.chdir('step2')
-    return_code = subprocess.call('cr_trig_parse_gmsh.py', shell=True)
-    if return_code != 0:
-        raise Exception(
-            'There was an error during execution of cr_trig_parse_gmsh.sh'
-        )
+    import cr_trig_parse_gmsh
+    cr_trig_parse_gmsh.main()
+    # return_code = subprocess.call('cr_trig_parse_gmsh.py', shell=True)
+    # if return_code != 0:
+    #     raise Exception(
+    #         'There was an error during execution of cr_trig_parse_gmsh.sh'
+    #     )
 
     #
     os.makedirs('grid')
@@ -555,3 +562,7 @@ if __name__ == '__main__':
         print(output_dir)
     else:
         print(directory)
+
+
+if __name__ == '__main__':
+    main()

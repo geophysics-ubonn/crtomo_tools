@@ -400,7 +400,7 @@ def write_elec_file(filename, mesh):
     fid.close()
 
 
-if __name__ == '__main__':
+def main():
     mesh = parse_gmsh('../commands.msh', '../boundary_lines.dat')
 
     # now create the CRTomo grid
