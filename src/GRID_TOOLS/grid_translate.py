@@ -1,14 +1,16 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # *-* coding:utf-8 *-*
 """Translate a given grid using the user-supplied offsets dx, dz
 
-END DOCUMENTATION
+Examples
+--------
+
+    grid_translate.py -e original/elem.dat -z 600 -o elem.dat
+
 """
 from optparse import OptionParser
 import numpy as np
-from crlab_py.mpl import *
-from crlab_py import elem2
-import math
+import crtomo.grid as CRGrid
 
 
 def handle_cmd_options():
@@ -54,10 +56,12 @@ if __name__ == '__main__':
     options.center_x = 0.0
     options.center_y = 0.0
 
-    grid = elem2.crt_grid()
+    grid = CRGrid.crt_grid()
     grid.load_elem_file(options.elem_file)
-    rotated_nodes = translate_nodes(grid.nodes['raw'][:, 1:3],
-                                    options.dx,
-                                    options.dz)
+    rotated_nodes = translate_nodes(
+        grid.nodes['raw'][:, 1:3],
+        options.dx,
+        options.dz
+    )
     grid.nodes['raw'][:, 1:3] = rotated_nodes
     grid.save_elem_file(options.output)
