@@ -361,3 +361,99 @@ class crt_grid(object):
 
         fig.savefig('test.png', dpi=300)
         return fig, ax
+
+    def get_internal_angles(self):
+        """Compute all internal angles of the grid
+
+        Returns
+        -------
+        numpy.ndarray
+            NxK array with N the number of elements, and K the number of nodes,
+            filled with the internal angles in degrees
+        """
+
+        angles = []
+
+        for elx, elz in zip(self.grid['x'], self.grid['z']):
+            el_angles = []
+            xy = np.vstack((elx, elz))
+            for i in range(0, elx.size):
+                i1 = (i - 1) % elx.size
+                i2 = (i + 1) % elx.size
+
+                a = (xy[:, i] - xy[:, i1])
+                b = (xy[:, i2] - xy[:, i])
+                # note that nodes are ordered counter-clockwise!
+                angle = np.pi - np.arctan2(
+                    a[0] * b[1] - a[1] * b[0],
+                    a[0] * b[0] + a[1] * b[1]
+                )
+                el_angles.append(angle * 180 / np.pi)
+            angles.append(el_angles)
+        return np.array(angles)
+
+    def analyze_internal_angles(self, return_plot=False):
+        """Analyze the internal angles of the grid. Angles shouldn't be too
+        small because this can cause problems/uncertainties in the
+        Finite-Element solution of the forward problem. This function prints
+        the min/max values, as well as quantiles, to the command line, and can
+        also produce a histogram plot of the angles.
+
+        Parameters
+        ----------
+        return_plot: bool
+            if true, return (fig, ax) objects of the histogram plot
+
+        Returns
+        -------
+        fig: matplotlib.figure
+            figure object
+        ax: matplotlib.axes
+            axes object
+
+        Examples
+        --------
+
+            >>> import crtomo.grid as CRGrid
+                grid = CRGrid.crt_grid()
+                grid.load_elem_file('elem.dat')
+                fig, ax = grid.analyze_internal_angles(Angles)
+            This grid was sorted using CutMcK. The nodes were resorted!
+            Triangular grid found
+            Minimal angle: 22.156368696965796 degrees
+            Maximal angle: 134.99337326279496 degrees
+            Angle percentile 10%: 51.22 degrees
+            Angle percentile 20%: 55.59 degrees
+            Angle percentile 30%: 58.26 degrees
+            Angle percentile 40%: 59.49 degrees
+            Angle percentile 50%: 59.95 degrees
+            Angle percentile 60%: 60.25 degrees
+            Angle percentile 70%: 61.16 degrees
+            Angle percentile 80%: 63.44 degrees
+            Angle percentile 90%: 68.72 degrees
+            generating plot...
+            >>> # save to file with
+                fig.savefig('element_angles.png', dpi=300)
+
+        """
+        angles = self.get_internal_angles().flatten()
+
+        print('Minimal angle: {0} degrees'.format(np.min(angles)))
+        print('Maximal angle: {0} degrees'.format(np.max(angles)))
+        # print out quantiles
+        for i in range(10, 100, 10):
+            print('Angle percentile {0}%: {1:0.2f} degrees'.format(
+                i,
+                np.percentile(angles, i),
+            ))
+
+        if return_plot:
+            print('generating plot...')
+            fig, ax = plt.subplots(1, 1, figsize=(12 / 2.54, 8 / 2.54))
+            ax.hist(angles, int(angles.size / 10))
+            ax.set_xlabel('angle [deg]')
+            ax.set_ylabel('count')
+            fig.tight_layout()
+            # fig.savefig('plot_element_angles.jpg', dpi=300)
+            return fig, ax
+
