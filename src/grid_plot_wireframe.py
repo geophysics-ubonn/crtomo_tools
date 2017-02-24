@@ -1,14 +1,12 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # *-* coding: utf-8 *-*
-"""
-Plot a wireframe of a given grid
-END DOCUMENTATION
+"""Plot a wireframe of a given grid
 """
 import os
 from optparse import OptionParser
 import numpy as np
-from crlab_py.mpl import *
-from crlab_py import elem2
+from crtomo.mpl_setup import *
+import crtomo.grid as CRGrid
 
 # # environment variables
 #
@@ -52,7 +50,7 @@ def handle_cmd_options():
 
 
 def plot_wireframe(options):
-    grid = elem2.crt_grid()
+    grid = CRGrid.crt_grid()
     grid.load_elem_file(options.elem_file)
     grid.load_elec_file(options.elec_file)
 
@@ -110,6 +108,6 @@ def plot_wireframe(options):
     fig.savefig(options.output, dpi=dpi, bbox_inches='tight')
 
 
-if __name__ == '__main__':
+def main():
     options = handle_cmd_options()
     plot_wireframe(options)
