@@ -33,6 +33,7 @@ class crt_grid(object):
         self.grid = None
         self.nr_of_elements = None
         self.nr_of_nodes = None
+        self.nr_of_electrodes = None
 
     class element:
         def __init__(self):
@@ -269,14 +270,29 @@ class crt_grid(object):
 
     def save_elem_file(self, output):
         """Save elem.dat to file.
-        The grid is saved as read in, i.e. with or without applied cutmck.
+        The grid is saved as read in, i.e., with or without applied cutmck.
         If you want to change node coordinates, use self.nodes['raw']
+
+        Parameters
+        ----------
+        filename: string
+            output filename
         """
         with open(output, 'wb') as fid:
             self._write_elem_header(fid)
             self._write_nodes(fid)
             self._write_elements(fid)
             self._write_neighbors(fid)
+
+    def save_elec_file(self, filename):
+        with open(filename, 'wb') as fid:
+            fid.write(
+                bytes(
+                    '{0}\n'.format(int(self.electrodes.shape[0])),
+                    'utf-8',
+                )
+            )
+            np.savetxt(fid, self.electrodes[:, 0].astype(int), fmt='%i')
 
     def _write_neighbors(self, fid):
         np.savetxt(fid, self.neighbors, fmt='%i')
@@ -304,6 +320,7 @@ class crt_grid(object):
     def load_elec_file(self, elec_file):
         electrode_nodes_raw = np.loadtxt(elec_file, skiprows=1, dtype=int) - 1
         self.electrodes = self.nodes['presort'][electrode_nodes_raw]
+        self.nr_of_electrodes = self.electrodes.shape[0]
 
     def load_grid(self, elem_file, elec_file):
         """Load elem.dat and elec.dat

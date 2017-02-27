@@ -56,6 +56,7 @@ binaries = {
     'CRMod': {
         'Linux': [
             'CRMod',
+            'CRMod_dev',
             '/usr/bin/CRMod_dev',
         ],
         'Windows': [

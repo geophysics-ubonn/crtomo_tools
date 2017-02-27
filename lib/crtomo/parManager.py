@@ -77,3 +77,60 @@ class ParMan(object):
             self.parsets[cid] = dataset
             return_ids.append(cid)
         return return_ids
+
+    def load_from_rho_file(self, filename):
+        """Convenience function that loads two parameter sets from a rho.dat
+        file, as used by CRMod for forward resistivity/phase models.
+
+        Parameters
+        ----------
+        filename: string, file path
+            filename of rho.dat file
+
+        Returns
+        -------
+        cid_mag: int
+            ID of magnitude parameter set
+        cid_phase: int
+            ID of phase parameter set
+
+        """
+        data = np.loadtxt(filename, skiprows=1)
+        cid_mag = self.add_data(data[:, 0])[0]
+        cid_pha = self.add_data(data[:, 1])[0]
+        return cid_mag, cid_pha
+
+    def save_to_rho_file(self, filename, cid_mag, cid_pha=None):
+        """Save one or two parameter sets in the rho.dat forward model format
+
+        Parameters
+        ----------
+        filename: string (file path)
+            output filename
+        cid_mag: int
+            ID of magnitude parameter set
+        cid_pha: int, optional
+            ID of phase parameter set. If not set, will be set to zeros.
+
+        """
+        mag_data = self.parsets[cid_mag]
+        if cid_pha is None:
+            pha_data = np.zeros(mag_data.shape)
+        else:
+            pha_data = self.parsets[cid_pha]
+
+        with open(filename, 'wb') as fid:
+            fid.write(
+                bytes(
+                    '{0}\n'.format(self.grid.nr_of_elements),
+                    'utf-8',
+                )
+            )
+            np.savetxt(
+                fid,
+                np.vstack((
+                    mag_data,
+                    pha_data,
+                )).T,
+                fmt='%f %f'
+            )

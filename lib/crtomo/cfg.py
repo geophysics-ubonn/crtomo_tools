@@ -1,5 +1,29 @@
 """Representations of CRMod and CRTomo configurations.
 
+Examples
+--------
+
+    >>> import crtomo.cfg as CRcfg
+        crmod_cfg = CRcfg.crmod_config()
+        print(crmod_cfg)
+    ***FILES***       !  mswitch
+    ../grid/elem.dat       !  elem
+    ../grid/elec.dat       !  elec
+    ../rho/rho.dat       !  rho
+    ../config/config.dat       !  config
+    F       !  write_pot
+    ../mod/pot/pot.dat       !  pot_file
+    T       !  write_volts
+    ../mod/volt.dat       !  volt_file
+    F       !  write_sens
+    ../mod/sens/sens.dat       !  sens_file
+    F       !  another_dataset
+    1       !  2D
+    F       !  fictitious_sink
+    1660       !  sink_node
+    F       !  boundary_values
+    boundary.dat       !  boundary_file
+
 TODO
 ----
 
@@ -47,6 +71,40 @@ class crmod_config(dict):
             'boundary_file'
         )
 
+        # boolean options
+        self.bools = (
+            'write_pot',
+            'write_volts',
+            'write_sens',
+        )
+
+    def _check_and_convert_bools(self):
+        """Replace boolean variables by the characters 'F'/'T'
+        """
+        replacements = {
+            True: 'T',
+            False: 'F',
+        }
+
+        for key in self.bools:
+            if isinstance(self[key], bool):
+                self[key] = replacements[self[key]]
+
+    def copy(self):
+        return self.__copy__()
+
+    def __copy__(self):
+        print('copying')
+        new_copy = crmod_config()
+        # translate the keys
+        for key in self.keys():
+            new_copy[key] = self[key]
+        return new_copy
+
+    def __deepcopy__(self, memo):
+        print('deepcopy')
+        raise Exception('not implemented')
+
     def set_defaults(self):
         """
         Fill the dictionary with all defaults
@@ -73,6 +131,7 @@ class crmod_config(dict):
         """
         Write the configuration to a file. Use the correct order of values.
         """
+        self._check_and_convert_bools()
         fid = open(filename, 'w')
 
         for key in self.key_order:
@@ -93,7 +152,7 @@ class crmod_config(dict):
         return representation
 
 
-class crtomo_cfg(dict):
+class crtomo_config(dict):
     """
     Write CRTomo configuration files (crtomo.cfg).
 
@@ -101,7 +160,7 @@ class crtomo_cfg(dict):
     functions that know how to write a proper crtomo.cfg file.
     """
     def __init__(self, *arg, **kw):
-        super(crtomo_cfg, self).__init__(*arg, **kw)
+        super(crtomo_config, self).__init__(*arg, **kw)
         self.set_defaults()
 
         # -1 indicates an empty line
@@ -131,21 +190,21 @@ class crtomo_cfg(dict):
         self['ani_z'] = '1.000  ! smoothing parameter in z-direction'
         self['max_it'] = '20    ! max. nr of iterations'
         self['dc_inv'] = 'F     ! DC inversion?'
-        self['robust_inv'] = 'F     ! robust inversion?'
-        self['fpi_inv'] = 'T     ! final phase improvement?'
+        self['robust_inv'] = 'T     ! robust inversion?'
+        self['fpi_inv'] = 'F     ! final phase improvement?'
         self['mag_rel'] = '5'
         self['mag_abs'] = '1e-3'
         self['pha_a1'] = 0
         self['pha_b'] = 0
         self['pha_rel'] = 0
-        self['pha_abs'] = 0.5
+        self['pha_abs'] = 0
         self['hom_bg'] = 'F'
         self['hom_mag'] = '10.00'
         self['hom_pha'] = '0.00'
         self['another_ds'] = 'F'
-        self['d2_5'] = '0'
-        self['fic_sink'] = 'T'
-        self['fic_sink_node'] = '6467'
+        self['d2_5'] = '1'
+        self['fic_sink'] = 'F'
+        self['fic_sink_node'] = '10000'
         self['boundaries'] = 'F'
         self['boundaries_file'] = 'boundary.dat'
         self['mswitch2'] = '1'
@@ -164,6 +223,21 @@ class crtomo_cfg(dict):
                 fid.write('{0}\n'.format(self[key]))
 
         fid.close()
+
+    def copy(self):
+        return self.__copy__()
+
+    def __copy__(self):
+        print('copying')
+        new_copy = crmod_config()
+        # translate the keys
+        for key in self.keys():
+            new_copy[key] = self[key]
+        return new_copy
+
+    def __deepcopy__(self, memo):
+        print('deepcopy')
+        raise Exception('not implemented')
 
     def __repr__(self):
         representation = ''

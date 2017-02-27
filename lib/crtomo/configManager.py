@@ -12,13 +12,15 @@ class ConfigManager(object):
     configurations can be created.
     """
 
-    def __init__(self):
+    def __init__(self, nr_of_electrodes=None):
         # store the configs as a Nx4 numpy array
         self.configs = None
         # store measurements in a list of size N arrays
-        self.measurements = []
+        self.measurements = {}
         # global counter for measurements
         self.meas_counter = - 1
+        # number of electrodes
+        self.nr_electrodes = nr_of_electrodes
 
     def _get_next_index(self):
         self.meas_counter += 1
@@ -121,27 +123,33 @@ class ConfigManager(object):
 
     def write_crmod_config(self, filename):
         """Write the configurations to a configuration file in the CRMod format
+        All configurations are merged into one previor to writing to file
         """
+        # merge all configurations in this instance
+        configs_all = np.vstack(self.configs)
 
-        with open(filename, 'w') as fid:
-            fid.write('{0}\n'.format(self.configs.shape[0]))
+        with open(filename, 'wb') as fid:
+            fid.write(
+                bytes(
+                    '{0}\n'.format(configs_all.shape[0]),
+                    'utf-8',
+                )
+            )
 
             ABMN = np.vstack((
-                self.configs[:, 0] * 1e4 + self.configs[:, 1],
-                self.configs[:, 2] * 1e4 + self.configs[:, 3],
+                configs_all[:, 0] * 1e4 + configs_all[:, 1],
+                configs_all[:, 2] * 1e4 + configs_all[:, 3],
             )).T
-            np.savetxt(fid, ABMN, fmt='%i %i')
+            print(ABMN.shape)
+            np.savetxt(fid, ABMN.astype(int), fmt='%i %i')
 
     def gen_dipole_dipole(
-            self,
-            N, skip, step=1, nr_voltage_dipoles=10,
-            skipv=0):
+            self, skip, step=1, nr_voltage_dipoles=10,
+            skipv=0, N=None):
         """Generate dipole-dipole configurations
 
         Parameters
         ----------
-        N: int
-            number of electrodes
         skip: int
             number of electrode positions that are skipped between electrodes
             of a given dipole
@@ -154,8 +162,16 @@ class ConfigManager(object):
         skipv: int
             steplength between subsequent voltage dipoles. A steplength of 0
             will produce increments by one, i.e., 3-4, 4-5, 5-6 ...
+        N: int, optional
+            number of electrodes, must be given if not already known by the
+            config instance
 
         """
+        if N is None and self.nr_electrodes is None:
+            raise Exception('You must provide the number of electrodes')
+        elif N is None:
+            N = self.nr_electrodes
+
         configs = []
         # current dipoles
         for a in range(0, N - (3 * skip) - 3, step):
@@ -170,6 +186,11 @@ class ConfigManager(object):
                 quadpole = np.array((a, b, m, n)) + 1
                 configs.append(quadpole)
         configs = np.array(configs)
+        # now add to the instance
+        if self.configs is None:
+            self.configs = configs
+        else:
+            self.configs = np.vstack((self.configs, configs))
         return configs
 
     def get_gradient(self, N, skip=0, step=1, vskip=0, vstep=1):
