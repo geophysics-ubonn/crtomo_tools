@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# *-* coding: utf-8 *-Ü
 """For a regular grid, create decouplings along a horizontal line in the grid.
 
 Two CMD parameters are required:
@@ -19,7 +20,7 @@ Example:
 
 The command
 
-grid_gen_decouplings.py 2 5
+grid_gen_decouplings 2 5
 
 
 Usage
@@ -43,14 +44,15 @@ END DOCUMENTATION
 import sys
 
 
-depth = int(sys.argv[1]) - 1
-width = int(sys.argv[2])
+def main():
+    depth = int(sys.argv[1]) - 1
+    width = int(sys.argv[2])
 
-if depth <= 0:
-    raise Exception("First parameter must be larger than 1!")
+    if depth <= 0:
+        raise Exception("First parameter must be larger than 1!")
 
-assert(depth > 0)
+    assert(depth > 0)
 
-start = depth * width + 1
-for i in range(start, start + width):
-    print('{0} {1} 0'.format(i, i + width))
+    start = depth * width + 1
+    for i in range(start, start + width):
+        print('{0} {1} 0'.format(i, i + width))

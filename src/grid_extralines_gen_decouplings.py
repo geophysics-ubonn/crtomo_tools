@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# *-* coding: utf-8 *-*
 """Generate a decouplings.dat for CRTomo
 
 From a given extra_lines.dat file (see triangular grid generation in manual),
@@ -283,7 +284,7 @@ def get_decouplings_for_line(grid, line, settings, fids=None):
 
     # find neighboring elements
     neighbors = []
-    eta = options.eta
+    eta = settings['eta']
     # for each element on the line
     for index, elm in enumerate(elms):
         found_it = False
@@ -455,7 +456,7 @@ def debug_plot(grid, extra_lines, decoupling_elements, options,):
     fig.savefig('debug_plot_decoupling.png', dpi=300, bbox_inches='tight')
 
 
-if __name__ == '__main__':
+def main():
     options = handle_cmd_options()
     check_options(options)
     grid = CRGrid.crt_grid()
@@ -477,7 +478,15 @@ if __name__ == '__main__':
         print('processing only line: {0}'.format(options.line_nr))
         lines = (extra_lines[options.line_nr], )
     for line in lines:
-        data = get_decouplings_for_line(grid, line, {'eps': options.eps}, fids)
+        data = get_decouplings_for_line(
+            grid,
+            line,
+            {
+                'eps': options.eps,
+                'eta': options.eta,
+            },
+            fids
+        )
         if neighbors is None:
             neighbors = data
         else:
@@ -504,3 +513,7 @@ if __name__ == '__main__':
             decoupling_elements=np.array(neighbors),
             options=options,
         )
+
+
+if __name__ == '__main__':
+    main()

@@ -9,6 +9,11 @@ TODO
 
 * properly check/fix and describe output files
 """
+import sys
+import IPython.core.ultratb as ultratb
+sys.excepthook = ultratb.VerboseTB(
+    call_pdb=True,
+)
 import os
 from optparse import OptionParser
 import numpy as np
@@ -119,11 +124,19 @@ def main():
     options = handle_cmd_options()
     grid = load_grid(options)
     configs = load_configs(options)
-    potentials_raw = am.compute_potentials_analytical_hs(grid, configs,
-                                                         options.rho)
+    potentials_raw = am.compute_potentials_analytical_hs(
+        grid,
+        configs,
+        options.rho
+    )
     voltages = am.compute_voltages(grid, configs, potentials_raw)
+    if not os.path.isdir(options.output_dir):
+        os.makedirs(options.output_dir)
+    pwd = os.getcwd()
+    os.chdir(options.output_dir)
     save_voltages(grid, voltages)
     save_potentials(grid, potentials_raw)
+    os.chdir(pwd)
 
 
 if __name__ == '__main__':

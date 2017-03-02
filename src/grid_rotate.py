@@ -2,14 +2,11 @@
 # *-* coding: utf-8 *-*
 """Rotate a given grid clockwise
 
-Note that, at the moment, the grid is always rotate around the origin (0,0).
-
-END DOCUMENTATION
+Note that, at the moment, the grid is always rotated around the origin (0,0).
 """
 from optparse import OptionParser
 import numpy as np
-from crlab_py.mpl import *
-from crlab_py import elem2
+import crtomo.grid as CRGrid
 import math
 
 
@@ -56,17 +53,23 @@ def rotate_nodes(xy, cx, cy, angle_rad):
     return rot_xy_array
 
 
-if __name__ == '__main__':
+def main():
     options = handle_cmd_options()
     # put in dummy center coordinates
     options.center_x = 0.0
     options.center_y = 0.0
 
-    grid = elem2.crt_grid()
+    grid = CRGrid.crt_grid()
     grid.load_elem_file(options.elem_file)
-    rotated_nodes = rotate_nodes(grid.nodes['raw'][:, 1:3],
-                                 options.center_x,
-                                 options.center_y,
-                                 math.radians(options.angle_deg))
+    rotated_nodes = rotate_nodes(
+        grid.nodes['raw'][:, 1:3],
+        options.center_x,
+        options.center_y,
+        math.radians(options.angle_deg)
+    )
     grid.nodes['raw'][:, 1:3] = rotated_nodes
     grid.save_elem_file(options.output)
+
+
+if __name__ == '__main__':
+    main()

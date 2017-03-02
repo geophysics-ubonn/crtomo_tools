@@ -2,8 +2,33 @@
 """
 Plot a histogram of a given volt.dat file (mod/volt.dat).
 
+If a command line parameter is provided, this file we be used for plotting.
+
 Examples
 --------
+
+>>> volt_histogram volt_01_f_0.000.crt
+loading file: volt_01_f_0.000.crt
+minimum/maximum magnitude: 0.000399 / 4.500319 Ohm
+minimum/maximum phase: -49.41 / 18.765 mrad
+Magnitude percentile 10%: 0.0022736 (log10: -2.643285939416605)
+Magnitude percentile 20%: 0.0041868 (log10: -2.3781177845042643)
+Magnitude percentile 30%: 0.0072387 (log10: -2.1403394218581333)
+Magnitude percentile 40%: 0.012341 (log10: -1.9086496476864212)
+Magnitude percentile 50%: 0.0221025 (log10: -1.6555586007583747)
+Magnitude percentile 60%: 0.0407628 (log10: -1.3897359919182128)
+Magnitude percentile 70%: 0.089891 (log10: -1.0462837882000315)
+Magnitude percentile 80%: 0.214467 (log10: -0.6686403331535711)
+Magnitude percentile 90%: 0.6953 (log10: -0.15782764569149582)
+Phase percentile 10%: -7.8405
+Phase percentile 20%: -4.047
+Phase percentile 30%: -2.715
+Phase percentile 40%: -1.8599999999999999
+Phase percentile 50%: -1.335
+Phase percentile 60%: -0.66
+Phase percentile 70%: 0.255
+Phase percentile 80%: 1.4160000000000013
+Phase percentile 90%: 4.132500000000004
 
 >>> volt_histogram
 loading file: mod/volt.dat
@@ -29,6 +54,7 @@ Phase percentile 80%: 0.0
 Phase percentile 90%: 0.0
 
 """
+import sys
 import os
 import numpy as np
 
@@ -38,11 +64,13 @@ from crtomo.mpl_setup import *
 def main():
 
     # we check for these files
-    voltfiles = (
+    voltfiles = [
         'mod/volt.dat',
         'volt.dat',
         '../mod/volt.dat',
-    )
+    ]
+    if len(sys.argv) > 1:
+        voltfiles = [sys.argv[-1], ]
 
     for filename in voltfiles:
         if not os.path.isfile(filename):

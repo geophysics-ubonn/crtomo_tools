@@ -29,6 +29,14 @@ def handle_cmd_options():
                       help="elec.dat file (default: elec.dat)",
                       default="elec.dat")
 
+    parser.add_option(
+        '-d', "--decouplings",
+        dest="decoupling_file",
+        type="string",
+        help='decouplings file (default: ../exe/decouplings.dat)',
+        default="../exe/decouplings.dat",
+    )
+
     parser.add_option("-o", "--output", dest="output",
                       help="Output file (default: grid.png)",
                       metavar="FILE", default="grid.png")
@@ -44,7 +52,7 @@ def handle_cmd_options():
                       metavar="NR", default=None)
     parser.add_option("--fancy", action="store_true", dest="plot_fancy",
                       help="Create a fancy plot (default:false)",
-                      default=False)
+                      default=True)
     (options, args) = parser.parse_args()
     return options
 
@@ -64,39 +72,95 @@ def plot_wireframe(options):
     for x, z in zip(grid.grid['x'], grid.grid['z']):
         tmp = np.vstack((x, z)).T
         all_xz.append(tmp)
-    collection = mpl.collections.PolyCollection(all_xz,
-                                                edgecolor='k',
-                                                facecolor='none',
-                                                linewidth=cell_line_width,
-                                                )
+    collection = mpl.collections.PolyCollection(
+        all_xz,
+        edgecolor='k',
+        facecolor='none',
+        linewidth=cell_line_width,
+    )
     ax.add_collection(collection)
 
     # plot electrodes
-    ax.scatter(grid.electrodes[:, 1], grid.electrodes[:, 2],
-               edgecolors='none', clip_on=False,
-               s=elec_size)
+    ax.scatter(
+        grid.electrodes[:, 1],
+        grid.electrodes[:, 2],
+        edgecolors='none',
+        clip_on=False,
+        label='electrodes',
+        s=elec_size
+    )
 
     # mark nodes
     if options.mark_node is not None:
         xy = grid.nodes['sorted'][options.mark_node]
-        ax.scatter(xy[1], xy[2], s=node_mark_size,
-                   color='r', edgecolors='none')
+        ax.scatter(
+            xy[1],
+            xy[2],
+            s=node_mark_size,
+            color='r',
+            edgecolors='none',
+            label='marked node',
+        )
 
     if options.mark_cell is not None:
         index = options.mark_cell
         x = grid.grid['x'][index]
         z = grid.grid['z'][index]
-        for i in xrange(0, x.size):
+        label = 'marked cell'
+        for i in range(0, x.size):
             i1 = (i + 1) % x.size
-            ax.plot(x[[i, i1]],
-                    z[[i, i1]],
-                    color='r',
-                    linewidth=cell_mark_size)
+            ax.plot(
+                x[[i, i1]],
+                z[[i, i1]],
+                color='r',
+                linewidth=cell_mark_size,
+                label=label,
+            )
+            label = ''
+
+        polygon = mpl.patches.Polygon(
+            [(a, b) for a, b in zip(x, z)],
+            closed=True,
+            color='r',
+            alpha=1.0,
+        )
+        ax.add_patch(polygon)
+
+    if os.path.isfile(options.decoupling_file):
+        decouplings = np.loadtxt(options.decoupling_file, skiprows=1)
+        # plot decouplings
+        label = 'decoupling line'
+        for (el1, el2, coef) in decouplings:
+            n1 = grid.elements[int(el1) - 1]
+            n2 = grid.elements[int(el2) - 1]
+
+            ints = np.intersect1d(n1, n2)
+
+            x = grid.nodes['presort'][ints, 1]
+            z = grid.nodes['presort'][ints, 2]
+
+            ax.plot(
+                x,
+                z,
+                '.-',
+                color='b',
+                linestyle='dashed',
+                label=label,
+            )
+            label = ''
 
     ax.autoscale_view()
     ax.set_aspect('equal')
     if options.plot_fancy:
-        pass
+        ax.set_xlabel('x [m]')
+        ax.set_ylabel('z [m]')
+        ax.legend(
+            loc="lower center",
+            ncol=4,
+            bbox_to_anchor=(0, 0, 1, 1),
+            bbox_transform=fig.transFigure
+        )
+
     else:
         ax.axis('off')
         ax.xaxis.set_visible(False)

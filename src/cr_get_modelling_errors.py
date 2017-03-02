@@ -30,9 +30,9 @@ from optparse import OptionParser
 
 import numpy as np
 
-from crlab_py.mpl import *
-import crlab_py.elem as elem
-import crlab_py.CRMod as CRMod
+from crtomo.mpl_setup import *
+import crtomo.grid as CRGrid
+import crtomo.tdManager as tdManager
 
 
 def handle_cmd_options():
@@ -70,8 +70,9 @@ def handle_cmd_options():
 
 
 def compute_K_factors(options):
-    elem.load_elem_file(options.elem_file)
-    elem.load_elec_file(options.elec_file)
+    grid = CRGrid.crt_grid()
+    grid.load_grid(options.elem_file, options.elec_file)
+
     configs = np.loadtxt(options.config_file, skiprows=1)
     A = np.round(configs[:, 0] / 1e4).astype(int) - 1
     B = np.mod(configs[:, 0], 1e4).astype(int) - 1
@@ -81,11 +82,11 @@ def compute_K_factors(options):
 
     # we assume that electrodes are positioned on the surface
     # therefore we only need X coordinates
-    Ex, Ez = elem.get_electrodes()
+    Exz = grid.get_electrode_positions()
+    Ex = Exz[:, 0]
 
     # make sure Ez are all the same
-    check_Ez = np.sum(Ez - Ez[0])
-    if(check_Ez != 0):
+    if np.any(Exz[:, 1] - Exz[0, 1] != 0):
         print('Are you sure that the grid approximates a halfspace?')
         exit()
 
@@ -107,33 +108,25 @@ def compute_K_factors(options):
 
 
 def get_R_mod(options, rho0):
-    CRMod_config = CRMod.config()
-    CRMod_instance = CRMod.CRMod(CRMod_config)
-    CRMod_instance.elemfile = options.elem_file
-    CRMod_instance.elecfile = options.elec_file
-    CRMod_instance.configfile = options.config_file
+    """Compute synthetic measurements over a homogeneous half-space
+    """
+    tomodir = tdManager.tdMan(
+        elem_file=options.elem_file,
+        elec_file=options.elec_file,
+        config_file=options.config_file,
+    )
 
-    # get number of elements
-    fid = open(options.elem_file, 'r')
-    fid.readline()
-    elements = int(fid.readline().strip().split()[1])
-    fid.close()
+    # set model
+    tomodir.add_homogeneous_model(magnitude=rho0)
 
-    # create rho.dat file
-    # fid = open(temp_dir + os.sep + 'rho.dat', 'w')
-    rhodata = '{0}\n'.format(elements)
-    for i in range(0, elements):
-        rhodata += '{0}   0\n'.format(rho0)
-    CRMod_instance.rhodata = rhodata
+    # only interested in magnitudes
+    Z = tomodir.measurements()[:, 0]
 
-    CRMod_instance.run_in_tempdir()
-    volt_file = CRMod_instance.volt_file
-
-    R = np.loadtxt(volt_file, skiprows=1)[:, 2]
-    return R
+    return Z
 
 
 def plot_and_save_deviations(rho0, rho_mod, Kfactors, filename, configs):
+    print('plotting')
     # multiply by 100 to get percentage
     deviation = np.abs((rho_mod - rho0) / rho0) * 100
 
@@ -141,7 +134,7 @@ def plot_and_save_deviations(rho0, rho_mod, Kfactors, filename, configs):
     fig, ax = plt.subplots(1, 1, figsize=(7, 4))
     ax.loglog(np.abs(Kfactors), deviation, '.')
     ax.set_xlabel('K [m]')
-    ax.set_ylabel(r'$\frac{K \cdot R^{mod} - \rho_0}{\rho_0}~(\%)$')
+    ax.set_ylabel(r'$\frac{K \cdot R^{mod} - \rho_0}{\rho_0}~[\%]$')
     fig.tight_layout()
     fig.savefig(filename, dpi=300)
 

@@ -50,7 +50,7 @@ def translate_nodes(xy, dx, dz):
     return trans_xy_array
 
 
-if __name__ == '__main__':
+def main():
     options = handle_cmd_options()
     # put in dummy center coordinates
     options.center_x = 0.0
@@ -65,3 +65,7 @@ if __name__ == '__main__':
     )
     grid.nodes['raw'][:, 1:3] = rotated_nodes
     grid.save_elem_file(options.output)
+
+
+if __name__ == '__main__':
+    main()

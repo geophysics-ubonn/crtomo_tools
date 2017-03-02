@@ -1,16 +1,15 @@
-#!/usr/bin/python
-"""
-Create depth-dependent grid decouplings.
+#!/usr/bin/env python
+"""Create depth-dependent grid decouplings.
 
 WORK IN PROGRESS!
-
-END DOCUMENTATION
 """
-from crlab_py.mpl import *
-import crlab_py.elem2 as elem2
 from optparse import OptionParser
+
 import numpy as np
 from scipy.interpolate import UnivariateSpline
+
+from crtomo.mpl_setup import *
+import crtomo.grid as CRGrid
 
 
 def handle_cmd_options():
@@ -141,11 +140,14 @@ def find_neighbors(grid, element_id):
             break
     return neighbors
 
-if __name__ == '__main__':
+
+def main():
     options = handle_cmd_options()
-    decfunc = get_func_decoupling_at_z(options.dec_file,
-                                       options.output + '.png')
-    grid = elem2.crt_grid()
+    decfunc = get_func_decoupling_at_z(
+        options.dec_file,
+        options.output + '.png'
+    )
+    grid = CRGrid.crt_grid()
     grid.load_elem_file(options.elem_file)
 
     nx = grid.nodes['sorted'][:, 1]
@@ -175,3 +177,7 @@ if __name__ == '__main__':
     with open(options.output, 'w') as fid:
         fid.write('{0}\n'.format(final_decouplings.shape[0]))
         np.savetxt(fid, final_decouplings, fmt='%i %i %f')
+
+
+if __name__ == '__main__':
+    main()

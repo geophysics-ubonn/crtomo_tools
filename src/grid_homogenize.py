@@ -93,7 +93,15 @@ def handle_cmd_options():
     return options
 
 
-def homogenize_grid(grid, dx, dy):
+def rotate_point(xorigin, yorigin, x, y, angle):
+    """Rotate the given point by angle
+    """
+    rotx = (x - xorigin) * np.cos(angle) - (y - yorigin) * np.sin(angle)
+    roty = (x - yorigin) * np.sin(angle) + (y - yorigin) * np.cos(angle)
+    return rotx, roty
+
+
+def homogenize_grid(grid_old, dx, dy):
     """
     1) fit line through electrodes
     2) rotate electrodes so that line lies in the horizontal plane
@@ -101,33 +109,42 @@ def homogenize_grid(grid, dx, dy):
     """
 
     # 1 line fit
-    x = grid.electrodes[:, 0]
-    y = grid.electrodes[:, 1]
+    x = grid_old.electrodes[:, 0]
+    y = grid_old.electrodes[:, 1]
     sort_indices = np.argsort(x)
     x_sort = x[sort_indices]
     y_sort = y[sort_indices]
     p = np.polyfit(x_sort, y_sort, 1)
 
-    # 2. rotate
+    # 2. rotate around first electrode
     offsetx = x_sort[0]
     offsety = y_sort[0]
-
-    # offsety = np.polyval(p, offsetx)
 
     alpha = -np.arctan2(p[0], 1.0)  # * 180 / np.pi
 
     xn = []
     yn = []
     for xc, yc in zip(x, y):
-        tmpx = (xc - offsetx) * np.cos(alpha) - (yc - offsety) * np.sin(alpha)
-        tmpy = (xc - offsetx) * np.sin(alpha) + (yc - offsety) * np.cos(alpha)
-        xn.append(tmpx + offsetx)
-        yn.append(tmpy + offsety)
+        rotx, roty = rotate_point(offsetx, offsety, xc, yc, alpha)
+        xn.append(rotx + offsetx)
+        yn.append(roty + offsety)
 
     new_coordinates = np.vstack((xn, yn)).T
 
     # move vertically
-    ymax = max(yn)
+
+    # this line is a horizontal line
+    p_rot = np.polyfit(
+        new_coordinates[:, 0],
+        new_coordinates[:, 1],
+        1
+    )
+    y_rot = np.polyval(
+        p_rot,
+        new_coordinates[:, 0],
+    )
+    ymax = y_rot[0]
+
     new_coordinates_trans = np.copy(new_coordinates)
     new_coordinates_trans[:, 1] -= ymax
 
@@ -140,12 +157,21 @@ def homogenize_grid(grid, dx, dy):
         np.polyval(p, x),
         '-',
         label='fit',
+        color='r',
     )
 
     ax.scatter(
         xn, yn,
         color='c',
-        label='',
+        label='rotated',
+    )
+
+    ax.plot(
+        xn,
+        y_rot,
+        '-',
+        label='fit',
+        color='c',
     )
 
     ax.scatter(
@@ -154,7 +180,23 @@ def homogenize_grid(grid, dx, dy):
         label='homog',
     )
 
+    # plot the line through the new coordintes
+    pnew = np.polyfit(
+        new_coordinates_trans[:, 0],
+        new_coordinates_trans[:, 1],
+        1
+    )
+    ax.plot(
+        new_coordinates_trans[:, 0],
+        np.polyval(pnew, new_coordinates_trans[:, 0]),
+        '-',
+        label='fit homogenized',
+    )
+
     ax.legend(loc='best')
+
+    ax.set_xlabel('x [m]')
+    ax.set_ylabel('y [m]')
 
     fig.tight_layout()
     fig.savefig('output_electrodes.png', dpi=300)
@@ -226,19 +268,19 @@ def homogenize_grid(grid, dx, dy):
 
     shell_script = ''
     shell_script += '#!/bin/bash\n'
-    shell_script += 'cr_trig_create.py grid\n'
+    shell_script += 'cr_trig_create grid\n'
 
     cmd1 = ''.join((
-        'grid_translate.py -e grid/elem.dat ',
+        'grid_translate -e grid/elem.dat ',
         '--dx {0} --dz {1} -o elem_trans1.dat'.format(
             offsetx, ymax - offsety)
     ))
     cmd2 = ''.join((
-        'grid_rotate.py -e elem_trans1.dat ',
+        'grid_rotate -e elem_trans1.dat ',
         '-a {0} -o elem_trans1_rot1.dat'.format(-alpha * 180 / np.pi)
     ))
     cmd3 = ''.join((
-        'grid_translate.py -e elem_trans1_rot1.dat ',
+        'grid_translate -e elem_trans1_rot1.dat ',
         '--dx {0} --dz {1} -o elem_trans1_rot1_trans2.dat'.format(
             offsetx, offsety)
     ))
@@ -247,7 +289,7 @@ def homogenize_grid(grid, dx, dy):
     shell_script += cmd3 + '\n'
 
     shell_script += ''.join((
-        'grid_plot_wireframe.py --fancy -t grid/elec.dat ',
+        'grid_plot_wireframe --fancy -t grid/elec.dat ',
         '-e elem_trans1_rot1_trans2.dat -o trans1_rot1_trans2.png'
     ))
 
@@ -272,7 +314,7 @@ def homogenize_grid(grid, dx, dy):
     return grid_new, grid_map
 
 
-if __name__ == '__main__':
+def main():
     options = handle_cmd_options()
     electrodes_file = options.data_dir + os.sep + 'electrodes.dat'
     boundaries_file = options.data_dir + os.sep + 'boundaries.dat'
@@ -292,4 +334,7 @@ if __name__ == '__main__':
     grid_new, grid_map = homogenize_grid(grid_old, options.dx, options.dy)
 
     grid_new.save_to_dir(options.output)
-    # grid_map.save_to_dir(options.output + os.sep + 'grid_map')
+
+
+if __name__ == '__main__':
+    main()
