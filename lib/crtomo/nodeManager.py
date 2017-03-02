@@ -23,6 +23,8 @@ class NodeMan(object):
         self.grid = grid_obj
         # we store the node value sets in here
         self.nodevals = {}
+        # here we can store metadata for a node value set
+        self.metadata = {}
         # we assign indices to each data set stored in the manager. This index
         # should be unique over the life time of each instance. Therefore we
         # increase the counter for each added data set. We also ensure

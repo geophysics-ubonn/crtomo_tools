@@ -23,6 +23,7 @@ class ParMan(object):
         self.grid = grid_obj
         # we store the parameter sets in here
         self.parsets = {}
+        self.metadata = {}
         # we assign indices to each data set stored in the manager. This index
         # should be unique over the life time of each instance. Therefore we
         # increase the counter for each added data set. We also ensure
@@ -33,7 +34,7 @@ class ParMan(object):
         self.index += 1
         return self.index
 
-    def add_data(self, data):
+    def add_data(self, data, metadata=None):
         """Add data to the parameter set
 
         Parameters
@@ -42,6 +43,15 @@ class ParMan(object):
             one or more parameter sets. It must either be 1D or 2D, with the
             first dimension the number of parameter sets (K), and the second
             the number of elements (N): K x N
+        metadata: object, optional
+            the provided object will be stored in in the metadata dict and can
+            be received with the ID that is returned. If multiple (K) datasets
+            are added at ones, provide a list of objects with len K.
+
+        Returns
+        -------
+        int, ID
+            ID which can be used to access the parameter set
 
         Examples
         --------
@@ -61,6 +71,7 @@ class ParMan(object):
 
         """
         subdata = np.atleast_2d(data)
+
         # we try to accommodate transposed input
         if subdata.shape[1] != self.grid.nr_of_elements:
             if subdata.shape[0] == self.grid.nr_of_elements:
@@ -71,10 +82,25 @@ class ParMan(object):
                     'elements in the grid'
                 )
 
+        # now make sure that metadata can be zipped with the subdata
+        K = subdata.shape[0]
+        if metadata is not None:
+            if K > 1:
+                if(not isinstance(metadata, (list, tuple)) or
+                   len(metadata) != K):
+                    raise Exception('metadata does not fit the provided data')
+            else:
+                # K == 1
+                metadata = [metadata, ]
+
+        if metadata is None:
+            metadata = [None for i in range(0, K)]
+
         return_ids = []
-        for dataset in subdata:
+        for dataset, meta in zip(subdata, metadata):
             cid = self._get_next_index()
             self.parsets[cid] = dataset
+            self.metadata[cid] = meta
             return_ids.append(cid)
         return return_ids
 

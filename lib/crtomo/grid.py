@@ -292,7 +292,8 @@ class crt_grid(object):
                     'utf-8',
                 )
             )
-            np.savetxt(fid, self.electrodes[:, 0].astype(int), fmt='%i')
+            # the + 1 fixes the zero-indexing
+            np.savetxt(fid, self.electrodes[:, 0].astype(int) + 1, fmt='%i')
 
     def _write_neighbors(self, fid):
         np.savetxt(fid, self.neighbors, fmt='%i')
@@ -333,7 +334,7 @@ class crt_grid(object):
         For a given electrode (e.g. from a config.dat file), return the true
         node number as in self.nodes['sorted']
         """
-        elec_node_raw = self.electrodes[electrode - 1][0]
+        elec_node_raw = int(self.electrodes[electrode - 1][0])
         if(self.header['cutmck']):
             elec_node = self.nodes['rev_cutmck_index'][elec_node_raw]
         else:
@@ -378,6 +379,12 @@ class crt_grid(object):
 
         fig.savefig('test.png', dpi=300)
         return fig, ax
+
+    def get_element_centroids(self):
+        return np.mean(self.grid['x'], axis=1), np.mean(self.grid['z'], axis=1)
+
+    def get_electrode_positions(self):
+        return self.electrodes[:, 1:3]
 
     def get_internal_angles(self):
         """Compute all internal angles of the grid

@@ -57,7 +57,7 @@ class crmod_config(dict):
             'elec',
             'rho',
             'config',
-            'write_pot',
+            'write_pots',
             'pot_file',
             'write_volts',
             'volt_file',
@@ -73,7 +73,7 @@ class crmod_config(dict):
 
         # boolean options
         self.bools = (
-            'write_pot',
+            'write_pots',
             'write_volts',
             'write_sens',
         )
@@ -114,7 +114,7 @@ class crmod_config(dict):
         self['elec'] = '../grid/elec.dat'
         self['rho'] = '../rho/rho.dat'
         self['config'] = '../config/config.dat'
-        self['write_pot'] = 'F'  # ! potentials ?
+        self['write_pots'] = 'F'  # ! potentials ?
         self['pot_file'] = '../mod/pot/pot.dat'
         self['write_volts'] = 'T'  # ! measurements ?
         self['volt_file'] = '../mod/volt.dat'
@@ -143,6 +143,7 @@ class crmod_config(dict):
         fid.close()
 
     def __repr__(self):
+        self._check_and_convert_bools()
         representation = ''
         for key in self.key_order:
             if key == -1:

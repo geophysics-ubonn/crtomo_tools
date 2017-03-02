@@ -2,6 +2,8 @@
 """Manage measurement configurations
 """
 import itertools
+from crtomo.mpl_setup import *
+import scipy.interpolate as si
 
 import numpy as np
 
@@ -17,6 +19,8 @@ class ConfigManager(object):
         self.configs = None
         # store measurements in a list of size N arrays
         self.measurements = {}
+        # each measurement can store additional data here
+        self.metadata = {}
         # global counter for measurements
         self.meas_counter = - 1
         # number of electrodes
@@ -25,6 +29,13 @@ class ConfigManager(object):
     def _get_next_index(self):
         self.meas_counter += 1
         return self.meas_counter
+
+    @property
+    def nr_of_configs(self):
+        if self.configs is None:
+            return 0
+        else:
+            return self.configs.shape[0]
 
     def add_measurements(self, measurements):
         """Add new measurements
@@ -67,7 +78,12 @@ class ConfigManager(object):
         B = np.floor(configs[:, 0] / 1e4).astype(int)
         M = configs[:, 1] % 1e4
         N = np.floor(configs[:, 1] / 1e4).astype(int)
-        ABMN = np.hstack((A, B, M, N))
+        ABMN = np.hstack((
+            A[:, np.newaxis],
+            B[:, np.newaxis],
+            M[:, np.newaxis],
+            N[:, np.newaxis]
+        ))
         return ABMN
 
     def load_crmod_config(self, filename):
@@ -76,12 +92,13 @@ class ConfigManager(object):
         with open(filename, 'r') as fid:
             nr_of_configs = int(fid.readline().strip())
             configs = np.loadtxt(fid)
+            print('loades configs', configs.shape)
             if nr_of_configs != configs.shape[0]:
                 raise Exception(
                     'indicated number of measurements does not equal ' +
                     'to actual number of measurements'
                 )
-            ABMN = self._crmod_to_abmn(configs)
+            ABMN = self._crmod_to_abmn(configs[:, 0:2])
             self.configs = ABMN
 
     def load_crmod_volt(self, filename):
@@ -121,26 +138,65 @@ class ConfigManager(object):
         cid_pha = self.add_measurements(measurements[:, 3])
         return [cid_mag, cid_pha]
 
-    def write_crmod_config(self, filename):
-        """Write the configurations to a configuration file in the CRMod format
-        All configurations are merged into one previor to writing to file
+    def _get_crmod_abmn(self):
+        """return a Nx2 array with the measurement configurations formatted
+        CRTomo style
         """
-        # merge all configurations in this instance
-        configs_all = np.vstack(self.configs)
+        ABMN = np.vstack((
+            self.configs[:, 0] * 1e4 + self.configs[:, 1],
+            self.configs[:, 2] * 1e4 + self.configs[:, 3],
+        )).T.astype(int)
+        return ABMN
+
+    def write_crmod_volt(self, filename, mid):
+        """Write the measurements to the output file in the volt.dat file
+        format that can be read by CRTomo.
+
+        Parameters
+        ----------
+        filename: string
+            output filename
+        mid: int or [int, int]
+            measurement ids of magnitude and phase measurements. If only one ID
+            is given, then the phase column is filled with zeros
+        """
+        ABMN = self._get_crmod_abmn()
+
+        if isinstance(mid, (list, tuple)):
+            mag_data = self.measurements[mid[0]]
+            pha_data = self.measurements[mid[1]]
+        else:
+            mag_data = self.measurements[mid]
+            pha_data = np.zeros(mag_data.shape)
+
+        all_data = np.hstack((
+            ABMN,
+            mag_data[:, np.newaxis],
+            pha_data[:, np.newaxis]
+        ))
 
         with open(filename, 'wb') as fid:
             fid.write(
                 bytes(
-                    '{0}\n'.format(configs_all.shape[0]),
+                    '{0}\n'.format(ABMN.shape[0]),
                     'utf-8',
                 )
             )
+            np.savetxt(fid, all_data, fmt='%i %i %f %f')
 
-            ABMN = np.vstack((
-                configs_all[:, 0] * 1e4 + configs_all[:, 1],
-                configs_all[:, 2] * 1e4 + configs_all[:, 3],
-            )).T
-            print(ABMN.shape)
+    def write_crmod_config(self, filename):
+        """Write the configurations to a configuration file in the CRMod format
+        All configurations are merged into one previor to writing to file
+        """
+        ABMN = self._get_crmod_abmn()
+
+        with open(filename, 'wb') as fid:
+            fid.write(
+                bytes(
+                    '{0}\n'.format(ABMN.shape[0]),
+                    'utf-8',
+                )
+            )
             np.savetxt(fid, ABMN.astype(int), fmt='%i %i')
 
     def gen_dipole_dipole(
@@ -215,6 +271,59 @@ class ConfigManager(object):
                 n = m + vskip + 1
                 quadpoles.append((a, b, m, n))
         return np.array(quadpoles)
+
+    def _pseudodepths_dd_simple(self, configs, grid):
+        """Given distances between electrodes, compute dipole-dipole pseudo
+        depths for the provided configuration
+
+        """
+        # only x-position
+        positions = grid.get_electrode_positions()[configs - 1, 0]
+
+        z = np.abs(
+            np.max(positions, axis=1) - np.min(positions, axis=1)
+        ) * -0.195
+        x = np.mean(positions, axis=1)
+        return x, z
+
+    def pseudosection(self, cid, grid):
+        """Create a pseudosection plot for a given measurement
+        """
+        # for now sort data and only plot dipole-dipole
+        import edf.utils.filter_config_types as fT
+        results = fT.filter(self.configs, settings={'only_types': ['dd', ], })
+        # dipole-dipole configurations
+        ddc = self.configs[results['dd']['indices']]
+        px, pz = self._pseudodepths_dd_simple(ddc, grid)
+
+        xg = np.linspace(px.min(), px.max(), 200)
+        zg = np.linspace(pz.min(), pz.max(), 200)
+
+        x, z = np.meshgrid(xg, zg)
+
+        plot_data = self.measurements[cid]
+        image = si.griddata((px, pz), plot_data, (x, z), method='linear')
+
+        cmap = mpl.cm.get_cmap('jet_r')
+
+        fig, ax = plt.subplots()
+
+        im = ax.imshow(
+            image,
+            extent=(xg.min(), xg.max(), zg.min(), zg.max()),
+            interpolation='none',
+            aspect='auto',
+            # vmin=10,
+            # vmax=300,
+            cmap=cmap,
+        )
+
+        ax.scatter(px, pz, color='k', alpha=0.5)
+        ax.set_aspect('equal')
+        fig.tight_layout()
+
+        return fig, ax, im
+
 
 # old functions that must be vetted for usefulness
 
