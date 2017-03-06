@@ -94,6 +94,8 @@ def main():
             i,
             np.percentile(volt_data[:, 2], i),
             np.log10(np.percentile(volt_data[:, 2], i)),
+            # int((np.log10(a) / np.abs(np.log10(a))) *\
+            # np.ceil(np.abs(np.log10(a))))
         ))
 
     for i in range(10, 100, 10):
