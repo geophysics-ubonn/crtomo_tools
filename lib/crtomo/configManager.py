@@ -92,7 +92,7 @@ class ConfigManager(object):
         with open(filename, 'r') as fid:
             nr_of_configs = int(fid.readline().strip())
             configs = np.loadtxt(fid)
-            print('loades configs', configs.shape)
+            print('loaded configs:', configs.shape)
             if nr_of_configs != configs.shape[0]:
                 raise Exception(
                     'indicated number of measurements does not equal ' +
