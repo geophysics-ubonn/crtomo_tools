@@ -587,3 +587,136 @@ class tdMan(object):
         pid_pha = self.parman.add_data(phase_model)[0]
 
         self.assignments['forward_model'] = [pid_mag, pid_pha]
+
+    def check_measurements_against_sensitivities(
+            self, magnitude, phase=0, return_plot=False):
+        """Check for all configurations if the sensitivities add up to a given
+        homogeneous model
+
+        Parameters
+        ----------
+        magnitude: float
+            magnitude used for the homogeneous model
+        phase: float, optional, default=0
+            phase value used for the homogeneous model
+        return_plot: bool, optional, default=False
+            create a plot analyzing the differences
+
+        Returns
+        -------
+        results: Nx6 numpy.ndarray
+            Results of the analysis.
+            * magnitude measurement [Ohm]
+            * sum of sensitivities [Volt]
+            * relative deviation of sensitivity-sum from measurement [in
+              percent]
+        fig: matplotlib.figure, optional
+            figure object. Only returned of return_plot=True
+        axes: list
+            list of axes corresponding to the figure
+
+        Examples
+        --------
+
+        >>> #!/usr/bin/python
+            import crtomo.tdManager as CRtdMan
+
+            tdm = CRtdMan.tdMan(
+                    elem_file='grid/elem.dat',
+                    elec_file='grid/elec.dat',
+                    config_file='config/config.dat',
+            )
+
+            results, fig, axes = tdm.check_measurements_against_sensitivities(
+                    magnitude=100,
+                    phase=-10,
+                    return_plot=True
+            )
+
+            fig.savefig('sensitivity_comparison.png', dpi=300)
+
+        """
+        # generate a temporary tdMan instance
+        tdm = tdMan(
+            grid=self.grid,
+            configs=self.configs,
+        )
+        tdm.add_homogeneous_model(magnitude, phase)
+        measurements = tdm.measurements()
+
+        Z = measurements[:, 0] * np.exp(1j * measurements[:, 1] / 1000)
+
+        results = []
+        for nr in range(0, tdm.configs.nr_of_configs):
+            sensitivities = tdm.get_sensitivity(nr)
+            sens_re = sensitivities[0][0]
+            sens_im = sensitivities[0][1]
+
+            sens_mag = 1.0 / measurements[nr, 0] * (
+                np.real(Z[nr]) * sens_re + np.imag(Z[nr]) * sens_im
+            )
+
+            V_mag_from_sens = sens_mag.sum() / magnitude
+            if phase != 0:
+                outer = 1 / (1 + (np.imag(Z[nr]) / np.real(Z[nr])) ** 2)
+                inner1 = - sens_re / np.real(Z[nr]) ** 2 * np.imag(Z[nr])
+                inner2 = sens_im * np.real(Z[nr])
+                sens_pha = outer * (inner1 + inner2)
+
+                V_pha_from_sens = sens_pha.sum() / phase
+            else:
+                V_pha_from_sens = None
+
+            print(
+                'WARNING: We still do not know where the minus sign comes ' +
+                'from!'
+            )
+            V_mag_from_sens *= -1
+
+            results.append((
+                measurements[nr][0],
+                V_mag_from_sens,
+                (measurements[nr][0] - V_mag_from_sens) / measurements[nr][0] *
+                100,
+                measurements[nr][1],
+                V_pha_from_sens,
+                (measurements[nr][1] - V_mag_from_sens) / measurements[nr][1] *
+                100,
+            ))
+        results = np.array(results)
+
+        if return_plot:
+            nr_x = 2
+            if phase == 0:
+                nr_x = 1
+            fig, axes = plt.subplots(1, nr_x, figsize=(15 / 2.54, 7 / 2.54))
+            fig.suptitle('Comparison sum of sensitivities to measurements')
+            # plot phase first
+            if phase != 0:
+                ax = axes[1]
+                ax.plot(results[:, 5], '.')
+                ax.set_xlabel('configuration number')
+                ax.set_ylabel(
+                    r'$\frac{V_i^{\mathrm{pha}} - ' +
+                    r' \sum s_{ij}^{\mathrm{pha}} \cdot ' +
+                    r'\phi_0}{V_i}~[\%]$'
+                )
+
+                # set ax for magnitude plot
+                ax = axes[0]
+            else:
+                ax = axes
+
+            ax.plot(results[:, 2], '.')
+            ax.set_xlabel('configuration number')
+            # ax.set_ylabel('deviation from magnitude measurement [\%]')
+            ax.set_ylabel(
+                r'$\frac{V_i^{\mathrm{mag}} - ' +
+                r'\sum s_{ij}^{\mathrm{mag}} \cdot ' +
+                r'\sigma_0}{V_i}~[\%]$'
+            )
+
+            fig.tight_layout()
+            return results, fig, axes
+        else:
+            return results
