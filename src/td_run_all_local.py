@@ -14,6 +14,10 @@ CRMod/CRTomo can be called.
 """
 import os
 import subprocess
+import multiprocessing
+
+os.environ['OMP_NUM_THREADS'] = '1'
+number_of_concurrent_processes = 4
 
 # determine binary paths
 try:
@@ -118,20 +122,28 @@ def find_unfinished_tomodirs(directory):
     return needs_modeling, needs_inversion
 
 
-def run_CRMod(tomodirs):
+def _run_crmod_in_tomodir(tomodir):
     pwd = os.getcwd()
-    for tomodir in tomodirs:
-        os.chdir(tomodir + os.sep + 'exe')
-        subprocess.call(crmod_binary, shell=True)
-        os.chdir(pwd)
+    os.chdir(tomodir + os.sep + 'exe')
+    subprocess.call(crmod_binary, shell=True)
+    os.chdir(pwd)
+
+
+def run_CRMod(tomodirs):
+    pool = multiprocessing.Pool(number_of_concurrent_processes)
+    pool.map(_run_crmod_in_tomodir, tomodirs)
+
+
+def _run_crtomo_in_tomodir(tomodir):
+    pwd = os.getcwd()
+    os.chdir(tomodir + os.sep + 'exe')
+    subprocess.call(crtomo_binary, shell=True)
+    os.chdir(pwd)
 
 
 def run_CRTomo(tomodirs):
-    pwd = os.getcwd()
-    for tomodir in tomodirs:
-        os.chdir(tomodir + os.sep + 'exe')
-        subprocess.call(crtomo_binary, shell=True)
-        os.chdir(pwd)
+    pool = multiprocessing.Pool(number_of_concurrent_processes)
+    pool.map(_run_crtomo_in_tomodir, tomodirs)
 
 
 def main():
