@@ -15,6 +15,15 @@ CRMod/CRTomo can be called.
 import os
 import subprocess
 
+# determine binary paths
+try:
+    import crtomo.binaries as cBin
+    crmod_binary = cBin.get('CRMod')
+    crtomo_binary = cBin.get('CRTomo')
+except ImportError as e:
+    crmod_binary = 'CRMod'
+    crtomo_binary = 'CRTomo'
+
 
 def is_tomodir(subdirectories):
     """provided with the subdirectories of a given directory, check if this is
@@ -113,7 +122,7 @@ def run_CRMod(tomodirs):
     pwd = os.getcwd()
     for tomodir in tomodirs:
         os.chdir(tomodir + os.sep + 'exe')
-        subprocess.call('CRMod', shell=True)
+        subprocess.call(crmod_binary, shell=True)
         os.chdir(pwd)
 
 
@@ -121,7 +130,7 @@ def run_CRTomo(tomodirs):
     pwd = os.getcwd()
     for tomodir in tomodirs:
         os.chdir(tomodir + os.sep + 'exe')
-        subprocess.call('CRTomo', shell=True)
+        subprocess.call(crtomo_binary, shell=True)
         os.chdir(pwd)
 
 
