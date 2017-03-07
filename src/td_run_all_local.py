@@ -15,9 +15,8 @@ CRMod/CRTomo can be called.
 import os
 import subprocess
 import multiprocessing
+from optparse import OptionParser
 
-os.environ['OMP_NUM_THREADS'] = '1'
-number_of_concurrent_processes = 4
 
 # determine binary paths
 try:
@@ -27,6 +26,29 @@ try:
 except ImportError as e:
     crmod_binary = 'CRMod'
     crtomo_binary = 'CRTomo'
+
+
+def handle_cmd_options():
+    parser = OptionParser()
+    parser.add_option(
+        '-t', "--threads",
+        dest="number_threads",
+        type="int",
+        help="number of threads EACH CRMod/CRTomo instance uses. If not " +
+        "set, will be determined automatically",
+        default=None,
+    )
+
+    parser.add_option(
+        "-n", "--number",
+        dest="number_processes",
+        help="How many CRMod/CRTomo instances to start in parallel. " +
+        "Default: number of detected CPUs/2",
+        type='int',
+        default=None,
+    )
+    (options, args) = parser.parse_args()
+    return options
 
 
 def is_tomodir(subdirectories):
@@ -129,7 +151,26 @@ def _run_crmod_in_tomodir(tomodir):
     os.chdir(pwd)
 
 
-def run_CRMod(tomodirs):
+def _get_mp_settings(options):
+    cpu_count = os.cpu_count()
+    if options.number_threads is not None:
+        os.environ['OMP_NUM_THREADS'] = '{0}'.format(
+            options.number_threads
+        )
+    else:
+        os.environ['OMP_NUM_THREADS'] = '{0}'.format(
+            int(cpu_count / 2)
+        )
+
+    if options.number_processes is not None:
+        number_of_concurrent_processes = options.number_processes
+    else:
+        number_of_concurrent_processes = int(cpu_count / 2)
+    return number_of_concurrent_processes
+
+
+def run_CRMod(tomodirs, options):
+    number_of_concurrent_processes = _get_mp_settings(options)
     pool = multiprocessing.Pool(number_of_concurrent_processes)
     pool.map(_run_crmod_in_tomodir, tomodirs)
 
@@ -141,18 +182,20 @@ def _run_crtomo_in_tomodir(tomodir):
     os.chdir(pwd)
 
 
-def run_CRTomo(tomodirs):
+def run_CRTomo(tomodirs, options):
+    number_of_concurrent_processes = _get_mp_settings(options)
     pool = multiprocessing.Pool(number_of_concurrent_processes)
     pool.map(_run_crtomo_in_tomodir, tomodirs)
 
 
 def main():
+    options = handle_cmd_options()
     needs_modeling, needs_inversion = find_unfinished_tomodirs('.')
     print('modeling:', needs_modeling)
     print('inversion:', needs_inversion)
 
-    run_CRMod(needs_modeling)
-    run_CRTomo(needs_inversion)
+    run_CRMod(needs_modeling, options)
+    run_CRTomo(needs_inversion, options)
 
 
 if __name__ == '__main__':
