@@ -4,6 +4,7 @@ that correspond to the elements of the grid. Usually this is a resistivity or
 phase distribution, but can also be a cumulated sensitivity distribution.
 """
 import numpy as np
+import shapely.geometry as shapgeo
 
 
 class ParMan(object):
@@ -102,7 +103,11 @@ class ParMan(object):
             self.parsets[cid] = dataset
             self.metadata[cid] = meta
             return_ids.append(cid)
-        return return_ids
+
+        if len(return_ids) == 1:
+            return return_ids[0]
+        else:
+            return return_ids
 
     def load_from_rho_file(self, filename):
         """Convenience function that loads two parameter sets from a rho.dat
@@ -122,8 +127,8 @@ class ParMan(object):
 
         """
         data = np.loadtxt(filename, skiprows=1)
-        cid_mag = self.add_data(data[:, 0])[0]
-        cid_pha = self.add_data(data[:, 1])[0]
+        cid_mag = self.add_data(data[:, 0])
+        cid_pha = self.add_data(data[:, 1])
         return cid_mag, cid_pha
 
     def save_to_rho_file(self, filename, cid_mag, cid_pha=None):
@@ -160,3 +165,119 @@ class ParMan(object):
                 )).T,
                 fmt='%f %f'
             )
+
+    def add_empty_dataset(self, value=1):
+        """Create an empty data set. Empty means: all elements have the same
+        value.
+
+        Parameters
+        ----------
+        value: float, optional
+            which value to assign all element parameters. Default is one.
+        """
+        subdata = np.ones(self.grid.nr_of_elements) * value
+        pid = self.add_data(subdata)
+        return pid
+
+    def _clean_pid(self, pid):
+        """if pid is a number, don't do anything. If pid is a list with one
+        entry, strip the list and return the number. If pid contains more than
+        one entries, do nothing.
+        """
+        if isinstance(pid, (list, tuple)):
+            if len(pid) == 1:
+                return pid[0]
+            else:
+                return pid
+        return pid
+
+    def modify_area(self, pid, xmin, xmax, zmin, zmax, value):
+        """Modify the given dataset in the rectangular area given by the
+        parameters and assign all parameters inside this area the given value.
+
+        Partially contained elements are treated as INSIDE the area, i.e., they
+        are assigned new values.
+
+        Parameters
+        ----------
+        pid: int
+            id of the parameter set to modify
+        xmin: float
+            smallest x value of the area to modify
+        xmax: float
+            largest x value of the area to modify
+        zmin: float
+            smallest z value of the area to modify
+        zmin: float
+            largest z value of the area to modify
+        value: float
+            this value is assigned to all parameters of the area
+
+        Examples
+        --------
+
+        >>> import crtomo.tdManager as CRtdm
+
+            tdman = CRtdm.tdMan(
+                    elem_file='GRID/elem.dat',
+                    elec_file='GRID/elec.dat',
+            )
+
+            pid = tdman.parman.add_empty_dataset(value=1)
+            tdman.parman.modify_area(
+                    pid,
+                    xmin=0,
+                    xmax=2,
+                    zmin=-2,
+                    zmin=-0.5,
+                    value=2,
+            )
+
+            fig, ax = tdman.plotman.plot_elements_to_ax(pid)
+            fig.savefig('out.png')
+        """
+        area_polygon = shapgeo.Polygon(
+            ((xmin, zmax), (xmax, zmax), (xmax, zmin), (xmin, zmin))
+        )
+        self.modify_polygon(pid, area_polygon, value)
+
+    def modify_polygon(self, pid, polygon, value):
+        """Modify parts of a parameter set by setting all parameters located
+        in, or touching, the provided :class:`shapely.geometry.Polygon`
+        instance.
+
+        Parameters
+        ----------
+        pid: int
+            id of parameter set to vary
+        polygon: :class:`shapely.geometry.Polygon` instance
+            polygon that determines the area to modify
+        value: float
+            value that is assigned to all elements in the polygon
+
+        Examples
+        --------
+        >>> import shapely.geometry
+            polygon = shapely.geometry.Polygon((
+                (2, 0), (4, -1), (2, -1)
+            ))
+            tdman.parman.modify_polygon(pid, polygon, 3)
+
+        """
+        # create grid polygons
+        grid_polygons = []
+        for x, z in zip(self.grid.grid['x'], self.grid.grid['z']):
+            coords = [(a, b) for a, b in zip(x, z)]
+            grid_polygons.append(
+                shapgeo.Polygon(coords)
+            )
+
+        # now determine elements in area
+        elements_in_area = []
+        for nr, element in enumerate(grid_polygons):
+            if polygon.intersects(element):
+                elements_in_area.append(nr)
+
+        # change the values
+        pid_clean = self._clean_pid(pid)
+        self.parsets[pid_clean][elements_in_area] = value

@@ -204,6 +204,18 @@ class tdMan(object):
            self.assignments['measurements'] is not None):
             self.can_invert = True
 
+    def load_rho_file(self, filename):
+        """Load a forward model from a rho.dat file
+
+        Parameters
+        ----------
+        filename: string
+            filename to rho.dat file
+        """
+        pids = self.parman.load_from_rho_file(filename)
+        self.register_magnitude_model(pids[0])
+        self.register_phase_model(pids[1])
+
     def save_to_tomodir(self, directory):
         """Save the tomodir instance to a directory structure.
 
@@ -363,7 +375,6 @@ class tdMan(object):
         pot_files = sorted(glob.glob(
             directory + os.sep + 'pot' + os.sep + 'pot*.dat')
         )
-        print('pot files', pot_files)
         # check if there are sensitivity files, and that the nr corresponds to
         # the nr of configs
         if(len(pot_files) > 0 and
@@ -500,37 +511,45 @@ class tdMan(object):
         else:
             # configurations don't match
             if not np.all(ABMN == self.configs.configs):
-                # check polarity
-                current_electrodes_are_equal = np.all(
-                    self.configs.configs[:, 0:2] == ABMN[:, 0:2]
-                )
-                voltage_electrodes_are_switched = np.all(
-                    self.configs.configs[:, 2:4] == ABMN[:, 4:1:-1]
-                )
-                if(current_electrodes_are_equal and
-                   voltage_electrodes_are_switched):
+                for nr, (old_config, new_config) in enumerate(zip(
+                        self.configs.configs, ABMN)):
 
-                    if len(self.configs.measurements.keys()) > 0:
-                        raise Exception(
-                            'need to switch electrode polarity, but there ' +
-                            'are already measurements stored for the ' +
-                            'old configuration!')
-                    else:
-                        # switch M/N in configurations
-                        self.configs.configs = ABMN
-                else:
-                    raise Exception(
-                        'There was an error matching configurations of ' +
-                        'voltages with configurations already imported'
+                    if np.all(old_config == new_config):
+                        continue
+                    # check polarity
+                    current_electrodes_are_equal = np.all(
+                        old_config[0:2] == new_config[0:2]
                     )
+                    voltage_electrodes_are_switched = np.all(
+                        old_config[2:4] == new_config[4:1:-1]
+                    )
+
+                    print(current_electrodes_are_equal)
+                    print(voltage_electrodes_are_switched)
+                    if(current_electrodes_are_equal and
+                       voltage_electrodes_are_switched):
+
+                        if len(self.configs.measurements.keys()) > 0:
+                            raise Exception(
+                                'need to switch electrode polarity, but ' +
+                                'there are already measurements stored for ' +
+                                'the old configuration!')
+                        else:
+                            # switch M/N in configurations
+                            self.configs.configs[nr, :] = new_config
+                    else:
+                        raise Exception(
+                            'There was an error matching configurations of ' +
+                            'voltages with configurations already imported'
+                        )
 
         # add measurements to the config instance
         mid_mag = self.configs.add_measurements(
             measurements[:, 2]
-        )[0]
+        )
         mid_pha = self.configs.add_measurements(
             measurements[:, 3]
-        )[0]
+        )
 
         self.assignments['measurements'] = [mid_mag, mid_pha]
 
@@ -573,6 +592,22 @@ class tdMan(object):
             )
             return None
 
+    def register_magnitude_model(self, pid):
+        """Set a given parameter model to the forward magnitude model
+        """
+        if self.assignments['forward_model'] is None:
+            self.assignments['forward_model'] = [None, None]
+
+        self.assignments['forward_model'][0] = pid
+
+    def register_phase_model(self, pid):
+        """Set a given parameter model to the forward phase model
+        """
+        if self.assignments['forward_model'] is None:
+            self.assignments['forward_model'] = [None, None]
+
+        self.assignments['forward_model'][1] = pid
+
     def add_homogeneous_model(self, magnitude, phase=0):
         """Add a homogeneous resistivity model to the tomodir. This is useful
         for synthetic measurements.
@@ -583,8 +618,8 @@ class tdMan(object):
         # generate distributions
         magnitude_model = np.ones(self.grid.nr_of_elements) * magnitude
         phase_model = np.ones(self.grid.nr_of_elements) * phase
-        pid_mag = self.parman.add_data(magnitude_model)[0]
-        pid_pha = self.parman.add_data(phase_model)[0]
+        pid_mag = self.parman.add_data(magnitude_model)
+        pid_pha = self.parman.add_data(phase_model)
 
         self.assignments['forward_model'] = [pid_mag, pid_pha]
 

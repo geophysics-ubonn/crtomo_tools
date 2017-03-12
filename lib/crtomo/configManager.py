@@ -6,6 +6,7 @@ from crtomo.mpl_setup import *
 import scipy.interpolate as si
 
 import numpy as np
+import edf.utils.filter_config_types as fT
 
 
 class ConfigManager(object):
@@ -69,7 +70,11 @@ class ConfigManager(object):
             cid = self._get_next_index()
             self.measurements[cid] = dataset.copy()
             return_ids.append(cid)
-        return return_ids
+
+        if len(return_ids) == 1:
+            return return_ids[0]
+        else:
+            return return_ids
 
     def _crmod_to_abmn(self, configs):
         """convert crmod-style configurations to a Nx4 array
@@ -200,8 +205,8 @@ class ConfigManager(object):
             np.savetxt(fid, ABMN.astype(int), fmt='%i %i')
 
     def gen_dipole_dipole(
-            self, skip, step=1, nr_voltage_dipoles=10,
-            skipv=0, N=None):
+            self, skipc, skipv=None, stepc=1, stepv=1, nr_voltage_dipoles=10,
+            before_current=False, start_skip=0, N=None):
         """Generate dipole-dipole configurations
 
         Parameters
@@ -213,11 +218,14 @@ class ConfigManager(object):
             steplength between subsequent current dipoles. A steplength of 0
             will produce increments by one, i.e., 3-4, 4-5, 5-6 ...
         nr_voltage_dipoles: int
-            the number of voltage dipoles to generate for each  current
+            the number of voltage dipoles to generate for each current
             injection dipole
         skipv: int
             steplength between subsequent voltage dipoles. A steplength of 0
             will produce increments by one, i.e., 3-4, 4-5, 5-6 ...
+        before_current: bool, optional
+            if set to True, also generate voltage dipoles in front of current
+            dipoles.
         N: int, optional
             number of electrodes, must be given if not already known by the
             config instance
@@ -228,19 +236,37 @@ class ConfigManager(object):
         elif N is None:
             N = self.nr_electrodes
 
+        # by default, current voltage dipoles have the same size
+        if skipv is None:
+            skipv = skipc
+
         configs = []
         # current dipoles
-        for a in range(0, N - (3 * skip) - 3, step):
-            b = a + skip + 1
+        for a in range(0, N - skipv - skipc - 3, stepc):
+            b = a + skipc + 1
             nr = 0
-            # potential dipoles
-            for m in range(b + 1 + skipv, N - skip - 1, step):
+            # potential dipoles before current injection
+            if before_current:
+                for n in range(a - start_skip - 1, -1, -stepv):
+                    nr += 1
+                    if nr > nr_voltage_dipoles:
+                        continue
+                    m = n - skipv - 1
+                    if m < 0:
+                        continue
+                    quadpole = np.array((a, b, m, n)) + 1
+                    configs.append(quadpole)
+
+            # potential dipoles after current injection
+            nr = 0
+            for m in range(b + start_skip + 1, N - skipv - 1, stepv):
                 nr += 1
                 if nr > nr_voltage_dipoles:
                     continue
-                n = m + skip + 1
+                n = m + skipv + 1
                 quadpole = np.array((a, b, m, n)) + 1
                 configs.append(quadpole)
+
         configs = np.array(configs)
         # now add to the instance
         if self.configs is None:
@@ -249,85 +275,201 @@ class ConfigManager(object):
             self.configs = np.vstack((self.configs, configs))
         return configs
 
-    def get_gradient(self, N, skip=0, step=1, vskip=0, vstep=1):
+    def _pseudodepths_dd_simple(self, configs, spacing=1, grid=None):
+        """Given distances between electrodes, compute dipole-dipole pseudo
+        depths for the provided configuration
+
         """
+        if grid is None:
+            xpositions = (configs - 1) * spacing + 1
+        else:
+            xpositions = grid.get_electrode_positions()[configs - 1, 0]
+
+        z = np.abs(
+            np.max(xpositions, axis=1) - np.min(xpositions, axis=1)
+        ) * -0.195
+        x = np.mean(xpositions, axis=1)
+        return x, z
+
+    def plot_pseudodepths(self, spacing=1, grid=None):
+        """Plot pseudodepths for the measurements. If grid is given, then the
+        actual electrode positions are used, and the parameter 'spacing' is
+        ignored'
+
         Parameters
+        ----------
+        spacing: float
+            assumed distance between electrodes
+        grid: crtomo.grid.crt_grid instance
+            grid instance. Used to infer real electrode positions
+
+        Returns
+        -------
+        figs: matplotlib.figure.Figure instance or list of Figure instances
+            if only one type was plotted, then the figure instance is return.
+            Otherwise, return a list of figure instances.
+        axes: axes object or list of axes ojects
+            plot axes
+        """
+        results = fT.filter(
+            self.configs,
+            settings={
+                'only_types': ['dd', ],
+            }
+        )
+        # import IPython
+        # IPython.embed()
+        # loop through all measurement types
+        # TODO: will break for non-dipole-dipole measurements
+        figs = []
+        axes = []
+        for key in sorted(results.keys()):
+            if key == 'not_sorted':
+                continue
+            ddc = self.configs[results[key]['indices']]
+            px, pz = self._pseudodepths_dd_simple(ddc, spacing, grid)
+
+            fig, ax = plt.subplots(figsize=(15 / 2.54, 5 / 2.54))
+            ax.scatter(px, pz, color='k', alpha=0.5)
+            ax.set_aspect('equal')
+            fig.tight_layout()
+            figs.append(fig)
+            axes.append(ax)
+
+        if len(figs) == 1:
+            return figs[0], axes[0]
+        else:
+            return figs, axes
+
+    def plot_pseudosection(self, cid, spacing=1, grid=None):
+        """Create a pseudosection plot for a given measurement
+        """
+        # for now sort data and only plot dipole-dipole
+        results = fT.filter(
+            self.configs,
+            settings={
+                'only_types': ['dd', ],
+            },
+        )
+
+        figs = []
+        for key in sorted(results.keys()):
+            if key == 'not_sorted':
+                continue
+            indices = results[key]['indices']
+            # dipole-dipole configurations
+            ddc = self.configs[indices]
+            px, pz = self._pseudodepths_dd_simple(ddc, spacing, grid)
+
+            # take 200 points for the new grid in every direction. Could be
+            # adapted to the actual ratio
+            xg = np.linspace(px.min(), px.max(), 200)
+            zg = np.linspace(pz.min(), pz.max(), 200)
+
+            x, z = np.meshgrid(xg, zg)
+
+            plot_data = self.measurements[cid][indices]
+            image = si.griddata((px, pz), plot_data, (x, z), method='linear')
+
+            cmap = mpl.cm.get_cmap('jet_r')
+
+            fig, ax = plt.subplots()
+
+            im = ax.imshow(
+                image[::-1],
+                extent=(xg.min(), xg.max(), zg.min(), zg.max()),
+                interpolation='none',
+                aspect='auto',
+                # vmin=10,
+                # vmax=300,
+                cmap=cmap,
+            )
+
+            # ax.scatter(px, pz, color='k', alpha=0.5)
+            ax.set_aspect('equal')
+            fig.tight_layout()
+            figs.append((fig, ax, im))
+
+        if len(figs) == 1:
+            return figs[0]
+        else:
+            return figs
+
+    def gen_gradient(self, skip=0, step=1, vskip=0, vstep=1):
+        """TODO: This function is not functional!
+        Parameter
         ---------
-        N: int
-            number of electrodes
-        skip: int
+        skip:
             distance between current electrodes
-        step: int
+        step:
             steplength between subsequent current dipoles
-        vskip: int
+        vskip:
             distance between voltage electrodes
-        vstep: int
+        vstep:
             steplength between subsequent voltage dipoles
         """
+        N = self.nr_electrodes
         quadpoles = []
         for a in range(1, N - skip, step):
             b = a + skip + 1
             for m in range(a + 1, b - vskip - 1, vstep):
                 n = m + vskip + 1
                 quadpoles.append((a, b, m, n))
-        return np.array(quadpoles)
 
-    def _pseudodepths_dd_simple(self, configs, grid):
-        """Given distances between electrodes, compute dipole-dipole pseudo
-        depths for the provided configuration
+        configs = np.array(quadpoles)
+        if configs.size == 0:
+            return None
 
+        # now add to the instance
+        if self.configs is None:
+            self.configs = configs
+        else:
+            # import IPython
+            # IPython.embed()
+            self.configs = np.vstack((self.configs, configs))
+        return configs
+
+    def gen_all_voltages_for_injections(self, injections):
         """
-        # only x-position
-        positions = grid.get_electrode_positions()[configs - 1, 0]
-
-        z = np.abs(
-            np.max(positions, axis=1) - np.min(positions, axis=1)
-        ) * -0.195
-        x = np.mean(positions, axis=1)
-        return x, z
-
-    def pseudosection(self, cid, grid):
-        """Create a pseudosection plot for a given measurement
         """
-        # for now sort data and only plot dipole-dipole
-        import edf.utils.filter_config_types as fT
-        results = fT.filter(self.configs, settings={'only_types': ['dd', ], })
-        # dipole-dipole configurations
-        ddc = self.configs[results['dd']['indices']]
-        px, pz = self._pseudodepths_dd_simple(ddc, grid)
+        N = self.nr_electrodes
+        all_quadpoles = []
+        for idipole in injections:
+            # sort current electrodes and convert to array indices
+            I = np.sort(idipole) - 1
 
-        xg = np.linspace(px.min(), px.max(), 200)
-        zg = np.linspace(pz.min(), pz.max(), 200)
+            # voltage electrodes
+            velecs = list(range(1, N + 1))
 
-        x, z = np.meshgrid(xg, zg)
+            # remove current electrodes
+            del(velecs[I[1]])
+            del(velecs[I[0]])
 
-        plot_data = self.measurements[cid]
-        image = si.griddata((px, pz), plot_data, (x, z), method='linear')
+            # permutate remaining
+            voltages = itertools.permutations(velecs, 2)
+            for voltage in voltages:
+                all_quadpoles.append(
+                    (idipole[0], idipole[1], voltage[0], voltage[1])
+                )
+        configs = np.array(all_quadpoles)
+        # now add to the instance
+        if self.configs is None:
+            self.configs = configs
+        else:
+            self.configs = np.vstack((self.configs, configs))
+        return configs
 
-        cmap = mpl.cm.get_cmap('jet_r')
-
-        fig, ax = plt.subplots()
-
-        im = ax.imshow(
-            image,
-            extent=(xg.min(), xg.max(), zg.min(), zg.max()),
-            interpolation='none',
-            aspect='auto',
-            # vmin=10,
-            # vmax=300,
-            cmap=cmap,
-        )
-
-        ax.scatter(px, pz, color='k', alpha=0.5)
-        ax.set_aspect('equal')
-        fig.tight_layout()
-
-        return fig, ax, im
+    def remove_duplicates(self):
+        """remove duplicate entries to self.configs
+        """
+        c = self.configs
+        struct = c.view(c.dtype.descr * 4)
+        self.configs = np.unique(struct).view(c.dtype).reshape(-1, 4)
+        # import IPython
+        # IPython.embed()
 
 
 # old functions that must be vetted for usefulness
-
-
 def full_voltages(injections, N):
     """
 
@@ -396,172 +538,3 @@ def create_current_dipoles(x0, skip, dx, N):
         dipoles.append((x0, x1))
     return dipoles
 
-
-def syscal_write_electrode_coords(fid, spacing, N):
-    fid.write('# X Y Z\n')
-    for i in range(0, N):
-        fid.write('{0} {1} {2} {3}\n'.format(i + 1, i * spacing, 0, 0))
-
-
-def syscal_write_quadpoles(fid, quadpoles):
-    fid.write('# A B M N\n')
-    for nr, quadpole in enumerate(quadpoles):
-        fid.write(
-            '{0} {1} {2} {3} {4}\n'.format(
-                nr, quadpole[0], quadpole[1], quadpole[2], quadpole[3]))
-
-
-def get_dipole_dipole(
-        N, skip, step=1, nr_voltage_dipoles=10,
-        skipv=0):
-    configs = []
-    for a in range(0, N - (3 * skip) - 3, step):
-        b = a + skip + 1
-        nr = 0
-        for m in range(b + 1 + skipv, N - skip - 1, step):
-            nr += 1
-            if nr > nr_voltage_dipoles:
-                continue
-            n = m + skip + 1
-            quadpole = np.array((a, b, m, n)) + 1
-            configs.append(quadpole)
-    configs = np.array(configs)
-    return configs
-
-
-def get_gradient(N, skip=0, step=1, vskip=0, vstep=1):
-    """
-    Parameter
-    ---------
-    N: number of electrodes
-    skip: distance between current electrodes
-    step: steplength between subsequent current dipoles
-    vskip: distance between voltage electrodes
-    vstep: steplength between subsequent voltage dipoles
-    """
-    quadpoles = []
-    for a in range(1, N - skip, step):
-        b = a + skip + 1
-        for m in range(a + 1, b - vskip - 1, vstep):
-            n = m + vskip + 1
-            quadpoles.append((a, b, m, n))
-    return np.array(quadpoles)
-
-
-def save_to_config_txt(filename, liste):
-    quadrupoles = np.vstack(liste)
-    print('Number of measurements: ', quadrupoles.shape[0])
-
-    with open(filename, 'w') as fid:
-        syscal_write_electrode_coords(fid, 1, 48)
-        syscal_write_quadpoles(fid, quadrupoles)
-
-
-def create_gradient_configs():
-    liste = []
-    liste.append(
-        get_gradient(
-            N=48,
-            skip=6,
-            step=2,
-            vskip=0,
-            vstep=1,
-        )
-    )
-    liste.append(
-        get_gradient(
-            N=48,
-            skip=10,
-            step=2,
-            vskip=1,
-            vstep=2,
-        )
-    )
-
-    save_to_config_txt('config_grad.txt', liste)
-
-
-def create_dd_configs():
-    liste = []
-
-    liste.append(
-        get_dipole_dipole(
-            N=48,
-            skip=1,
-            step=1,
-            nr_voltage_dipoles=16,
-            skipv=1,
-        )
-    )
-
-    liste.append(
-        get_dipole_dipole(
-            N=48,
-            skip=3,
-            step=1,
-            nr_voltage_dipoles=60,
-            skipv=1,
-        )
-    )
-
-    for x in liste[1][0:30]:
-        print(x)
-
-    liste.append(
-        get_dipole_dipole(
-            N=48,
-            skip=7,
-            step=1,
-            nr_voltage_dipoles=5,
-            skipv=1,
-        )
-    )
-
-    save_to_config_txt('configs_dd.txt', liste)
-
-
-def create_dd_configs_v2():
-    liste = []
-
-    liste.append(
-        get_dipole_dipole(
-            N=48,
-            skip=1,
-            step=1,
-            nr_voltage_dipoles=16,
-            skipv=1,
-        )
-    )
-
-    liste.append(
-        get_dipole_dipole(
-            N=48,
-            skip=3,
-            step=1,
-            nr_voltage_dipoles=60,
-            skipv=1,
-        )
-    )
-
-    liste.append(
-        get_dipole_dipole(
-            N=48,
-            skip=5,
-            step=1,
-            nr_voltage_dipoles=60,
-            skipv=1,
-        )
-    )
-
-    liste.append(
-        get_dipole_dipole(
-            N=48,
-            skip=7,
-            step=1,
-            nr_voltage_dipoles=5,
-            skipv=1,
-        )
-    )
-
-    save_to_config_txt('configs_dd_v2.txt', liste)
-    # write_crmod_config('configs_v2.dat', liste)

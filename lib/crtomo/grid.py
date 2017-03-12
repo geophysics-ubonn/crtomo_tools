@@ -1,5 +1,15 @@
 """Manage and plot CRMod/CRTomo grids
 
+After loading an elem.dat file, i.e., the grid, grid information are exposed
+via various structures:
+
+    * the header is stored in the dict self.header
+
+    >>> self.header.keys()
+    dict_keys(['bandwidth', 'element_infos', 'cutmck', 'nr_element_types',
+              'nr_nodes'])
+
+
 Examples
 --------
 
@@ -19,11 +29,12 @@ class crt_grid(object):
     routines can be found in XX.
 
     """
-    def __init__(self):
+    def __init__(self, elem_file=None, elec_file=None):
         self.electrodes = None
         self.header = None
         self.nodes = None
         self.elements = None
+        self.element_neighbors_data = None
         self.grid_is_rectangular = None
         self.grid_data = []
 
@@ -34,6 +45,22 @@ class crt_grid(object):
         self.nr_of_elements = None
         self.nr_of_nodes = None
         self.nr_of_electrodes = None
+
+        if elem_file is not None:
+            self.load_elem_file(elem_file)
+
+        if elec_file is not None:
+            self.load_elec_file(elec_file)
+
+    def __repr__(self):
+        output_str = 'CRMod/CTRomo grid instance\n'
+        output_str += 'number of elements: {0}\n'.format(self.nr_of_elements)
+        output_str += 'number of nodes: {0}\n'.format(self.nr_of_nodes)
+        output_str += 'number of electrodes: {0}\n'.format(
+            self.nr_of_electrodes
+        )
+
+        return output_str
 
     class element:
         def __init__(self):
@@ -66,9 +93,11 @@ class crt_grid(object):
         element_infos = np.zeros((nr_of_element_types, 3), dtype=int)
         for element_type in range(0, nr_of_element_types):
             element_line = fid.readline().lstrip()
-            element_infos[element_type, :] = np.fromstring(element_line,
-                                                           dtype=int,
-                                                           sep='  ')
+            element_infos[element_type, :] = np.fromstring(
+                element_line,
+                dtype=int,
+                sep='  ',
+            )
         header['element_infos'] = element_infos
         self.header = header
 
@@ -358,6 +387,7 @@ class crt_grid(object):
                 self.electrodes[:, 1],
                 self.electrodes[:, 2],
                 color=self.props['electrode_color'],
+                clip_on=False,
             )
         ax.set_xlim(self.grid['x'].min(), self.grid['x'].max())
         ax.set_ylim(self.grid['z'].min(), self.grid['z'].max())
@@ -381,7 +411,18 @@ class crt_grid(object):
         return fig, ax
 
     def get_element_centroids(self):
-        return np.mean(self.grid['x'], axis=1), np.mean(self.grid['z'], axis=1)
+        """return the central points of all elements
+
+        Returns
+        -------
+        Nx2 array
+            x/z coordinates for all (N) elements
+        """
+        centroids = np.vstack((
+            np.mean(self.grid['x'], axis=1), np.mean(self.grid['z'], axis=1)
+        )).T
+
+        return centroids
 
     def get_electrode_positions(self):
         return self.electrodes[:, 1:3]
@@ -481,3 +522,44 @@ class crt_grid(object):
             # fig.savefig('plot_element_angles.jpg', dpi=300)
             return fig, ax
 
+    @property
+    def element_neighbors(self):
+        """Return a list with element numbers (zero indexed) of neighboring
+        elements. Note that the elements are not sorted. No spacial orientation
+        can be inferred from the order of neighbors.
+
+        WARNING: This function is slow due to a nested loop. This would be a
+        good starting point for further optimizations.
+
+        Returns
+        -------
+        neighbors: list
+            a list (length equal to nr of elements) with neighboring elements
+
+        Examples
+        --------
+
+
+        """
+        if self.element_neighbors_data is not None:
+            return self.element_neighbors_data
+
+        max_nr_edges = self.header['element_infos'][0, 2]
+
+        # initialize the neighbor array
+        self.element_neighbors_data = []
+
+        # determine neighbors
+        print('Looking for neighbors')
+        for nr, element_nodes in enumerate(self.elements):
+            print('element {0}/{1}'.format(nr + 1, self.nr_of_elements))
+            neighbors = []
+            for nr1, el in enumerate(self.elements):
+                # we look for elements that have two nodes in common with this
+                # element
+                if np.intersect1d(element_nodes, el).size == 2:
+                    neighbors.append(nr1)
+                    if len(neighbors) == max_nr_edges:
+                        break
+            self.element_neighbors_data.append(neighbors)
+        return self.element_neighbors_data

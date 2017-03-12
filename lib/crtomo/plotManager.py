@@ -9,8 +9,8 @@ TODO
 """
 import numpy as np
 import scipy.interpolate
-import matplotlib as mpl
 
+from crtomo.mpl_setup import *
 import crtomo.grid as CRGrid
 import crtomo.parManager as pM
 import crtomo.nodeManager as nM
@@ -231,7 +231,22 @@ class plotManager(object):
 #         # cb = fig.colorbar(pc)
 #         return pc
 
-    def plot_elements_to_ax(self, ax, cid, config):
+    def plot_elements_to_ax(self, cid, ax=None, config=None):
+        if config is None:
+            config = {}
+
+        xmin = config.get('xmin', self.grid.grid['x'].min())
+        xmax = config.get('xmax', self.grid.grid['x'].max())
+        zmin = config.get('zmin', self.grid.grid['z'].min())
+        zmax = config.get('zmax', self.grid.grid['z'].max())
+
+        if ax is None:
+            # 15 cm
+            sizex = 15 / 2.54
+            sizez = sizex * (np.abs(zmax - zmin) / np.abs(xmax - xmin) * 1.1)
+            fig, ax = plt.subplots(figsize=(sizex, sizez))
+        else:
+            fig = ax.get_figure()
         # sl2 = 10 ** sl2_raw[:, 2]
 
         # alpha = np.ones(sl2.size)
@@ -240,6 +255,7 @@ class plotManager(object):
         # convert data
         subdata = self.parman.parsets[cid]
         cmap = mpl.cm.get_cmap('jet')
+
         cnorm = mpl.colors.Normalize(vmin=subdata.min(), vmax=subdata.max())
         scalarMap = mpl.cm.ScalarMappable(norm=cnorm, cmap=cmap)
 
@@ -275,7 +291,33 @@ class plotManager(object):
                 color=self.grid.props['electrode_color'],
                 clip_on=False,
             )
-        ax.set_xlim(self.grid.grid['x'].min(), self.grid.grid['x'].max())
-        ax.set_ylim(self.grid.grid['z'].min(), self.grid.grid['z'].max())
-        # ax.autoscale_view()
+
+        ax.set_xlim(xmin, xmax)
+
+        ax.set_ylim(zmin, zmax)
+
         ax.set_aspect('equal')
+
+        if config.get('plot_colorbar', False):
+            cb_boundaries = mpl_get_cb_bound_below_plot(ax)
+            cax = fig.add_axes(cb_boundaries, frame_on=True)
+            self._return_colorbar(
+                cax,
+                cnorm,
+                cmap,
+                label=config.get('cblabel', ''),
+            )
+
+        return fig, ax, cnorm, cmap
+
+    def _return_colorbar(self, cax, norm, cmap, label=''):
+        """plot a colorbar to the provided axis
+        """
+        cb = mpl.colorbar.ColorbarBase(
+            ax=cax,
+            cmap=cmap,
+            norm=norm,
+            orientation='horizontal',
+        )
+        cb.set_label(label)
+        return cb
