@@ -18,8 +18,8 @@ by invoking the command line options.
 Use sens_center_plot.py -h for help or take a look at the tests provided in
 TESTS/sens_center_plot.
 
-Usage
------
+Examples
+--------
 
 Plot center plot, and single measurement sensitivities:
 
@@ -39,12 +39,15 @@ Use alternative weighting functions:
 
 END DOCUMENTATION
 """
-from crlab_py.mpl import *
+from crtomo.mpl_setup import *
 from optparse import OptionParser
 import numpy as np
+import shutil
+
+# import crtomo.grid as CRGrid
+# import crtomo.cfg as CRcfg
 import crlab_py.elem as elem
 import crlab_py.CRMod as CRMod
-import shutil
 
 
 def handle_cmd_options():
@@ -106,17 +109,18 @@ class sens_center:
         self.weight = weight
         self.cblabel = None
         self.output_file = None
+        self.grid = CRGrid.crt_grid(elem_file, elec_file)
 
     def plot_single_configuration(self, id, sens_file):
         """
         plot sensitivity distribution with center of mass for
         a single configuration. The electrodes used are colored.
         """
-        elem.load_elem_file(self.elem_file)
-        elem.load_elec_file(self.elec_file)
-
-        indices = elem.load_column_file_to_elements_advanced(sens_file, [2, 3],
-                                                             False, False)
+        indices = elem.load_column_file_to_elements_advanced(
+            sens_file, [2, 3],
+            False,
+            False
+        )
 
         elem.plt_opt.title = ''
         elem.plt_opt.reverse = True
@@ -153,7 +157,7 @@ class sens_center:
         try:
             colors = np.loadtxt(self.volt_file, skiprows=1)
         except IOError:
-            print ('IOError opening {0}'.format(volt_file))
+            print('IOError opening {0}'.format(volt_file))
             exit()
 
         # check for 1-dimensionality
@@ -344,7 +348,7 @@ class sens_center:
         self.remove_tmp_dir(self.temp_dir)
 
 
-if __name__ == '__main__':
+def main():
     options = handle_cmd_options()
 
     center_obj = sens_center(options.elem_file, options.elec_file,
@@ -366,3 +370,7 @@ if __name__ == '__main__':
         center_obj.plot_sensitivities_to_file()
 
     center_obj.clean()
+
+
+if __name__ == '__main__':
+    main()

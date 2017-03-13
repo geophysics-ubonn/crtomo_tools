@@ -21,13 +21,21 @@ dpi = int(os.environ.get('DPI', 300))
 
 def handle_cmd_options():
     parser = OptionParser()
-    parser.add_option('-e', "--elem", dest="elem_file", type="string",
-                      help="elem.dat file (default: elem.dat)",
-                      default="elem.dat")
+    parser.add_option(
+        '-e', "--elem",
+        dest="elem_file",
+        type="string",
+        help="elem.dat file (default: elem.dat)",
+        default="elem.dat",
+    )
 
-    parser.add_option('-t', "--elec", dest="elec_file", type="string",
-                      help="elec.dat file (default: elec.dat)",
-                      default="elec.dat")
+    parser.add_option(
+        '-t', "--elec",
+        dest="elec_file",
+        type="string",
+        help="elec.dat file (default: elec.dat)",
+        default="elec.dat",
+    )
 
     parser.add_option(
         '-d', "--decouplings",
@@ -37,22 +45,38 @@ def handle_cmd_options():
         default="../exe/decouplings.dat",
     )
 
-    parser.add_option("-o", "--output", dest="output",
-                      help="Output file (default: grid.png)",
-                      metavar="FILE", default="grid.png")
+    parser.add_option(
+        "-o", "--output",
+        dest="output",
+        help="Output file (default: grid.png)",
+        metavar="FILE",
+        default="grid.png",
+    )
 
-    parser.add_option("-m", "--mark_node", dest="mark_node",
-                      help="Mark one node (index starts with 0)",
-                      type="int",
-                      metavar="NR", default=None)
+    parser.add_option(
+        "-m", "--mark_node",
+        dest="mark_node",
+        help="Mark one node (index starts with 0)",
+        type="int",
+        metavar="NR",
+        default=None,
+    )
 
-    parser.add_option("-c", "--mark_cell", dest="mark_cell",
-                      help="Mark one cell (index starts with 0)",
-                      type="int",
-                      metavar="NR", default=None)
-    parser.add_option("--fancy", action="store_true", dest="plot_fancy",
-                      help="Create a fancy plot (default:false)",
-                      default=True)
+    parser.add_option(
+        "-c", "--mark_cell",
+        dest="mark_cell",
+        help="Mark one cell (index starts with 0)",
+        type="int",
+        metavar="NR",
+        default=None,
+    )
+    parser.add_option(
+        "--fancy",
+        action="store_true",
+        dest="plot_fancy",
+        help="Create a fancy plot (default:false)",
+        default=True,
+    )
     (options, args) = parser.parse_args()
     return options
 

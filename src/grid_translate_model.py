@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 # *-* coding: utf-8 *-*
-"""
-Tranfer complex resistivity models between two FE grids.
-END DOCUMENTATION
+"""Tranfer complex resistivity models between two FE grids.
 """
 import os
 # import shapely
 from optparse import OptionParser
 from shapely.geometry import Polygon
-import crlab_py.elem2 as elem
+import crtomo.grid as CRGrid
 import numpy as np
 
 
@@ -41,7 +39,7 @@ def _load_grid(directory):
             raise IOError('filename not found: {0}'.format(filename))
 
     cells = []
-    grid = elem.crt_grid()
+    grid = CRGrid.crt_grid()
     grid.load_elem_file(directory + os.sep + 'elem.dat')
     grid.load_elec_file(directory + os.sep + 'elec.dat')
     gx = grid.grid['x']
