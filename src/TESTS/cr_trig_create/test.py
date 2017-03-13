@@ -21,7 +21,9 @@ def check_grid_creation(directory, expect_return_code):
 
 
 def test_success_generator():
-    """Look for all 'Test_*' directories and try to create grids in them. We
+    """Tests that should run
+
+    Look for all 'Test_*' directories and try to create grids in them. We
     expect those test to run through, i.e., return a code 0.
     """
     directories = sorted(glob.glob('Test_*'))
@@ -31,7 +33,9 @@ def test_success_generator():
 
 
 def test_fail_generator():
-    """Look for all 'TestF_*' directories and try to create grids in them. We
+    """Tests that should fail
+
+    Look for all 'TestF_*' directories and try to create grids in them. We
     expect those test to FAIL, i.e., return a code of 1.
     """
     directories = sorted(glob.glob('TestF_*'))
