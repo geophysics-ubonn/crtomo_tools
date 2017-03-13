@@ -4,3 +4,4 @@ build/
 __pycache__
 crtomo_tools.egg-info
 tmp_grid_*
+.noseids
