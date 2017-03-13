@@ -127,6 +127,6 @@ def mpl_get_cb_bound_below_plot(ax):
     # ydiff = (ax_size[3] - pb1[3]) / 2
 
     # the colorbar is set to 0.01 width
-    sizes = [ax_size[0], ax_size[1] - 0.14, pb1[2], 0.03]
+    sizes = [ax_size[0], ax_size[1], pb1[2], 0.03]
 
     return sizes

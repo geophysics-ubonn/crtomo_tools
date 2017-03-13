@@ -4,7 +4,6 @@
 TODO
 ----
 
-* we need the nodeManager
 
 """
 import numpy as np
@@ -67,10 +66,7 @@ class plotManager(object):
         self.nodeman = nodeman
 
         # par manager
-        parman = kwargs.get('pm', None)
-        if parman is None:
-            parman = pM.ParMan(self.grid)
-        self.parman = parman
+        self.parman = kwargs.get('pm', pM.ParMan(self.grid))
 
     def plot_nodes_pcolor_to_ax(self, ax, cid, config):
         """
@@ -231,15 +227,31 @@ class plotManager(object):
 #         # cb = fig.colorbar(pc)
 #         return pc
 
-    def plot_elements_to_ax(self, cid, ax=None, config=None):
-        if config is None:
-            config = {}
+    def plot_elements_to_ax(self, cid, ax=None, **kwargs):
+        """Plot element data (parameter sets).
 
-        xmin = config.get('xmin', self.grid.grid['x'].min())
-        xmax = config.get('xmax', self.grid.grid['x'].max())
-        zmin = config.get('zmin', self.grid.grid['z'].min())
-        zmax = config.get('zmax', self.grid.grid['z'].max())
+        Parameters
+        ----------
+        cid
+        ax
+        alpha_cid
+        xmin
+        xmax
+        zmin
+        zmax
+        cmap_name
+        cblabel
+        plot_colorbar: bool
 
+
+        """
+
+        xmin = kwargs.get('xmin', self.grid.grid['x'].min())
+        xmax = kwargs.get('xmax', self.grid.grid['x'].max())
+        zmin = kwargs.get('zmin', self.grid.grid['z'].min())
+        zmax = kwargs.get('zmax', self.grid.grid['z'].max())
+
+        # try to create a suitable default figure size
         if ax is None:
             # 15 cm
             sizex = 15 / 2.54
@@ -247,35 +259,41 @@ class plotManager(object):
             fig, ax = plt.subplots(figsize=(sizex, sizez))
         else:
             fig = ax.get_figure()
-        # sl2 = 10 ** sl2_raw[:, 2]
 
+        # sl2 = 10 ** sl2_raw[:, 2]
         # alpha = np.ones(sl2.size)
         # alpha[np.where(sl2 < 1e-3)] = 0.0
 
-        # convert data
+        # get data
         subdata = self.parman.parsets[cid]
-        cmap = mpl.cm.get_cmap('jet')
 
+        # color map
+        cmap_name = kwargs.get('cmap_name', 'jet')
+        cmap = mpl.cm.get_cmap(cmap_name)
+
+        # normalize data
         cnorm = mpl.colors.Normalize(vmin=subdata.min(), vmax=subdata.max())
         scalarMap = mpl.cm.ScalarMappable(norm=cnorm, cmap=cmap)
-
         fcolors = scalarMap.to_rgba(subdata)
-        # fcolors[:, 3] = alpha
+
+        # if applicable, apply alpha values
+        alpha_cid = kwargs.get('cid_alpha', None)
+        print('alpha_cid', alpha_cid)
+        if isinstance(alpha_cid, int):
+            print('applying alpha')
+            alpha = self.parman.parsets[alpha_cid]
+            print(alpha)
+            # make sure this data set is normalized between 0 and 1
+            if np.nanmin(alpha) < 0 or np.nanmax(alpha) > 1:
+                raise Exception(
+                    'alpha data set must be normalized between 0 and 1'
+                )
+            fcolors[:, 3] = alpha
 
         all_xz = []
         for x, z in zip(self.grid.grid['x'], self.grid.grid['z']):
             tmp = np.vstack((x, z)).T
             all_xz.append(tmp)
-
-        # ecolors = np.zeros((len(all_xz), 4))
-        # ecolors[:, 0] = 0.5
-        # ecolors[:, 3] = 1.0
-
-        # fcolors = np.zeros((len(all_xz), 4))
-        # fcolors[:, 0] = 0.5
-        # fcolors[:, 3] = 1.0
-
-        # fcolors[-100:, 3] = 0.5
 
         collection = mpl.collections.PolyCollection(
             all_xz,
@@ -293,20 +311,22 @@ class plotManager(object):
             )
 
         ax.set_xlim(xmin, xmax)
-
         ax.set_ylim(zmin, zmax)
-
+        ax.set_xlabel(kwargs.get('xlabel', 'x'))
+        ax.set_ylabel(kwargs.get('zlabel', 'z'))
         ax.set_aspect('equal')
 
-        if config.get('plot_colorbar', False):
+        if kwargs.get('plot_colorbar', False):
+            print('colorbar')
             cb_boundaries = mpl_get_cb_bound_below_plot(ax)
             cax = fig.add_axes(cb_boundaries, frame_on=True)
-            self._return_colorbar(
+            cb = self._return_colorbar(
                 cax,
                 cnorm,
                 cmap,
-                label=config.get('cblabel', ''),
+                label=kwargs.get('cblabel', ''),
             )
+            return fig, ax, cnorm, cmap, cb
 
         return fig, ax, cnorm, cmap
 
