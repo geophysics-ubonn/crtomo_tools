@@ -6,10 +6,10 @@ resistivity vs K-factors. Also save the relative deviations to a .dat file.
 
 dev = (R_mod * K - rho0) / rho0
 
-R_mod: modelled resistance value (using CRMod)
-K: geometric factor over a homogeneous half-space, computed using the
-   analytical formula
-rho0: resistivity of homogeneous half-space
+* R_mod - modelled resistance value (using CRMod)
+* K - geometric factor over a homogeneous half-space, computed using the
+  analytical formula
+* rho0: resistivity of homogeneous half-space
 
 Output files
 ------------

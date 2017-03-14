@@ -217,12 +217,10 @@ class ParMan(object):
         --------
 
         >>> import crtomo.tdManager as CRtdm
-
             tdman = CRtdm.tdMan(
                     elem_file='GRID/elem.dat',
                     elec_file='GRID/elec.dat',
             )
-
             pid = tdman.parman.add_empty_dataset(value=1)
             tdman.parman.modify_area(
                     pid,
@@ -232,9 +230,9 @@ class ParMan(object):
                     zmin=-0.5,
                     value=2,
             )
-
             fig, ax = tdman.plotman.plot_elements_to_ax(pid)
             fig.savefig('out.png')
+
         """
         area_polygon = shapgeo.Polygon(
             ((xmin, zmax), (xmax, zmax), (xmax, zmin), (xmin, zmin))

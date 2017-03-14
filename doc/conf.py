@@ -14,9 +14,9 @@
 
 import os
 import sys
-# required to documnt scripts
+# required to document scripts
 sys.path.append(
-    os.path.abspath('../src/GRID_TOOLS')
+    os.path.abspath('../src/')
 )
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -33,6 +33,8 @@ sys.path.append(
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'matplotlib.sphinxext.only_directives',
+    'matplotlib.sphinxext.plot_directive',
     'sphinx.ext.autodoc',
     'sphinxcontrib.napoleon',
     'sphinx.ext.doctest',

@@ -9,10 +9,12 @@ in the grid. This might give a better overview on the sensitivities of our
 measurement configuration.
 
 Different weights for the sensitivities can be used (--weight):
+
     - 0: unweighted,
     - 1: abs,
     - 2: log10,
     - 3: square,
+
 by invoking the command line options.
 
 Use sens_center_plot.py -h for help or take a look at the tests provided in
@@ -21,11 +23,11 @@ TESTS/sens_center_plot.
 Examples
 --------
 
-Plot center plot, and single measurement sensitivities:
+Plot center plot, and single measurement sensitivities: ::
 
     sens_center_plot.py --elem elem.dat --elec elec.dat --config config.dat -c
 
-Disable plots:
+Disable plots: ::
 
     sens_center_plot.py --no_plot
 
@@ -37,7 +39,7 @@ Use alternative weighting functions:
     sens_center_plot.py --weight 2
     sens_center_plot.py --weight 3
 
-END DOCUMENTATION
+
 """
 from crtomo.mpl_setup import *
 from optparse import OptionParser

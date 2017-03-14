@@ -38,6 +38,31 @@ class ConfigManager(object):
         else:
             return self.configs.shape[0]
 
+    def add_noise(self, cid, **kwargs):
+        """Add noise to a data set and return a new cid for the noised data.
+
+        Parameters
+        ----------
+        cid: int
+            ID for the data set to add noise to
+        positive: bool
+            if True, then set measurements to np.nan that are negative
+        seed: int, optional
+            set the seed used to initialize the random number generator
+        relative: float
+            standard deviation of error
+        absolute: float
+            mean value of normal distribution
+
+
+        Returns
+        -------
+        cid_noise: int
+            ID pointing to noised data set
+
+        """
+        pass
+
     def add_measurements(self, measurements):
         """Add new measurements
 
@@ -230,6 +255,17 @@ class ConfigManager(object):
             number of electrodes, must be given if not already known by the
             config instance
 
+        Examples
+        --------
+
+        .. plot::
+            :include-source:
+
+            import crtomo.configManager as CRconfig
+            config = CRconfig.ConfigManager(nr_of_electrodes=10)
+            config.gen_dipole_dipole(skipc=2)
+            config.plot_pseudodepths()
+
         """
         if N is None and self.nr_electrodes is None:
             raise Exception('You must provide the number of electrodes')
@@ -310,6 +346,7 @@ class ConfigManager(object):
             Otherwise, return a list of figure instances.
         axes: axes object or list of axes ojects
             plot axes
+
         """
         results = fT.filter(
             self.configs,
@@ -332,6 +369,8 @@ class ConfigManager(object):
             fig, ax = plt.subplots(figsize=(15 / 2.54, 5 / 2.54))
             ax.scatter(px, pz, color='k', alpha=0.5)
             ax.set_aspect('equal')
+            ax.set_xlabel('x [m]')
+            ax.set_ylabel('x [z]')
             fig.tight_layout()
             figs.append(fig)
             axes.append(ax)
@@ -396,17 +435,19 @@ class ConfigManager(object):
             return figs
 
     def gen_gradient(self, skip=0, step=1, vskip=0, vstep=1):
-        """TODO: This function is not functional!
-        Parameter
-        ---------
-        skip:
+        """Generate gradient measurements
+
+        Parameters
+        ----------
+        skip: int
             distance between current electrodes
-        step:
+        step: int
             steplength between subsequent current dipoles
-        vskip:
+        vskip: int
             distance between voltage electrodes
-        vstep:
+        vstep: int
             steplength between subsequent voltage dipoles
+
         """
         N = self.nr_electrodes
         quadpoles = []

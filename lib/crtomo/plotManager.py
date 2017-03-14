@@ -1,10 +1,6 @@
 # *-* coding: utf-8 *-*
 """Manage node and element plots
 
-TODO
-----
-
-
 """
 import numpy as np
 import scipy.interpolate

@@ -1,17 +1,13 @@
 # *-* coding: utf-8 *-*
 """A digital representation of a tomodir, i.e., a single-frequency inversion.
 
-TODO
-----
-
-Modelling
----------
+** Modelling **
 
 * save to one large binary file
 
     * I suggest to use pytables (tables) for that.
     * need to figure out how to store the individual modules in there, and
-    retrieve them later.
+      retrieve them later.
 
 * save-to-tomodir
 
@@ -44,13 +40,13 @@ Modelling
 * plot sensitivities
 
     * perhaps provide different transformation functions, for example the one
-    from Johannes Kenkel
+      from Johannes Kenkel
 
 * plot potential distributions
 
     * also plot current lines via streamlines?
     * can we generate current densities? not sure how to mix element data
-    (sigma) and potential data (nodes) in j = sigma E
+      (sigma) and potential data (nodes) in j = sigma E
 
 """
 import glob
@@ -117,7 +113,13 @@ class tdMan(object):
         self._initialize_components(kwargs)
 
     def _initialize_components(self, kwargs):
-        """initialize the various components using the supplied **kwargs
+        """initialize the various components using the supplied \*\*kwargs
+
+        Parameters
+        ----------
+        kwargs: dict
+            \*\*kwargs dict as received by __init__()
+
         """
 
         # load/assign grid
@@ -219,7 +221,7 @@ class tdMan(object):
     def save_to_tomodir(self, directory):
         """Save the tomodir instance to a directory structure.
 
-        TODO
+        Note
         ----
 
         Test cases:
@@ -385,11 +387,12 @@ class tdMan(object):
     def _read_sensitivities(self, sens_dir):
         """import sensitivities from a directory
 
-        TODO:
-        -----
+        Note
+        ----
 
         * check that signs are correct in case CRMod switches potential
-        electrodes
+          electrodes
+
         """
         if self.assignments['sensitivities'] is not None:
             print('Sensitivities already imported. Will not overwrite!')
@@ -641,10 +644,12 @@ class tdMan(object):
         -------
         results: Nx6 numpy.ndarray
             Results of the analysis.
+
             * magnitude measurement [Ohm]
             * sum of sensitivities [Volt]
             * relative deviation of sensitivity-sum from measurement [in
               percent]
+
         fig: matplotlib.figure, optional
             figure object. Only returned of return_plot=True
         axes: list
@@ -655,19 +660,16 @@ class tdMan(object):
 
         >>> #!/usr/bin/python
             import crtomo.tdManager as CRtdMan
-
             tdm = CRtdMan.tdMan(
                     elem_file='grid/elem.dat',
                     elec_file='grid/elec.dat',
                     config_file='config/config.dat',
             )
-
             results, fig, axes = tdm.check_measurements_against_sensitivities(
                     magnitude=100,
                     phase=-10,
                     return_plot=True
             )
-
             fig.savefig('sensitivity_comparison.png', dpi=300)
 
         """

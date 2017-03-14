@@ -26,20 +26,19 @@ grid_gen_decouplings 2 5
 Usage
 -----
 
-Pipe the output directly to a decouplings.dat file:
+Pipe the output directly to a decouplings.dat file: ::
 
     echo "40" > decouplings.dat && grid_gen_decouplings.py 5 40 >> \
-            decouplings.dat
+    decouplings.dat
 
 The first line denotes the number of decouplings.
 
-Chain multiple calls to decouple multiple lines
+Chain multiple calls to decouple multiple lines ::
 
     echo "80" > decouplings.dat && grid_gen_decouplings.py 5 40 >> \
-            decouplings.dat && grid_gen_decouplings.py 8 40 >> \
-            decouplings.dat
+    decouplings.dat && grid_gen_decouplings.py 8 40 >> \
+    decouplings.dat
 
-END DOCUMENTATION
 """
 import sys
 

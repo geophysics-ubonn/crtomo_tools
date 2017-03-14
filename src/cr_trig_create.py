@@ -72,11 +72,14 @@ def handle_cmd_options():
 class Mesh():
     """
     GMSH distinguishes three types of objects:
-        Points on the boundary (i.e. points that create the boundary)
-        Lines that connect Points to form the actual boundaries
-        Points in Surface, nodes (or points) that lie IN the grid and need to
-                be connected to the grid
 
+    * Points on the boundary (i.e., points that create the boundary)
+    * Lines that connect Points to form the actual boundaries
+    * Points in Surface, nodes (or points) that lie IN the grid and need to
+      be connected to the grid
+
+    Note
+    ----
 
     TODO: I think we don't need to add electrodes as POINTS, only as POINT IN
     SURFACE, because POINTs that do not belong to a line will not be included
@@ -93,6 +96,7 @@ class Mesh():
     Add extra-nodes (for inner-grid-structure)
 
     Add extra-lines (for inner-grid-structure)
+
     """
 
     def __init__(self):
