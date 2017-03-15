@@ -1,5 +1,17 @@
 # *-* coding: utf-8 *-*
-"""Manage measurement configurations
+"""Manage measurement configurations and corresponding measurements.
+
+Literature
+----------
+
+* Noel, Mark and Biwen Xu; Archaeological investigation by electrical
+    resistivity tomography: a preliminary study. Geophys J Int 1991; 107 (1):
+    95-102. doi: 10.1111/j.1365-246X.1991.tb01159.x
+* Stummer, Peter, Hansruedi Maurer, and Alan G. Green. “Experimental Design:
+  Electrical Resistivity Data Sets That Provide Optimum Subsurface
+  Information.” Geophysics 69, no. 1 (January 1, 2004): 120–120.
+  doi:10.1190/1.1649381.
+
 """
 import itertools
 from crtomo.mpl_setup import *
@@ -33,6 +45,14 @@ class ConfigManager(object):
 
     @property
     def nr_of_configs(self):
+        """Return number of configurations
+
+        Returns
+        -------
+        nr_of_configs: int
+            number of configurations stored in this instance
+
+        """
         if self.configs is None:
             return 0
         else:
@@ -64,7 +84,7 @@ class ConfigManager(object):
         pass
 
     def add_measurements(self, measurements):
-        """Add new measurements
+        """Add new measurements to this instance
 
         Parameters
         ----------
@@ -72,6 +92,23 @@ class ConfigManager(object):
             one or more measurement sets. It must either be 1D or 2D, with the
             first dimension the number of measurement sets (K), and the second
             the number of measurements (N): K x N
+
+        Returns
+        -------
+        mid: int
+            measurement ID used to extract the measurements later on
+
+        Examples
+        --------
+        >>> import numpy as np
+            import crtomo.configManager as CRconfig
+            config = CRconfig.ConfigManager(nr_of_electrodes=10)
+            config.gen_dipole_dipole(skipc=0)
+            # generate some random noise
+            random_measurements = np.random.random(config.nr_of_configs)
+            mid = config.add_measurements(random_measurements)
+            # retrieve using mid
+            print(config.measurements[mid])
 
         """
         subdata = np.atleast_2d(measurements)
@@ -103,6 +140,36 @@ class ConfigManager(object):
 
     def _crmod_to_abmn(self, configs):
         """convert crmod-style configurations to a Nx4 array
+
+        CRMod-style configurations merge A and B, and M and N, electrode
+        numbers into one large integer each:
+
+        .. math ::
+
+            AB = A \cdot 10^4 + B\\
+            MN = M \cdot 10^4 + N
+
+        Parameters
+        ----------
+        configs: numpy.ndarray
+            Nx2 array holding the configurations to convert
+
+        Examples
+        --------
+
+        >>> import numpy as np
+            import crtomo.configManager as CRconfig
+            config = CRconfig.ConfigManager(nr_of_electrodes=5)
+            # generate some CRMod-style configurations
+            crmod_configs = np.array((
+                (10002, 40003),
+                (10010, 30004),
+            ))
+            abmn = config._crmod_to_abmn(crmod_configs)
+            print(abmn)
+        [[  2.   1.   3.   4.]
+         [ 10.   1.   4.   3.]]
+
         """
         A = configs[:, 0] % 1e4
         B = np.floor(configs[:, 0] / 1e4).astype(int)
@@ -118,6 +185,12 @@ class ConfigManager(object):
 
     def load_crmod_config(self, filename):
         """Load a CRMod configuration file
+
+        Parameters
+        ----------
+        filename: string
+            absolute or relative path to a crmod config.dat file
+
         """
         with open(filename, 'r') as fid:
             nr_of_configs = int(fid.readline().strip())
@@ -189,6 +262,7 @@ class ConfigManager(object):
         mid: int or [int, int]
             measurement ids of magnitude and phase measurements. If only one ID
             is given, then the phase column is filled with zeros
+
         """
         ABMN = self._get_crmod_abmn()
 
@@ -217,6 +291,11 @@ class ConfigManager(object):
     def write_crmod_config(self, filename):
         """Write the configurations to a configuration file in the CRMod format
         All configurations are merged into one previor to writing to file
+
+        Parameters
+        ----------
+        filename: string
+            absolute or relative path to output filename (usually config.dat)
         """
         ABMN = self._get_crmod_abmn()
 
@@ -354,8 +433,6 @@ class ConfigManager(object):
                 'only_types': ['dd', ],
             }
         )
-        # import IPython
-        # IPython.embed()
         # loop through all measurement types
         # TODO: will break for non-dipole-dipole measurements
         figs = []
@@ -461,13 +538,7 @@ class ConfigManager(object):
         if configs.size == 0:
             return None
 
-        # now add to the instance
-        if self.configs is None:
-            self.configs = configs
-        else:
-            # import IPython
-            # IPython.embed()
-            self.configs = np.vstack((self.configs, configs))
+        self.add_to_configs(configs)
         return configs
 
     def gen_all_voltages_for_injections(self, injections):
@@ -492,90 +563,220 @@ class ConfigManager(object):
                 all_quadpoles.append(
                     (idipole[0], idipole[1], voltage[0], voltage[1])
                 )
-        configs = np.array(all_quadpoles)
-        # now add to the instance
+        configs_unsorted = np.array(all_quadpoles)
+        # sort AB and MN
+        configs_sorted = np.hstack((
+            np.sort(configs_unsorted[:, 0:2], axis=1),
+            np.sort(configs_unsorted[:, 2:4], axis=1),
+        ))
+        configs = self.remove_duplicates(configs_sorted)
+
+        self.add_to_configs(configs)
+        return configs
+
+    def gen_all_current_dipoles(self):
+        """Generate all possible current dipoles for the given number of
+        electrodes (self.nr_electrodes).
+
+        Returns
+        -------
+        configs: Nx2 numpy.ndarray
+            all possible current dipoles A-B
+        """
+        N = self.nr_electrodes
+        celecs = list(range(1, N + 1))
+        AB_list = itertools.permutations(celecs, 2)
+        AB = np.array([ab for ab in AB_list])
+        AB.sort(axis=1)
+
+        # now we need to filter duplicates
+        AB = np.unique(
+            AB.view(AB.dtype.descr * 2)
+        ).view(AB.dtype).reshape(-1, 2)
+
+        return AB
+
+    def remove_duplicates(self, configs=None):
+        """remove duplicate entries from 4-point configurations. If no
+        configurations are provided, then use self.configs. Unique
+        configurations are only returned if configs is not None.
+
+        Parameters
+        ----------
+        configs: Nx4 numpy.ndarray, optional
+            remove duplicates from these configurations instead from
+            self.configs.
+
+        Returns
+        -------
+        configs_unique: Kx4 numpy.ndarray
+            unique configurations. Only returned if configs is not None
+
+        """
+        if configs is None:
+            c = self.configs
+        else:
+            c = configs
+        struct = c.view(c.dtype.descr * 4)
+        configs_unique = np.unique(struct).view(c.dtype).reshape(-1, 4)
+        if configs is None:
+            self.configs = configs_unique
+        else:
+            return configs_unique
+
+    def gen_schlumberger(self, M, N):
+        """generate one Schlumberger sounding configuration, that is, one set
+        of configurations for one potential dipole M-N.
+
+        Parameters
+        ----------
+        M: int
+            electrode number for the first potential electrode
+        N: int
+            electrode number for the second potential electrode
+
+        Returns
+        -------
+        configs: Kx4 numpy.ndarray
+            array holding the configurations
+
+        """
+        a = np.abs(M - N)
+        nr_of_steps_left = int(min(M, N) - 1 / a)
+        nr_of_steps_right = int((self.nr_electrodes - max(M, N)) / a)
+        configs = []
+        for i in range(0, min(nr_of_steps_left, nr_of_steps_right)):
+            A = min(M, N) - (i + 1) * a
+            B = max(M, N) + (i + 1) * a
+            configs.append(
+                (A, B, M, N)
+            )
+        configs = np.array(configs)
+        self.add_to_configs(configs)
+        return configs
+
+    def gen_wenner(self, a):
+        """generate Wenner measurement configurations
+
+        Parameters
+        ----------
+        a: int
+            distance (in electrodes) between subsequent electrodes of each
+            four-point configuration.
+
+        Returns
+        -------
+        configs: Kx4 numpy.ndarray
+            array holding the configurations
+        """
+        configs = []
+        for i in range(1, self.nr_electrodes - 3 * a + 1):
+            configs.append(
+                (i, i + a, i + 2 * a, i + 3 * a),
+            )
+        configs = np.array(configs)
+        self.add_to_configs(configs)
+        return configs
+
+    def add_to_configs(self, configs):
+        """Add one or more measurement configurations to the stored
+        configurations
+
+        Parameters
+        ----------
+        configs: list or numpy.ndarray
+            list or array of configurations
+
+        Returns
+        -------
+        configs: Kx4 numpy.ndarray
+            array holding all configurations of this instance
+        """
+        if len(configs) == 0:
+            return None
+
         if self.configs is None:
             self.configs = configs
         else:
+            configs = np.atleast_2d(configs)
             self.configs = np.vstack((self.configs, configs))
-        return configs
+        return self.configs
 
-    def remove_duplicates(self):
-        """remove duplicate entries to self.configs
+    def split_into_normal_and_reciprocal(self, pad=False):
+        """Split the stored configurations into normal and reciprocal
+        measurements
+
+        ** *Rule 1: the normal configuration contains the smallest electrode
+        number of the four involved electrodes in the current dipole* **
+
+        Parameters
+        ----------
+        pad: bool
+            if True, add numpy.nan values to the reciprocals for non-existent
+            measuremnts
+
+        Returns
+        -------
+        normal: numpy.ndarray
+            Nnx4 array. If pad is True, then Nn == N (total number of
+            unique measurements). Otherwise Nn is the number of normal
+            measurements.
+        reciprocal: numpy.ndarray
+            Nrx4 array. If pad is True, then Nr == N (total number of
+            unique measurements). Otherwise Nr is the number of reciprocal
+            measurements.
+
         """
-        c = self.configs
-        struct = c.view(c.dtype.descr * 4)
-        self.configs = np.unique(struct).view(c.dtype).reshape(-1, 4)
-        # import IPython
-        # IPython.embed()
+        # for simplicity, we create an array where AB and MN are sorted
+        configs = np.hstack((
+            np.sort(self.configs[:, 0:2], axis=1),
+            np.sort(self.configs[:, 2:4], axis=1)
+        ))
 
+        ab_min = configs[:, 0]
+        mn_min = configs[:, 2]
 
-# old functions that must be vetted for usefulness
-def full_voltages(injections, N):
-    """
+        # rule 1
+        indices_normal = np.where(ab_min < mn_min)[0]
 
-    """
-    all_quadpoles = []
-    for idipole in injections:
-        # sort current electrodes and convert to array indices
-        I = np.sort(idipole) - 1
+        # now look for reciprocals
+        indices_used = []
+        normal = []
+        reciprocal = []
+        duplicates = []
+        for index in indices_normal:
+            indices_used.append(index)
+            normal.append(self.configs[index, :])
 
-        # voltage electrodes
-        velecs = range(1, N + 1)
+            # look for reciprocal configuration
+            index_rec = np.where(
+                # A == M, B == N, M == A, N == B
+                (configs[:, 0] == configs[index, 2]) &
+                (configs[:, 1] == configs[index, 3]) &
+                (configs[:, 2] == configs[index, 0]) &
+                (configs[:, 3] == configs[index, 1])
+            )[0]
+            if len(index_rec) == 0 and pad:
+                reciprocal.append(np.ones(4) * np.nan)
+            elif len(index_rec) == 1:
+                reciprocal.append(self.configs[index_rec[0], :])
+                indices_used.append(index_rec[0])
+            elif len(index_rec > 1):
+                # take the first one
+                reciprocal.append(self.configs[index_rec[0], :])
+                duplicates += list(index_rec[1:])
+                indices_used += list(index_rec)
 
-        # remove current electrodes
-        del(velecs[I[1]])
-        del(velecs[I[0]])
+        # now determine all reciprocal-only parameters
+        set_all_indices = set(list(range(0, configs.shape[0])))
+        set_used_indices = set(indices_used)
+        reciprocal_only_indices = set_all_indices - set_used_indices
+        for index in reciprocal_only_indices:
+            if pad:
+                normal.append(np.ones(4) * np.nan)
+            reciprocal.append(self.configs[index, :])
 
-        # permutate remaining
-        voltages = itertools.permutations(velecs, 2)
+        normals = np.array(normal)
+        reciprocals = np.array(reciprocal)
 
-        voltages = np.array([x for x in voltages])
-        voltages_sorted = np.sort(voltages, axis=1)
-        sorted_u = 1e4 * voltages_sorted[:, 0] + voltages_sorted[:, 1]
-        duplicates, ret_index = np.unique(sorted_u, return_index=True)
-        sorted_voltages = voltages_sorted[ret_index, :]
-
-        current = np.resize(np.array(idipole), sorted_voltages.shape)
-        quadpoles = np.hstack((current, sorted_voltages))
-        all_quadpoles.append(quadpoles)
-
-    quadpoles = np.vstack(all_quadpoles)
-    return quadpoles
-
-
-def create_current_dipoles(x0, skip, dx, N):
-    """
-    Parameters
-    ----------
-    x0: starting electrodes
-    skip: skip of dipole
-    dx: how many electrodes to skip between injection dipoles
-    N: total number of electrodes
-    """
-    starting_elecs = [x0]
-    while(True):
-        i = starting_elecs[-1] + dx
-        if i <= N:
-            starting_elecs.append(i)
-        else:
-            break
-    N1 = N + 1
-    dipoles_raw = [(x, x + skip + 1) for x in starting_elecs]
-    dipoles0 = [(x[0] % N1, x[1] % N1) for x in dipoles_raw]
-
-    dipoles = []
-    for x in dipoles0:
-        if(x[0] == 0):
-            x0 = 1
-        else:
-            x0 = x[0]
-
-        if(x[1] == 0):
-            x1 = 1
-        else:
-            x1 = x[1]
-
-        dipoles.append((x0, x1))
-    return dipoles
-
+        return normals, reciprocals
