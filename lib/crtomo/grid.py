@@ -425,6 +425,14 @@ class crt_grid(object):
         return centroids
 
     def get_electrode_positions(self):
+        """Return the electrode positions in an numpy.ndarray
+
+        Returns
+        -------
+        positions: numpy.ndarray
+            Nx2 array, where N is the number of electrodes. The first column
+            contains x positions, the second z positions.
+        """
         return self.electrodes[:, 1:3]
 
     def get_internal_angles(self):
