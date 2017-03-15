@@ -11,6 +11,8 @@ Literature
   Electrical Resistivity Data Sets That Provide Optimum Subsurface
   Information.” Geophysics 69, no. 1 (January 1, 2004): 120–120.
   doi:10.1190/1.1649381.
+* Roy, A., and A. Apparao. “DEPTH OF INVESTIGATION IN DIRECT CURRENT METHODS.”
+  GEOPHYSICS 36, no. 5 (January 1, 1971): 943–59. doi:10.1190/1.1440226.
 
 """
 import itertools
@@ -80,6 +82,11 @@ class ConfigManager(object):
         cid_noise: int
             ID pointing to noised data set
 
+        Note
+        ----
+
+        This function is a stub at the moment and has NO functionality.
+
         """
         pass
 
@@ -146,7 +153,8 @@ class ConfigManager(object):
 
         .. math ::
 
-            AB = A \cdot 10^4 + B\\
+            AB = A \cdot 10^4 + B
+
             MN = M \cdot 10^4 + N
 
         Parameters
@@ -390,13 +398,57 @@ class ConfigManager(object):
             self.configs = np.vstack((self.configs, configs))
         return configs
 
+    def _pseudodepths_wenner(self, configs, spacing=1, grid=None):
+        """Given distances between electrodes, compute Wenner pseudo
+        depths for the provided configuration
+
+        The pseudodepth is computed after Roy & Apparao, 1971, as 0.11 times
+        the distance between the two outermost electrodes. It's not really
+        clear why the Wenner depths are different from the Dipole-Dipole
+        depths, given the fact that Wenner configurations are a complete subset
+        of the Dipole-Dipole configurations.
+
+        """
+        if grid is None:
+            xpositions = (configs - 1) * spacing
+        else:
+            xpositions = grid.get_electrode_positions()[configs - 1, 0]
+
+        z = np.abs(
+            np.max(xpositions, axis=1) - np.min(xpositions, axis=1)
+        ) * -0.11
+        x = np.mean(xpositions, axis=1)
+        return x, z
+
+    def _pseudodepths_schlumberger(self, configs, spacing=1, grid=None):
+        """Given distances between electrodes, compute Schlumberger pseudo
+        depths for the provided configuration
+
+        The pseudodepth is computed after Roy & Apparao, 1971, as 0.125 times
+        the distance between the two outermost electrodes.
+
+        """
+        if grid is None:
+            xpositions = (configs - 1) * spacing
+        else:
+            xpositions = grid.get_electrode_positions()[configs - 1, 0]
+
+        x = np.mean(xpositions, axis=1)
+        z = np.abs(
+            np.max(xpositions, axis=1) - np.min(xpositions, axis=1)
+        ) * -0.125
+        return x, z
+
     def _pseudodepths_dd_simple(self, configs, spacing=1, grid=None):
         """Given distances between electrodes, compute dipole-dipole pseudo
         depths for the provided configuration
 
+        The pseudodepth is computed after Roy & Apparao, 1971, as 0.195 times
+        the distance between the two outermost electrodes.
+
         """
         if grid is None:
-            xpositions = (configs - 1) * spacing + 1
+            xpositions = (configs - 1) * spacing
         else:
             xpositions = grid.get_electrode_positions()[configs - 1, 0]
 
@@ -406,17 +458,24 @@ class ConfigManager(object):
         x = np.mean(xpositions, axis=1)
         return x, z
 
-    def plot_pseudodepths(self, spacing=1, grid=None):
+    def plot_pseudodepths(self, spacing=1, grid=None, ctypes=None):
         """Plot pseudodepths for the measurements. If grid is given, then the
         actual electrode positions are used, and the parameter 'spacing' is
         ignored'
 
         Parameters
         ----------
-        spacing: float
-            assumed distance between electrodes
-        grid: crtomo.grid.crt_grid instance
+        spacing: float, optional
+            assumed distance between electrodes. Default=1
+        grid: crtomo.grid.crt_grid instance, optional
             grid instance. Used to infer real electrode positions
+        ctypes: list of strings, optional
+            a list of configuration types that will be plotted. All
+            configurations that can not be sorted into these types will not be
+            plotted! Possible types:
+
+            * dd
+            * schlumberger
 
         Returns
         -------
@@ -426,28 +485,90 @@ class ConfigManager(object):
         axes: axes object or list of axes ojects
             plot axes
 
+        Examples
+        --------
+
+        .. plot::
+            :include-source:
+
+            import crtomo.configManager as CRconfig
+            config = CRconfig.ConfigManager(nr_of_electrodes=48)
+            config.gen_dipole_dipole(skipc=2)
+            fig, ax = config.plot_pseudodepths(
+                spacing=0.3,
+                ctypes=['dd', ],
+            )
+
+        .. plot::
+            :include-source:
+
+            import crtomo.configManager as CRconfig
+            config = CRconfig.ConfigManager(nr_of_electrodes=48)
+            config.gen_schlumberger(M=24, N=25)
+            fig, ax = config.plot_pseudodepths(
+                spacing=1,
+                ctypes=['schlumberger', ],
+            )
+
         """
+        # for each configuration type we have different ways of computing
+        # pseudodepths
+        pseudo_d_functions = {
+            'dd': self._pseudodepths_dd_simple,
+            'schlumberger': self._pseudodepths_schlumberger,
+            'wenner': self._pseudodepths_wenner,
+        }
+
+        titles = {
+            'dd': 'dipole-dipole configurations',
+            'schlumberger': 'Schlumberger configurations',
+            'wenner': 'Wenner configurations',
+        }
+
+        # sort the configurations into the various types of configurations
+        only_types = ctypes or ['dd', ]
         results = fT.filter(
             self.configs,
             settings={
-                'only_types': ['dd', ],
+                'only_types': only_types,
             }
         )
+
         # loop through all measurement types
-        # TODO: will break for non-dipole-dipole measurements
         figs = []
         axes = []
         for key in sorted(results.keys()):
-            if key == 'not_sorted':
+            # this key holds all results that could not be sorted into one of
+            # the requested types
+            if key == 'not_sorted' or len(results[key]) == 0:
                 continue
             ddc = self.configs[results[key]['indices']]
-            px, pz = self._pseudodepths_dd_simple(ddc, spacing, grid)
+            px, pz = pseudo_d_functions[key](ddc, spacing, grid)
 
             fig, ax = plt.subplots(figsize=(15 / 2.54, 5 / 2.54))
             ax.scatter(px, pz, color='k', alpha=0.5)
+
+            # plot electrodes
+            if grid is not None:
+                electrodes = grid.get_electrode_positions()
+                ax.scatter(
+                    electrodes[:, 0],
+                    electrodes[:, 1],
+                    color='b',
+                    label='electrodes',
+                )
+            else:
+                ax.scatter(
+                    np.arange(0, self.nr_electrodes) * spacing,
+                    np.zeros(self.nr_electrodes),
+                    color='b',
+                    label='electrodes',
+                )
+            ax.set_title(titles[key])
             ax.set_aspect('equal')
             ax.set_xlabel('x [m]')
             ax.set_ylabel('x [z]')
+
             fig.tight_layout()
             figs.append(fig)
             axes.append(ax)
@@ -457,25 +578,53 @@ class ConfigManager(object):
         else:
             return figs, axes
 
-    def plot_pseudosection(self, cid, spacing=1, grid=None):
+    def plot_pseudosection(self, mid, spacing=1, grid=None):
         """Create a pseudosection plot for a given measurement
+
+        Examples
+        --------
+
+        .. plot::
+            :include-source:
+
+            import numpy as np
+            import crtomo.configManager as CRConfig
+            config = CRConfig.ConfigManager(nr_of_electrodes=48)
+            config.gen_dipole_dipole(skipc=1, stepc=2)
+            # generate random measurements
+            measurements = np.random.random(config.nr_of_configs)
+            mid = config.add_measurements(measurements)
+            config.plot_pseudosection(mid, spacing=1)
+
         """
         # for now sort data and only plot dipole-dipole
         results = fT.filter(
             self.configs,
             settings={
-                'only_types': ['dd', ],
+                'only_types': ['schlumberger', 'dd', ],
             },
         )
 
+        pseudo_d_functions = {
+            'dd': self._pseudodepths_dd_simple,
+            'schlumberger': self._pseudodepths_schlumberger,
+            'wenner': self._pseudodepths_wenner,
+        }
+
+        titles = {
+            'dd': 'dipole-dipole configurations',
+            'schlumberger': 'Schlumberger configurations',
+            'wenner': 'Wenner configurations',
+        }
+
         figs = []
         for key in sorted(results.keys()):
-            if key == 'not_sorted':
+            if key == 'not_sorted' or len(results[key]) == 0:
                 continue
             indices = results[key]['indices']
             # dipole-dipole configurations
             ddc = self.configs[indices]
-            px, pz = self._pseudodepths_dd_simple(ddc, spacing, grid)
+            px, pz = pseudo_d_functions[key](ddc, spacing, grid)
 
             # take 200 points for the new grid in every direction. Could be
             # adapted to the actual ratio
@@ -484,12 +633,12 @@ class ConfigManager(object):
 
             x, z = np.meshgrid(xg, zg)
 
-            plot_data = self.measurements[cid][indices]
+            plot_data = self.measurements[mid][indices]
             image = si.griddata((px, pz), plot_data, (x, z), method='linear')
 
             cmap = mpl.cm.get_cmap('jet_r')
 
-            fig, ax = plt.subplots()
+            fig, ax = plt.subplots(1, 1, figsize=(15, 5))
 
             im = ax.imshow(
                 image[::-1],
@@ -501,8 +650,10 @@ class ConfigManager(object):
                 cmap=cmap,
             )
 
-            # ax.scatter(px, pz, color='k', alpha=0.5)
+            ax.set_title(titles[key])
             ax.set_aspect('equal')
+            ax.set_xlabel('x [m]')
+            ax.set_ylabel('x [z]')
             fig.tight_layout()
             figs.append((fig, ax, im))
 
@@ -542,7 +693,32 @@ class ConfigManager(object):
         return configs
 
     def gen_all_voltages_for_injections(self, injections):
-        """
+        """For a given set of current injections AB, generate all possible
+        unique potential measurements.
+
+        After Noel and Xu, 1991, for N electrodes, the number of possible
+        voltage dipoles for a given current dipole is :math:`(N - 2)(N - 3) /
+        2`. This includes normal and reciprocal measurements.
+
+        If current dipoles are generated with
+        ConfigManager.gen_all_current_dipoles(), then :math:`N \cdot (N - 1) /
+        2` current dipoles are generated. Thus, this function will produce
+        :math:`(N - 1)(N - 2)(N - 3) / 4` four-point configurations ABMN, half
+        of which are reciprocals (Noel and Xu, 1991).
+
+        Use ConfigManager.split_into_normal_and_reciprocal() to split the
+        configurations into normal and reciprocal measurements.
+
+        Parameters
+        ----------
+        injections: numpy.ndarray
+            Kx2 array holding K current injection dipoles A-B
+
+        Returns
+        -------
+        configs: numpy.ndarray
+            Nax4 array holding all possible measurement configurations
+
         """
         N = self.nr_electrodes
         all_quadpoles = []
@@ -576,7 +752,12 @@ class ConfigManager(object):
 
     def gen_all_current_dipoles(self):
         """Generate all possible current dipoles for the given number of
-        electrodes (self.nr_electrodes).
+        electrodes (self.nr_electrodes). Duplicates are removed in the process.
+
+        After Noel and Xu, 1991, for N electrodes, the number of possible
+        unique configurations is :math:`N \cdot (N - 1) / 2`. This excludes
+        duplicates in the form of switches current/voltages electrodes, as well
+        as reciprocal measurements.
 
         Returns
         -------
@@ -702,7 +883,8 @@ class ConfigManager(object):
             self.configs = np.vstack((self.configs, configs))
         return self.configs
 
-    def split_into_normal_and_reciprocal(self, pad=False):
+    def split_into_normal_and_reciprocal(
+            self, pad=False, return_indices=False):
         """Split the stored configurations into normal and reciprocal
         measurements
 
@@ -711,9 +893,13 @@ class ConfigManager(object):
 
         Parameters
         ----------
-        pad: bool
+        pad: bool, optional
             if True, add numpy.nan values to the reciprocals for non-existent
             measuremnts
+        return_indices: bool, optional
+            if True, also return the indices of normal and reciprocal
+            measurments. This can be used to extract corresponding
+            measurements.
 
         Returns
         -------
@@ -725,6 +911,12 @@ class ConfigManager(object):
             Nrx4 array. If pad is True, then Nr == N (total number of
             unique measurements). Otherwise Nr is the number of reciprocal
             measurements.
+        nor_indices: numpy.ndarray, optional
+            Nnx1 array containing the indices of normal measurements. Only
+            returned if return_indices is True.
+        rec_indices: numpy.ndarray, optional
+            Nrx1 array containing the indices of normal measurements. Only
+            returned if return_indices is True.
 
         """
         # for simplicity, we create an array where AB and MN are sorted
@@ -742,11 +934,14 @@ class ConfigManager(object):
         # now look for reciprocals
         indices_used = []
         normal = []
+        normal_indices = []
+        reciprocal_indices = []
         reciprocal = []
         duplicates = []
         for index in indices_normal:
             indices_used.append(index)
             normal.append(self.configs[index, :])
+            normal_indices.append(index)
 
             # look for reciprocal configuration
             index_rec = np.where(
@@ -761,9 +956,11 @@ class ConfigManager(object):
             elif len(index_rec) == 1:
                 reciprocal.append(self.configs[index_rec[0], :])
                 indices_used.append(index_rec[0])
+                reciprocal_indices.append(index_rec[0])
             elif len(index_rec > 1):
                 # take the first one
                 reciprocal.append(self.configs[index_rec[0], :])
+                reciprocal_indices.append(index_rec[0])
                 duplicates += list(index_rec[1:])
                 indices_used += list(index_rec)
 
@@ -779,4 +976,7 @@ class ConfigManager(object):
         normals = np.array(normal)
         reciprocals = np.array(reciprocal)
 
-        return normals, reciprocals
+        if return_indices:
+            return normals, reciprocals, normal_indices, reciprocal_indices
+        else:
+            return normals, reciprocals
