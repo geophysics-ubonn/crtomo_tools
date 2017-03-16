@@ -45,6 +45,15 @@ class ConfigManager(object):
         self.meas_counter += 1
         return self.meas_counter
 
+    def clear_measurements(self):
+        """Remove all measurements from self.measurements. Reset the
+        measurement counter. All ID are invalidated.
+        """
+        keys = self.measurements.keys()
+        for key in keys:
+            del(self.measurements[key])
+        self.meas_counter = -1
+
     @property
     def nr_of_configs(self):
         """Return number of configurations
@@ -706,6 +715,8 @@ class ConfigManager(object):
         :math:`(N - 1)(N - 2)(N - 3) / 4` four-point configurations ABMN, half
         of which are reciprocals (Noel and Xu, 1991).
 
+        All generated measurements are added to the instance.
+
         Use ConfigManager.split_into_normal_and_reciprocal() to split the
         configurations into normal and reciprocal measurements.
 
@@ -748,6 +759,7 @@ class ConfigManager(object):
         configs = self.remove_duplicates(configs_sorted)
 
         self.add_to_configs(configs)
+        self.remove_duplicates()
         return configs
 
     def gen_all_current_dipoles(self):
@@ -877,7 +889,7 @@ class ConfigManager(object):
             return None
 
         if self.configs is None:
-            self.configs = configs
+            self.configs = np.atleast_2d(configs)
         else:
             configs = np.atleast_2d(configs)
             self.configs = np.vstack((self.configs, configs))

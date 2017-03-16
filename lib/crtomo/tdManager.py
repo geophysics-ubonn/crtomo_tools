@@ -104,6 +104,8 @@ class tdMan(object):
             'sensitivities': None,
             # store potential nids here
             'potentials': None,
+            # store the ID of the resolution matrix
+            'resm': None,
         }
         # indicates if all information for modeling are present
         self.can_model = False
@@ -527,8 +529,6 @@ class tdMan(object):
                         old_config[2:4] == new_config[4:1:-1]
                     )
 
-                    print(current_electrodes_are_equal)
-                    print(voltage_electrodes_are_switched)
                     if(current_electrodes_are_equal and
                        voltage_electrodes_are_switched):
 
@@ -594,6 +594,90 @@ class tdMan(object):
                 'Sorry, no measurements present, cannot model yet'
             )
             return None
+
+    def _invert(self, tempdir):
+        print('attempting inversion in directory: {0}'.format(tempdir))
+        pwd = os.getcwd()
+        os.chdir(tempdir)
+
+        self.save_to_tomodir('.')
+        os.chdir('exe')
+        binary = CRBin.get('CRTomo')
+        return_code = subprocess.call(
+            binary, shell=True
+        )
+        if return_code != 0:
+            raise Exception('There was an error using CRTomo')
+
+        os.chdir(pwd)
+        self._read_inversion_results(tempdir + os.sep + 'inv')
+
+    def invert(self, output_directory=None):
+        """Invert this instance, and import the result files
+
+        No directories/files will be overwritten.
+
+        Parameters
+        ----------
+        output_directory: string, optional
+            use this directory as output directory for the generated tomodir.
+            If None, then a temporary directory will be used that is deleted
+            after import.
+
+        """
+        self._check_state()
+        if self.can_model:
+            if output_directory is not None:
+                if not os.path.isdir(output_directory):
+                    os.makedirs(output_directory)
+                    tempdir = output_directory
+                    self._invert(tempdir)
+                else:
+                    raise IOError(
+                        'output directory already exists: {0}'.format(
+                            output_directory
+                        )
+                    )
+            else:
+                with tempfile.TemporaryDirectory() as tempdir:
+                    self._invert(tempdir)
+
+            return 1
+        else:
+            print(
+                'Sorry, no measurements present, cannot model yet'
+            )
+            return None
+
+    def _read_inversion_results(self, tomodir):
+        self._read_resm_m(tomodir)
+
+    def _read_resm_m(self, tomodir):
+        """Read in the resolution matrix of an inversion
+
+        Parameters
+        ----------
+        tomodir: string
+            directory path to a tomodir
+
+        """
+        resm_file = tomodir + os.sep + 'inv' + os.sep + 'res_m.diag'
+        if not os.path.isfile(resm_file):
+            return 1
+
+        # read header
+        with open(resm_file, 'rb') as fid:
+            first_line = fid.readline().strip()
+            print('first_line', first_line)
+            header_raw = np.fromstring(first_line, count=4, sep=' ')
+            nr_cells = int(header_raw[0])
+            lam = float(header_raw[1])
+            print('header:', nr_cells, lam)
+
+            subdata = np.genfromtxt(fid)
+            print(subdata.shape)
+            pid = self.parman.add_data(subdata[:, 0])
+            self.assignments['resm'] = pid
 
     def register_magnitude_model(self, pid):
         """Set a given parameter model to the forward magnitude model
