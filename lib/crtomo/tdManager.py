@@ -291,10 +291,10 @@ class tdMan(object):
             filename_raw = 'sens{0:0' + '{0}'.format(digits) + '}.dat'
             filename = directory + os.sep + filename_raw.format(i + 1)
 
-            grid_x, grid_z = self.grid.get_element_centroids()
+            grid_xz = self.grid.get_element_centroids()
             all_data = np.vstack((
-                grid_x,
-                grid_z,
+                grid_xz[:, 0],
+                grid_xz[:, 0],
                 sens_data[0],
                 sens_data[1],
             )).T
@@ -663,9 +663,12 @@ class tdMan(object):
         """
         resm_file = tomodir + os.sep + 'inv' + os.sep + 'res_m.diag'
         if not os.path.isfile(resm_file):
+            print('res_m.diag not found: {0}'.format(resm_file))
+            print(os.getcwd())
             return 1
 
         # read header
+        print('reading R', resm_file)
         with open(resm_file, 'rb') as fid:
             first_line = fid.readline().strip()
             print('first_line', first_line)
