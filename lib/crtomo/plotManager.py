@@ -18,11 +18,6 @@ class plotManager(object):
     :class:`crtomo.nodeManager` is used to manage node data.
     """
 
-    # configuration options
-    rcParams = {
-
-    }
-
     def __init__(self, **kwargs):
         """initialize the plot manager. Multiple combinations are possible for
         the kwargs.
@@ -239,7 +234,18 @@ class plotManager(object):
         cblabel
         plot_colorbar: bool
 
+        Returns
+        -------
+        fig:
 
+        ax:
+
+        cnorm:
+
+        cmap:
+
+        cb: colorbar instance, optional
+            only of plot_colorbar is True
         """
 
         xmin = kwargs.get('xmin', self.grid.grid['x'].min())
@@ -256,12 +262,10 @@ class plotManager(object):
         else:
             fig = ax.get_figure()
 
-        # sl2 = 10 ** sl2_raw[:, 2]
-        # alpha = np.ones(sl2.size)
-        # alpha[np.where(sl2 < 1e-3)] = 0.0
-
         # get data
         subdata = self.parman.parsets[cid]
+        if 'converter' in kwargs:
+            subdata = kwargs['converter'](subdata)
 
         # color map
         cmap_name = kwargs.get('cmap_name', 'jet')
@@ -337,3 +341,31 @@ class plotManager(object):
         )
         cb.set_label(label)
         return cb
+
+
+def converter_pm_log10(data):
+    """Convert the given data to:
+
+        log10(subdata) for subdata > 0
+        log10(-subdata') for subdata' < 0
+        0 for subdata'' == 0
+
+    Parameters
+    ----------
+    data: array
+        input data
+
+    Returns
+    -------
+    array_converted: array
+        converted data
+
+    """
+    # indices_zero = np.where(data == 0)
+    indices_gt_zero = np.where(data > 0)
+    indices_lt_zero = np.where(data < 0)
+
+    data_converted = np.zeros(data.shape)
+    data_converted[indices_gt_zero] = np.log10(data[indices_gt_zero])
+    data_converted[indices_lt_zero] = np.log10(-data[indices_lt_zero])
+    return data_converted

@@ -70,7 +70,9 @@ class NodeMan(object):
             else:
                 raise Exception(
                     'Number of values does not match the number of ' +
-                    'nodes in the grid'
+                    'nodes in the grid {0} grid nodes vs {1} data'.format(
+                        self.grid.nr_of_nodes, subdata.shape,
+                    )
                 )
 
         return_ids = []
@@ -78,4 +80,8 @@ class NodeMan(object):
             cid = self._get_next_index()
             self.nodevals[cid] = dataset.copy()
             return_ids.append(cid)
-        return return_ids
+
+        if len(return_ids) == 1:
+            return return_ids[0]
+        else:
+            return return_ids
