@@ -107,6 +107,9 @@ class tdMan(object):
             # store the ID of the resolution matrix
             'resm': None,
         }
+        # short-cut
+        self.a = self.assignments
+
         # indicates if all information for modeling are present
         self.can_model = False
         # indicates if all information for inversion are present
@@ -500,10 +503,12 @@ class tdMan(object):
         """import voltages from a volt.dat file
         """
 
-        measurements = np.loadtxt(
+        measurements_raw = np.loadtxt(
             voltage_file,
             skiprows=1,
         )
+        measurements = np.atleast_2d(measurements_raw)
+
         # extract measurement configurations
         A = (measurements[:, 0] / 1e4).astype(int)
         B = (measurements[:, 0] % 1e4).astype(int)
@@ -556,39 +561,68 @@ class tdMan(object):
 
         self.assignments['measurements'] = [mid_mag, mid_pha]
 
+    def _model(self, voltages, sensitivities, potentials, tempdir):
+        self._check_state()
+        if self.can_model:
+            print('attempting modeling')
+            pwd = os.getcwd()
+            os.chdir(tempdir)
+            # store the configuration temporarily
+            cfg_save = self.crmod_cfg.copy()
+
+            self.crmod_cfg['write_volts'] = voltages
+            self.crmod_cfg['write_pots'] = potentials
+            self.crmod_cfg['write_sens'] = sensitivities
+
+            self.save_to_tomodir('.')
+            os.chdir('exe')
+            binary = CRBin.get('CRMod')
+            return_text = subprocess.check_output(
+                binary,
+                shell=True,
+                stderr=subprocess.STDOUT,
+            )
+            return_text
+            # restore the configuration
+            self.crmod_cfg = cfg_save
+            # if return_code != 0:
+            #     raise Exception('There was an error using CRMod')
+
+            os.chdir(pwd)
+            self._read_modeling_results(tempdir + os.sep + 'mod')
+            return 1
+        else:
+            print(
+                'Sorry, no measurements present, cannot model yet'
+            )
+            return None
+
     def model(self,
               voltages=True,
               sensitivities=False,
-              potentials=False):
+              potentials=False,
+              output_directory=None,
+              ):
         """Forward model the tomodir and read in the results
         """
         self._check_state()
         if self.can_model:
-            with tempfile.TemporaryDirectory() as tempdir:
-                print('attempting modeling')
-                pwd = os.getcwd()
-                os.chdir(tempdir)
-                # store the configuration temporarily
-                cfg_save = self.crmod_cfg.copy()
+            if output_directory is not None:
+                if not os.path.isdir(output_directory):
+                    os.makedirs(output_directory)
+                    tempdir = output_directory
+                    self._model(voltages, sensitivities, potentials, tempdir)
+                else:
+                    raise IOError(
+                        'output directory already exists: {0}'.format(
+                            output_directory
+                        )
+                    )
+            else:
+                with tempfile.TemporaryDirectory() as tempdir:
+                    self._model(voltages, sensitivities, potentials, tempdir)
 
-                self.crmod_cfg['write_volts'] = voltages
-                self.crmod_cfg['write_pots'] = potentials
-                self.crmod_cfg['write_sens'] = sensitivities
-
-                self.save_to_tomodir('.')
-                os.chdir('exe')
-                binary = CRBin.get('CRMod')
-                return_code = subprocess.call(
-                    binary, shell=True
-                )
-                # restore the configuration
-                self.crmod_cfg = cfg_save
-                if return_code != 0:
-                    raise Exception('There was an error using CRMod')
-
-                os.chdir(pwd)
-                self._read_modeling_results(tempdir + os.sep + 'mod')
-                return 1
+            return 1
         else:
             print(
                 'Sorry, no measurements present, cannot model yet'
@@ -603,11 +637,13 @@ class tdMan(object):
         self.save_to_tomodir('.')
         os.chdir('exe')
         binary = CRBin.get('CRTomo')
-        return_code = subprocess.call(
-            binary, shell=True
+        subprocess.check_output(
+            binary,
+            shell=True,
+            stderr=subprocess.STDOUT,
         )
-        if return_code != 0:
-            raise Exception('There was an error using CRTomo')
+        # if return_code != 0:
+        #     raise Exception('There was an error using CRTomo')
 
         os.chdir(pwd)
         self._read_inversion_results(tempdir + os.sep + 'inv')
@@ -668,14 +704,12 @@ class tdMan(object):
             return 1
 
         # read header
-        print('reading R', resm_file)
         with open(resm_file, 'rb') as fid:
             first_line = fid.readline().strip()
-            print('first_line', first_line)
             header_raw = np.fromstring(first_line, count=4, sep=' ')
-            nr_cells = int(header_raw[0])
-            lam = float(header_raw[1])
-            print('header:', nr_cells, lam)
+            header_raw
+            # nr_cells = int(header_raw[0])
+            # lam = float(header_raw[1])
 
             subdata = np.genfromtxt(fid)
             print(subdata.shape)

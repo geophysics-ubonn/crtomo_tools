@@ -272,7 +272,9 @@ class plotManager(object):
         cmap = mpl.cm.get_cmap(cmap_name)
 
         # normalize data
-        cnorm = mpl.colors.Normalize(vmin=subdata.min(), vmax=subdata.max())
+        data_min = kwargs.get('cbmin', subdata.min())
+        data_max = kwargs.get('cbmax', subdata.max())
+        cnorm = mpl.colors.Normalize(vmin=data_min, vmax=data_max)
         scalarMap = mpl.cm.ScalarMappable(norm=cnorm, cmap=cmap)
         fcolors = scalarMap.to_rgba(subdata)
 
@@ -369,3 +371,9 @@ def converter_pm_log10(data):
     data_converted[indices_gt_zero] = np.log10(data[indices_gt_zero])
     data_converted[indices_lt_zero] = np.log10(-data[indices_lt_zero])
     return data_converted
+
+
+def converter_abs_log10(data):
+    """Return log10(abs(data))
+    """
+    return np.log10(np.abs(data))
