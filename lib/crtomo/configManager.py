@@ -20,6 +20,7 @@ from crtomo.mpl_setup import *
 import scipy.interpolate as si
 
 import numpy as np
+import edf.utils.geometric_factors as edfK
 import edf.utils.filter_config_types as fT
 
 
@@ -199,6 +200,12 @@ class ConfigManager(object):
             N[:, np.newaxis]
         ))
         return ABMN
+
+    def load_configs(self, filename):
+        """Load configurations from a file with four columns: a b m n
+        """
+        configs = np.loadtxt(filename)
+        self.add_to_configs(configs)
 
     def load_crmod_config(self, filename):
         """Load a CRMod configuration file
@@ -467,7 +474,8 @@ class ConfigManager(object):
         x = np.mean(xpositions, axis=1)
         return x, z
 
-    def plot_pseudodepths(self, spacing=1, grid=None, ctypes=None):
+    def plot_pseudodepths(self, spacing=1, grid=None, ctypes=None,
+                          dd_merge=False, **kwargs):
         """Plot pseudodepths for the measurements. If grid is given, then the
         actual electrode positions are used, and the parameter 'spacing' is
         ignored'
@@ -485,6 +493,10 @@ class ConfigManager(object):
 
             * dd
             * schlumberger
+
+        dd_merge: bool, optional
+            if True, merge all skips. Otherwise, generate individual plots for
+            each skip
 
         Returns
         -------
@@ -547,47 +559,71 @@ class ConfigManager(object):
         figs = []
         axes = []
         for key in sorted(results.keys()):
-            # this key holds all results that could not be sorted into one of
-            # the requested types
-            if key == 'not_sorted' or len(results[key]) == 0:
+            print('plotting: ', key)
+            if key == 'not_sorted':
                 continue
-            ddc = self.configs[results[key]['indices']]
-            px, pz = pseudo_d_functions[key](ddc, spacing, grid)
-
-            fig, ax = plt.subplots(figsize=(15 / 2.54, 5 / 2.54))
-            ax.scatter(px, pz, color='k', alpha=0.5)
-
-            # plot electrodes
-            if grid is not None:
-                electrodes = grid.get_electrode_positions()
-                ax.scatter(
-                    electrodes[:, 0],
-                    electrodes[:, 1],
-                    color='b',
-                    label='electrodes',
-                )
+            index_dict = results[key]
+            # it is possible that we want to generate multiple plots for one
+            # type of measurement, i.e., to separate skips of dipole-dipole
+            # measurements. Therefore we generate two lists:
+            # 1) list of list of indices to plot
+            # 2) corresponding labels
+            if key == 'dd' and not dd_merge:
+                plot_list = []
+                labels_add = []
+                for skip in sorted(index_dict.keys()):
+                    plot_list.append(index_dict[skip])
+                    labels_add.append(
+                        ' - skip {0}'.format(skip)
+                    )
             else:
-                ax.scatter(
-                    np.arange(0, self.nr_electrodes) * spacing,
-                    np.zeros(self.nr_electrodes),
-                    color='b',
-                    label='electrodes',
-                )
-            ax.set_title(titles[key])
-            ax.set_aspect('equal')
-            ax.set_xlabel('x [m]')
-            ax.set_ylabel('x [z]')
+                # merge all indices
+                plot_list = [np.hstack(index_dict.values()), ]
+                print('schlumberger', plot_list)
+                labels_add = ['', ]
 
-            fig.tight_layout()
-            figs.append(fig)
-            axes.append(ax)
+            # generate plots
+            for indices, label_add in zip(plot_list, labels_add):
+                if len(indices) == 0:
+                    continue
+                ddc = self.configs[indices]
+                px, pz = pseudo_d_functions[key](ddc, spacing, grid)
+
+                fig, ax = plt.subplots(figsize=(15 / 2.54, 5 / 2.54))
+                ax.scatter(px, pz, color='k', alpha=0.5)
+
+                # plot electrodes
+                if grid is not None:
+                    electrodes = grid.get_electrode_positions()
+                    ax.scatter(
+                        electrodes[:, 0],
+                        electrodes[:, 1],
+                        color='b',
+                        label='electrodes',
+                    )
+                else:
+                    ax.scatter(
+                        np.arange(0, self.nr_electrodes) * spacing,
+                        np.zeros(self.nr_electrodes),
+                        color='b',
+                        label='electrodes',
+                    )
+                ax.set_title(titles[key] + label_add)
+                ax.set_aspect('equal')
+                ax.set_xlabel('x [m]')
+                ax.set_ylabel('x [z]')
+
+                fig.tight_layout()
+                figs.append(fig)
+                axes.append(ax)
 
         if len(figs) == 1:
             return figs[0], axes[0]
         else:
             return figs, axes
 
-    def plot_pseudosection(self, mid, spacing=1, grid=None):
+    def plot_pseudosection(self, mid, spacing=1, grid=None, ctypes=None,
+                           dd_merge=False, cb=False, **kwargs):
         """Create a pseudosection plot for a given measurement
 
         Examples
@@ -606,13 +642,6 @@ class ConfigManager(object):
             config.plot_pseudosection(mid, spacing=1)
 
         """
-        # for now sort data and only plot dipole-dipole
-        results = fT.filter(
-            self.configs,
-            settings={
-                'only_types': ['schlumberger', 'dd', ],
-            },
-        )
 
         pseudo_d_functions = {
             'dd': self._pseudodepths_dd_simple,
@@ -626,50 +655,163 @@ class ConfigManager(object):
             'wenner': 'Wenner configurations',
         }
 
-        figs = []
-        for key in sorted(results.keys()):
-            if key == 'not_sorted' or len(results[key]) == 0:
-                continue
-            indices = results[key]['indices']
-            # dipole-dipole configurations
-            ddc = self.configs[indices]
-            px, pz = pseudo_d_functions[key](ddc, spacing, grid)
-
-            # take 200 points for the new grid in every direction. Could be
-            # adapted to the actual ratio
-            xg = np.linspace(px.min(), px.max(), 200)
-            zg = np.linspace(pz.min(), pz.max(), 200)
-
-            x, z = np.meshgrid(xg, zg)
-
-            plot_data = self.measurements[mid][indices]
-            image = si.griddata((px, pz), plot_data, (x, z), method='linear')
-
-            cmap = mpl.cm.get_cmap('jet_r')
-
-            fig, ax = plt.subplots(1, 1, figsize=(15, 5))
-
-            im = ax.imshow(
-                image[::-1],
-                extent=(xg.min(), xg.max(), zg.min(), zg.max()),
-                interpolation='none',
-                aspect='auto',
-                # vmin=10,
-                # vmax=300,
-                cmap=cmap,
+        # for now sort data and only plot dipole-dipole
+        only_types = ctypes or ['dd', ]
+        if 'schlumberger' in only_types:
+            raise Exception(
+                'plotting of pseudosections not implemented for ' +
+                'Schlumberger configurations!'
             )
+        results = fT.filter(
+            self.configs,
+            settings={
+                'only_types': only_types,
+            },
+        )
 
-            ax.set_title(titles[key])
-            ax.set_aspect('equal')
-            ax.set_xlabel('x [m]')
-            ax.set_ylabel('x [z]')
-            fig.tight_layout()
-            figs.append((fig, ax, im))
+        plot_objects = []
+        for key in sorted(results.keys()):
+            print('plotting: ', key)
+            if key == 'not_sorted':
+                continue
+            index_dict = results[key]
+            # it is possible that we want to generate multiple plots for one
+            # type of measurement, i.e., to separate skips of dipole-dipole
+            # measurements. Therefore we generate two lists:
+            # 1) list of list of indices to plot
+            # 2) corresponding labels
+            if key == 'dd' and not dd_merge:
+                plot_list = []
+                labels_add = []
+                for skip in sorted(index_dict.keys()):
+                    plot_list.append(index_dict[skip])
+                    labels_add.append(
+                        ' - skip {0}'.format(skip)
+                    )
+            else:
+                # merge all indices
+                plot_list = [np.hstack(index_dict.values()), ]
+                print('schlumberger', plot_list)
+                labels_add = ['', ]
 
-        if len(figs) == 1:
-            return figs[0]
-        else:
-            return figs
+            # generate plots
+            for indices, label_add in zip(plot_list, labels_add):
+                if len(indices) == 0:
+                    continue
+
+                ddc = self.configs[indices]
+                px, pz = pseudo_d_functions[key](ddc, spacing, grid)
+                print('pxpz', px, pz)
+
+                # take 200 points for the new grid in every direction. Could be
+                # adapted to the actual ratio
+                xg = np.linspace(px.min(), px.max(), 200)
+                zg = np.linspace(pz.min(), pz.max(), 200)
+
+                x, z = np.meshgrid(xg, zg)
+
+                plot_data = self.measurements[mid][indices]
+                cmap_name = kwargs.get('cmap_name', 'jet')
+                cmap = mpl.cm.get_cmap(cmap_name)
+
+                # normalize data
+                data_min = kwargs.get('cbmin', plot_data.min())
+                data_max = kwargs.get('cbmax', plot_data.max())
+                cnorm = mpl.colors.Normalize(vmin=data_min, vmax=data_max)
+                scalarMap = mpl.cm.ScalarMappable(norm=cnorm, cmap=cmap)
+                fcolors = scalarMap.to_rgba(plot_data)
+
+                image = si.griddata((px, pz), fcolors, (x, z), method='linear')
+
+                cmap = mpl.cm.get_cmap('jet_r')
+
+                data_ratio = np.abs(
+                    px.max() - px.min()
+                ) / np.abs(
+                    pz.min()
+                )
+                print(np.abs(px.max() - px.min()))
+                print(np.abs(pz.min()))
+                print('ratio:', data_ratio)
+
+                fig_size_y = 15 / data_ratio + 6 / 2.54
+                print('SIZE', fig_size_y)
+                fig = plt.figure(figsize=(15, fig_size_y))
+
+                fig_top = 1 / 2.54 / fig_size_y
+                fig_left = 2 / 2.54 / 15
+                fig_right = 1 / 2.54 / 15
+                if cb:
+                    fig_bottom = 3 / 2.54 / fig_size_y
+                else:
+                    fig_bottom = 0.05
+
+                ax = fig.add_axes([
+                    fig_left,
+                    fig_bottom + fig_top * 2,
+                    1 - fig_left - fig_right,
+                    1 - fig_top - fig_bottom - fig_top * 2
+                ])
+
+                im = ax.imshow(
+                    image[::-1],
+                    extent=(xg.min(), xg.max(), zg.min(), zg.max()),
+                    interpolation='none',
+                    aspect='auto',
+                    # vmin=10,
+                    # vmax=300,
+                    cmap=cmap,
+                )
+                ax.set_ylim(pz.min(), 0)
+
+                # colorbar
+                if cb:
+                    # the colorbar has 3 cm on the bottom
+                    ax_cb = fig.add_axes(
+                        [
+                            fig_left * 4,
+                            fig_top * 2,
+                            1 - fig_left * 4 - fig_right * 4,
+                            fig_bottom - fig_top * 2
+                        ]
+                    )
+                    # from mpl_toolkits.axes_grid1 import make_axes_locatable
+                    # divider = make_axes_locatable(ax)
+                    # ax_cb = divider.append_axes("bottom", "5%", pad="3%")
+                    # (ax_cb, kw) = mpl.colorbar.make_axes_gridspec(
+                    #     ax,
+                    #     orientation='horizontal',
+                    #     fraction=fig_bottom,
+                    #     pad=0.3,
+                    #     shrink=0.9,
+                    #     # location='bottom',
+                    # )
+                    cb = mpl.colorbar.ColorbarBase(
+                        ax=ax_cb,
+                        cmap=cmap,
+                        norm=cnorm,
+                        orientation='horizontal',
+                        # **kw
+                    )
+                    cb.set_label('cb label')
+                else:
+                    fig_bottom = 0.05
+
+                # 1cm on top
+
+                # # 3 cm on bottom for colorbar
+                # fig.subplots_adjust(
+                #     top=1 - fig_top,
+                #     bottom=fig_bottom,
+                # )
+
+                ax.set_title(titles[key] + label_add)
+                ax.set_aspect('equal')
+                ax.set_xlabel('x [m]')
+                ax.set_ylabel('x [z]')
+                plot_objects.append((fig, ax, im))
+
+        return plot_objects
 
     def gen_gradient(self, skip=0, step=1, vskip=0, vstep=1):
         """Generate gradient measurements
@@ -994,3 +1136,53 @@ class ConfigManager(object):
             return normals, reciprocals, normal_indices, reciprocal_indices
         else:
             return normals, reciprocals
+
+    def plot_error_pars(self, mid):
+        """
+
+        """
+        axes = plt.subplots(1, 2, figsize=(10, 6))
+
+        def plot_error_pars(axes, a, b, R, label=''):
+            dR = a * R + b
+            dlogR = np.abs(a + b / R)
+            ax = axes[0]
+            ax.scatter(R, dR / R * 100, label=label)
+            ax = axes[1]
+            ax.scatter(R, dlogR / np.abs(np.log(R)) * 100, label=label)
+            ax.set_xscale('log')
+            ax.set_yscale('log')
+
+        for b in np.linspace(R.min(), np.percentile(R, 10), 5):
+            plot_error_pars(axes, 0.05, b, R, label='b={0:.4f}'.format(b))
+        axes[0].set_xlabel(r'$R [\Omega]$')
+        axes[0].set_ylabel(r'$(\Delta R/R) \cdot 100 [\%]$')
+        axes[1].set_xlabel(r'$log_{10}(R [\Omega])$')
+        axes[1].set_ylabel(
+            r'$log_{10}(R) / \Delta log_{10}(R) \cdot 100 [\%]$'
+        )
+        axes[0].axhline(y=100)
+        axes[1].axhline(y=100)
+        fig.tight_layout()
+        fig.subplots_adjust(bottom=0.2)
+        axes[0].legend(
+            loc="lower center",
+            ncol=4,
+            bbox_to_anchor=(0, 0, 1, 1),
+            bbox_transform=fig.transFigure
+        )
+
+        # fig.savefig('out.png', dpi=300)
+        return fig
+
+    def compute_K_factors(self, spacing, configs=None):
+        """Compute analytical geometrical factors.
+
+        TODO: use real electrode positions from self.grid
+        """
+        if configs is None:
+            use_configs = self.configs
+        else:
+            use_configs = configs
+        K = edfK.compute_K_analytical(use_configs, spacing=spacing)
+        return K

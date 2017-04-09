@@ -17,6 +17,11 @@ for script in scripts:
         '{0} = {0}:main'.format(script)
     )
 
+# package data
+os.chdir('lib/crtomo')
+package_data = glob.glob('debug_data/*')
+os.chdir('../../')
+
 
 if __name__ == '__main__':
     setup(
@@ -42,6 +47,7 @@ if __name__ == '__main__':
         # package_dir={'': 'lib', 'grid_tools': 'src/GRID_TOOLS'},
         # packages=find_packages(),
         packages=['crtomo', ],
+        package_data={'crtomo': package_data},
         py_modules=scripts,
         # py_modules=[
         #     splitext(basename(i))[0] for i in glob.glob("src/*.py")
