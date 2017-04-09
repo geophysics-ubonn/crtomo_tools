@@ -701,7 +701,7 @@ class ConfigManager(object):
         self.add_to_configs(configs)
         return configs
 
-    def gen_all_voltages_for_injections(self, injections):
+    def gen_all_voltages_for_injections(self, injections_raw):
         """For a given set of current injections AB, generate all possible
         unique potential measurements.
 
@@ -731,6 +731,8 @@ class ConfigManager(object):
             Nax4 array holding all possible measurement configurations
 
         """
+        injections = injections_raw.astype(int)
+
         N = self.nr_electrodes
         all_quadpoles = []
         for idipole in injections:
