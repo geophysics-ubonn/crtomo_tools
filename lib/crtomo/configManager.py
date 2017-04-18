@@ -1186,3 +1186,89 @@ class ConfigManager(object):
             use_configs = configs
         K = edfK.compute_K_analytical(use_configs, spacing=spacing)
         return K
+
+    def gen_configs_permutate(self, injections_raw,
+                              ignore_crossed_dipoles=False):
+        """
+        Create measurement configurations out of a pool of current injections.
+        Use only the provided dipoles for potential dipole selection. This
+        means that we have always reciprocal measurements.
+
+        Remove quadpoles where electrodes are used both as current and voltage
+        dipoles.
+
+        Parameters
+        ----------
+        injections_raw: Nx2 array
+            current injections
+        ignore_crossed_dipoles: bool
+            If True, potential dipoles will be ignored that lie between current
+            dipoles,  e.g. 1-4 3-5. In this case it is possible to not have
+            full normal-reciprocal coverage.
+
+            Note that the 'ignore_crossed_dipoles' option is specific to
+            rhizotrons with 38 or less electrodes.
+
+        Returns
+        -------
+        configs: Nx4 array
+            quadrupoles generated out of the current injections
+
+        """
+        injections = np.atleast_2d(injections_raw).astype(int)
+        N = injections.shape[0]
+
+        measurements = []
+
+        for injection in range(0, N):
+            for i in set(range(0, N)) - set([injection]):
+                quadpole = np.array(
+                    [
+                        injections[injection, :],
+                        injections[i, :]
+                    ]
+                ).flatten()
+                if ignore_crossed_dipoles is True:
+                    # check if we need to ignore this dipole
+                    # Note: this could be wrong if electrode number are not
+                    # ascending!
+                    if((quadpole[0] < 33 and quadpole[1] < 33) or
+                       (quadpole[0] > 33 and quadpole[1] > 33)):
+                        if(quadpole[2] > quadpole[0] and
+                           quadpole[2] < quadpole[1]):
+                            print('A - ignoring', quadpole)
+                        elif(quadpole[3] > quadpole[0] and
+                             quadpole[3] < quadpole[1]):
+                            print('B - ignoring', quadpole)
+                        else:
+                            measurements.append(quadpole)
+                    # special cases involing electrodes 27 and 14
+                    if(quadpole[0] == 27 and quadpole[1] > 32):
+                        if(quadpole[2] in range(32, quadpole[1] + 1) or
+                           quadpole[3] in range(32, quadpole[1] + 1)):
+                            print('C - ignoring', quadpole)
+                        else:
+                            measurements.append(quadpole)
+
+                    if(quadpole[0] > 32 and quadpole[1] == 14):
+                        if(quadpole[2] in range(quadpole[0], 39) or
+                           quadpole[3] in range(quadpole[0], 39)):
+                            print('D - ignoring', quadpole)
+                        else:
+                            measurements.append(quadpole)
+
+                else:
+                    # add very quadpole
+                    measurements.append(quadpole)
+
+        # check and remove double use of electrodes
+        filtered = []
+        for quadpole in measurements:
+            if (not set(quadpole[0:2]).isdisjoint(set(quadpole[2:4]))):
+                print('Ignoring quadrupole because of repeated electrode use:',
+                      quadpole)
+                pass
+            else:
+                filtered.append(quadpole)
+        self.add_to_configs(filtered)
+        return np.array(filtered)
