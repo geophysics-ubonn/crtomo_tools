@@ -413,14 +413,14 @@ class tdMan(object):
                 metadata = np.fromstring(
                     fid.readline().strip(), sep=' ', count=2
                 )
-                meta_mag = metadata[0]
-                meta_pha = metadata[1]
+                meta_re = metadata[0]
+                meta_im = metadata[1]
 
                 sens_data = np.loadtxt(fid)
 
                 cids = self.parman.add_data(
                     sens_data[:, 2:4],
-                    [meta_mag, meta_pha],
+                    [meta_re, meta_im],
                 )
                 # store cids for later retrieval
                 self.assignments['sensitivities'][nr] = cids
