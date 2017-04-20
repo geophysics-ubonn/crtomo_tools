@@ -34,7 +34,10 @@ class crt_grid(object):
         self.header = None
         self.nodes = None
         self.elements = None
+        # store the neighbors (by zeroed index) of each element
         self.element_neighbors_data = None
+        # for each neighbor, store the nodes common to both elements
+        self.element_neighbors_edges = None
         self.grid_is_rectangular = None
         self.grid_data = []
 
@@ -113,7 +116,7 @@ class crt_grid(object):
             * "sorted" : completely sorted as in the original grid (before any
                        CutMcK)
 
-        For completness, we also store the following keys:
+        For completeness, we also store the following keys:
 
             * "cutmck_index" : Array containing the indices in "presort" to
               obtain the "sorted" values:
@@ -140,7 +143,7 @@ class crt_grid(object):
         # check for CutMcK
         # The check is based on the first node, but if one node was renumbered,
         # so were all the others.
-        if(nodes_raw[0, 0] != 1 or nodes_raw[1, 0] != 2):
+        if(nodes_raw[:, 0] != list(range(1, nodes_raw.shape[0]))):
             self.header['cutmck'] = True
             print(
                 'This grid was sorted using CutMcK. The nodes were resorted!')
@@ -539,6 +542,14 @@ class crt_grid(object):
         WARNING: This function is slow due to a nested loop. This would be a
         good starting point for further optimizations.
 
+        In order to speed things up, we could search using the raw data, i.e.,
+        with CutMcK enabled sorting, and then restrict the loops to the 2x the
+        bandwidth (before - after).
+
+        While not being returned, this function also sets the variable
+        self.element_neighbors_edges, in which the common nodes with each
+        neighbor are stored.
+
         Returns
         -------
         neighbors: list
@@ -556,18 +567,48 @@ class crt_grid(object):
 
         # initialize the neighbor array
         self.element_neighbors_data = []
+        self.element_neighbors_edges = []
 
         # determine neighbors
         print('Looking for neighbors')
         for nr, element_nodes in enumerate(self.elements):
             print('element {0}/{1}'.format(nr + 1, self.nr_of_elements))
+            print(element_nodes)
             neighbors = []
+            neighbors_edges = []  # store the edges to this neighbor
             for nr1, el in enumerate(self.elements):
                 # we look for elements that have two nodes in common with this
                 # element
-                if np.intersect1d(element_nodes, el).size == 2:
+                intersection = np.intersect1d(element_nodes, el)
+                if intersection.size == 2:
                     neighbors.append(nr1)
+                    neighbors_edges.append(intersection)
+                    # stop if we reached the maximum number of possible edges
+                    # this saves us quite some loop iterations
                     if len(neighbors) == max_nr_edges:
                         break
             self.element_neighbors_data.append(neighbors)
+            self.element_neighbors_edges.append(neighbors_edges)
         return self.element_neighbors_data
+
+    def Wm(self):
+        """Return the smoothing regularization matrix Wm
+
+        """
+        centroids = self.get_element_centroids()
+
+        Wm = np.zeros((self.nr_of_elements, self.nr_of_elements))
+        for i, nb in enumerate(self.element_neighbors):
+            for j, edges in zip(nb, self.element_neighbors_edges[i]):
+                # side length
+                edge_coords = self.nodes['presort'][edges][:, 1:]
+                edge_length = np.linalg.norm(
+                    edge_coords[1, :] - edge_coords[0, :]
+                )
+                distance = np.linalg.norm(centroids[i] - centroids[j])
+
+                # main diagonal
+                Wm[i, i] += edge_length / distance
+                # side diagonals
+                Wm[i, j] -= edge_length / distance
+        return Wm
