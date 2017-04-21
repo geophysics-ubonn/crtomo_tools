@@ -50,6 +50,7 @@
 
 """
 import glob
+import re
 import os
 import tempfile
 import numpy as np
@@ -629,7 +630,14 @@ class tdMan(object):
             )
             return None
 
-    def _invert(self, tempdir):
+    def _invert(self, tempdir, catch_output=True):
+        """
+
+        Parameters
+        ----------
+        catch_output: bool
+            if True, catch all outputs of the CRTomo call
+        """
         print('attempting inversion in directory: {0}'.format(tempdir))
         pwd = os.getcwd()
         os.chdir(tempdir)
@@ -637,18 +645,28 @@ class tdMan(object):
         self.save_to_tomodir('.')
         os.chdir('exe')
         binary = CRBin.get('CRTomo')
-        subprocess.check_output(
-            binary,
-            shell=True,
-            stderr=subprocess.STDOUT,
-        )
+        print(binary)
+        print('calling CRTomo')
+        if catch_output:
+            subprocess.check_output(
+                binary,
+                shell=True,
+                stderr=subprocess.STDOUT,
+            )
+        else:
+            subprocess.call(
+                binary,
+                shell=True,
+            )
+
+        print('finished')
         # if return_code != 0:
         #     raise Exception('There was an error using CRTomo')
 
         os.chdir(pwd)
-        self._read_inversion_results(tempdir + os.sep + 'inv')
+        self._read_inversion_results(tempdir)
 
-    def invert(self, output_directory=None):
+    def invert(self, output_directory=None, catch_output=True):
         """Invert this instance, and import the result files
 
         No directories/files will be overwritten.
@@ -667,7 +685,7 @@ class tdMan(object):
                 if not os.path.isdir(output_directory):
                     os.makedirs(output_directory)
                     tempdir = output_directory
-                    self._invert(tempdir)
+                    self._invert(tempdir, catch_output)
                 else:
                     raise IOError(
                         'output directory already exists: {0}'.format(
@@ -676,7 +694,7 @@ class tdMan(object):
                     )
             else:
                 with tempfile.TemporaryDirectory() as tempdir:
-                    self._invert(tempdir)
+                    self._invert(tempdir, catch_output)
 
             return 1
         else:
@@ -686,7 +704,74 @@ class tdMan(object):
             return None
 
     def _read_inversion_results(self, tomodir):
+        self._read_inv_ctr(tomodir)
         self._read_resm_m(tomodir)
+
+    def _read_inv_ctr(self, tomodir):
+        """Read in selected results of the inv.ctr file
+
+        Parameters
+        ----------
+        tomodir: string
+            directory path to a tomodir
+
+        Returns
+        -------
+        inv_ctr:    ?
+            structure containing inv.ctr data
+
+        """
+        invctr_file = tomodir + os.sep + 'inv' + os.sep + 'inv.ctr'
+        if not os.path.isfile(invctr_file):
+            print('inv.ctr not found: {0}'.format(invctr_file))
+            print(os.getcwd())
+            return 1
+
+        # read header
+        with open(invctr_file, 'r') as fid:
+            lines = fid.readlines()
+
+        # find section that contains the iteration data
+        for i, line in enumerate(lines):
+            if line.strip().startswith('ID it.'):
+                break
+
+        # TODO: check for robust iteration
+        # we have three types of lines:
+        # 1. first iteration line
+        # 2. other main iteration lines
+        # 3. update lines
+
+        # prepare regular expressions for these three types, each in two
+        # flavors: robust and non-robust
+
+        # this identifies a float number, or a NaN value
+        reg_float = ''.join((
+            '((?:[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?)',
+            '|',
+            '(?:NaN))'
+        ))
+
+        reg_it1_norob = ''.join((
+            ' ([a-zA-Z]{1,3})',
+            ' *(\d{1,3})',
+            ' *' + reg_float,
+            ' *' + reg_float,
+            ' *' + reg_float,
+            ' *([0-9]{1,4})',
+
+        ))
+
+        for line in lines[i:]:
+            linec = line.strip()
+            if linec.startswith('IT') or linec.startswidth('PIT'):
+                # main iterations
+                re.compile(reg_it1_norob).search(linec).groups()
+            elif linec.startswith('UP'):
+                # update iterations
+                pass
+        import IPython
+        IPython.embed()
 
     def _read_resm_m(self, tomodir):
         """Read in the resolution matrix of an inversion
