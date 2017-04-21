@@ -328,6 +328,15 @@ class tdMan(object):
             with open(filename, 'wb') as fid:
                 np.savetxt(fid, all_data)
 
+    def clear_measurements(self):
+        """Forget any previous measurements
+        """
+        mid_list = self.assignments.get('measurements', None)
+        if mid_list is not None:
+            for mid in mid_list:
+                self.configs.delete_measurements(mid=mid)
+            self.assignments['measurements'] = None
+
     def measurements(self):
         """Return the measurements associated with this instance.
 
@@ -820,6 +829,24 @@ class tdMan(object):
     def add_homogeneous_model(self, magnitude, phase=0):
         """Add a homogeneous resistivity model to the tomodir. This is useful
         for synthetic measurements.
+
+        Parameters
+        ----------
+        magnitude: float
+            magnitude [Ohm m] value of the homogeneous model
+        phase: float, optional
+            phase [mrad] value of the homogeneous model
+
+
+        Returns
+        -------
+        pid_mag: int
+            ID value of the parameter set of the magnitude model
+        pid_pha: int
+            ID value of the parameter set of the phase model
+
+        Note that the parameter sets are automatically registered as the
+        forward models for magnitude and phase values.
         """
         if self.assignments['forward_model'] is not None:
             print('model already set, will overwrite')
@@ -831,6 +858,7 @@ class tdMan(object):
         pid_pha = self.parman.add_data(phase_model)
 
         self.assignments['forward_model'] = [pid_mag, pid_pha]
+        return pid_mag, pid_pha
 
     def check_measurements_against_sensitivities(
             self, magnitude, phase=0, return_plot=False):

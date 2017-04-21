@@ -1,6 +1,11 @@
 # *-* coding: utf-8 *-*
 """Manage measurement configurations and corresponding measurements.
 
+Geometric Factors
+-----------------
+
+.. plot:: pyplots/plot_K_vs_dipol_sep.py
+
 Literature
 ----------
 
@@ -54,6 +59,16 @@ class ConfigManager(object):
         for key in keys:
             del(self.measurements[key])
         self.meas_counter = -1
+
+    def clear_configs(self):
+        """Remove all configs. This implies deleting all measurements.
+        """
+        self.clear_measurements()
+        del(self.configs)
+        self.configs = None
+
+    def delete_measurements(self, mid):
+        del(self.measurements[mid])
 
     @property
     def nr_of_configs(self):
@@ -976,6 +991,9 @@ class ConfigManager(object):
         -------
         configs: Kx4 numpy.ndarray
             array holding the configurations
+
+        Examples
+        --------
 
         """
         a = np.abs(M - N)

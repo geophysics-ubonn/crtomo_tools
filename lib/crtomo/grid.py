@@ -62,6 +62,10 @@ class crt_grid(object):
         output_str += 'number of electrodes: {0}\n'.format(
             self.nr_of_electrodes
         )
+        output_str += 'grid dimsensions: \n'
+        xlim, zlim = self.get_minmax()
+        output_str += 'X: {0} {1} \n'.format(*xlim)
+        output_str += 'Z: {0} {1} \n'.format(*zlim)
 
         return output_str
 
