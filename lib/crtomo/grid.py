@@ -1,5 +1,19 @@
 """Manage and plot CRMod/CRTomo grids
 
+Creating grids
+--------------
+
+Grids can be created in various ways:
+
+    * Regular grids can be created using Griev
+    * Irregular (triangular) grids are created using the command line tool
+      'cr_trig_create'
+    * the crt_grid class provides some simple wrapper functions for
+      cr_trig_create that directory load created grids
+
+Notes
+-----
+
 After loading an elem.dat file, i.e., the grid, grid information are exposed
 via various structures:
 
@@ -18,7 +32,12 @@ Examples
     grid.load_grid('elem.dat', 'elec.dat')
 
 """
+import tempfile
+import subprocess
+import os
+
 import numpy as np
+
 from .mpl_setup import *
 
 
@@ -26,7 +45,22 @@ class crt_grid(object):
     """The :class:`crt_grid` holds and manages one Finite-Element grid.
 
     This class provides only basic plotting routines. Advanced plotting
-    routines can be found in XX.
+    routines can be found in :class:`crtomo.plotManager`.
+
+    Examples
+    --------
+
+    >>> import crtomo.grid as CRGrid
+        grid = CRGrid(elem_file='elem.dat', elec_file='elec.dat')
+        print(grid)
+    CRMod/CTRomo grid instance
+    number of elements: 2728
+    number of nodes: 1440
+    number of electrodes: 60
+    grid dimsensions:
+        X: -7.5 37.5
+        Z: -15.0 0.0
+
 
     """
     def __init__(self, elem_file=None, elec_file=None):
@@ -616,3 +650,97 @@ class crt_grid(object):
                 # side diagonals
                 Wm[i, j] -= edge_length / distance
         return Wm
+
+    @staticmethod
+    def create_surface_grid(nr_electrodes=None, spacing=None,
+                            electrodes_x=None,
+                            depth=None, left=None,
+                            right=None, char_lengths=None):
+        """This is a simple wrapper for cr_trig_create to create simple surface
+        grids.
+
+        Parameters
+        ----------
+        nr_electrodes: int, optional
+            the number of surface electrodes
+        spacing: float, optional
+            the spacing between electrodes, usually in [m], required if nr of
+            electrodes is given
+        electrodes_x: array, optional
+            x-electrode positions can be provided here, e.g., for
+            non-equidistant electrode distances
+        depth: float, optional
+            the depth of the grid. If not given, this is computed as half the
+            maximum distance between electrodes
+        left: float, optional
+            the space allocated left of the first electrode. If not given,
+            compute as a fourth of the maximum inter-electrode distance
+        right: float, optional
+            the space allocated right of the first electrode. If not given,
+            compute as a fourth of the maximum inter-electrode distance
+
+        Returns
+        -------
+        grid: :class:`crtomo.grid.crt_grid` instance
+            the generated grid
+
+        """
+        if electrodes_x is None:
+            electrodes = np.array(
+                [(x, 0.0) for x in np.arange(0.0, nr_electrodes)]
+            )
+            electrodes[:, 0] = electrodes[:, 0] * spacing
+        else:
+            nr_electrodes = len(electrodes_x)
+            electrodes = np.hstack((electrodes_x, np.zeros_like(electrodes_x)))
+
+        max_distance = np.abs(
+            np.max(electrodes[:, 0]) - np.min(electrodes[:, 0])
+        )
+        minx = electrodes[:, 0].min()
+        maxx = electrodes[:, 0].max()
+
+        if left is None:
+            left = max_distance / 4
+        if right is None:
+            right = max_distance / 4
+        if depth is None:
+            depth = max_distance / 2
+
+        boundaries = np.vstack((
+            (minx - left, 0, 12),
+            np.hstack((
+                electrodes, 12 * np.ones((electrodes.shape[0], 1))
+            )),
+            (maxx + right, 0, 11),
+            (maxx + right, -depth, 11),
+            (minx - left, -depth, 11),
+        ))
+
+        if char_lengths is None:
+            char_lengths = [1, ]
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            np.savetxt(tempdir + os.sep + 'electrodes.dat', electrodes)
+            np.savetxt(tempdir + os.sep + 'boundaries.dat', boundaries)
+            np.savetxt(tempdir + os.sep + 'char_length.dat', char_lengths)
+            pwd = os.getcwd()
+            os.chdir(tempdir)
+            try:
+                subprocess.check_output(
+                    'cr_trig_create grid',
+                    shell=True,
+                    stderr=subprocess.STDOUT,
+                )
+            except subprocess.CalledProcessError as e:
+                print('there was an error generating the grid')
+                print(e.returncode)
+                print(e.output)
+                exit()
+
+            os.chdir(pwd)
+            grid = crt_grid(
+                elem_file=tempdir + os.sep + 'grid' + os.sep + 'elem.dat',
+                elec_file=tempdir + os.sep + 'grid' + os.sep + 'elec.dat',
+            )
+        return grid
