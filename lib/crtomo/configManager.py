@@ -355,21 +355,27 @@ class ConfigManager(object):
 
         Parameters
         ----------
-        skip: int
+        skipc: int
             number of electrode positions that are skipped between electrodes
             of a given dipole
-        step: int
+        skipv: int
+            steplength between subsequent voltage dipoles. A steplength of 0
+            will produce increments by one, i.e., 3-4, 4-5, 5-6 ...
+        stepc: int
             steplength between subsequent current dipoles. A steplength of 0
+            will produce increments by one, i.e., 3-4, 4-5, 5-6 ...
+        stepv: int
+            steplength between subsequent voltage dipoles. A steplength of 0
             will produce increments by one, i.e., 3-4, 4-5, 5-6 ...
         nr_voltage_dipoles: int
             the number of voltage dipoles to generate for each current
             injection dipole
-        skipv: int
-            steplength between subsequent voltage dipoles. A steplength of 0
-            will produce increments by one, i.e., 3-4, 4-5, 5-6 ...
         before_current: bool, optional
             if set to True, also generate voltage dipoles in front of current
             dipoles.
+        start_skip: int, optional
+            how many electrode to skip before/after the first/second current
+            electrode.
         N: int, optional
             number of electrodes, must be given if not already known by the
             config instance
