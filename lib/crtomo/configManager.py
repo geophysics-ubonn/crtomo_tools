@@ -819,7 +819,8 @@ class ConfigManager(object):
                         orientation='horizontal',
                         # **kw
                     )
-                    cb.set_label('cb label')
+                    cblabel = kwargs.get('cblabel', '')
+                    cb.set_label(cblabel)
                 else:
                     fig_bottom = 0.05
 
