@@ -1360,3 +1360,40 @@ class ConfigManager(object):
                 filtered.append(quadpole)
         self.add_to_configs(filtered)
         return np.array(filtered)
+
+    def plot_pseudosection_v2(self):
+        # TODO: sort for dipole-skip
+        # TODO: sorting of dipoles in itself is still messy
+        # TODO: test for Dipole-Dipole measurements that no measurements are
+        #       located at the same spot
+        # TODO: add general check for duplicate positions
+        c = man.configs.configs
+        MN_sorted = np.sort(c[:, 2:4], axis=1)
+        # MN_sorted = np.sort(MN_sorted, axis=0)
+        AB_sorted = np.sort(c[:, 0:2], axis=1)
+        # AB_sorted = np.sort(AB_sorted, axis=0)
+        AB_sorted_1d = (AB_sorted[:, 0] * 1e5 + AB_sorted[:, 1]).astype(int)
+        AB_unique = np.unique(AB_sorted_1d)
+        AB_ids = {
+            key: value for key, value in zip(
+                AB_unique, range(0, AB_unique.size)
+            )
+        }
+        AB_coords = [AB_ids[i] for i in AB_sorted_1d]
+        MN_sorted_1d = (MN_sorted[:, 0] * 1e5 + MN_sorted[:, 1]).astype(int)
+        MN_unique = np.unique(MN_sorted_1d)
+        MN_ids = {
+            key: value for key, value in zip(
+                MN_unique, range(0, MN_unique.size)
+            )
+        }
+        MN_coords = [MN_ids[i] for i in MN_sorted_1d]
+        C = np.zeros((MN_unique.size, AB_unique.size)) * np.nan
+        C[MN_coords, AB_coords] = rhoa
+        fig, ax = plt.subplots()
+        im = ax.matshow(C, interpolation='none')
+        cb = fig.colorbar(im, ax=ax)
+        cb.set_label('rhoa')
+        ax.set_xlabel('current dipoles')
+        ax.set_ylabel('voltage dipoles')
+        fig.savefig('v1.png', dpi=300)
