@@ -1225,6 +1225,14 @@ class ConfigManager(object):
         else:
             return normals, reciprocals
 
+    def gen_reciprocals(self, quadrupoles):
+        """For a given set of quadrupoles, generate and return reciprocals
+        """
+        reciprocals = quadrupoles[:, ::-1].copy()
+        reciprocals[:, 0:2] = np.sort(reciprocals[:, 0:2], axis=1)
+        reciprocals[:, 2:4] = np.sort(reciprocals[:, 2:4], axis=1)
+        return reciprocals
+
     def plot_error_pars(self, mid):
         """
 
@@ -1361,39 +1369,106 @@ class ConfigManager(object):
         self.add_to_configs(filtered)
         return np.array(filtered)
 
-    def plot_pseudosection_v2(self):
-        # TODO: sort for dipole-skip
-        # TODO: sorting of dipoles in itself is still messy
+    @staticmethod
+    def _get_unique_identifiers(ee_raw):
+        """
+
+        """
+        ee = ee_raw.copy()
+
+        # get unique dipoles
+        eeu = np.unique(
+            ee.view(ee.dtype.descr * 2)
+        ).view(ee.dtype).reshape(-1, 2)
+
+        # sort order of dipole electrodes
+        eeu_s0 = np.sort(eeu, axis=1)
+
+        # sort according to electrode numbers
+        eeu_s = eeu_s0[
+            np.argsort(eeu_s0[:, 0]),
+            :
+        ]
+
+        # differences
+        eeu_diff = np.abs(eeu_s[:, 0] - eeu_s[:, 1])
+        indices = np.argsort(eeu_diff)
+
+        # final arrangement
+        eeu_final = eeu_s[indices, :]
+
+        ee_ids = {
+            key: value for key, value in zip(
+                (eeu_final[:, 0] * 1e5 + eeu_final[:, 1]).astype(int),
+                range(0, eeu_final.shape[0]),
+            )
+        }
+        return ee_ids
+
+    def test_get_unique_identifiers():
+        np.random.seed(1)
+        results = []
+        for i in range(0, 10):
+            ab = np.random.permutation(c[:, 0:2])
+            print(ab)
+            q = self._get_unique_identifiers(ab)
+            for key in sorted(q.keys()):
+                print(key, q[key])
+            results.append(q)
+        # compare the results
+        print('checking results:')
+        for x in results:
+            if x != results[0]:
+                print('error')
+
+    def plot_pseudosection_type2(self, mid, **kwargs):
+        """
         # TODO: test for Dipole-Dipole measurements that no measurements are
         #       located at the same spot
         # TODO: add general check for duplicate positions
-        c = man.configs.configs
-        MN_sorted = np.sort(c[:, 2:4], axis=1)
-        # MN_sorted = np.sort(MN_sorted, axis=0)
-        AB_sorted = np.sort(c[:, 0:2], axis=1)
-        # AB_sorted = np.sort(AB_sorted, axis=0)
-        AB_sorted_1d = (AB_sorted[:, 0] * 1e5 + AB_sorted[:, 1]).astype(int)
-        AB_unique = np.unique(AB_sorted_1d)
-        AB_ids = {
-            key: value for key, value in zip(
-                AB_unique, range(0, AB_unique.size)
-            )
-        }
-        AB_coords = [AB_ids[i] for i in AB_sorted_1d]
-        MN_sorted_1d = (MN_sorted[:, 0] * 1e5 + MN_sorted[:, 1]).astype(int)
-        MN_unique = np.unique(MN_sorted_1d)
-        MN_ids = {
-            key: value for key, value in zip(
-                MN_unique, range(0, MN_unique.size)
-            )
-        }
-        MN_coords = [MN_ids[i] for i in MN_sorted_1d]
-        C = np.zeros((MN_unique.size, AB_unique.size)) * np.nan
-        C[MN_coords, AB_coords] = rhoa
+
+        Parameters
+        ----------
+
+        cblabel: string, optional
+            label for the colorbar
+
+        Returns
+        -------
+        fig:
+            figure object
+        ax:
+            axes object
+
+        """
+        c = self.configs
+
+        AB_ids = self._get_unique_identifiers(c[:, 0:2])
+        MN_ids = self._get_unique_identifiers(c[:, 2:4])
+
+        # import IPython
+        # IPython.embed()
+        AB_coords = [
+            AB_ids[x] for x in
+            (c[:, 0] * 1e5 + c[:, 1]).astype(int)
+        ]
+        MN_coords = [
+            MN_ids[x] for x in
+            (c[:, 2] * 1e5 + c[:, 3]).astype(int)
+        ]
+
+        C = np.zeros((len(AB_ids.items()), len(MN_ids))) * np.nan
+        C[MN_coords, AB_coords] = self.measurements[mid]
+
+        # for display purposes
+        C = C[::-1, :]
         fig, ax = plt.subplots()
         im = ax.matshow(C, interpolation='none')
         cb = fig.colorbar(im, ax=ax)
-        cb.set_label('rhoa')
+        cb.set_label(
+            kwargs.get('cblabel', '')
+        )
         ax.set_xlabel('current dipoles')
         ax.set_ylabel('voltage dipoles')
-        fig.savefig('v1.png', dpi=300)
+
+        return fig, ax
