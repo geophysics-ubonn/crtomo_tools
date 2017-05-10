@@ -1,4 +1,10 @@
-"""Analytical potential distribution over a half-space
+r"""Analytical potential distribution over a half-space
+
+For a homogeneous full space, the potential distribution over a point source is
+given as:
+
+:math:`\varphi(r) = I \frac{1}{4 \pi \sigma r}`
+
 """
 import numpy as np
 
@@ -21,14 +27,16 @@ def compute_potentials_analytical_hs(grid, configs_raw, rho):
     ----------
     grid:
         crt_grid object with loaded FE grid. Used for the electrode positions
-        configs_raw: Nx4 array containing N four-point spreads
-    rho:
-        resitivity of half-space
+    configs_raw: numpy.ndarray
+        Nx4 array containing N four-point spreads
+    rho: float
+        resistivity of half-space
 
     Returns
     -------
-    potentials:
+    potentials: list
         List containing N arrays, each of size M (nr of grid nodes)
+
     """
     potentials = []
     nodes_sorted = grid.nodes['sorted']

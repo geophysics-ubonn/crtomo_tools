@@ -10,17 +10,10 @@ Two CMD parameters are required:
 
 Example:
 
-----------------
-| 1| 2| 3| 4| 5|
-----------------
-| 6| 7| 8| 9|10|
-----------------
-|11|12|13|14|15|
-----------------
+    >>> grid_gen_decouplings 2 5
 
-The command
-
-grid_gen_decouplings 2 5
+    Generate a decoupling line in 2m depths, with the grid consisting of 5
+    elements in x direction.
 
 
 Usage
