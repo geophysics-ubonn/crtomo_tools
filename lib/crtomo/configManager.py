@@ -56,7 +56,7 @@ class ConfigManager(object):
         """Remove all measurements from self.measurements. Reset the
         measurement counter. All ID are invalidated.
         """
-        keys = self.measurements.keys()
+        keys = list(self.measurements.keys())
         for key in keys:
             del(self.measurements[key])
         self.meas_counter = -1
@@ -1390,17 +1390,17 @@ class ConfigManager(object):
         """
         ee = ee_raw.copy()
 
+        # sort order of dipole electrodes, i.e., turn 2-1 into 1-2
+        ee_s = np.sort(ee, axis=1)
+
         # get unique dipoles
         eeu = np.unique(
-            ee.view(ee.dtype.descr * 2)
-        ).view(ee.dtype).reshape(-1, 2)
-
-        # sort order of dipole electrodes, i.e., turn 2-1 into 1-2
-        eeu_s0 = np.sort(eeu, axis=1)
+            ee_s.view(ee_s.dtype.descr * 2)
+        ).view(ee_s.dtype).reshape(-1, 2)
 
         # sort according to first electrode number
-        eeu_s = eeu_s0[
-            np.argsort(eeu_s0[:, 0]),
+        eeu_s = eeu[
+            np.argsort(eeu[:, 0]),
             :
         ]
 
@@ -1580,13 +1580,16 @@ class ConfigManager(object):
         AB_ids = self._get_unique_identifiers(c[:, 0:2])
         MN_ids = self._get_unique_identifiers(c[:, 2:4])
 
+        ab_sorted = np.sort(c[:, 0:2], axis=1)
+        mn_sorted = np.sort(c[:, 2:4], axis=1)
+
         AB_coords = [
             AB_ids[x] for x in
-            (c[:, 0] * 1e5 + c[:, 1]).astype(int)
+            (ab_sorted[:, 0] * 1e5 + ab_sorted[:, 1]).astype(int)
         ]
         MN_coords = [
             MN_ids[x] for x in
-            (c[:, 2] * 1e5 + c[:, 3]).astype(int)
+            (mn_sorted[:, 0] * 1e5 + mn_sorted[:, 1]).astype(int)
         ]
 
         # check for duplicate positions
