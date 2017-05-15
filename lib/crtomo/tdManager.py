@@ -99,7 +99,8 @@ class tdMan(object):
         self.assignments = {
             # should contain a two-item list with ids in parman
             'forward_model': None,
-            # should contain one id for the config object
+            # should contain a two-item list with ids of magnitude and phase
+            # measurements (which are stored in self.configs)
             'measurements': None,
             # store sensitivity cids here
             'sensitivities': None,
@@ -285,6 +286,8 @@ class tdMan(object):
             directory + os.sep + 'exe/crtomo.cfg'
         )
 
+        os.makedirs(directory + os.sep + 'inv')
+
     def _save_sensitivities(self, directory):
         """save sensitivities to a directory
         """
@@ -352,7 +355,7 @@ class tdMan(object):
                 potentials=False,
             )
             if return_value is None:
-                print('Cannot model')
+                print('cannot model')
                 return
 
         # retrieve measurements
@@ -689,7 +692,7 @@ class tdMan(object):
 
         """
         self._check_state()
-        if self.can_model:
+        if self.can_invert:
             if output_directory is not None:
                 if not os.path.isdir(output_directory):
                     os.makedirs(output_directory)
@@ -740,12 +743,23 @@ class tdMan(object):
         with open(invctr_file, 'r') as fid:
             lines = fid.readlines()
 
+        # check for robust inversion
+        is_robust_inversion = False
+        for i, line in enumerate(lines):
+            if line.startswith('***PARAMETERS***'):
+                raw_value = lines[i + 7].strip()[0]
+                if raw_value == 'T':
+                    is_robust_inversion = True
+
+        print('is robust', is_robust_inversion)
+
         # find section that contains the iteration data
         for i, line in enumerate(lines):
             if line.strip().startswith('ID it.'):
                 break
 
         # TODO: check for robust iteration
+
         # we have three types of lines:
         # 1. first iteration line
         # 2. other main iteration lines
@@ -754,6 +768,28 @@ class tdMan(object):
         # prepare regular expressions for these three types, each in two
         # flavors: robust and non-robust
 
+        """
+! first iteration, robust
+100 FORMAT (t1,a3,t5,i3,t11,g10.4,t69,g10.4,t81,g10.4,t93,i4,t105,g9.3)
+! first iteration, non-robust
+101 FORMAT (t1,a3,t5,i3,t11,g10.4,t69,g10.4,t81,g10.4,t93,i4)
+
+! other iterations, robust
+110 FORMAT (t1,a3,t5,i3,t11,g10.4,t23,g10.4,t34,g10.4,t46,g10.4,t58,&
+i6,t69,g10.4,t81,g10.4,t93,i4,t105,g9.3,t117,f5.3)
+! other iterations, non-robust
+111 FORMAT (t1,a3,t5,i3,t11,g10.4,t23,g10.4,t34,g10.4,t46,g10.4,t58,&
+i6,t69,g10.4,t81,g10.4,t93,i4,t105,f5.3)
+
+! update iterations, non-robust
+105 FORMAT (t1,a3,t5,i3,t11,g10.4,t23,g9.3,t34,g10.4,t46,g10.4,t58,&
+i6,t105,f5.3)
+! update iterations, robust
+106 FORMAT (t1,a3,t5,i3,t11,g10.4,t23,g9.3,t34,g10.4,t46,g10.4,t58,&
+i6,t105,g9.3,t117,f5.3)
+
+        """
+
         # this identifies a float number, or a NaN value
         reg_float = ''.join((
             '((?:[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?)',
@@ -761,26 +797,58 @@ class tdMan(object):
             '(?:NaN))'
         ))
 
+        reg_int = '(\d{1,3})'
+
+        # (t1,a3,t5,i3,t11,g10.4,t69,g10.4,t81,g10.4,t93,i4)
+        # first iteration line of non-robust inversion
         reg_it1_norob = ''.join((
             ' ([a-zA-Z]{1,3})',
+            ' *' + reg_int,
+            ' *' + reg_float,
+            ' *' + reg_float,
+            ' *' + reg_float,
+            ' *' + reg_int,
+        ))
+        # first iteration line of robust inversion
+        reg_it1_robust = ''.join((
+            '([a-zA-Z]{1,3})',
             ' *(\d{1,3})',
             ' *' + reg_float,
             ' *' + reg_float,
             ' *' + reg_float,
             ' *([0-9]{1,4})',
-
         ))
+
+        reg_it2plus_norob = ''.join((
+            '([a-zA-Z]{1,3})',
+            ' *(\d{1,3})',
+            ' *' + reg_float,
+            ' *' + reg_float,
+            ' *' + reg_float,
+        ))
+
+        # iteration counter
+        current_iteration = 0
 
         for line in lines[i:]:
             linec = line.strip()
-            if linec.startswith('IT') or linec.startswidth('PIT'):
+            if linec.startswith('IT') or linec.startswith('PIT'):
                 # main iterations
-                re.compile(reg_it1_norob).search(linec).groups()
+                if is_robust_inversion:
+                    if current_iteration == 0:
+                        g = re.compile(reg_it1_robust).search(linec).groups()
+                    else:
+                        pass
+                else:
+                    if current_iteration == 0:
+                        g = re.compile(reg_it1_norob).search(linec).groups()
+                        import IPython
+                        IPython.embed()
+                    else:
+                        re.compile(reg_it2plus_norob).search(linec).groups()
             elif linec.startswith('UP'):
                 # update iterations
                 pass
-        import IPython
-        IPython.embed()
 
     def _read_resm_m(self, tomodir):
         """Read in the resolution matrix of an inversion
@@ -809,6 +877,28 @@ class tdMan(object):
             print(subdata.shape)
             pid = self.parman.add_data(subdata[:, 0])
             self.assignments['resm'] = pid
+
+    def register_measurements(self, mid_mag, mid_pha=None):
+        """Register measurements as magnitude/phase measurements used for the
+        inversion
+
+        Parameters
+        ----------
+        mid_mag: int
+            magnitude measurements id for the corresponding measurement data in
+            self.configs.measurements
+        mid_pha: int, optional
+            phase measurements id for the corresponding measurement data in
+            self.configs.measurements. If not present, a new measurement set
+            will be added with zeros only.
+        """
+        if mid_pha is None:
+            mid_pha = self.configs.add_measurements(
+                np.zeros_like(
+                    self.configs.measurements[mid_mag]
+                )
+            )
+        self.assignments['measurements'] = [mid_mag, mid_pha]
 
     def register_magnitude_model(self, pid):
         """Set a given parameter model to the forward magnitude model
