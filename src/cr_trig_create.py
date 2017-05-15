@@ -563,7 +563,11 @@ def main():
         output_dir = args[0]
         if not os.path.isdir(output_dir):
             shutil.move(directory, output_dir)
-        print(output_dir)
+            print(output_dir)
+        else:
+            print('temporary directory:')
+            print(directory)
+            raise Exception('output directory already exists!')
     else:
         print(directory)
 

@@ -81,20 +81,26 @@ def parse_gmsh(filename, boundary_file):
     boundaries = {}
 
     if(boundary_file is not None):
+        # load the original boundary lines
+        # it is possible that GMSH added additional nodes on these lines, and
+        # that is why we need to find all mesh lines that lie on these original
+        # lines.
         bids = np.loadtxt(boundary_file)
 
         for btype in ('12', '11'):
+            # select all original boundaries with this type
             a = np.where(bids[:, 4] == int(btype))[0]
             boundaries[btype] = []
             # for each of those lines, find all lines of the mesh that belong
             # here
             for orig_line in bids[a, :]:
                 # print('Find all lines lying on the line: ')
-                # found = False
+                found_one_line = False
                 # print(orig_line)
                 # construct line equation
 
                 # x1 == x2 ?
+                # split into coordinates
                 ox1 = orig_line[0]
                 ox2 = orig_line[2]
                 oy1 = orig_line[1]
@@ -116,46 +122,62 @@ def parse_gmsh(filename, boundary_file):
                         # check
                         # if the new line lies in between the original one
                         oy1, oy2 = np.sort([orig_line[1], orig_line[3]])
-                        x1, x2 = np.sort([mesh['nodes'][line[0] - 1][1],
-                                         mesh['nodes'][line[1] - 1][1]])
-                        y1, y2 = np.sort([mesh['nodes'][line[0] - 1][2],
-                                         mesh['nodes'][line[1] - 1][2]])
+                        x1, x2 = np.sort(
+                            [
+                                mesh['nodes'][line[0] - 1][1],
+                                mesh['nodes'][line[1] - 1][1]
+                            ]
+                        )
+                        y1, y2 = np.sort(
+                            [
+                                mesh['nodes'][line[0] - 1][2],
+                                mesh['nodes'][line[1] - 1][2]
+                            ]
+                        )
 
-                        if(x1 == x2 == ox1):
+                        if np.isclose(x1, x2) and np.isclose(x2, ox1):
                             if(y1 >= oy1 and y2 <= oy2):
+                                found_one_line = True
                                 boundaries[btype].append(line)
 
                 else:
+                    # print('checking with full line equation')
                     # no vertical line
                     # we need the full check using the line equation
                     slope = (orig_line[1] - orig_line[3]) / (
                         orig_line[0] - orig_line[2])
                     intersect = orig_line[1] - (slope * orig_line[0])
-                    #  print('Slope', slope, ' Intercept ', intersect)
+                    # print('Slope', slope, ' Intercept ', intersect)
                     for line in elements['1']:
                         x1 = mesh['nodes'][line[0] - 1][1]
                         y1 = mesh['nodes'][line[0] - 1][2]
                         x2 = mesh['nodes'][line[1] - 1][1]
                         y2 = mesh['nodes'][line[1] - 1][2]
 
+                        # print(x1, x2, y1, y1)
                         check = False
                         # check if x coordinates of the test line fit in the
                         # original line
                         if(ox1 < ox2):
                             if(x1 < x2):
-                                if(x1 >= ox1 and x2 <= ox2):
+                                if((np.isclose(x1, ox1) or x1 > ox1) and
+                                   (np.isclose(x2, ox2) or x2 < ox2)):
                                     check = True
                             else:
-                                if(x2 >= ox1 and x1 <= ox2):
+                                if((np.isclose(x2, ox1) or x2 >= ox1) and
+                                   (np.isclose(x1, ox2) or x1 <= ox2)):
                                     check = True
                         else:
                             if(x1 < x2):
-                                if(x1 >= ox2 and x2 <= ox1):
+                                if((np.isclose(x1, ox2) or x1 >= ox2) and
+                                   (np.isclose(x2, ox1) or x2 <= ox1)):
                                     check = True
                             else:
-                                if(x2 >= ox2 and x1 <= ox1):
+                                if((np.isclose(x2, ox2) or x2 >= ox2) and
+                                   (np.isclose(x1, ox1) or x1 <= ox1)):
                                     check = True
 
+                        # print('boundary check:', check)
                         if(check):
                             # the line lies within the x-range of the orig line
                             ytest1 = slope * x1 + intersect
@@ -164,7 +186,12 @@ def parse_gmsh(filename, boundary_file):
                                np.around(ytest2 - y2, 5) == 0):
                                 boundaries[btype].append(line)
                                 # found = True
-                                # print('new', line)
+                                found_one_line = True
+                                # print('found it new', line)
+                # add a weak check: we need to find at least one line in the
+                # mesh corresponding to this boundary line:
+                if not found_one_line:
+                    raise Exception('no mesh line found for this boundary')
 
             print('Total number of boundaries of this type:',
                   len(boundaries[btype]))
@@ -390,7 +417,7 @@ def write_elec_file(filename, mesh):
     for i in electrodes:
         # find
         for nr, j in enumerate(mesh['nodes']):
-            if(j[1] == i[0] and j[2] == i[1]):
+            if np.isclose(j[1], i[0]) and np.isclose(j[2], i[1]):
                 elecs.append(nr + 1)
 
     fid = open('elec.dat', 'w')
