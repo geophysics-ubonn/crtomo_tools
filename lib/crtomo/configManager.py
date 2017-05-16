@@ -1495,6 +1495,8 @@ class ConfigManager(object):
             saturate with the respective limit colors. Instead, values lower
             than the CB are colored "cyan" and vaues above the CB limit are
             colored "red"
+        log10: bool, optional
+            if set to True, plot the log10 values of the provided data
 
         Returns
         -------
@@ -1615,6 +1617,9 @@ class ConfigManager(object):
             plot_values = np.squeeze(mid)
         else:
             raise Exception('Data in parameter "mid" not understood')
+
+        if kwargs.get('log10', False):
+            plot_values = np.log10(plot_values)
 
         C = np.zeros((len(MN_ids.items()), len(AB_ids))) * np.nan
         C[MN_coords, AB_coords] = plot_values
