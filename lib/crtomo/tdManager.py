@@ -286,7 +286,8 @@ class tdMan(object):
             directory + os.sep + 'exe/crtomo.cfg'
         )
 
-        os.makedirs(directory + os.sep + 'inv')
+        if not os.path.isdir(directory + os.sep + 'inv'):
+            os.makedirs(directory + os.sep + 'inv')
 
     def _save_sensitivities(self, directory):
         """save sensitivities to a directory
