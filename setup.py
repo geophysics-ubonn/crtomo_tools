@@ -56,5 +56,5 @@ if __name__ == '__main__':
         #     'crtomo',
         # ],
         # scripts=scripts,
-        # install_requires=['numpy', 'scipy', 'matplotlib'],
+        install_requires=['numpy', 'scipy', 'matplotlib', 'shapely'],
     )
