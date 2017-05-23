@@ -803,7 +803,7 @@ i6,t105,g9.3,t117,f5.3)
         # (t1,a3,t5,i3,t11,g10.4,t69,g10.4,t81,g10.4,t93,i4)
         # first iteration line of non-robust inversion
         reg_it1_norob = ''.join((
-            ' ([a-zA-Z]{1,3})',
+            '([a-zA-Z]{1,3})',
             ' *' + reg_int,
             ' *' + reg_float,
             ' *' + reg_float,
@@ -820,16 +820,38 @@ i6,t105,g9.3,t117,f5.3)
             ' *([0-9]{1,4})',
         ))
 
+        # second-to-last iterations, non-robustk
+        # (t1,a3,t5,i3,t11,g10.4,t23,g10.4,t34,g10.4,t46,g10.4,t58,&
+        # i6,t69,g10.4,t81,g10.4,t93,i4,t105,f5.3)
         reg_it2plus_norob = ''.join((
             '([a-zA-Z]{1,3})',
             ' *(\d{1,3})',
-            ' *' + reg_float,
-            ' *' + reg_float,
-            ' *' + reg_float,
+            ' *' + reg_float,  # data RMS
+            ' *' + reg_float,  # stepsize
+            ' *' + reg_float,  # lambda
+            ' *' + reg_float,  # roughness
+            ' *' + reg_int,  # CG-steps
+            ' *' + reg_float,  # mag RMS
+            ' *' + reg_float,  # pha RMS
+            ' *' + reg_int,  # nr excluded data
+            ' *' + reg_float,  # steplength
+        ))
+
+        # update non-robust
+        reg_update_norob = ''.join((
+            '([a-zA-Z]{1,3})',
+            ' *(\d{1,3})',
+            ' *' + reg_float,  # data RMS
+            ' *' + reg_float,  # stepsize
+            ' *' + reg_float,  # lambda
+            ' *' + reg_float,  # roughness
+            ' *' + reg_int,  # CG-steps
+            ' *' + reg_float,  # steplength
         ))
 
         # iteration counter
         current_iteration = 0
+        iterations = []
 
         for line in lines[i:]:
             linec = line.strip()
@@ -837,19 +859,90 @@ i6,t105,g9.3,t117,f5.3)
                 # main iterations
                 if is_robust_inversion:
                     if current_iteration == 0:
+                        # first iteration, robust
                         g = re.compile(reg_it1_robust).search(linec).groups()
+                        print('g', g)
+                        # labels = (
                     else:
+                        # second-to-last iterations, robust
                         pass
                 else:
                     if current_iteration == 0:
+                        # non-robust, first iteration
                         g = re.compile(reg_it1_norob).search(linec).groups()
-                        import IPython
-                        IPython.embed()
+                        print('g', g)
+
+                        keyfuncs = [
+                            (None, None),
+                            ('iteration', int),
+                            ('dataRMS', float),
+                            ('magRMS', float),
+                            ('phaRMS', float),
+                            ('nrdata', int)
+                        ]
+                        values = {}
+                        for value, (key, func) in zip(g, keyfuncs):
+                            if key is not None:
+                                values[key] = func(value)
                     else:
-                        re.compile(reg_it2plus_norob).search(linec).groups()
+                        g = re.compile(
+                            reg_it2plus_norob
+                        ).search(linec).groups()
+                        keyfuncs = [
+                            (None, None),
+                            ('iteration', int),
+                            ('dataRMS', float),
+                            ('stepsize', float),
+                            ('lambda', float),
+                            ('roughness', float),
+                            ('cgsteps', int),
+                            ('magRMS', float),
+                            ('phaRMS', float),
+                            ('nrdata', int),
+                            ('steplength', float),
+                        ]
+                        values = {}
+                        for value, (key, func) in zip(g, keyfuncs):
+                            if key is not None:
+                                values[key] = func(value)
+                    values['type'] = 'main'
+                    values['main_iteration'] = current_iteration
+                    iterations.append(values)
+                    current_iteration += 1
             elif linec.startswith('UP'):
                 # update iterations
-                pass
+                if is_robust_inversion:
+                    pass
+                else:
+                    g = re.compile(
+                        reg_update_norob
+                    ).search(linec).groups()
+                    keyfuncs = [
+                        (None, None),
+                        ('iteration', int),
+                        ('dataRMS', float),
+                        ('stepsize', float),
+                        ('lambda', float),
+                        ('roughness', float),
+                        ('cgsteps', int),
+                        ('steplength', float),
+                    ]
+                    values = {}
+                    for value, (key, func) in zip(g, keyfuncs):
+                        if key is not None:
+                            values[key] = func(value)
+                values['type'] = 'update'
+                values['main_iteration'] = current_iteration
+                iterations.append(values)
+
+        print('RESULTS')
+        print(iterations)
+        import pandas as pd
+        df = pd.DataFrame(iterations)
+        print(df)
+        exit()
+        # import IPython
+        # IPython.embed()
 
     def _read_resm_m(self, tomodir):
         """Read in the resolution matrix of an inversion
