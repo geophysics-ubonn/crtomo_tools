@@ -53,8 +53,11 @@ import glob
 import re
 import os
 import tempfile
-import numpy as np
 import subprocess
+from io import StringIO
+
+import numpy as np
+import pandas as pd
 
 from crtomo.mpl_setup import *
 import crtomo.binaries as CRBin
@@ -720,6 +723,28 @@ class tdMan(object):
         self._read_inv_ctr(tomodir)
         self._read_resm_m(tomodir)
 
+    def _read_eps_ctr(self, tomodir):
+        """
+
+        """
+
+        with open('eps.ctr', 'r') as fid:
+            lines = fid.readlines()
+        import itertools
+        group = itertools.groupby(lines, lambda x: x == '\n')
+        dfs = []
+        # group
+        for x in group:
+            # print(x)
+            if not x[0]:
+                data = [y for y in x[1]]
+                if data[0].startswith('IT') or data[0].startswith('PIT'):
+                    del(data[0])
+                data[0] = data[0].replace('-Phase (rad)', '-Phase(rad)')
+                tfile = StringIO(''.join(data))
+                df = pd.read_csv(tfile, delim_whitespace=True)
+                dfs.append(df)
+
     def _read_inv_ctr(self, tomodir):
         """Read in selected results of the inv.ctr file
 
@@ -746,11 +771,14 @@ class tdMan(object):
 
         # check for robust inversion
         is_robust_inversion = False
+        nr_of_data_points = None
         for i, line in enumerate(lines):
             if line.startswith('***PARAMETERS***'):
                 raw_value = lines[i + 7].strip()[0]
                 if raw_value == 'T':
                     is_robust_inversion = True
+            if line.startswith('# Data points'):
+                nr_of_data_points = int(line[15:].strip())
 
         print('is robust', is_robust_inversion)
 
@@ -814,10 +842,27 @@ i6,t105,g9.3,t117,f5.3)
         reg_it1_robust = ''.join((
             '([a-zA-Z]{1,3})',
             ' *(\d{1,3})',
-            ' *' + reg_float,
-            ' *' + reg_float,
-            ' *' + reg_float,
-            ' *([0-9]{1,4})',
+            ' *' + reg_float,   # data RMS
+            ' *' + reg_float,   # mag RMS
+            ' *' + reg_float,   # pha RMS
+            ' *' + reg_int,     # nr excluded data
+            ' *' + reg_float,   # L1-ratio
+        ))
+
+        # second-to-last iterations, robust
+        reg_it2plus_rob = ''.join((
+            '([a-zA-Z]{1,3})',
+            ' *(\d{1,3})',
+            ' *' + reg_float,   # data RMS
+            ' *' + reg_float,   # stepsize
+            ' *' + reg_float,   # lambda
+            ' *' + reg_float,   # roughness
+            ' *' + reg_int,     # CG-steps
+            ' *' + reg_float,   # mag RMS
+            ' *' + reg_float,   # pha RMS
+            ' *' + reg_int,     # nr excluded data
+            ' *' + reg_float,   # l1-ratio
+            ' *' + reg_float,   # steplength
         ))
 
         # second-to-last iterations, non-robustk
@@ -826,17 +871,28 @@ i6,t105,g9.3,t117,f5.3)
         reg_it2plus_norob = ''.join((
             '([a-zA-Z]{1,3})',
             ' *(\d{1,3})',
+            ' *' + reg_float,   # data RMS
+            ' *' + reg_float,   # stepsize
+            ' *' + reg_float,   # lambda
+            ' *' + reg_float,   # roughness
+            ' *' + reg_int,     # CG-steps
+            ' *' + reg_float,   # mag RMS
+            ' *' + reg_float,   # pha RMS
+            ' *' + reg_int,     # nr excluded data
+            ' *' + reg_float,   # steplength
+        ))
+
+        # update robust
+        reg_update_rob = ''.join((
+            '([a-zA-Z]{1,3})',
+            ' *(\d{1,3})',
             ' *' + reg_float,  # data RMS
             ' *' + reg_float,  # stepsize
             ' *' + reg_float,  # lambda
             ' *' + reg_float,  # roughness
             ' *' + reg_int,  # CG-steps
-            ' *' + reg_float,  # mag RMS
-            ' *' + reg_float,  # pha RMS
-            ' *' + reg_int,  # nr excluded data
-            ' *' + reg_float,  # steplength
+            ' *' + reg_float,  # l1ratio
         ))
-
         # update non-robust
         reg_update_norob = ''.join((
             '([a-zA-Z]{1,3})',
@@ -856,21 +912,63 @@ i6,t105,g9.3,t117,f5.3)
         for line in lines[i:]:
             linec = line.strip()
             if linec.startswith('IT') or linec.startswith('PIT'):
+                if linec[0:3].strip() == 'IT':
+                    it_type = 'DC/IP'
+                else:
+                    it_type = 'FPI'
+
+                values = None
+
                 # main iterations
                 if is_robust_inversion:
                     if current_iteration == 0:
                         # first iteration, robust
                         g = re.compile(reg_it1_robust).search(linec).groups()
-                        print('g', g)
-                        # labels = (
+                        keyfuncs = [
+                            (None, None),
+                            ('iteration', int),
+                            ('dataRMS', float),
+                            ('magRMS', float),
+                            ('phaRMS', float),
+                            ('nrdata', int),
+                            ('l1ratio', float),
+                        ]
+                        values = {}
+                        for value, (key, func) in zip(g, keyfuncs):
+                            if key is not None:
+                                values[key] = func(value)
                     else:
                         # second-to-last iterations, robust
-                        pass
+                        g = re.compile(
+                            reg_it2plus_rob
+                        ).search(linec).groups()
+                        keyfuncs = [
+                            (None, None),
+                            ('iteration', int),
+                            ('dataRMS', float),
+                            ('stepsize', float),
+                            ('lambda', float),
+                            ('roughness', float),
+                            ('cgsteps', int),
+                            ('magRMS', float),
+                            ('phaRMS', float),
+                            ('nrdata', int),
+                            ('l1ratio', float),
+                            ('steplength', float),
+                        ]
+                        values = {}
+                        for value, (key, func) in zip(g, keyfuncs):
+                            if key is not None:
+                                values[key] = func(value)
+                    values['type'] = 'main'
+                    values['main_iteration'] = current_iteration
+                    values['it_type'] = it_type
+                    iterations.append(values)
+                    current_iteration += 1
                 else:
                     if current_iteration == 0:
                         # non-robust, first iteration
                         g = re.compile(reg_it1_norob).search(linec).groups()
-                        print('g', g)
 
                         keyfuncs = [
                             (None, None),
@@ -906,13 +1004,31 @@ i6,t105,g9.3,t117,f5.3)
                             if key is not None:
                                 values[key] = func(value)
                     values['type'] = 'main'
+                    values['it_type'] = it_type
                     values['main_iteration'] = current_iteration
                     iterations.append(values)
                     current_iteration += 1
             elif linec.startswith('UP'):
                 # update iterations
                 if is_robust_inversion:
-                    pass
+                    # robust
+                    g = re.compile(
+                        reg_update_rob
+                    ).search(linec).groups()
+                    keyfuncs = [
+                        (None, None),
+                        ('iteration', int),
+                        ('dataRMS', float),
+                        ('stepsize', float),
+                        ('lambda', float),
+                        ('roughness', float),
+                        ('cgsteps', int),
+                        ('l1-ratio', float),
+                    ]
+                    values = {}
+                    for value, (key, func) in zip(g, keyfuncs):
+                        if key is not None:
+                            values[key] = func(value)
                 else:
                     g = re.compile(
                         reg_update_norob
@@ -932,17 +1048,63 @@ i6,t105,g9.3,t117,f5.3)
                         if key is not None:
                             values[key] = func(value)
                 values['type'] = 'update'
+                values['it_type'] = it_type
                 values['main_iteration'] = current_iteration
                 iterations.append(values)
 
-        print('RESULTS')
-        print(iterations)
-        import pandas as pd
         df = pd.DataFrame(iterations)
-        print(df)
-        exit()
-        # import IPython
-        # IPython.embed()
+        df = df.reindex_axis([
+            'iteration',
+            'main_iteration',
+            'it_type',
+            'type',
+            'dataRMS',
+            'magRMS',
+            'phaRMS',
+            'lambda',
+            'roughness',
+            'cgsteps',
+            'nrdata',
+            'steplength',
+            'stepsize',
+            'l1ratio',
+        ], axis=1)
+
+        df['nrdata'] = nr_of_data_points - df['nrdata']
+        return df
+
+    def plot_inversion_evolution(self, df, filename):
+        fig, ax = plt.subplots()
+        # update iterations
+        for name, group in g:
+            # plot update evolution
+            updates = group.query('type == "update"')
+            ax.scatter(
+                np.ones(updates.shape[0]) * name,
+                updates['lambda'],
+                color='k',
+            )
+
+        # main iterations
+        main = df.query('type == "main"')
+        ax.plot(
+            main['main_iteration'],
+            main['lambda'],
+            '.-',
+            color='k',
+        )
+        ax.set_ylabel(r'$\lambda$')
+        ax2 = ax.twinx()
+        ax2.plot(
+            main['main_iteration'],
+            main['dataRMS'],
+            '.-',
+            color='r',
+        )
+        ax2.set_ylabel('data RMS')
+
+        fig.tight_layout()
+        fig.savefig('inversion_evolution.png', dpi=300)
 
     def _read_resm_m(self, tomodir):
         """Read in the resolution matrix of an inversion
