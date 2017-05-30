@@ -4,6 +4,7 @@
 """
 import numpy as np
 import scipy.interpolate
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from crtomo.mpl_setup import *
 import crtomo.grid as CRGrid
@@ -221,18 +222,42 @@ class plotManager(object):
     def plot_elements_to_ax(self, cid, ax=None, **kwargs):
         """Plot element data (parameter sets).
 
+        If the parameter *ax* is not set, then a new figure will be created
+        with a corresponding axes.
+
+
         Parameters
         ----------
-        cid
-        ax
-        alpha_cid
-        xmin
-        xmax
-        zmin
-        zmax
-        cmap_name
+        cid: int or numpy.ndarray
+            if *cid* is an int, then treat it as the id of the parameter set
+            stored in self.parman. Otherwise, expect it to be the data to plot.
+            At the moment no checks are made that the data fits the grid.
+        ax: matplotlib.Axes, optional
+            plot to this axes object, if provided
+        alpha_cid: int, optional
+            if given, use the corresponding dataset in self.parman as the alpha
+            channel. No checks are made if all values of this data set lie
+            between 0 and 1 (0 being fully transparent, and 1 being opaque).
+        xmin: float, optional
+            minimal x limit to plot
+        xmax: float, optional
+            maximal x limit to plot
+        zmin: float, optional
+            minimal z limit to plot
+        zmax: float, optional
+            maximial z limit to plot
+        cmap_name: string, optional
+            name of the colorbar to use. Default is "jet". To reverse colors,
+            use the _r version "jet_r"
+        cbposition
         cblabel
+        cbsegments: int, optional
+        cbnrticks: int, optional
         plot_colorbar: bool
+        title: string, optional
+            plot title string
+        xlabel
+        ylabel
 
         Returns
         -------
@@ -258,33 +283,45 @@ class plotManager(object):
             # 15 cm
             sizex = 15 / 2.54
             sizez = sizex * (np.abs(zmax - zmin) / np.abs(xmax - xmin) * 1.1)
+            # add 1 inch to accommodate colorbar
+            sizez += 1.3
             fig, ax = plt.subplots(figsize=(sizex, sizez))
         else:
             fig = ax.get_figure()
+            sizex, sizez = fig.get_size_inches()
 
         # get data
-        subdata = self.parman.parsets[cid]
+        if isinstance(cid, int):
+            subdata = self.parman.parsets[cid]
+        else:
+            subdata = cid
+
         if 'converter' in kwargs:
             subdata = kwargs['converter'](subdata)
 
         # color map
         cmap_name = kwargs.get('cmap_name', 'jet')
-        cmap = mpl.cm.get_cmap(cmap_name)
+        cmap = mpl.cm.get_cmap(
+            cmap_name,
+            kwargs.get('cbsegments', None)
+        )
 
         # normalize data
         data_min = kwargs.get('cbmin', subdata.min())
         data_max = kwargs.get('cbmax', subdata.max())
+        if data_min == data_max:
+            data_min -= 1
+            data_max += 1
         cnorm = mpl.colors.Normalize(vmin=data_min, vmax=data_max)
         scalarMap = mpl.cm.ScalarMappable(norm=cnorm, cmap=cmap)
         fcolors = scalarMap.to_rgba(subdata)
+        scalarMap.set_array(subdata)
 
         # if applicable, apply alpha values
         alpha_cid = kwargs.get('cid_alpha', None)
-        print('alpha_cid', alpha_cid)
         if isinstance(alpha_cid, int):
             print('applying alpha')
             alpha = self.parman.parsets[alpha_cid]
-            print(alpha)
             # make sure this data set is normalized between 0 and 1
             if np.nanmin(alpha) < 0 or np.nanmax(alpha) > 1:
                 raise Exception(
@@ -302,7 +339,9 @@ class plotManager(object):
             edgecolor=fcolors,
             facecolor=fcolors,
             linewidth=0.4,
+            cmap=cmap,
         )
+        collection.set_cmap(cmap)
         ax.add_collection(collection)
         if self.grid.electrodes is not None:
             ax.scatter(
@@ -317,33 +356,41 @@ class plotManager(object):
         ax.set_xlabel(kwargs.get('xlabel', 'x'))
         ax.set_ylabel(kwargs.get('zlabel', 'z'))
         ax.set_aspect('equal')
+        ax.set_title(
+            kwargs.get('title', '')
+        )
 
         if kwargs.get('plot_colorbar', False):
-            print('colorbar')
-            cb_boundaries = mpl_get_cb_bound_below_plot(ax)
-            cax = fig.add_axes(cb_boundaries, frame_on=True)
-            cb = self._return_colorbar(
-                cax,
-                cnorm,
-                cmap,
+            divider = make_axes_locatable(ax)
+            cbposition = kwargs.get('cbposition', 'vertical')
+            if cbposition == 'horizontal':
+                ax_cb = divider.new_vertical(
+                    size=0.1, pad=0.4, pack_start=True
+                )
+            elif cbposition == 'vertical':
+                ax_cb = divider.new_horizontal(
+                    size=0.1, pad=0.4,
+                )
+            else:
+                raise Exception('cbposition not recognized')
+
+            ax.get_figure().add_axes(ax_cb)
+
+            cb = fig.colorbar(
+                scalarMap,
+                cax=ax_cb,
+                orientation=cbposition,
                 label=kwargs.get('cblabel', ''),
+                ticks=mpl.ticker.MaxNLocator(kwargs.get('cbnrticks', 3)),
+                format=kwargs.get('cbformat', None),
             )
+
             return fig, ax, cnorm, cmap, cb
 
         return fig, ax, cnorm, cmap
 
-    def _return_colorbar(self, cax, norm, cmap, label=''):
-        """plot a colorbar to the provided axis
-        """
-        cb = mpl.colorbar.ColorbarBase(
-            ax=cax,
-            cmap=cmap,
-            norm=norm,
-            orientation='horizontal',
-        )
-        cb.set_label(label)
-        return cb
 
+# def formatter_log10(x, s):
 
 def converter_pm_log10(data):
     """Convert the given data to:

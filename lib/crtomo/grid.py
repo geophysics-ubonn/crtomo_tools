@@ -655,7 +655,8 @@ class crt_grid(object):
     def create_surface_grid(nr_electrodes=None, spacing=None,
                             electrodes_x=None,
                             depth=None, left=None,
-                            right=None, char_lengths=None):
+                            right=None, char_lengths=None,
+                            lines=None):
         """This is a simple wrapper for cr_trig_create to create simple surface
         grids.
 
@@ -678,6 +679,8 @@ class crt_grid(object):
         right: float, optional
             the space allocated right of the first electrode. If not given,
             compute as a fourth of the maximum inter-electrode distance
+        lines: list of ints, optional
+            at the given depths, add horizontal lines in the grid
 
         Returns
         -------
@@ -685,6 +688,14 @@ class crt_grid(object):
             the generated grid
 
         """
+        # check if all required information are present
+        if(electrodes_x is None and
+           (nr_electrodes is None or spacing is None)):
+            raise Exception(
+                'You must provide either the parameter "electrodes_" or ' +
+                'the parameters "nr_electrodes" AND "spacing"'
+            )
+
         if electrodes_x is None:
             electrodes = np.array(
                 [(x, 0.0) for x in np.arange(0.0, nr_electrodes)]
@@ -707,14 +718,26 @@ class crt_grid(object):
         if depth is None:
             depth = max_distance / 2
 
+        # prepare extra lines
+        # extra_lines = []
+        # # we need to add the start/end points to the boundaries
+        # add_boundary_nodes_left = []
+        # add_boundary_nodes_right = []
+        # if lines is not None:
+        #     # go through all depths/objects
+        #     for line in lines:
+        #         if line <  or line > 0
+
+        boundary_noflow = 11
+        boundary_mixed = 12
         boundaries = np.vstack((
-            (minx - left, 0, 12),
+            (minx - left, 0, boundary_noflow),
             np.hstack((
-                electrodes, 12 * np.ones((electrodes.shape[0], 1))
+                electrodes, boundary_noflow * np.ones((electrodes.shape[0], 1))
             )),
-            (maxx + right, 0, 11),
-            (maxx + right, -depth, 11),
-            (minx - left, -depth, 11),
+            (maxx + right, 0, boundary_mixed),
+            (maxx + right, -depth, boundary_mixed),
+            (minx - left, -depth, boundary_mixed),
         ))
 
         if char_lengths is None:

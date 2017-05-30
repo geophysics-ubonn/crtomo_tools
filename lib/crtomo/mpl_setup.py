@@ -23,7 +23,7 @@ if(not already_loaded):
 mpl.rcParams["lines.linewidth"] = 2.0
 mpl.rcParams["lines.markeredgewidth"] = 3.0
 mpl.rcParams["lines.markersize"] = 3.0
-mpl.rcParams["font.size"] = 12
+mpl.rcParams["font.size"] = 8
 # mpl.rcParams['font.sans-serif'] = 'Droid Sans'
 
 mpl.rcParams['font.family'] = 'Open Sans'

@@ -49,6 +49,7 @@
       (sigma) and potential data (nodes) in j = sigma E
 
 """
+import sys
 import glob
 import re
 import os
@@ -646,14 +647,19 @@ class tdMan(object):
             )
             return None
 
-    def _invert(self, tempdir, catch_output=True):
-        """
+    def _invert(self, tempdir, catch_output=True, **kwargs):
+        """Internal function than runs an inversion using CRTomo.
 
         Parameters
         ----------
-        catch_output: bool
+        tempdir: string
+            directory which to use as a tomodir
+        catch_output: bool, optional
             if True, catch all outputs of the CRTomo call
+        cores: int, optional
+            how many cores to use. defaults to 2
         """
+        nr_cores = kwargs.get('cores', 2)
         print('attempting inversion in directory: {0}'.format(tempdir))
         pwd = os.getcwd()
         os.chdir(tempdir)
@@ -661,8 +667,11 @@ class tdMan(object):
         self.save_to_tomodir('.')
         os.chdir('exe')
         binary = CRBin.get('CRTomo')
-        print(binary)
+        print('Using binary: {0}'.format(binary))
         print('calling CRTomo')
+        # store env variable
+        env_omp = sys.env.get('OMP_NUM_THREADS', '')
+        sys.env['OMP_NUM_THREADS'] = '{0}'.format(nr_cores)
         if catch_output:
             subprocess.check_output(
                 binary,
@@ -674,18 +683,19 @@ class tdMan(object):
                 binary,
                 shell=True,
             )
+        # reset environment variable
+        sys.env['OMP_NUM_THREADS'] = env_omp
 
         print('finished')
-        # if return_code != 0:
-        #     raise Exception('There was an error using CRTomo')
 
         os.chdir(pwd)
         self._read_inversion_results(tempdir)
 
-    def invert(self, output_directory=None, catch_output=True):
+    def invert(self, output_directory=None, catch_output=True, **kwargs):
         """Invert this instance, and import the result files
 
-        No directories/files will be overwritten.
+        No directories/files will be overwritten. Raise an IOError if the
+        output directory exists.
 
         Parameters
         ----------
@@ -693,7 +703,16 @@ class tdMan(object):
             use this directory as output directory for the generated tomodir.
             If None, then a temporary directory will be used that is deleted
             after import.
+        catch_output: bool, optional
+            Do not show CRTomo output
+        cores: int, optional
+            how many cores to use for CRTomo
 
+        Returns
+        -------
+        return_code: bool
+            Return 0 if the inversion completed successfully. Return 1 if no
+            measurements are present.
         """
         self._check_state()
         if self.can_invert:
@@ -701,7 +720,7 @@ class tdMan(object):
                 if not os.path.isdir(output_directory):
                     os.makedirs(output_directory)
                     tempdir = output_directory
-                    self._invert(tempdir, catch_output)
+                    self._invert(tempdir, catch_output, **kwargs)
                 else:
                     raise IOError(
                         'output directory already exists: {0}'.format(
@@ -710,25 +729,193 @@ class tdMan(object):
                     )
             else:
                 with tempfile.TemporaryDirectory() as tempdir:
-                    self._invert(tempdir, catch_output)
+                    self._invert(tempdir, catch_output, **kwargs)
 
-            return 1
+            return 0
         else:
             print(
                 'Sorry, no measurements present, cannot model yet'
             )
-            return None
+            return 1
 
     def _read_inversion_results(self, tomodir):
         self._read_inv_ctr(tomodir)
         self._read_resm_m(tomodir)
 
-    def _read_eps_ctr(self, tomodir):
+    def plot_eps_data_hist(self, dfs):
+        """Plot histograms of data residuals and data error weighting
+
+        TODO:
+            * add percentage of data below/above the RMS value
         """
+        # check if this is a DC inversion
+        if 'datum' in dfs[0]:
+            dc_inv = True
+        else:
+            dc_inv = False
+
+        nr_y = len(dfs)
+        size_y = 5 / 2.54 * nr_y
+        if dc_inv:
+            nr_x = 1
+        else:
+            nr_x = 3
+        size_x = 15 / 2.54
+
+        fig, axes = plt.subplots(nr_y, nr_x, figsize=(size_x, size_y))
+        axes = np.atleast_2d(axes)
+
+        # plot initial data errors
+        df = dfs[0]
+        if dc_inv:
+            ax = axes[0, 0]
+            ax.hist(
+                df['datum'] / df['eps_r'],
+                100,
+            )
+            ax.set_xlabel(r'$-log(|R|)$')
+            ax.set_ylabel(r'count')
+        else:
+            # complex inversion
+            ax = axes[0, 0]
+            ax.hist(
+                df['-log(|R|)'] / df['eps'],
+                100,
+            )
+            ax.set_xlabel(r'$-log(|R|)$')
+            ax.set_ylabel(r'count')
+
+            ax = axes[0, 1]
+            ax.hist(
+                df['-log(|R|)'] / df['eps_r'],
+                100,
+            )
+            ax.set_xlabel(r'$-log(|R|)$')
+            ax.set_ylabel(r'count')
+
+            ax = axes[0, 2]
+            ax.hist(
+                df['-Phase(rad)'] / df['eps_p'],
+                100,
+            )
+            ax.set_xlabel(r'$-log(|R|)$')
+            ax.set_ylabel(r'count')
+
+        # iterations
+        for it, df in enumerate(dfs[1:]):
+            ax = axes[0, 1 + it]
+            ax.hist(
+                df['psi'],
+                100
+            )
+            rms = np.sqrt(
+                1 / df['psi'].shape[0] *
+                np.sum(
+                    df['psi'] ** 2
+                )
+            )
+            ax.axvline(rms, color='k', linestyle='dashed')
+            ax.set_title('iteration: {0}'.format(it))
+            ax.set_xlabel('config nr')
+            ax.set_ylabel(r'count')
+
+        fig.tight_layout()
+        fig.savefig('eps_plot_hist.png', dpi=300)
+
+    def plot_eps_data(self, dfs):
+        # check if this is a DC inversion
+        if 'datum' in dfs[0]:
+            dc_inv = True
+        else:
+            dc_inv = False
+
+        nr_y = len(dfs)
+        size_y = 5 / 2.54 * nr_y
+        if dc_inv:
+            nr_x = 1
+        else:
+            nr_x = 3
+        size_x = 15 / 2.54
+
+        fig, axes = plt.subplots(nr_y, nr_x, figsize=(size_x, size_y))
+        axes = np.atleast_2d(axes)
+
+        # plot initial data errors
+        df = dfs[0]
+        if dc_inv:
+            ax = axes[0, 0]
+            ax.scatter(
+                df['datum'] / df['eps_r'],
+                df['eps_r'],
+            )
+            ax.set_xlabel(r'$-log(|R|)$')
+            ax.set_ylabel(r'$eps_r$')
+        else:
+            # complex inversion
+            ax = axes[0, 0]
+            ax.scatter(
+                df['-log(|R|)'] / df['eps'],
+                df['eps'],
+            )
+            ax.set_xlabel(r'$-log(|R|)$')
+            ax.set_ylabel(r'$eps$')
+
+            ax = axes[0, 1]
+            ax.scatter(
+                df['-log(|R|)'] / df['eps_r'],
+                df['eps_p'],
+            )
+            ax.set_xlabel(r'$-log(|R|)$')
+            ax.set_ylabel(r'$eps$')
+
+            ax = axes[0, 2]
+            ax.scatter(
+                df['-Phase(rad)'] / df['eps_p'],
+                df['eps_p'],
+            )
+            ax.set_xlabel(r'$-log(|R|)$')
+            ax.set_ylabel(r'$eps$')
+
+        # iterations
+        for it, df in enumerate(dfs[1:]):
+            ax = axes[0, 1 + it]
+            ax.scatter(
+                range(0, df.shape[0]),
+                df['psi'],
+            )
+            rms = np.sqrt(
+                1 / df['psi'].shape[0] *
+                np.sum(
+                    df['psi'] ** 2
+                )
+            )
+            ax.axhline(rms, color='k', linestyle='dashed')
+            ax.set_title('iteration: {0}'.format(it))
+            ax.set_xlabel('config nr')
+            ax.set_ylabel(r'$\Psi$')
+
+        fig.tight_layout()
+        fig.savefig('eps_plot.png', dpi=300)
+
+    @staticmethod
+    def _read_eps_ctr(tomodir):
+        """Parse a CRTomo eps.ctr file.
+
+        TODO: change parameters to only provide eps.ctr file
+
+        Parameters
+        ----------
+        tomodir: string
+            Path to directory path
 
         """
+        epsctr_file = tomodir + os.sep + 'inv' + os.sep + 'eps.ctr'
+        if not os.path.isfile(epsctr_file):
+            print('eps.ctr not found: {0}'.format(invctr_file))
+            print(os.getcwd())
+            return 1
 
-        with open('eps.ctr', 'r') as fid:
+        with open(epsctr_file, 'r') as fid:
             lines = fid.readlines()
         import itertools
         group = itertools.groupby(lines, lambda x: x == '\n')
@@ -744,6 +931,7 @@ class tdMan(object):
                 tfile = StringIO(''.join(data))
                 df = pd.read_csv(tfile, delim_whitespace=True)
                 dfs.append(df)
+        return dfs
 
     def _read_inv_ctr(self, tomodir):
         """Read in selected results of the inv.ctr file
