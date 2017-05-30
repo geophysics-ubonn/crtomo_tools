@@ -312,8 +312,19 @@ class ParMan(object):
         # now determine elements in area
         elements_in_area = []
         for nr, element in enumerate(grid_polygons):
-            if polygon.intersects(element):
+            if polygon.contains(element):
                 elements_in_area.append(nr)
+            elif polygon.equals(element):
+                elements_in_area.append(nr)
+            elif polygon.crosses(element):
+                elements_in_area.append(nr)
+                # only take crossed elements with at least A % overlap
+                # int_area = polygon.intersect(element).area
+                # print('overlap: ',
+                #       int_area,
+                #       element.area,
+                #       element.area / int_area
+                #       )
 
         # change the values
         pid_clean = self._clean_pid(pid)
