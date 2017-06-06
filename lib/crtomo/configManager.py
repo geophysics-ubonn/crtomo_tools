@@ -1298,6 +1298,7 @@ class ConfigManager(object):
         return K
 
     def gen_configs_permutate(self, injections_raw,
+                              only_same_dipole_length=False,
                               ignore_crossed_dipoles=False):
         """
         Create measurement configurations out of a pool of current injections.
@@ -1311,7 +1312,9 @@ class ConfigManager(object):
         ----------
         injections_raw: Nx2 array
             current injections
-        ignore_crossed_dipoles: bool
+        only_same_dipole_length: bool, optional
+            if True, only generate permutations for the same dipole length
+        ignore_crossed_dipoles: bool, optional
             If True, potential dipoles will be ignored that lie between current
             dipoles,  e.g. 1-4 3-5. In this case it is possible to not have
             full normal-reciprocal coverage.
@@ -1331,7 +1334,19 @@ class ConfigManager(object):
         measurements = []
 
         for injection in range(0, N):
+            dipole_length = np.abs(
+                injections[injection][1] -
+                injections[injection][0]
+            )
+
+            # select all dipole EXCEPT for the injection dipole
             for i in set(range(0, N)) - set([injection]):
+                test_dipole_length = np.abs(
+                    injections[i, :][1] - injections[i, :][0]
+                )
+                if(only_same_dipole_length and
+                   test_dipole_length != dipole_length):
+                    continue
                 quadpole = np.array(
                     [
                         injections[injection, :],
@@ -1662,3 +1677,8 @@ class ConfigManager(object):
         )
 
         return fig, ax
+
+    def write_configs(self, filename):
+        """Write configs to file in four columns
+        """
+        np.savetxt(filename, self.configs, fmt='%i %i %i %i')
