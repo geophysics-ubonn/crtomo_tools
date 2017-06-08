@@ -1319,9 +1319,6 @@ class ConfigManager(object):
             dipoles,  e.g. 1-4 3-5. In this case it is possible to not have
             full normal-reciprocal coverage.
 
-            Note that the 'ignore_crossed_dipoles' option is specific to
-            rhizotrons with 38 or less electrodes.
-
         Returns
         -------
         configs: Nx4 array
@@ -1357,31 +1354,14 @@ class ConfigManager(object):
                     # check if we need to ignore this dipole
                     # Note: this could be wrong if electrode number are not
                     # ascending!
-                    if((quadpole[0] < 33 and quadpole[1] < 33) or
-                       (quadpole[0] > 33 and quadpole[1] > 33)):
-                        if(quadpole[2] > quadpole[0] and
-                           quadpole[2] < quadpole[1]):
-                            print('A - ignoring', quadpole)
-                        elif(quadpole[3] > quadpole[0] and
-                             quadpole[3] < quadpole[1]):
-                            print('B - ignoring', quadpole)
-                        else:
-                            measurements.append(quadpole)
-                    # special cases involing electrodes 27 and 14
-                    if(quadpole[0] == 27 and quadpole[1] > 32):
-                        if(quadpole[2] in range(32, quadpole[1] + 1) or
-                           quadpole[3] in range(32, quadpole[1] + 1)):
-                            print('C - ignoring', quadpole)
-                        else:
-                            measurements.append(quadpole)
-
-                    if(quadpole[0] > 32 and quadpole[1] == 14):
-                        if(quadpole[2] in range(quadpole[0], 39) or
-                           quadpole[3] in range(quadpole[0], 39)):
-                            print('D - ignoring', quadpole)
-                        else:
-                            measurements.append(quadpole)
-
+                    if(quadpole[2] > quadpole[0] and
+                       quadpole[2] < quadpole[1]):
+                        print('A - ignoring', quadpole)
+                    elif(quadpole[3] > quadpole[0] and
+                         quadpole[3] < quadpole[1]):
+                        print('B - ignoring', quadpole)
+                    else:
+                        measurements.append(quadpole)
                 else:
                     # add very quadpole
                     measurements.append(quadpole)
@@ -1662,7 +1642,21 @@ class ConfigManager(object):
             aspect='auto',
             vmin=kwargs.get('cbmin', None),
             vmax=kwargs.get('cbmax', None),
+            extent=[
+                0, max(AB_coords),
+                0, max(MN_coords),
+            ],
         )
+
+        max_xy = max((max(AB_coords), max(MN_coords)))
+        ax.plot(
+            (0, max_xy),
+            (0, max_xy),
+            '-',
+            color='k',
+            linewidth=1.0,
+        )
+
         if not kwargs.get('nocb', False):
             cb = fig.colorbar(im, ax=ax)
             cb.set_label(
