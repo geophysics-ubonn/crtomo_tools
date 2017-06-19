@@ -141,7 +141,7 @@ def find_unfinished_tomodirs(directory):
             if check_if_needs_inversion(root):
                 needs_inversion.append(root)
 
-    return needs_modeling, needs_inversion
+    return sorted(needs_modeling), sorted(needs_inversion)
 
 
 def _run_crmod_in_tomodir(tomodir):
@@ -191,8 +191,10 @@ def run_CRTomo(tomodirs, options):
 def main():
     options = handle_cmd_options()
     needs_modeling, needs_inversion = find_unfinished_tomodirs('.')
+    print('-' * 20)
     print('modeling:', needs_modeling)
     print('inversion:', needs_inversion)
+    print('-' * 20)
 
     run_CRMod(needs_modeling, options)
     run_CRTomo(needs_inversion, options)

@@ -1344,6 +1344,20 @@ i6,t105,g9.3,t117,f5.3)
             )
         self.assignments['measurements'] = [mid_mag, mid_pha]
 
+    def register_forward_model(self, pid_mag, pid_pha):
+        """Register parameter sets as the forward models for magnitude and
+        phase
+
+        Parameters
+        ----------
+        pid_mag: int
+            parameter id corresponding to the magnitude model
+        pid_pha: int
+            parameter id corresponding to the phase model
+        """
+        self.register_magnitude_model(pid_mag)
+        self.register_phase_model(pid_pha)
+
     def register_magnitude_model(self, pid):
         """Set a given parameter model to the forward magnitude model
         """

@@ -759,6 +759,8 @@ class crt_grid(object):
                 print('there was an error generating the grid')
                 print(e.returncode)
                 print(e.output)
+                import shutil
+                shutil.copytree(tempdir, pwd + os.sep + 'GRID_FAIL')
                 exit()
 
             os.chdir(pwd)
