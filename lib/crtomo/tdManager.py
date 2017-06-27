@@ -224,10 +224,19 @@ class tdMan(object):
         ----------
         filename: string
             filename to rho.dat file
+
+        Returns
+        -------
+        pid_mag: int
+            parameter id for the magnitude model
+        pid_pha: int
+            parameter id for the phase model
+
         """
         pids = self.parman.load_from_rho_file(filename)
         self.register_magnitude_model(pids[0])
         self.register_phase_model(pids[1])
+        return pids
 
     def save_to_tomodir(self, directory):
         """Save the tomodir instance to a directory structure.
