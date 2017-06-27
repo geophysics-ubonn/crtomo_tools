@@ -12,6 +12,8 @@ import os
 import shutil
 from optparse import OptionParser
 
+import crtomo.cfg
+
 
 def handle_cmd_options():
     '''
@@ -34,17 +36,6 @@ def move(fname, folder, options):
             print('{0} missing'.format(fname))
 
 
-def sip_copy(fname, options):
-    '''
-    If fname missing use default one in ~/.sip
-    '''
-    if options.silent is False:
-        print('{0} missing, using default one stored in ~/.sip'.format(fname))
-
-    if os.path.isfile('~/.sip/{0}'.format(fname)):
-        shutil.copy('~/.sip/{0}'.format(fname), 'exe')
-
-
 def main():
     (options, args) = handle_cmd_options()
     for i in ['config', 'exe', 'grid', 'mod', 'mod/sens', 'mod/pot',
@@ -60,12 +51,15 @@ def main():
     if os.path.isfile('crmod.cfg'):
         shutil.move('crmod.cfg', 'exe')
     elif os.path.isfile('config/config.dat'):
-        sip_copy('crmod.cfg', options)
+        # only copy the crmod.cfg file if a config.dat file exists
+        cfg = crtomo.cfg.crmod_config()
+        cfg.write_to_file('exe/crmod.cfg')
 
     if os.path.isfile('crtomo.cfg'):
         shutil.move('crtomo.cfg', 'exe')
     else:
-        sip_copy('crtomo.cfg', options)
+        cfg = crtomo.cfg.crtomo_config()
+        cfg.write_to_file('exe/crtomo.cfg')
 
 
 if __name__ == '__main__':
