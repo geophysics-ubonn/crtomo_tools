@@ -911,7 +911,7 @@ class tdMan(object):
         """
         epsctr_file = tomodir + os.sep + 'inv' + os.sep + 'eps.ctr'
         if not os.path.isfile(epsctr_file):
-            print('eps.ctr not found: {0}'.format(invctr_file))
+            print('eps.ctr not found: {0}'.format(epsctr_file))
             print(os.getcwd())
             return 1
 
@@ -1322,21 +1322,33 @@ i6,t105,g9.3,t117,f5.3)
             pid = self.parman.add_data(subdata[:, 0])
             self.assignments['resm'] = pid
 
-    def register_measurements(self, mid_mag, mid_pha=None):
+    def register_measurements(self, mag, pha=None):
         """Register measurements as magnitude/phase measurements used for the
         inversion
 
         Parameters
         ----------
-        mid_mag: int
+        mag: int|numpy.ndarray
             magnitude measurements id for the corresponding measurement data in
-            self.configs.measurements
-        mid_pha: int, optional
+            self.configs.measurements. If mag is a numpy.ndarray, assume
+            mag to be the data itself an register it
+        pha: int, optional
             phase measurements id for the corresponding measurement data in
             self.configs.measurements. If not present, a new measurement set
             will be added with zeros only.
         """
-        if mid_pha is None:
+        if isinstance(mag, np.ndarray):
+            mid_mag = self.configs.add_measurements(mag)
+        else:
+            mid_mag = mag
+
+        if pha is not None:
+            if isinstance(pha, np.ndarray):
+                mid_pha = self.configs.add_measurements(pha)
+            else:
+                mid_pha = pha
+
+        else:
             mid_pha = self.configs.add_measurements(
                 np.zeros_like(
                     self.configs.measurements[mid_mag]
