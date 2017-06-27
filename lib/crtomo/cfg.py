@@ -212,8 +212,7 @@ class crtomo_config(dict):
         self['lambda'] = 'lambda'
 
     def write_to_file(self, filename):
-        """
-        Write the configuration to a file. Use the correct order of values.
+        """ Write the configuration to a file. Use the correct order of values.
         """
         fid = open(filename, 'w')
 
@@ -248,3 +247,12 @@ class crtomo_config(dict):
             else:
                 representation += '{0}       !  {1}\n'.format(self[key], key)
         return representation
+
+    def help(key):
+        """Return the help text specific to a certain key
+        """
+        help_dict = {
+
+        }
+        return_text = help_dict.get(key, 'no help available')
+        return return_text
