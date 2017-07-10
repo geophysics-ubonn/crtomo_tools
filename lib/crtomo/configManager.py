@@ -1285,7 +1285,8 @@ class ConfigManager(object):
         # fig.savefig('out.png', dpi=300)
         return fig
 
-    def compute_K_factors(self, spacing, configs=None):
+    def compute_K_factors(self, spacing=None, configs=None, numerical=False,
+                          elem_file=None, elec_file=None):
         """Compute analytical geometrical factors.
 
         TODO: use real electrode positions from self.grid
@@ -1294,7 +1295,16 @@ class ConfigManager(object):
             use_configs = self.configs
         else:
             use_configs = configs
-        K = edfK.compute_K_analytical(use_configs, spacing=spacing)
+
+        if numerical:
+            settings = {
+                'elem': elem_file,
+                'elec': elec_file,
+                'rho': 100,
+            }
+            K = edfK.compute_K_numerical(use_configs, settings)
+        else:
+            K = edfK.compute_K_analytical(use_configs, spacing=spacing)
         return K
 
     def gen_configs_permutate(self, injections_raw,
