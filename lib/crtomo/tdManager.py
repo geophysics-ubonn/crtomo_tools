@@ -60,7 +60,8 @@ from io import StringIO
 import numpy as np
 import pandas as pd
 
-from crtomo.mpl_setup import *
+import crtomo.mpl
+crtomo.mpl.setup()
 import crtomo.binaries as CRBin
 import crtomo.grid as CRGrid
 import crtomo.nodeManager as nM
