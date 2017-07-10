@@ -10,50 +10,56 @@ Examples
     >>> from crtomo.mpl_setup import *
 
 """
-import sys
-already_loaded = 'matplotlib' in sys.modules
 
-# just make sure we can access matplotlib as mpl
-import matplotlib as mpl
 
-if(not already_loaded):
+def setup():
+    """import the matplotlib modules and set the style
+    """
+    import sys
+    already_loaded = 'matplotlib' in sys.modules
+
+    # just make sure we can access matplotlib as mpl
+    import matplotlib as mpl
+
+    if(not already_loaded):
+        mpl.use('Agg')
+
+    # general settings
+    mpl.rcParams["lines.linewidth"] = 2.0
+    mpl.rcParams["lines.markeredgewidth"] = 3.0
+    mpl.rcParams["lines.markersize"] = 3.0
+    mpl.rcParams["font.size"] = 8
+    # mpl.rcParams['font.sans-serif'] = 'Droid Sans'
+
+    mpl.rcParams['font.family'] = 'Open Sans'
+    # mpl.rcParams['font.weight'] = 400
+    mpl.rcParams['mathtext.default'] = 'regular'
+
+    # mpl.rcParams['font.family'] = 'Droid Sans'
+
+    mpl.rcParams['text.usetex'] = True
+    mpl.rcParams['text.latex.unicode'] = True
+
+    mpl.rc(
+        'text.latex',
+        preamble=''.join((
+            # r'\usepackage{droidsans}',
+            # r'\usepackage[T1]{fontenc} ',
+            r'\usepackage{sfmath} \renewcommand{\rmfamily}{\sffamily}',
+            r'\renewcommand\familydefault{\sfdefault} ',
+            # r'\usepackage{mathastext} '
+        ))
+    )
+
     mpl.use('Agg')
 
-# general settings
-mpl.rcParams["lines.linewidth"] = 2.0
-mpl.rcParams["lines.markeredgewidth"] = 3.0
-mpl.rcParams["lines.markersize"] = 3.0
-mpl.rcParams["font.size"] = 8
-# mpl.rcParams['font.sans-serif'] = 'Droid Sans'
+    import matplotlib.pyplot as plt
+    plt
 
-mpl.rcParams['font.family'] = 'Open Sans'
-# mpl.rcParams['font.weight'] = 400
-mpl.rcParams['mathtext.default'] = 'regular'
+    plt.style.use('seaborn')
 
-# mpl.rcParams['font.family'] = 'Droid Sans'
-
-mpl.rcParams['text.usetex'] = True
-mpl.rcParams['text.latex.unicode'] = True
-
-mpl.rc(
-    'text.latex',
-    preamble=''.join((
-        # r'\usepackage{droidsans} ',
-        # r'\usepackage[T1]{fontenc} ',
-        r'\usepackage{sfmath} \renewcommand{\rmfamily}{\sffamily}',
-        r'\renewcommand\familydefault{\sfdefault} ',
-        # r'\usepackage{mathastext} '
-    ))
-)
-
-
-mpl.use('Agg')
-
-import matplotlib.pyplot as plt
-plt
-
-import mpl_toolkits.axes_grid1 as axes_grid1
-axes_grid1
+    import mpl_toolkits.axes_grid1 as axes_grid1
+    axes_grid1
 
 
 def mpl_get_cb_bound_next_to_plot(ax):
