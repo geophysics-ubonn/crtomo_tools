@@ -782,7 +782,7 @@ class tdMan(object):
                 df['datum'] / df['eps_r'],
                 100,
             )
-            ax.set_xlabel(r'$-log(|R|)$')
+            ax.set_xlabel(r'$-log(|R|) / \epsilon_r$')
             ax.set_ylabel(r'count')
         else:
             # complex inversion
@@ -799,20 +799,22 @@ class tdMan(object):
                 df['-log(|R|)'] / df['eps_r'],
                 100,
             )
-            ax.set_xlabel(r'$-log(|R|)$')
+            ax.set_xlabel(r'$-log(|R|) / \epsilon_r$')
             ax.set_ylabel(r'count')
 
             ax = axes[0, 2]
-            ax.hist(
-                df['-Phase(rad)'] / df['eps_p'],
-                100,
-            )
-            ax.set_xlabel(r'$-log(|R|)$')
+            phase_data = df['-Phase(rad)'] / df['eps_p']
+            if not np.all(np.isinf(phase_data) | np.isnan(phase_data)):
+                ax.hist(
+                    phase_data,
+                    100,
+                )
+            ax.set_xlabel(r'$-\phi[rad] / \epsilon_p$')
             ax.set_ylabel(r'count')
 
         # iterations
         for it, df in enumerate(dfs[1:]):
-            ax = axes[0, 1 + it]
+            ax = axes[1 + it, 0]
             ax.hist(
                 df['psi'],
                 100
@@ -825,8 +827,30 @@ class tdMan(object):
             )
             ax.axvline(rms, color='k', linestyle='dashed')
             ax.set_title('iteration: {0}'.format(it))
-            ax.set_xlabel('config nr')
+            ax.set_xlabel('psi')
             ax.set_ylabel(r'count')
+
+            ax = axes[1 + it, 1]
+            Rdat = df['Re(d)']
+            Rmod = df['Re(f(m))']
+
+            ax.scatter(
+                Rdat,
+                Rmod,
+            )
+            ax.set_xlabel(r'$log(R_{data}~[\Omega])$')
+            ax.set_ylabel(r'$log(R_{mod}~[\Omega])$')
+
+            ax = axes[1 + it, 2]
+            phidat = df['Im(d)']
+            phimod = df['Im(f(m))']
+
+            ax.scatter(
+                phidat,
+                phimod,
+            )
+            ax.set_xlabel(r'$\phi_{data}~[mrad]$')
+            ax.set_ylabel(r'$\phi_{mod}~[mrad]$')
 
         fig.tight_layout()
         fig.savefig('eps_plot_hist.png', dpi=300)
@@ -887,7 +911,7 @@ class tdMan(object):
 
         # iterations
         for it, df in enumerate(dfs[1:]):
-            ax = axes[0, 1 + it]
+            ax = axes[1 + it, 0]
             ax.scatter(
                 range(0, df.shape[0]),
                 df['psi'],
@@ -938,7 +962,11 @@ class tdMan(object):
                     del(data[0])
                 data[0] = data[0].replace('-Phase (rad)', '-Phase(rad)')
                 tfile = StringIO(''.join(data))
-                df = pd.read_csv(tfile, delim_whitespace=True)
+                df = pd.read_csv(
+                    tfile,
+                    delim_whitespace=True,
+                    na_values=['Infinity'],
+                )
                 dfs.append(df)
         return dfs
 
