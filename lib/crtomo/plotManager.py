@@ -250,14 +250,15 @@ class plotManager(object):
             name of the colorbar to use. Default is "jet". To reverse colors,
             use the _r version "jet_r"
         cbposition
-        cblabel
+        cblabel: string, optional
+            colorbar label
         cbsegments: int, optional
         cbnrticks: int, optional
         plot_colorbar: bool
         title: string, optional
             plot title string
-        xlabel
-        ylabel
+        xlabel: string, optional
+        ylabel: string, optional
 
         Returns
         -------
