@@ -60,6 +60,7 @@ def setup():
 
     import mpl_toolkits.axes_grid1 as axes_grid1
     axes_grid1
+    return plt, mpl
 
 
 def mpl_get_cb_bound_next_to_plot(ax):

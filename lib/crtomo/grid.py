@@ -39,7 +39,7 @@ import os
 import numpy as np
 
 import crtomo.mpl
-crtomo.mpl.setup()
+plt, mpl = crtomo.mpl.setup()
 
 
 class crt_grid(object):

@@ -49,19 +49,20 @@
       (sigma) and potential data (nodes) in j = sigma E
 
 """
-import sys
 import glob
 import re
 import os
 import tempfile
 import subprocess
 from io import StringIO
+import itertools
 
 import numpy as np
 import pandas as pd
 
 import crtomo.mpl
-crtomo.mpl.setup()
+plt, mpl = crtomo.mpl.setup()
+
 import crtomo.binaries as CRBin
 import crtomo.grid as CRGrid
 import crtomo.nodeManager as nM
@@ -680,8 +681,8 @@ class tdMan(object):
         print('Using binary: {0}'.format(binary))
         print('calling CRTomo')
         # store env variable
-        env_omp = sys.env.get('OMP_NUM_THREADS', '')
-        sys.env['OMP_NUM_THREADS'] = '{0}'.format(nr_cores)
+        env_omp = os.environ.get('OMP_NUM_THREADS', '')
+        os.environ['OMP_NUM_THREADS'] = '{0}'.format(nr_cores)
         if catch_output:
             subprocess.check_output(
                 binary,
@@ -694,12 +695,12 @@ class tdMan(object):
                 shell=True,
             )
         # reset environment variable
-        sys.env['OMP_NUM_THREADS'] = env_omp
+        os.environ['OMP_NUM_THREADS'] = env_omp
 
         print('finished')
 
         os.chdir(pwd)
-        self._read_inversion_results(tempdir)
+        self.read_inversion_results(tempdir)
 
     def invert(self, output_directory=None, catch_output=True, **kwargs):
         """Invert this instance, and import the result files
@@ -748,9 +749,12 @@ class tdMan(object):
             )
             return 1
 
-    def _read_inversion_results(self, tomodir):
+    def read_inversion_results(self, tomodir):
+        """Import inversion results from a tomodir into this instance
+        """
         self._read_inv_ctr(tomodir)
         self._read_resm_m(tomodir)
+        self._read_eps_ctr(tomodir)
 
     def plot_eps_data_hist(self, dfs):
         """Plot histograms of data residuals and data error weighting
@@ -942,6 +946,10 @@ class tdMan(object):
         tomodir: string
             Path to directory path
 
+        Returns
+        -------
+
+
         """
         epsctr_file = tomodir + os.sep + 'inv' + os.sep + 'eps.ctr'
         if not os.path.isfile(epsctr_file):
@@ -951,7 +959,6 @@ class tdMan(object):
 
         with open(epsctr_file, 'r') as fid:
             lines = fid.readlines()
-        import itertools
         group = itertools.groupby(lines, lambda x: x == '\n')
         dfs = []
         # group
@@ -1300,6 +1307,7 @@ i6,t105,g9.3,t117,f5.3)
         return df
 
     def plot_inversion_evolution(self, df, filename):
+        g = df.groupby('iteration')
         fig, ax = plt.subplots()
         # update iterations
         for name, group in g:
