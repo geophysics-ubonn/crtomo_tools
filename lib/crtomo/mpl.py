@@ -21,17 +21,24 @@ def setup():
     # just make sure we can access matplotlib as mpl
     import matplotlib as mpl
 
-    if(not already_loaded):
+    if not already_loaded:
         mpl.use('Agg')
 
+    import matplotlib.pyplot as plt
+
+    plt.style.use('seaborn')
+
     # general settings
+    mpl.rcParams['font.size'] = 8.0
+    mpl.rcParams['axes.labelsize'] = 8.0
+    mpl.rcParams['xtick.labelsize'] = 8.0
+    mpl.rcParams['ytick.labelsize'] = 8.0
     mpl.rcParams["lines.linewidth"] = 2.0
     mpl.rcParams["lines.markeredgewidth"] = 3.0
     mpl.rcParams["lines.markersize"] = 3.0
-    mpl.rcParams["font.size"] = 8
     # mpl.rcParams['font.sans-serif'] = 'Droid Sans'
 
-    mpl.rcParams['font.family'] = 'Open Sans'
+    # mpl.rcParams['font.family'] = 'Open Sans'
     # mpl.rcParams['font.weight'] = 400
     mpl.rcParams['mathtext.default'] = 'regular'
 
@@ -50,14 +57,6 @@ def setup():
             # r'\usepackage{mathastext} '
         ))
     )
-
-    mpl.use('Agg')
-
-    import matplotlib.pyplot as plt
-    plt
-
-    plt.style.use('seaborn')
-
     import mpl_toolkits.axes_grid1 as axes_grid1
     axes_grid1
     return plt, mpl
