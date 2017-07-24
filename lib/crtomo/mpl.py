@@ -29,11 +29,11 @@ def setup():
     plt.style.use('seaborn')
 
     # general settings
-    mpl.rcParams['font.size'] = 8.0
-    mpl.rcParams['axes.labelsize'] = 8.0
-    mpl.rcParams['xtick.labelsize'] = 8.0
-    mpl.rcParams['ytick.labelsize'] = 8.0
-    mpl.rcParams["lines.linewidth"] = 2.0
+    mpl.rcParams['font.size'] = 7.0
+    mpl.rcParams['axes.labelsize'] = 7.0
+    mpl.rcParams['xtick.labelsize'] = 7.0
+    mpl.rcParams['ytick.labelsize'] = 7.0
+    mpl.rcParams["lines.linewidth"] = 1.5
     mpl.rcParams["lines.markeredgewidth"] = 3.0
     mpl.rcParams["lines.markersize"] = 3.0
     # mpl.rcParams['font.sans-serif'] = 'Droid Sans'
