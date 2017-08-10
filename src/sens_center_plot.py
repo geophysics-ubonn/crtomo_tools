@@ -1,12 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-"""
-For each measurement configuration, the sensitivity distribution and the
+""" For each measurement configuration, the sensitivity distribution and the
 center of mass of its values is computed.
 
-Then for all measurements sensitivities and centers of mass are plotted
-in the grid. This might give a better overview on the sensitivities of our
-measurement configuration.
+Then for all measurements sensitivities and centers of mass are plotted in the
+grid. This might give a better overview on the sensitivities of our measurement
+configuration.
 
 Different weights for the sensitivities can be used (--weight):
 
@@ -41,62 +40,115 @@ Use alternative weighting functions:
 
 
 """
-from crtomo.mpl_setup import *
+import crtomo.mpl
+plt, mpl = crtomo.mpl.setup()
 from optparse import OptionParser
 import numpy as np
 import shutil
 
-# import crtomo.grid as CRGrid
-# import crtomo.cfg as CRcfg
-import crlab_py.elem as elem
-import crlab_py.CRMod as CRMod
+import crtomo.grid as CRGrid
+import crtomo.cfg as CRcfg
+# import crlab_py.elem as elem
+# import crlab_py.CRMod as CRMod
 
 
 def handle_cmd_options():
     parser = OptionParser()
-    parser.add_option("-e", "--elem", dest="elem_file", type="string",
-                      help="elem.dat file (default: elem.dat)",
-                      default="elem.dat")
-    parser.add_option("-t", "--elec", dest="elec_file", type="string",
-                      help="elec.dat file (default: elec.dat)",
-                      default="elec.dat")
-    parser.add_option("--config", dest="config_file", type="string",
-                      help="config.dat file (default: config.dat)",
-                      default="config.dat")
-    parser.add_option("-i", "--use_first_line", action="store_true",
-                      dest="use_first_line", default=False,
-                      help="Normally the first line of the config file is " +
-                      "ignored, but if set to True, it will be used. " +
-                      "Default: False")
-    parser.add_option('-s', "--sink", dest="sink", type="int",
-                      help="Fictitious sink node nr, implies 2D mode",
-                      default=None)
-    parser.add_option("--data", dest="data_file", type="string",
-                      help="Data file (default: volt.dat)",
-                      default='volt.dat')
-    parser.add_option("-f", "--frequency", dest="frequency", type="int",
-                      help="Frequency/Column in volt.dat, starting from 0 " +
-                      "(default: 2)", default=2)
+    parser.add_option(
+        "-e", "--elem",
+        dest="elem_file",
+        type="string",
+        help="elem.dat file (default: elem.dat)",
+        default="elem.dat"
+    )
+    parser.add_option(
+        "-t", "--elec",
+        dest="elec_file",
+        type="string",
+        help="elec.dat file (default: elec.dat)",
+        default="elec.dat"
+    )
+    parser.add_option(
+        "--config", dest="config_file",
+        type="string",
+        help="config.dat file (default: config.dat)",
+        default="config.dat"
+    )
+    parser.add_option(
+        "-i", "--use_first_line",
+        action="store_true",
+        dest="use_first_line",
+        default=False,
+        help="Normally the first line of the config file is " +
+        "ignored, but if set to True, it will be used. " +
+        "Default: False"
+    )
+    parser.add_option(
+        '-s', "--sink",
+        dest="sink",
+        type="int",
+        help="Fictitious sink node nr, implies 2D mode",
+        default=None
+    )
+    parser.add_option(
+        "--data", dest="data_file",
+        type="string",
+        help="Data file (default: volt.dat)",
+        default='volt.dat'
+    )
+    parser.add_option(
+        "-f", "--frequency",
+        dest="frequency",
+        type="int",
+        help="Frequency/Column in volt.dat, starting from 0 " +
+        "(default: 2)",
+        default=2
+    )
 
-    parser.add_option("-o", "--output", dest="output_file", type="string",
-                      help="Output file (plot) (default: sens_center.png)",
-                      default='sens_center.png')
+    parser.add_option(
+        "-o", "--output",
+        dest="output_file",
+        type="string",
+        help="Output file (plot) (default: sens_center.png)",
+        default='sens_center.png'
+    )
 
-    parser.add_option("--cblabel", dest="cblabel", type="string",
-                      help=r"ColorbarLabel (default: $Data$)",
-                      default=r'$Data$')
-    parser.add_option("--label", dest="label", type="string",
-                      help=r"Label (default: none)", default=r'$ $')
-    parser.add_option("-w", "--weight", dest="weight_int", type="int",
-                      help="Choose the weights used : 0 - unweighted, 1 - " +
-                      "abs, 2 -log10, 3 - sqrt", default=0)
-    parser.add_option("-c", "--plot_configurations", action="store_true",
-                      dest="plot_configurations", default=False,
-                      help="Plots every configuration sensitivity center in " +
-                      "a single file. Default: False")
-    parser.add_option("--no_plot", action="store_true",
-                      dest="no_plot", default=False,
-                      help="Do not create center plot (only text output)")
+    parser.add_option(
+        "--cblabel", dest="cblabel",
+        type="string",
+        help=r"ColorbarLabel (default: $Data$)",
+        default=r'$Data$'
+    )
+    parser.add_option(
+        "--label",
+        dest="label",
+        type="string",
+        help=r"Label (default: none)",
+        default=r'$ $'
+    )
+    parser.add_option(
+        "-w", "--weight",
+        dest="weight_int",
+        type="int",
+        help="Choose the weights used : 0 - unweighted, 1 - " +
+        "abs, 2 -log10, 3 - sqrt",
+        default=0
+    )
+    parser.add_option(
+        "-c", "--plot_configurations",
+        action="store_true",
+        dest="plot_configurations",
+        default=False,
+        help="Plots every configuration sensitivity center in " +
+        "a single file. Default: False"
+    )
+    parser.add_option(
+        "--no_plot",
+        action="store_true",
+        dest="no_plot",
+        default=False,
+        help="Do not create center plot (only text output)"
+    )
 
     (options, args) = parser.parse_args()
     return options
@@ -113,10 +165,18 @@ class sens_center:
         self.output_file = None
         self.grid = CRGrid.crt_grid(elem_file, elec_file)
 
-    def plot_single_configuration(self, id, sens_file):
+    def plot_single_configuration(self, config_nr, sens_file):
         """
         plot sensitivity distribution with center of mass for
         a single configuration. The electrodes used are colored.
+
+        Parameters
+        ----------
+        config_nr: int
+            number of configuration
+        sens_file: string, file path
+            filename to sensitvity file
+
         """
         indices = elem.load_column_file_to_elements_advanced(
             sens_file, [2, 3],
@@ -134,13 +194,22 @@ class sens_center:
 
         fig = plt.figure(figsize=(5, 7))
         ax = fig.add_subplot(111)
-        ax, pm, cb = elem.plot_element_data_to_ax(indices[0], ax,
-                                                  scale='asinh',
-                                                  no_cb=False)
-        ax.scatter(self.sens_centers[id, 0], self.sens_centers[id, 1],
-                   marker='*', s=50, color='w', edgecolors='w')
+        ax, pm, cb = elem.plot_element_data_to_ax(
+            indices[0],
+            ax,
+            scale='asinh',
+            no_cb=False,
+        )
+        ax.scatter(
+            self.sens_centers[config_nr, 0],
+            self.sens_centers[config_nr, 1],
+            marker='*',
+            s=50,
+            color='w',
+            edgecolors='w',
+        )
 
-        self.color_electrodes(id, ax)
+        self.color_electrodes(config_nr, ax)
 
         # Output
         sensf = sens_file.split('sens')[-1]
@@ -199,7 +268,7 @@ class sens_center:
 
         fig.savefig(self.output_file, bbox_inches='tight', dpi=300)
 
-    def color_electrodes(self, id, ax):
+    def color_electrodes(self, config_nr, ax):
         """
         Color the electrodes used in specific configuration.
         Voltage electrodes are yellow, Current electrodes are red ?!
@@ -210,7 +279,7 @@ class sens_center:
 
         conf = []
         for dim in range(0, electrodes.shape[1]):
-            c = electrodes[id, dim]
+            c = electrodes[config_nr, dim]
             # c = c.partition('0')
             a = np.round(c / 10000) - 1
             b = np.mod(c, 10000) - 1
@@ -353,9 +422,12 @@ class sens_center:
 def main():
     options = handle_cmd_options()
 
-    center_obj = sens_center(options.elem_file, options.elec_file,
-                             options,
-                             weight=options.weight_int)
+    center_obj = sens_center(
+        options.elem_file,
+        options.elec_file,
+        options,
+        weight=options.weight_int,
+    )
     center_obj.cblabel = options.cblabel
     center_obj.output_file = options.output_file
 
