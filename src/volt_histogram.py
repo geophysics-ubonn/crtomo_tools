@@ -7,7 +7,7 @@ If a command line parameter is provided, this file we be used for plotting.
 Examples
 --------
 
->>> volt_histogram volt_01_f_0.000.crt
+# volt_histogram volt_01_f_0.000.crt
 loading file: volt_01_f_0.000.crt
 minimum/maximum magnitude: 0.000399 / 4.500319 Ohm
 minimum/maximum phase: -49.41 / 18.765 mrad
@@ -30,7 +30,7 @@ Phase percentile 70%: 0.255
 Phase percentile 80%: 1.4160000000000013
 Phase percentile 90%: 4.132500000000004
 
->>> volt_histogram
+# volt_histogram
 loading file: mod/volt.dat
 minimum/maximum magnitude: 0.000164396115 / 9.16193485 Ohm
 minimum/maximum phase: 0.0 / 0.0 mrad
@@ -58,7 +58,8 @@ import sys
 import os
 import numpy as np
 
-from crtomo.mpl_setup import *
+import crtomo.mpl
+plt, mpl = crtomo.mpl.setup()
 
 
 def main():

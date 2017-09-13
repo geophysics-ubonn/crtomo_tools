@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # *-* coding: utf-8 *-*
-"""Tranfer complex resistivity models between two FE grids.
+"""Transfer complex resistivity models between two FE grids.
 """
 import os
 # import shapely
