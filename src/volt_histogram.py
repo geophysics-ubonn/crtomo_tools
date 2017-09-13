@@ -73,6 +73,8 @@ def main():
     if len(sys.argv) > 1:
         voltfiles = [sys.argv[-1], ]
 
+    # quit on the first hit
+    volt_data = None
     for filename in voltfiles:
         if not os.path.isfile(filename):
             continue
@@ -80,6 +82,9 @@ def main():
         print('loading file: {0}'.format(filename))
         volt_data = np.loadtxt(filename, skiprows=1)
         break
+
+    if volt_data is None:
+        raise Exception('no suitable volt.dat file found!')
 
     print('minimum/maximum magnitude: {0} / {1} Ohm'.format(
         np.min(volt_data[:, 2]),
