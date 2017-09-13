@@ -68,7 +68,7 @@ def _almost_equal(a, b):
     return (diff < threshold)
 
 
-if __name__ == '__main__':
+def main():
     options = handle_cmd_options()
 
     gx_old, gz_old, cells_old, rho_old = _load_grid(options.old_dir)
@@ -113,3 +113,7 @@ if __name__ == '__main__':
             )
         )
         np.savetxt(fid, rho_new)
+
+
+if __name__ == '__main__':
+    main()
