@@ -77,14 +77,16 @@ def td_is_finished(tomodir):
        os.path.isfile(tomodir + os.sep + 'inv/run.ctr') and
        os.path.isfile(tomodir + os.sep + 'mod/volt.dat')):
         with open(tomodir + os.sep + 'inv/run.ctr', 'r') as fid:
-            last_line = fid.readlines()[-1].strip()
-            regex = re.compile('CPU')
-            result = regex.match(last_line)
-            print('result', result)
-            if result is None:
-                crtomo_is_finished = False
-            else:
-                crtomo_is_finished = True
+            lines = fid.readlines()
+            crtomo_is_finished = False
+            # check the last 5 lines
+            for line in lines[-5:]:
+                test_line = line.strip()
+                regex = re.compile('CPU')
+                result = regex.match(test_line)
+                print('result', result)
+                if result is not None:
+                    crtomo_is_finished = True
     else:
         crtomo_is_finished = False
     return crmod_is_finished, crtomo_is_finished
