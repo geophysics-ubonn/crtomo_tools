@@ -1002,7 +1002,7 @@ class ConfigManager(object):
         else:
             return configs_unique
 
-    def gen_schlumberger(self, M, N):
+    def gen_schlumberger(self, M, N, a=None):
         """generate one Schlumberger sounding configuration, that is, one set
         of configurations for one potential dipole M-N.
 
@@ -1012,6 +1012,9 @@ class ConfigManager(object):
             electrode number for the first potential electrode
         N: int
             electrode number for the second potential electrode
+        a: int, optional
+            stepping between subsequent voltage electrodes. If not set,
+            determine it as a = |M - N|
 
         Returns
         -------
@@ -1080,7 +1083,9 @@ class ConfigManager(object):
 
 
         """
-        a = np.abs(M - N)
+        if a is None:
+            a = np.abs(M - N)
+
         nr_of_steps_left = int(min(M, N) - 1 / a)
         nr_of_steps_right = int((self.nr_electrodes - max(M, N)) / a)
         configs = []
