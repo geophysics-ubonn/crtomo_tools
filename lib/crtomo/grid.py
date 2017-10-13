@@ -5,7 +5,8 @@ Creating grids
 
 Grids can be created in various ways:
 
-    * Regular grids can be created using Griev
+    * Regular grids can be created using Griev (which is not supported any
+      more)
     * Irregular (triangular) grids are created using the command line tool
       'cr_trig_create'
     * the crt_grid class provides some simple wrapper functions for
@@ -23,6 +24,10 @@ via various structures:
     dict_keys(['bandwidth', 'element_infos', 'cutmck', 'nr_element_types',
               'nr_nodes'])
 
+    * nodes are stored in self.nodes. Various sortings are available. If in
+    doubt use self.nodes['presort'].
+
+    * elements are stored in self.elements (as node numbers)
 
 Examples
 --------
@@ -31,6 +36,12 @@ Examples
     grid = CRTGrid.crt_grid()
     grid.load_grid('elem.dat', 'elec.dat')
 
+>>> # extracting element coordinates in the order of rho.dat file
+    import crtomo.grid as CRGrid
+    grid = CRGrid.crt_grid(elem_file='elem.dat', elec_file='elec.dat')
+    # 1. element (oben links)
+    grid.nodes['presort'][grid.elements[0], :]
+    # columns: node number - x position - z position
 """
 import tempfile
 import subprocess
