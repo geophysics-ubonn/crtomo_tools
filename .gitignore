@@ -5,3 +5,4 @@ __pycache__
 crtomo_tools.egg-info
 tmp_grid_*
 .noseids
+doc/api/schlumberger_sounding.png
