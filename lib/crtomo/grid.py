@@ -18,16 +18,18 @@ Notes
 After loading an elem.dat file, i.e., the grid, grid information are exposed
 via various structures:
 
-    * the header is stored in the dict self.header
+    * the header is stored in the dict self.header::
 
-    >>> self.header.keys()
-    dict_keys(['bandwidth', 'element_infos', 'cutmck', 'nr_element_types',
-              'nr_nodes'])
+          >>> self.header.keys()
+              dict_keys(
+                ['bandwidth', 'element_infos', 'cutmck', 'nr_element_types',
+                'nr_nodes']
+              )
 
     * nodes are stored in self.nodes. Various sortings are available. If in
-    doubt use self.nodes['presort'].
-
+      doubt use self.nodes['presort'].
     * elements are stored in self.elements (as node numbers)
+
 
 Examples
 --------
