@@ -1004,7 +1004,7 @@ class ConfigManager(object):
 
     def gen_schlumberger(self, M, N, a=None):
         """generate one Schlumberger sounding configuration, that is, one set
-        of configurations for one potential dipole M-N.
+        of configurations for one potential dipole MN.
 
         Parameters
         ----------
@@ -1014,7 +1014,7 @@ class ConfigManager(object):
             electrode number for the second potential electrode
         a: int, optional
             stepping between subsequent voltage electrodes. If not set,
-            determine it as a = |M - N|
+            determine it as a = abs(M - N)
 
         Returns
         -------
@@ -1100,7 +1100,7 @@ class ConfigManager(object):
         return configs
 
     def gen_wenner(self, a):
-        """generate Wenner measurement configurations
+        """Generate Wenner measurement configurations.
 
         Parameters
         ----------
