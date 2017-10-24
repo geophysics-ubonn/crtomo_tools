@@ -84,7 +84,6 @@ def td_is_finished(tomodir):
                 test_line = line.strip()
                 regex = re.compile('CPU')
                 result = regex.match(test_line)
-                print('result', result)
                 if result is not None:
                     crtomo_is_finished = True
     else:
