@@ -7,11 +7,9 @@ END DOCUMENTATION
 import numpy as np
 import os
 from optparse import OptionParser
-import scipy as sc
 import crtomo.plotManager as CRPlot
 import crtomo.grid as CRGrid
-import pylab as plt
-import matplotlib
+import matplotlib.pyplot as plt
 
 
 def handle_base_options():
@@ -86,6 +84,53 @@ def handle_base_options():
     (options, args) = parser.parse_args()
     return options
 
+
+def handle_cov_options():
+    '''Handle options, which are the same for all subplots or for the overview.
+    '''
+    parser = OptionParser()
+    parser.add_option('--cov_cbtiks',
+                      dest='cbtiks',
+                      help="Number of CB tiks for coverage",
+                      type=int,
+                      metavar="INT",
+                      default=3,
+                      )
+
+    (options, args) = parser.parse_args()
+    return options
+
+
+def handle_mag_options():
+    '''Handle options, which are the same for all subplots or for the overview.
+    '''
+    parser = OptionParser()
+    parser.add_option('--mag_cbtiks',
+                      dest='cbtiks',
+                      help="Number of CB tiks for magnitude",
+                      type=int,
+                      metavar="INT",
+                      default=3,
+                      )
+
+    (options, args) = parser.parse_args()
+    return options
+
+
+def handle_pha_options():
+    '''Handle options, which are the same for all subplots or for the overview.
+    '''
+    parser = OptionParser()
+    parser.add_option('--pha_cbtiks',
+                      dest='cbtiks',
+                      help="Number of CB tiks for phase",
+                      type=int,
+                      metavar="INT",
+                      default=3,
+                      )
+
+    (options, args) = parser.parse_args()
+    return options
 
 # handle options for mag
     # linear, ctiks, cmin, cmax, cname
@@ -176,30 +221,138 @@ def load_rho(name):
     content = np.loadtxt(name, skiprows=1, usecols=([2]))
 
     return content
-# read in coverage
-# read in mag, pha
 
 # calculate real
 # calculate imag
-
-# plot content corresponding to identifiers, use plots below, return fig, ax
-# plot mag
-# plot phase
-# plot cov
 # plot real
 # plot imag
-# plot overview
+
+# plot mag
+# plot phase
+
+
+def plot_mag(cid, ax, plotman):
+    # load options
+    options = handle_mag_options()
+    # handle options
+    xmin = b_options.xmin
+    xmax = b_options.xmax
+    zmin = b_options.zmin
+    zmax = b_options.zmax
+    cblabel = r'$|\rho|\,[\Omega\mbox{m}]$'
+    title = 'Magnitude'
+    zlabel = 'z [' + b_options.unit + ']'
+    xlabel = 'x [' + b_options.unit + ']'
+    cbtiks = options.cbtiks
+    # plot
+    fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
+                                                           ax=ax,
+                                                           xmin=xmin,
+                                                           xmax=xmax,
+                                                           zmin=zmin,
+                                                           zmax=zmax,
+                                                           cblabel=cblabel,
+                                                           cbnrticks=cbtiks,
+                                                           title=title,
+                                                           zlabel=zlabel,
+                                                           xlabel=xlabel,
+                                                           plot_colorbar=True,
+                                                           )
+
+
+def plot_pha(cid, ax, plotman):
+    # load options
+    options = handle_pha_options()
+    # handle options
+    xmin = b_options.xmin
+    xmax = b_options.xmax
+    zmin = b_options.zmin
+    zmax = b_options.zmax
+    cblabel = ''
+    title = 'Phase'
+    zlabel = 'z [' + b_options.unit + ']'
+    xlabel = 'x [' + b_options.unit + ']'
+    cbtiks = options.cbtiks
+    # plot
+    fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
+                                                           ax=ax,
+                                                           xmin=xmin,
+                                                           xmax=xmax,
+                                                           zmin=zmin,
+                                                           zmax=zmax,
+                                                           cblabel=cblabel,
+                                                           cbnrticks=cbtiks,
+                                                           title=title,
+                                                           zlabel=zlabel,
+                                                           xlabel=xlabel,
+                                                           plot_colorbar=True,
+                                                           )
+
+
+def plot_cov(cid, ax, plotman):
+    # load options
+    options = handle_cov_options()
+    # handle options
+    xmin = b_options.xmin
+    xmax = b_options.xmax
+    zmin = b_options.zmin
+    zmax = b_options.zmax
+    cblabel = 'L1 Coverage'
+    title = 'Coverage'
+    zlabel = 'z [' + b_options.unit + ']'
+    xlabel = 'x [' + b_options.unit + ']'
+    cbtiks = options.cbtiks
+    # plot
+    fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
+                                                           ax=ax,
+                                                           xmin=xmin,
+                                                           xmax=xmax,
+                                                           zmin=zmin,
+                                                           zmax=zmax,
+                                                           cblabel=cblabel,
+                                                           cbnrticks=cbtiks,
+                                                           title=title,
+                                                           zlabel=zlabel,
+                                                           xlabel=xlabel,
+                                                           plot_colorbar=True,
+                                                           )
+
+
+def plot_tomodir(cov, mag, pha, pha_fpi):
+    # load grid
+    grid = CRGrid.crt_grid('grid/elem.dat',
+                           'grid/elec.dat')
+    plotman = CRPlot.plotManager(grid=grid)
+    # create figure
+    f, ax = plt.subplots(2, 4, figsize=(14, 4))
+    # plot coverage
+    cid = plotman.parman.add_data(cov)
+    plot_cov(cid, ax[1, 0], plotman)
+    # plot magnitue
+    cid = plotman.parman.add_data(mag)
+    plot_mag(cid, ax[0, 0], plotman)
+    # plot phase
+    if pha != []:
+        cid = plotman.parman.add_data(pha)
+        plot_pha(cid, ax[0, 1], plotman)
+    # plot fpi phase
+    if pha_fpi != []:
+        cid = plotman.parman.add_data(pha_fpi)
+        plot_pha(cid, ax[1, 1], plotman)
+    # plot overview
     # load grid
     # load plotmanager
     # plot content
+    f.tight_layout()
+    f.savefig('td_overview.png', dpi=300)
 
 
 def main():
+    global b_options
     b_options = handle_base_options()
     [datafiles, filetype] = list_datafiles()
     [cov, mag, pha, pha_fpi] = read_datafiles(datafiles, filetype)
-    # plot content
-    # plot overview
+    plot_tomodir(cov, mag, pha, pha_fpi)
 
 
 if __name__ == '__main__':
