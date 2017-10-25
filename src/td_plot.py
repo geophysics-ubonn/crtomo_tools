@@ -10,6 +10,7 @@ from optparse import OptionParser
 import crtomo.plotManager as CRPlot
 import crtomo.grid as CRGrid
 import matplotlib.pyplot as plt
+import math
 
 
 def handle_base_options():
@@ -222,16 +223,71 @@ def load_rho(name):
 
     return content
 
-# calculate real
-# calculate imag
-# plot real
-# plot imag
 
-# plot mag
-# plot phase
+def calc_complex(mag, pha):
+    complx = [10 ** m * math.e ** (1j * p / 1e3) for m, p in zip(mag, pha)]
+    real = [math.log10((1 / c).real) for c in complx]
+    imag = [((1 / c).imag) for c in complx]  # ##############log entfernt
+    return real, imag
 
 
-def plot_mag(cid, ax, plotman):
+def plot_real(cid, ax, plotman, title):
+    # load options
+    options = handle_mag_options()
+    # handle options
+    xmin = b_options.xmin
+    xmax = b_options.xmax
+    zmin = b_options.zmin
+    zmax = b_options.zmax
+    cblabel = r"$\log_{10}(\sigma'$ [S/m]"
+    zlabel = 'z [' + b_options.unit + ']'
+    xlabel = 'x [' + b_options.unit + ']'
+    cbtiks = options.cbtiks
+    # plot
+    fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
+                                                           ax=ax,
+                                                           xmin=xmin,
+                                                           xmax=xmax,
+                                                           zmin=zmin,
+                                                           zmax=zmax,
+                                                           cblabel=cblabel,
+                                                           cbnrticks=cbtiks,
+                                                           title=title,
+                                                           zlabel=zlabel,
+                                                           xlabel=xlabel,
+                                                           plot_colorbar=True,
+                                                           )
+
+
+def plot_imag(cid, ax, plotman, title):
+    # load options
+    options = handle_mag_options()
+    # handle options
+    xmin = b_options.xmin
+    xmax = b_options.xmax
+    zmin = b_options.zmin
+    zmax = b_options.zmax
+    cblabel = r"$\log_{10}(\sigma''$ [S/m]"
+    zlabel = 'z [' + b_options.unit + ']'
+    xlabel = 'x [' + b_options.unit + ']'
+    cbtiks = options.cbtiks
+    # plot
+    fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
+                                                           ax=ax,
+                                                           xmin=xmin,
+                                                           xmax=xmax,
+                                                           zmin=zmin,
+                                                           zmax=zmax,
+                                                           cblabel=cblabel,
+                                                           cbnrticks=cbtiks,
+                                                           title=title,
+                                                           zlabel=zlabel,
+                                                           xlabel=xlabel,
+                                                           plot_colorbar=True,
+                                                           )
+
+
+def plot_mag(cid, ax, plotman, title):
     # load options
     options = handle_mag_options()
     # handle options
@@ -240,7 +296,6 @@ def plot_mag(cid, ax, plotman):
     zmin = b_options.zmin
     zmax = b_options.zmax
     cblabel = r'$|\rho|\,[\Omega\mbox{m}]$'
-    title = 'Magnitude'
     zlabel = 'z [' + b_options.unit + ']'
     xlabel = 'x [' + b_options.unit + ']'
     cbtiks = options.cbtiks
@@ -260,7 +315,7 @@ def plot_mag(cid, ax, plotman):
                                                            )
 
 
-def plot_pha(cid, ax, plotman):
+def plot_pha(cid, ax, plotman, title):
     # load options
     options = handle_pha_options()
     # handle options
@@ -268,8 +323,7 @@ def plot_pha(cid, ax, plotman):
     xmax = b_options.xmax
     zmin = b_options.zmin
     zmax = b_options.zmax
-    cblabel = ''
-    title = 'Phase'
+    cblabel = r'$\phi$ [mrad]'
     zlabel = 'z [' + b_options.unit + ']'
     xlabel = 'x [' + b_options.unit + ']'
     cbtiks = options.cbtiks
@@ -289,7 +343,7 @@ def plot_pha(cid, ax, plotman):
                                                            )
 
 
-def plot_cov(cid, ax, plotman):
+def plot_cov(cid, ax, plotman, title):
     # load options
     options = handle_cov_options()
     # handle options
@@ -298,7 +352,6 @@ def plot_cov(cid, ax, plotman):
     zmin = b_options.zmin
     zmax = b_options.zmax
     cblabel = 'L1 Coverage'
-    title = 'Coverage'
     zlabel = 'z [' + b_options.unit + ']'
     xlabel = 'x [' + b_options.unit + ']'
     cbtiks = options.cbtiks
@@ -327,22 +380,28 @@ def plot_tomodir(cov, mag, pha, pha_fpi):
     f, ax = plt.subplots(2, 4, figsize=(14, 4))
     # plot coverage
     cid = plotman.parman.add_data(cov)
-    plot_cov(cid, ax[1, 0], plotman)
+    plot_cov(cid, ax[1, 0], plotman, 'Coverage')
     # plot magnitue
     cid = plotman.parman.add_data(mag)
-    plot_mag(cid, ax[0, 0], plotman)
-    # plot phase
+    plot_mag(cid, ax[0, 0], plotman, 'Magnitude')
+    # plot phase, real, imag
     if pha != []:
         cid = plotman.parman.add_data(pha)
-        plot_pha(cid, ax[0, 1], plotman)
-    # plot fpi phase
+        plot_pha(cid, ax[0, 1], plotman, 'Phase')
+        [real, imag] = calc_complex(mag, pha)
+        cid_re = plotman.parman.add_data(real)
+        cid_im = plotman.parman.add_data(imag)
+        plot_real(cid_re, ax[0, 2], plotman, 'Real Part')
+        plot_imag(cid_im, ax[0, 3], plotman, 'Imaginary Part')
+    # plot fpi phase, real, imag
     if pha_fpi != []:
         cid = plotman.parman.add_data(pha_fpi)
-        plot_pha(cid, ax[1, 1], plotman)
-    # plot overview
-    # load grid
-    # load plotmanager
-    # plot content
+        plot_pha(cid, ax[1, 1], plotman, 'FPI Phase')
+        [real, imag] = calc_complex(mag, pha_fpi)
+        cid_fre = plotman.parman.add_data(real)
+        cid_fim = plotman.parman.add_data(imag)
+        plot_real(cid_fre, ax[1, 2], plotman, 'FPI Real Part')
+        plot_imag(cid_fim, ax[1, 3], plotman, 'FPI Imaginary Part')
     f.tight_layout()
     f.savefig('td_overview.png', dpi=300)
 
