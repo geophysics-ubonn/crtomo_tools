@@ -259,7 +259,13 @@ def calc_complex(mag, pha):
     '''
     complx = [10 ** m * math.e ** (1j * p / 1e3) for m, p in zip(mag, pha)]
     real = [math.log10((1 / c).real) for c in complx]
-    imag = [((1 / c).imag) for c in complx]  # ##############log entfernt
+    imag = []
+    for c in complx:
+        if ((1 / c).imag) == 0:
+            imag.append(math.nan)
+        else:
+            i = math.log10((1 / c).imag)
+            imag.append(i)
     return real, imag
 
 
@@ -333,7 +339,7 @@ def plot_mag(cid, ax, plotman, title):
     xmax = b_options.xmax
     zmin = b_options.zmin
     zmax = b_options.zmax
-    cblabel = r'$|\rho|\,[\Omega\mbox{m}]$'
+    cblabel = r'$\log_{10}(|\rho|\,[\Omega\mbox{m}])$'
     zlabel = 'z [' + b_options.unit + ']'
     xlabel = 'x [' + b_options.unit + ']'
     cbtiks = options.cbtiks
