@@ -133,14 +133,37 @@ def handle_pha_options():
     (options, args) = parser.parse_args()
     return options
 
-# handle options for mag
-    # linear, ctiks, cmin, cmax, cname
-# handle options for phase
-    # linear, ctiks, cmin, cmax, cname
-# handle oprions for real
-    # linear, ctiks, cmin, cmax, cname
-# handle options for imag
-    # linear, ctiks, cmin, cmax, cname
+
+def handle_real_options():
+    '''Handle options, which are the same for all subplots or for the overview.
+    '''
+    parser = OptionParser()
+    parser.add_option('--real_cbtiks',
+                      dest='cbtiks',
+                      help="Number of CB tiks for real part",
+                      type=int,
+                      metavar="INT",
+                      default=3,
+                      )
+
+    (options, args) = parser.parse_args()
+    return options
+
+
+def handle_imag_options():
+    '''Handle options, which are the same for all subplots or for the overview.
+    '''
+    parser = OptionParser()
+    parser.add_option('--imag_cbtiks',
+                      dest='cbtiks',
+                      help="Number of CB tiks for imag part",
+                      type=int,
+                      metavar="INT",
+                      default=3,
+                      )
+
+    (options, args) = parser.parse_args()
+    return options
 
 
 def read_iter(use_fpi):
@@ -197,6 +220,8 @@ def list_datafiles():
 
 
 def read_datafiles(files, dtype):
+    '''Load the datafiles and return cov, mag, phase and fpi phase values.
+    '''
     pha = []
     pha_fpi = []
     for filename, filetype in zip(files, dtype):
@@ -213,18 +238,25 @@ def read_datafiles(files, dtype):
 
 
 def load_cov(name):
+    '''Load a datafile with coverage file structure.
+    '''
     content = np.genfromtxt(name, skip_header=1, skip_footer=1, usecols=([2]))
 
     return content
 
 
 def load_rho(name):
+    '''Load a datafile with rho structure like mag and phase
+    '''
     content = np.loadtxt(name, skiprows=1, usecols=([2]))
 
     return content
 
 
 def calc_complex(mag, pha):
+    ''' Calculate real and imaginary part of the complex conductivity from
+    magnitude and phase in log10.
+    '''
     complx = [10 ** m * math.e ** (1j * p / 1e3) for m, p in zip(mag, pha)]
     real = [math.log10((1 / c).real) for c in complx]
     imag = [((1 / c).imag) for c in complx]  # ##############log entfernt
@@ -232,6 +264,8 @@ def calc_complex(mag, pha):
 
 
 def plot_real(cid, ax, plotman, title):
+    '''Plot real parts of the complex conductivity using the real_options.
+    '''
     # load options
     options = handle_mag_options()
     # handle options
@@ -260,6 +294,8 @@ def plot_real(cid, ax, plotman, title):
 
 
 def plot_imag(cid, ax, plotman, title):
+    '''Plot imag parts of the complex conductivity using the imag_options.
+    '''
     # load options
     options = handle_mag_options()
     # handle options
@@ -288,6 +324,8 @@ def plot_imag(cid, ax, plotman, title):
 
 
 def plot_mag(cid, ax, plotman, title):
+    '''Plot magnitude of the complex resistivity using the mag_options.
+    '''
     # load options
     options = handle_mag_options()
     # handle options
@@ -316,6 +354,8 @@ def plot_mag(cid, ax, plotman, title):
 
 
 def plot_pha(cid, ax, plotman, title):
+    '''Plot phase of the complex resistivity using the pha_options.
+    '''
     # load options
     options = handle_pha_options()
     # handle options
@@ -344,6 +384,8 @@ def plot_pha(cid, ax, plotman, title):
 
 
 def plot_cov(cid, ax, plotman, title):
+    '''Plot coverage of the complex resistivity using the cov_options.
+    '''
     # load options
     options = handle_cov_options()
     # handle options
@@ -372,6 +414,8 @@ def plot_cov(cid, ax, plotman, title):
 
 
 def plot_tomodir(cov, mag, pha, pha_fpi):
+    '''Plot the data of the tomodir in one overview plot.
+    '''
     # load grid
     grid = CRGrid.crt_grid('grid/elem.dat',
                            'grid/elec.dat')
