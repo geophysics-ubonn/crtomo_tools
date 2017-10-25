@@ -150,6 +150,32 @@ def list_datafiles():
     return files, dtype
 
 
+def read_datafiles(files, dtype):
+    pha = []
+    pha_fpi = []
+    for filename, filetype in zip(files, dtype):
+        if filetype == 'cov':
+            cov = load_cov(filename)
+        elif filetype == 'mag':
+            mag = load_rho(filename)
+        elif filetype == 'pha':
+            pha = load_rho(filename)
+        elif filetype == 'pha_fpi':
+            pha_fpi = load_rho(filename)
+
+    return cov, mag, pha, pha_fpi
+
+
+def load_cov(name):
+    content = np.genfromtxt(name, skip_header=1, skip_footer=1, usecols=([2]))
+
+    return content
+
+
+def load_rho(name):
+    content = np.loadtxt(name, skiprows=1, usecols=([2]))
+
+    return content
 # read in coverage
 # read in mag, pha
 
@@ -171,7 +197,7 @@ def list_datafiles():
 def main():
     b_options = handle_base_options()
     [datafiles, filetype] = list_datafiles()
-    # read files
+    [cov, mag, pha, pha_fpi] = read_datafiles(datafiles, filetype)
     # plot content
     # plot overview
 
