@@ -13,8 +13,8 @@ import matplotlib.pyplot as plt
 import math
 
 
-def handle_base_options():
-    '''Handle options, which are the same for all subplots or for the overview.
+def handle_options():
+    '''Handle options.
     '''
     parser = OptionParser()
     parser.add_option('-x',
@@ -57,105 +57,55 @@ def handle_base_options():
                       default=False,
                       )
     parser.add_option('--title',
-                      dest='title_override',
+                      dest='title',
                       type='string',
                       help='Global override for title',
                       default=None,
                       )
-    parser.add_option('--x_nr',
-                      dest='x_nr',
-                      help='Number of X-axis tiks',
-                      type=int,
-                      metavar='INT',
-                      default=None,
-                      )
-    parser.add_option('--y_nr',
-                      dest='y_nr',
-                      help='Number of Y-axis tiks',
-                      type=int, metavar='INT',
-                      default=None,
-                      )
-    parser.add_option('--aspect',
-                      dest='aspect',
-                      help='Aspect ratio of plot (default: 1)',
-                      type=float,
-                      metavar='float',
-                      default=1.0,
-                      )
-    (options, args) = parser.parse_args()
-    return options
-
-
-def handle_cov_options():
-    '''Handle options, which are the same for all subplots or for the overview.
-    '''
-    parser = OptionParser()
+#    parser.add_option('--x_nr',
+#                      dest='x_nr',
+#                      help='Number of X-axis tiks',
+#                      type=int,
+#                      metavar='INT',
+#                      default=None,
+#                      )
+#    parser.add_option('--y_nr',
+#                      dest='y_nr',
+#                      help='Number of Y-axis tiks',
+#                      type=int, metavar='INT',
+#                      default=None,
+#                      )
+    # options for subplots
     parser.add_option('--cov_cbtiks',
-                      dest='cbtiks',
+                      dest='cov_cbtiks',
                       help="Number of CB tiks for coverage",
                       type=int,
                       metavar="INT",
                       default=3,
                       )
-
-    (options, args) = parser.parse_args()
-    return options
-
-
-def handle_mag_options():
-    '''Handle options, which are the same for all subplots or for the overview.
-    '''
-    parser = OptionParser()
     parser.add_option('--mag_cbtiks',
-                      dest='cbtiks',
+                      dest='mag_cbtiks',
                       help="Number of CB tiks for magnitude",
                       type=int,
                       metavar="INT",
                       default=3,
                       )
-
-    (options, args) = parser.parse_args()
-    return options
-
-
-def handle_pha_options():
-    '''Handle options, which are the same for all subplots or for the overview.
-    '''
-    parser = OptionParser()
     parser.add_option('--pha_cbtiks',
-                      dest='cbtiks',
+                      dest='pha_cbtiks',
                       help="Number of CB tiks for phase",
                       type=int,
                       metavar="INT",
                       default=3,
                       )
-
-    (options, args) = parser.parse_args()
-    return options
-
-
-def handle_real_options():
-    '''Handle options, which are the same for all subplots or for the overview.
-    '''
-    parser = OptionParser()
     parser.add_option('--real_cbtiks',
-                      dest='cbtiks',
+                      dest='real_cbtiks',
                       help="Number of CB tiks for real part",
                       type=int,
                       metavar="INT",
                       default=3,
                       )
-
-    (options, args) = parser.parse_args()
-    return options
-
-
-def handle_imag_options():
-    '''Handle options, which are the same for all subplots or for the overview.
-    '''
-    parser = OptionParser()
     parser.add_option('--imag_cbtiks',
-                      dest='cbtiks',
+                      dest='imag_cbtiks',
                       help="Number of CB tiks for imag part",
                       type=int,
                       metavar="INT",
@@ -272,17 +222,15 @@ def calc_complex(mag, pha):
 def plot_real(cid, ax, plotman, title):
     '''Plot real parts of the complex conductivity using the real_options.
     '''
-    # load options
-    options = handle_mag_options()
     # handle options
-    xmin = b_options.xmin
-    xmax = b_options.xmax
-    zmin = b_options.zmin
-    zmax = b_options.zmax
+    xmin = options.xmin
+    xmax = options.xmax
+    zmin = options.zmin
+    zmax = options.zmax
     cblabel = r"$\log_{10}(\sigma'$ [S/m]"
-    zlabel = 'z [' + b_options.unit + ']'
-    xlabel = 'x [' + b_options.unit + ']'
-    cbtiks = options.cbtiks
+    zlabel = 'z [' + options.unit + ']'
+    xlabel = 'x [' + options.unit + ']'
+    cbtiks = options.real_cbtiks
     # plot
     fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
                                                            ax=ax,
@@ -302,17 +250,15 @@ def plot_real(cid, ax, plotman, title):
 def plot_imag(cid, ax, plotman, title):
     '''Plot imag parts of the complex conductivity using the imag_options.
     '''
-    # load options
-    options = handle_mag_options()
     # handle options
-    xmin = b_options.xmin
-    xmax = b_options.xmax
-    zmin = b_options.zmin
-    zmax = b_options.zmax
+    xmin = options.xmin
+    xmax = options.xmax
+    zmin = options.zmin
+    zmax = options.zmax
     cblabel = r"$\log_{10}(\sigma''$ [S/m]"
-    zlabel = 'z [' + b_options.unit + ']'
-    xlabel = 'x [' + b_options.unit + ']'
-    cbtiks = options.cbtiks
+    zlabel = 'z [' + options.unit + ']'
+    xlabel = 'x [' + options.unit + ']'
+    cbtiks = options.imag_cbtiks
     # plot
     fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
                                                            ax=ax,
@@ -332,17 +278,15 @@ def plot_imag(cid, ax, plotman, title):
 def plot_mag(cid, ax, plotman, title):
     '''Plot magnitude of the complex resistivity using the mag_options.
     '''
-    # load options
-    options = handle_mag_options()
     # handle options
-    xmin = b_options.xmin
-    xmax = b_options.xmax
-    zmin = b_options.zmin
-    zmax = b_options.zmax
+    xmin = options.xmin
+    xmax = options.xmax
+    zmin = options.zmin
+    zmax = options.zmax
     cblabel = r'$\log_{10}(|\rho|\,[\Omega\mbox{m}])$'
-    zlabel = 'z [' + b_options.unit + ']'
-    xlabel = 'x [' + b_options.unit + ']'
-    cbtiks = options.cbtiks
+    zlabel = 'z [' + options.unit + ']'
+    xlabel = 'x [' + options.unit + ']'
+    cbtiks = options.mag_cbtiks
     # plot
     fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
                                                            ax=ax,
@@ -362,17 +306,15 @@ def plot_mag(cid, ax, plotman, title):
 def plot_pha(cid, ax, plotman, title):
     '''Plot phase of the complex resistivity using the pha_options.
     '''
-    # load options
-    options = handle_pha_options()
     # handle options
-    xmin = b_options.xmin
-    xmax = b_options.xmax
-    zmin = b_options.zmin
-    zmax = b_options.zmax
+    xmin = options.xmin
+    xmax = options.xmax
+    zmin = options.zmin
+    zmax = options.zmax
     cblabel = r'$\phi$ [mrad]'
-    zlabel = 'z [' + b_options.unit + ']'
-    xlabel = 'x [' + b_options.unit + ']'
-    cbtiks = options.cbtiks
+    zlabel = 'z [' + options.unit + ']'
+    xlabel = 'x [' + options.unit + ']'
+    cbtiks = options.pha_cbtiks
     # plot
     fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
                                                            ax=ax,
@@ -392,17 +334,15 @@ def plot_pha(cid, ax, plotman, title):
 def plot_cov(cid, ax, plotman, title):
     '''Plot coverage of the complex resistivity using the cov_options.
     '''
-    # load options
-    options = handle_cov_options()
     # handle options
-    xmin = b_options.xmin
-    xmax = b_options.xmax
-    zmin = b_options.zmin
-    zmax = b_options.zmax
+    xmin = options.xmin
+    xmax = options.xmax
+    zmin = options.zmin
+    zmax = options.zmax
     cblabel = 'L1 Coverage'
-    zlabel = 'z [' + b_options.unit + ']'
-    xlabel = 'x [' + b_options.unit + ']'
-    cbtiks = options.cbtiks
+    zlabel = 'z [' + options.unit + ']'
+    xlabel = 'x [' + options.unit + ']'
+    cbtiks = options.cov_cbtiks
     # plot
     fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
                                                            ax=ax,
@@ -428,6 +368,8 @@ def plot_tomodir(cov, mag, pha, pha_fpi):
     plotman = CRPlot.plotManager(grid=grid)
     # create figure
     f, ax = plt.subplots(2, 4, figsize=(14, 4))
+    if options.title is not None:
+        plt.suptitle(options.title, fontsize=18)
     # plot coverage
     cid = plotman.parman.add_data(cov)
     plot_cov(cid, ax[1, 0], plotman, 'Coverage')
@@ -457,8 +399,8 @@ def plot_tomodir(cov, mag, pha, pha_fpi):
 
 
 def main():
-    global b_options
-    b_options = handle_base_options()
+    global options
+    options = handle_options()
     [datafiles, filetype] = list_datafiles()
     [cov, mag, pha, pha_fpi] = read_datafiles(datafiles, filetype)
     plot_tomodir(cov, mag, pha, pha_fpi)
