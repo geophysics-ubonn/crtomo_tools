@@ -18,6 +18,7 @@ def handle_options():
     '''Handle options.
     '''
     parser = OptionParser()
+    parser.set_defaults(cmaglin=False)
     parser.add_option('-x',
                       '--xmin',
                       dest='xmin',
@@ -90,6 +91,11 @@ def handle_options():
                       type=int,
                       metavar="INT",
                       default=3,
+                      )
+    parser.add_option("--cmaglin",
+                      action="store_true",
+                      dest="cmaglin",
+                      help="linear colorbar for magnitude",
                       )
     parser.add_option('--pha_cbtiks',
                       dest='pha_cbtiks',
@@ -286,7 +292,10 @@ def plot_mag(cid, ax, plotman, title):
     xmax = options.xmax
     zmin = options.zmin
     zmax = options.zmax
-    cblabel = units.get_label('log_rho')
+    if options.cmaglin:
+        cblabel = units.get_label('rho')
+    else:
+        cblabel = units.get_label('log_rho')
     zlabel = 'z [' + options.unit + ']'
     xlabel = 'x [' + options.unit + ']'
     cbtiks = options.mag_cbtiks
@@ -380,7 +389,10 @@ def plot_tomodir(cov, mag, pha, pha_fpi):
     cid = plotman.parman.add_data(cov)
     plot_cov(cid, ax[1, 0], plotman, 'Coverage')
     # plot magnitue
-    cid = plotman.parman.add_data(mag)
+    if options.cmaglin:
+        cid = plotman.parman.add_data(np.power(10, mag)) 
+    else:
+        cid = plotman.parman.add_data(mag)
     plot_mag(cid, ax[0, 0], plotman, 'Magnitude')
     # plot phase, real, imag
     if pha != []:
