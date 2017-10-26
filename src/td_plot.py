@@ -11,6 +11,7 @@ import crtomo.plotManager as CRPlot
 import crtomo.grid as CRGrid
 import matplotlib.pyplot as plt
 import math
+import edf.main.units as units
 
 
 def handle_options():
@@ -227,7 +228,7 @@ def plot_real(cid, ax, plotman, title):
     xmax = options.xmax
     zmin = options.zmin
     zmax = options.zmax
-    cblabel = r"$\log_{10}(\sigma'$ [S/m]"
+    cblabel = units.get_label('log_real')
     zlabel = 'z [' + options.unit + ']'
     xlabel = 'x [' + options.unit + ']'
     cbtiks = options.real_cbtiks
@@ -256,7 +257,7 @@ def plot_imag(cid, ax, plotman, title):
     xmax = options.xmax
     zmin = options.zmin
     zmax = options.zmax
-    cblabel = r"$\log_{10}(\sigma''$ [S/m]"
+    cblabel = units.get_label('log_imag')
     zlabel = 'z [' + options.unit + ']'
     xlabel = 'x [' + options.unit + ']'
     cbtiks = options.imag_cbtiks
@@ -285,7 +286,7 @@ def plot_mag(cid, ax, plotman, title):
     xmax = options.xmax
     zmin = options.zmin
     zmax = options.zmax
-    cblabel = r'$\log_{10}(|\rho|\,[\Omega\mbox{m}])$'
+    cblabel = units.get_label('log_rho')
     zlabel = 'z [' + options.unit + ']'
     xlabel = 'x [' + options.unit + ']'
     cbtiks = options.mag_cbtiks
@@ -314,7 +315,7 @@ def plot_pha(cid, ax, plotman, title):
     xmax = options.xmax
     zmin = options.zmin
     zmax = options.zmax
-    cblabel = r'$\phi$ [mrad]'
+    cblabel = units.get_label('phi')
     zlabel = 'z [' + options.unit + ']'
     xlabel = 'x [' + options.unit + ']'
     cbtiks = options.pha_cbtiks
