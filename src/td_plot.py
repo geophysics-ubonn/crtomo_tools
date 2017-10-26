@@ -377,12 +377,9 @@ def plot_cov(cid, ax, plotman, title):
     return fig, ax, cnorm, cmap, cb
 
 
-def plot_single():
+def plot_single(filename, mag):
     '''Plot only the magnitude of the last iteration in a single plot.
     '''
-    # load data
-    filename = read_iter(False)
-    mag = load_rho(filename)
     # load grid
     grid = CRGrid.crt_grid('grid/elem.dat',
                            'grid/elec.dat')
@@ -432,6 +429,10 @@ def plot_tomodir(cov, mag, pha, pha_fpi):
         cid_im = plotman.parman.add_data(imag)
         plot_real(cid_re, ax[0, 2], plotman, 'Real Part')
         plot_imag(cid_im, ax[0, 3], plotman, 'Imaginary Part')
+    else:
+        ax[0, 1].axis('off')
+        ax[0, 2].axis('off')
+        ax[0, 3].axis('off')
     # plot fpi phase, real, imag
     if pha_fpi != []:
         cid = plotman.parman.add_data(pha_fpi)
@@ -441,6 +442,10 @@ def plot_tomodir(cov, mag, pha, pha_fpi):
         cid_fim = plotman.parman.add_data(imag)
         plot_real(cid_fre, ax[1, 2], plotman, 'FPI Real Part')
         plot_imag(cid_fim, ax[1, 3], plotman, 'FPI Imaginary Part')
+    else:
+        ax[1, 1].axis('off')
+        ax[1, 2].axis('off')
+        ax[1, 3].axis('off')
     f.tight_layout()
     f.savefig('td_overview.png', dpi=300)
     return f, ax
@@ -454,7 +459,9 @@ def main():
         [cov, mag, pha, pha_fpi] = read_datafiles(datafiles, filetype)
         plot_tomodir(cov, mag, pha, pha_fpi)
     else:
-        plot_single()
+        filename = read_iter(False)
+        mag = load_rho(filename)
+        plot_single(filename, mag)
 
 
 if __name__ == '__main__':
