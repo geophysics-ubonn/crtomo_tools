@@ -19,6 +19,7 @@ def handle_options():
     '''
     parser = OptionParser()
     parser.set_defaults(cmaglin=False)
+    parser.set_defaults(single=False)
     parser.add_option('-x',
                       '--xmin',
                       dest='xmin',
@@ -96,6 +97,11 @@ def handle_options():
                       action="store_true",
                       dest="cmaglin",
                       help="linear colorbar for magnitude",
+                      )
+    parser.add_option("--single",
+                      action="store_true",
+                      dest="single",
+                      help="plot only magnitude",
                       )
     parser.add_option('--pha_cbtiks',
                       dest='pha_cbtiks',
@@ -371,6 +377,30 @@ def plot_cov(cid, ax, plotman, title):
     return fig, ax, cnorm, cmap, cb
 
 
+def plot_single():
+    '''Plot only the magnitude of the last iteration in a single plot.
+    '''
+    # load data
+    filename = read_iter(False)
+    mag = load_rho(filename)
+    # load grid
+    grid = CRGrid.crt_grid('grid/elem.dat',
+                           'grid/elec.dat')
+    plotman = CRPlot.plotManager(grid=grid)
+    f, ax = plt.subplots(1, figsize=(3.5, 2))
+    if options.title is None:
+        options.title = 'Magnitude'
+    if options.cmaglin:
+        cid = plotman.parman.add_data(np.power(10, mag))
+        loglin = 'rho'
+    else:
+        cid = plotman.parman.add_data(mag)
+        loglin = 'log_rho'
+    plot_mag(cid, ax, plotman, options.title, loglin)
+    f.tight_layout()
+    f.savefig(filename[4:] + '.png', dpi=300)
+
+
 def plot_tomodir(cov, mag, pha, pha_fpi):
     '''Plot the data of the tomodir in one overview plot.
     '''
@@ -382,9 +412,6 @@ def plot_tomodir(cov, mag, pha, pha_fpi):
     f, ax = plt.subplots(2, 4, figsize=(14, 4))
     if options.title is not None:
         plt.suptitle(options.title, fontsize=18)
-    # plot coverage
-    cid = plotman.parman.add_data(cov)
-    plot_cov(cid, ax[1, 0], plotman, 'Coverage')
     # plot magnitue
     if options.cmaglin:
         cid = plotman.parman.add_data(np.power(10, mag))
@@ -393,6 +420,9 @@ def plot_tomodir(cov, mag, pha, pha_fpi):
         cid = plotman.parman.add_data(mag)
         loglin = 'log_rho'
     plot_mag(cid, ax[0, 0], plotman, 'Magnitude', loglin)
+    # plot coverage
+    cid = plotman.parman.add_data(cov)
+    plot_cov(cid, ax[1, 0], plotman, 'Coverage')
     # plot phase, real, imag
     if pha != []:
         cid = plotman.parman.add_data(pha)
@@ -419,9 +449,12 @@ def plot_tomodir(cov, mag, pha, pha_fpi):
 def main():
     global options
     options = handle_options()
-    [datafiles, filetype] = list_datafiles()
-    [cov, mag, pha, pha_fpi] = read_datafiles(datafiles, filetype)
-    plot_tomodir(cov, mag, pha, pha_fpi)
+    if not options.single:
+        [datafiles, filetype] = list_datafiles()
+        [cov, mag, pha, pha_fpi] = read_datafiles(datafiles, filetype)
+        plot_tomodir(cov, mag, pha, pha_fpi)
+    else:
+        plot_single()
 
 
 if __name__ == '__main__':
