@@ -284,7 +284,7 @@ def plot_imag(cid, ax, plotman, title):
     return fig, ax, cnorm, cmap, cb
 
 
-def plot_mag(cid, ax, plotman, title):
+def plot_mag(cid, ax, plotman, title, unit):
     '''Plot magnitude of the complex resistivity using the mag_options.
     '''
     # handle options
@@ -292,10 +292,7 @@ def plot_mag(cid, ax, plotman, title):
     xmax = options.xmax
     zmin = options.zmin
     zmax = options.zmax
-    if options.cmaglin:
-        cblabel = units.get_label('rho')
-    else:
-        cblabel = units.get_label('log_rho')
+    cblabel = units.get_label(unit)
     zlabel = 'z [' + options.unit + ']'
     xlabel = 'x [' + options.unit + ']'
     cbtiks = options.mag_cbtiks
@@ -390,10 +387,12 @@ def plot_tomodir(cov, mag, pha, pha_fpi):
     plot_cov(cid, ax[1, 0], plotman, 'Coverage')
     # plot magnitue
     if options.cmaglin:
-        cid = plotman.parman.add_data(np.power(10, mag)) 
+        cid = plotman.parman.add_data(np.power(10, mag))
+        loglin = 'rho'
     else:
         cid = plotman.parman.add_data(mag)
-    plot_mag(cid, ax[0, 0], plotman, 'Magnitude')
+        loglin = 'log_rho'
+    plot_mag(cid, ax[0, 0], plotman, 'Magnitude', loglin)
     # plot phase, real, imag
     if pha != []:
         cid = plotman.parman.add_data(pha)
