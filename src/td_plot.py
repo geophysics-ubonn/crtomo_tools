@@ -245,6 +245,7 @@ def plot_real(cid, ax, plotman, title):
                                                            xlabel=xlabel,
                                                            plot_colorbar=True,
                                                            )
+    return fig, ax, cnorm, cmap, cb
 
 
 def plot_imag(cid, ax, plotman, title):
@@ -273,6 +274,7 @@ def plot_imag(cid, ax, plotman, title):
                                                            xlabel=xlabel,
                                                            plot_colorbar=True,
                                                            )
+    return fig, ax, cnorm, cmap, cb
 
 
 def plot_mag(cid, ax, plotman, title):
@@ -301,6 +303,7 @@ def plot_mag(cid, ax, plotman, title):
                                                            xlabel=xlabel,
                                                            plot_colorbar=True,
                                                            )
+    return fig, ax, cnorm, cmap, cb
 
 
 def plot_pha(cid, ax, plotman, title):
@@ -329,6 +332,7 @@ def plot_pha(cid, ax, plotman, title):
                                                            xlabel=xlabel,
                                                            plot_colorbar=True,
                                                            )
+    return fig, ax, cnorm, cmap, cb
 
 
 def plot_cov(cid, ax, plotman, title):
@@ -357,6 +361,7 @@ def plot_cov(cid, ax, plotman, title):
                                                            xlabel=xlabel,
                                                            plot_colorbar=True,
                                                            )
+    return fig, ax, cnorm, cmap, cb
 
 
 def plot_tomodir(cov, mag, pha, pha_fpi):
@@ -396,6 +401,7 @@ def plot_tomodir(cov, mag, pha, pha_fpi):
         plot_imag(cid_fim, ax[1, 3], plotman, 'FPI Imaginary Part')
     f.tight_layout()
     f.savefig('td_overview.png', dpi=300)
+    return f, ax
 
 
 def main():
