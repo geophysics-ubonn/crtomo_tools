@@ -227,7 +227,7 @@ def calc_complex(mag, pha):
         if ((1 / c).imag) == 0:
             imag.append(math.nan)
         else:
-            i = math.log10((1 / c).imag)
+            i = math.log10(abs((1 / c).imag))
             imag.append(i)
     return real, imag
 
