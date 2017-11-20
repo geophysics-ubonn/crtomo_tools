@@ -339,7 +339,7 @@ class plotManager(object):
             all_xz,
             edgecolor=fcolors,
             facecolor=fcolors,
-            linewidth=0.4,
+            linewidth=0.0,
             cmap=cmap,
         )
         collection.set_cmap(cmap)
