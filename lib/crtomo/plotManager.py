@@ -247,8 +247,8 @@ class plotManager(object):
         zmax: float, optional
             maximial z limit to plot
         cmap_name: string, optional
-            name of the colorbar to use. Default is "jet". To reverse colors,
-            use the _r version "jet_r"
+            name of the colorbar to use. Default is "viridis". To reverse colors,
+            use the _r version "viridis_r"
         cbposition
         cblabel: string, optional
             colorbar label
@@ -301,7 +301,7 @@ class plotManager(object):
             subdata = kwargs['converter'](subdata)
 
         # color map
-        cmap_name = kwargs.get('cmap_name', 'jet')
+        cmap_name = kwargs.get('cmap_name', 'viridis')
         cmap = mpl.cm.get_cmap(
             cmap_name,
             kwargs.get('cbsegments', None)
