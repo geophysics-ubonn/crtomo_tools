@@ -10,8 +10,10 @@ from optparse import OptionParser
 import crtomo.plotManager as CRPlot
 import crtomo.grid as CRGrid
 import matplotlib.pyplot as plt
+import matplotlib
 import math
 import edf.main.units as units
+import crtomo.mpl as mpl_style
 
 
 def handle_options():
@@ -475,6 +477,8 @@ def plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha):
 def main():
     global options
     options = handle_options()
+    matplotlib.style.use('default')
+    mpl_style.general_settings()
     # load grid
     grid = CRGrid.crt_grid('grid/elem.dat',
                            'grid/elec.dat')

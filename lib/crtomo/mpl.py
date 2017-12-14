@@ -28,7 +28,18 @@ def setup():
 
     plt.style.use('seaborn')
 
-    # general settings
+    general_settings()
+
+    import mpl_toolkits.axes_grid1 as axes_grid1
+    axes_grid1
+    return plt, mpl
+
+
+def general_settings():
+    """general settings
+    """
+    import matplotlib as mpl
+    import matplotlib.pyplot as plt
     mpl.rcParams['font.size'] = 7.0
     mpl.rcParams['axes.labelsize'] = 7.0
     mpl.rcParams['xtick.labelsize'] = 7.0
@@ -57,9 +68,6 @@ def setup():
             # r'\usepackage{mathastext} '
         ))
     )
-    import mpl_toolkits.axes_grid1 as axes_grid1
-    axes_grid1
-    return plt, mpl
 
 
 def mpl_get_cb_bound_next_to_plot(ax):
