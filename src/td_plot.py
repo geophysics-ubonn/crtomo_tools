@@ -289,6 +289,7 @@ def plot_imag(cid, ax, plotman, title, alpha):
     zlabel = 'z [' + options.unit + ']'
     xlabel = 'x [' + options.unit + ']'
     cbtiks = options.imag_cbtiks
+    cm = 'plasma'
     # plot
     fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
                                                            cid_alpha=alpha,
@@ -303,6 +304,7 @@ def plot_imag(cid, ax, plotman, title, alpha):
                                                            zlabel=zlabel,
                                                            xlabel=xlabel,
                                                            plot_colorbar=True,
+                                                           cmap_name=cm,
                                                            )
     return fig, ax, cnorm, cmap, cb
 
@@ -349,6 +351,7 @@ def plot_pha(cid, ax, plotman, title, alpha):
     zlabel = 'z [' + options.unit + ']'
     xlabel = 'x [' + options.unit + ']'
     cbtiks = options.pha_cbtiks
+    cm = 'plasma'
     # plot
     fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
                                                            ax=ax,
@@ -363,6 +366,7 @@ def plot_pha(cid, ax, plotman, title, alpha):
                                                            zlabel=zlabel,
                                                            xlabel=xlabel,
                                                            plot_colorbar=True,
+                                                           cmap_name=cm,
                                                            )
     return fig, ax, cnorm, cmap, cb
 
@@ -379,6 +383,7 @@ def plot_cov(cid, ax, plotman, title):
     zlabel = 'z [' + options.unit + ']'
     xlabel = 'x [' + options.unit + ']'
     cbtiks = options.cov_cbtiks
+    cm = 'GnBu'
     # plot
     fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
                                                            ax=ax,
@@ -392,6 +397,7 @@ def plot_cov(cid, ax, plotman, title):
                                                            zlabel=zlabel,
                                                            xlabel=xlabel,
                                                            plot_colorbar=True,
+                                                           cmap_name=cm,
                                                            )
     return fig, ax, cnorm, cmap, cb
 
