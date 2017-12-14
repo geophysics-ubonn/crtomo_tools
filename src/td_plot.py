@@ -1,7 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-Has to be run in tomodir
+Tool to plot inversion results of tomodir. Included data is
+* magnitude
+* coverage
+* phase
+* phase of FPI
+* real part
+* real part of FPI
+* imaginary part
+* imaginary part of FPI
+
+But it is possible to only plot the magnitude (--single).
+The script has to be run in a tomodir. Output file will be saved in tomodir.
 END DOCUMENTATION
 '''
 import numpy as np
@@ -420,6 +431,8 @@ def plot_single(plotman, filename, mag, alpha):
 
 
 def alpha_from_cov(plotman):
+    '''Calculate alpha values from the coverage/2.5.
+    '''
     abscov = np.abs(load_cov('inv/coverage.mag'))
     if options.alpha_cov:
         normcov = np.divide(abscov, 2.5)
