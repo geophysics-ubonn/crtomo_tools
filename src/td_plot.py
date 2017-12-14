@@ -45,6 +45,13 @@ def handle_options():
                       help='Maximum Z range',
                       type='float',
                       )
+    parser.add_option('-c',
+                      '--column',
+                      dest='column',
+                      help='column to plot of input file',
+                      type='int',
+                      default=2,
+                      )
     parser.add_option('-u',
                       '--unit',
                       dest='unit',
@@ -188,7 +195,7 @@ def list_datafiles():
     return files, dtype
 
 
-def read_datafiles(files, dtype):
+def read_datafiles(files, dtype, column):
     '''Load the datafiles and return cov, mag, phase and fpi phase values.
     '''
     pha = []
@@ -197,11 +204,11 @@ def read_datafiles(files, dtype):
         if filetype == 'cov':
             cov = load_cov(filename)
         elif filetype == 'mag':
-            mag = load_rho(filename)
+            mag = load_rho(filename, column)
         elif filetype == 'pha':
-            pha = load_rho(filename)
+            pha = load_rho(filename, column)
         elif filetype == 'pha_fpi':
-            pha_fpi = load_rho(filename)
+            pha_fpi = load_rho(filename, column)
 
     return cov, mag, pha, pha_fpi
 
@@ -214,10 +221,10 @@ def load_cov(name):
     return content
 
 
-def load_rho(name):
+def load_rho(name, column):
     '''Load a datafile with rho structure like mag and phase
     '''
-    content = np.loadtxt(name, skiprows=1, usecols=([2]))
+    content = np.loadtxt(name, skiprows=1, usecols=([column]))
 
     return content
 
@@ -476,11 +483,13 @@ def main():
     alpha, plotman = alpha_from_cov(plotman)
     if not options.single:
         [datafiles, filetype] = list_datafiles()
-        [cov, mag, pha, pha_fpi] = read_datafiles(datafiles, filetype)
+        [cov, mag, pha, pha_fpi] = read_datafiles(datafiles,
+                                                  filetype,
+                                                  options.column)
         plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha)
     else:
         filename = read_iter(False)
-        mag = load_rho(filename)
+        mag = load_rho(filename, options.column)
         plot_single(plotman, filename, mag, alpha)
 
 
