@@ -175,11 +175,9 @@ def read_iter(use_fpi):
     return linestring
 
 
-def list_datafiles():
-    '''Get the type of the tomodir and the highest iteration to list all files,
-    which will be plotted.
+def td_type():
+    '''get type of the tomodir
     '''
-    # get type of the tomodir
     cfg = np.genfromtxt('exe/crtomo.cfg',
                         skip_header=15,
                         dtype='str',
@@ -190,6 +188,15 @@ def list_datafiles():
     is_fpi = False
     if cfg[2] == 'T':
         is_fpi = True
+
+    return is_complex, is_fpi
+
+
+def list_datafiles():
+    '''Get the type of the tomodir and the highest iteration to list all files,
+    which will be plotted.
+    '''
+    is_cplx, is_fpi = td_type()
     # get the highest iteration
     it_rho = read_iter(is_fpi)
     it_phase = read_iter(False)
@@ -198,7 +205,7 @@ def list_datafiles():
     dtype = ['cov']
     files.append(it_rho)
     dtype.append('mag')
-    if is_complex:
+    if is_cplx:
         files.append(it_rho.replace('mag', 'pha'))
         dtype.append('pha')
     if is_fpi:
