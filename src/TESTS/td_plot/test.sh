@@ -80,3 +80,22 @@ rm *.png
 td_plot --single --mag_cbtiks 5 --title 'CB tiks'
 cp *.png ../single_mag4.png
 rm *.png
+
+# test plots for timelapse data in tomodir
+cd ../tomodir_timelapse
+td_plot -c 3 --title 'column 4'
+cp *.png ../overview_tl1.png
+rm *.png
+td_plot --single -c 3 --title 'column 4'
+cp *.png ../single_tl1.png
+rm *.png
+td_plot --single -c 4 --title 'column 5'
+cp *.png ../single_tl2.png
+rm *.png
+td_plot --single -c 5 --title 'column 6'
+cp *.png ../single_tl3.png
+rm *.png
+td_plot --single -c 6 --title 'column 7'
+cp *.png ../single_tl4.png
+rm *.png
+td_plot --single -c 7 --title 'non exsting column'
