@@ -273,6 +273,7 @@ def plot_real(cid, ax, plotman, title, alpha,
     cblabel = units.get_label('log_real')
     zlabel = 'z [' + xunit + ']'
     xlabel = 'x [' + xunit + ']'
+    cm = 'viridis_r'
     # plot
     fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
                                                            cid_alpha=alpha,
@@ -287,6 +288,7 @@ def plot_real(cid, ax, plotman, title, alpha,
                                                            zlabel=zlabel,
                                                            xlabel=xlabel,
                                                            plot_colorbar=True,
+                                                           cmap_name=cm,
                                                            )
     return fig, ax, cnorm, cmap, cb
 
@@ -299,7 +301,7 @@ def plot_imag(cid, ax, plotman, title, alpha,
     cblabel = units.get_label('log_imag')
     zlabel = 'z [' + xunit + ']'
     xlabel = 'x [' + xunit + ']'
-    cm = 'plasma'
+    cm = 'plasma_r'
     # plot
     fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
                                                            cid_alpha=alpha,
