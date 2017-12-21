@@ -14,6 +14,9 @@ rm *.png
 td_plot --cov_cbtiks 5 --mag_cbtiks 5 --pha_cbtiks 5 --real_cbtiks 5 --imag_cbtiks 5 --title 'CB tiks'
 cp *.png ../overview_cplx4.png
 rm *.png
+td_plot --no_elecs --title 'no electrodes'
+cp *.png ../overview_cplx5.png
+rm *.png
 td_plot --single --title 'magnitude plot only'
 cp *.png ../single_cplx1.png
 rm *.png
@@ -25,6 +28,9 @@ cp *.png ../single_cplx3.png
 rm *.png
 td_plot --single --mag_cbtiks 5 --title 'CB tiks'
 cp *.png ../single_cplx4.png
+rm *.png
+td_plot --single --no_elecs --title 'no electrodes'
+cp *.png ../single_cplx5.png
 rm *.png
 
 # test plots for FPI data in tomodir
@@ -41,6 +47,9 @@ rm *.png
 td_plot --cov_cbtiks 5 --mag_cbtiks 5 --pha_cbtiks 5 --real_cbtiks 5 --imag_cbtiks 5 --title 'CB tiks'
 cp *.png ../overview_fpi4.png
 rm *.png
+td_plot --no_elecs --title 'no electrodes'
+cp *.png ../overview_fpi5.png
+rm *.png
 td_plot --single --title 'magnitude plot only'
 cp *.png ../single_fpi1.png
 rm *.png
@@ -52,6 +61,9 @@ cp *.png ../single_fpi3.png
 rm *.png
 td_plot --single --mag_cbtiks 5 --title 'CB tiks'
 cp *.png ../single_fpi4.png
+rm *.png
+td_plot --single --no_elecs --title 'no electrodes'
+cp *.png ../single_fpi5.png
 rm *.png
 
 # test plots for DC data in tomodir
@@ -68,6 +80,9 @@ rm *.png
 td_plot --cov_cbtiks 5 --mag_cbtiks 5 --pha_cbtiks 5 --real_cbtiks 5 --imag_cbtiks 5 --title 'CB tiks'
 cp *.png ../overview_mag4.png
 rm *.png
+td_plot --no_elecs --title 'no electrodes'
+cp *.png ../overview_mag5.png
+rm *.png
 td_plot --single --title 'magnitude plot only'
 cp *.png ../single_mag1.png
 rm *.png
@@ -79,6 +94,9 @@ cp *.png ../single_mag3.png
 rm *.png
 td_plot --single --mag_cbtiks 5 --title 'CB tiks'
 cp *.png ../single_mag4.png
+rm *.png
+td_plot --single --no_elecs --title 'no electrodes'
+cp *.png ../single_mag5.png
 rm *.png
 
 # test plots for timelapse data in tomodir
