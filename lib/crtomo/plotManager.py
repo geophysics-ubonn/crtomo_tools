@@ -351,7 +351,7 @@ class plotManager(object):
                 self.grid.electrodes[:, 1],
                 self.grid.electrodes[:, 2],
                 color=self.grid.props['electrode_color'],
-                #clip_on=False,
+                clip_on=False,
             )
 
         
