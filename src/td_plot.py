@@ -265,18 +265,14 @@ def calc_complex(mag, pha):
     return real, imag
 
 
-def plot_real(cid, ax, plotman, title, alpha):
+def plot_real(cid, ax, plotman, title, alpha,
+             xmin, xmax, zmin, zmax, xunit, cbtiks):
     '''Plot real parts of the complex conductivity using the real_options.
     '''
     # handle options
-    xmin = options.xmin
-    xmax = options.xmax
-    zmin = options.zmin
-    zmax = options.zmax
     cblabel = units.get_label('log_real')
-    zlabel = 'z [' + options.unit + ']'
-    xlabel = 'x [' + options.unit + ']'
-    cbtiks = options.real_cbtiks
+    zlabel = 'z [' + xunit + ']'
+    xlabel = 'x [' + xunit + ']'
     # plot
     fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
                                                            cid_alpha=alpha,
@@ -295,18 +291,14 @@ def plot_real(cid, ax, plotman, title, alpha):
     return fig, ax, cnorm, cmap, cb
 
 
-def plot_imag(cid, ax, plotman, title, alpha):
+def plot_imag(cid, ax, plotman, title, alpha,
+             xmin, xmax, zmin, zmax, xunit, cbtiks):
     '''Plot imag parts of the complex conductivity using the imag_options.
     '''
     # handle options
-    xmin = options.xmin
-    xmax = options.xmax
-    zmin = options.zmin
-    zmax = options.zmax
     cblabel = units.get_label('log_imag')
-    zlabel = 'z [' + options.unit + ']'
-    xlabel = 'x [' + options.unit + ']'
-    cbtiks = options.imag_cbtiks
+    zlabel = 'z [' + xunit + ']'
+    xlabel = 'x [' + xunit + ']'
     cm = 'plasma'
     # plot
     fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
@@ -327,18 +319,14 @@ def plot_imag(cid, ax, plotman, title, alpha):
     return fig, ax, cnorm, cmap, cb
 
 
-def plot_mag(cid, ax, plotman, title, unit, alpha):
+def plot_mag(cid, ax, plotman, title, unit, alpha,
+             xmin, xmax, zmin, zmax, xunit, cbtiks):
     '''Plot magnitude of the complex resistivity using the mag_options.
     '''
     # handle options
-    xmin = options.xmin
-    xmax = options.xmax
-    zmin = options.zmin
-    zmax = options.zmax
     cblabel = units.get_label(unit)
-    zlabel = 'z [' + options.unit + ']'
-    xlabel = 'x [' + options.unit + ']'
-    cbtiks = options.mag_cbtiks
+    zlabel = 'z [' + xunit + ']'
+    xlabel = 'x [' + xunit + ']'
     # plot
     fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
                                                            ax=ax,
@@ -357,18 +345,14 @@ def plot_mag(cid, ax, plotman, title, unit, alpha):
     return fig, ax, cnorm, cmap, cb
 
 
-def plot_pha(cid, ax, plotman, title, alpha):
+def plot_pha(cid, ax, plotman, title, alpha,
+             xmin, xmax, zmin, zmax, xunit, cbtiks):
     '''Plot phase of the complex resistivity using the pha_options.
     '''
     # handle options
-    xmin = options.xmin
-    xmax = options.xmax
-    zmin = options.zmin
-    zmax = options.zmax
     cblabel = units.get_label('phi')
-    zlabel = 'z [' + options.unit + ']'
-    xlabel = 'x [' + options.unit + ']'
-    cbtiks = options.pha_cbtiks
+    zlabel = 'z [' + xunit + ']'
+    xlabel = 'x [' + xunit + ']'
     cm = 'plasma'
     # plot
     fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
@@ -389,18 +373,14 @@ def plot_pha(cid, ax, plotman, title, alpha):
     return fig, ax, cnorm, cmap, cb
 
 
-def plot_cov(cid, ax, plotman, title):
+def plot_cov(cid, ax, plotman, title,
+             xmin, xmax, zmin, zmax, xunit, cbtiks):
     '''Plot coverage of the complex resistivity using the cov_options.
     '''
     # handle options
-    xmin = options.xmin
-    xmax = options.xmax
-    zmin = options.zmin
-    zmax = options.zmax
     cblabel = 'L1 Coverage'
-    zlabel = 'z [' + options.unit + ']'
-    xlabel = 'x [' + options.unit + ']'
-    cbtiks = options.cov_cbtiks
+    zlabel = 'z [' + xunit + ']'
+    xlabel = 'x [' + xunit + ']'
     cm = 'GnBu'
     # plot
     fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
@@ -420,7 +400,7 @@ def plot_cov(cid, ax, plotman, title):
     return fig, ax, cnorm, cmap, cb
 
 
-def plot_single(plotman, filename, mag, alpha):
+def plot_single(plotman, filename, mag, alpha, options):
     '''Plot only the magnitude of the last iteration in a single plot.
     '''
     f, ax = plt.subplots(1, figsize=(3.5, 2))
@@ -432,16 +412,18 @@ def plot_single(plotman, filename, mag, alpha):
     else:
         cid = plotman.parman.add_data(mag)
         loglin = 'log_rho'
-    plot_mag(cid, ax, plotman, options.title, loglin, alpha)
+    plot_mag(cid, ax, plotman, options.title, loglin, alpha,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.mag_cbtiks)
     f.tight_layout()
     f.savefig(filename[4:] + '.png', dpi=300)
 
 
-def alpha_from_cov(plotman):
+def alpha_from_cov(plotman, alpha_cov):
     '''Calculate alpha values from the coverage/2.5.
     '''
     abscov = np.abs(load_cov('inv/coverage.mag'))
-    if options.alpha_cov:
+    if alpha_cov:
         normcov = np.divide(abscov, 2.5)
         normcov[np.where(normcov > 1)] = 1
         mask = np.subtract(1, normcov)
@@ -451,7 +433,7 @@ def alpha_from_cov(plotman):
     return alpha, plotman
 
 
-def plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha):
+def plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha, options):
     '''Plot the data of the tomodir in one overview plot.
     '''
     # create figure
@@ -465,19 +447,34 @@ def plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha):
     else:
         cid = plotman.parman.add_data(mag)
         loglin = 'log_rho'
-    plot_mag(cid, ax[0, 0], plotman, 'Magnitude', loglin, alpha)
+    plot_mag(cid, ax[0, 0], plotman, 'Magnitude', loglin, alpha,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.mag_cbtiks,
+             )
     # plot coverage
     cid = plotman.parman.add_data(cov)
-    plot_cov(cid, ax[1, 0], plotman, 'Coverage')
+    plot_cov(cid, ax[1, 0], plotman, 'Coverage',
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.cov_cbtiks,
+             )
     # plot phase, real, imag
     if pha != []:
         cid = plotman.parman.add_data(pha)
-        plot_pha(cid, ax[0, 1], plotman, 'Phase', alpha)
+        plot_pha(cid, ax[0, 1], plotman, 'Phase', alpha,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.pha_cbtiks,
+             )
         [real, imag] = calc_complex(mag, pha)
         cid_re = plotman.parman.add_data(real)
         cid_im = plotman.parman.add_data(imag)
-        plot_real(cid_re, ax[0, 2], plotman, 'Real Part', alpha)
-        plot_imag(cid_im, ax[0, 3], plotman, 'Imaginary Part', alpha)
+        plot_real(cid_re, ax[0, 2], plotman, 'Real Part', alpha,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.real_cbtiks,
+             )
+        plot_imag(cid_im, ax[0, 3], plotman, 'Imaginary Part', alpha,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.imag_cbtiks,
+             )
     else:
         ax[0, 1].axis('off')
         ax[0, 2].axis('off')
@@ -485,12 +482,21 @@ def plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha):
     # plot fpi phase, real, imag
     if pha_fpi != []:
         cid = plotman.parman.add_data(pha_fpi)
-        plot_pha(cid, ax[1, 1], plotman, 'FPI Phase', alpha)
+        plot_pha(cid, ax[1, 1], plotman, 'FPI Phase', alpha,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.pha_cbtiks,
+             )
         [real, imag] = calc_complex(mag, pha_fpi)
         cid_fre = plotman.parman.add_data(real)
         cid_fim = plotman.parman.add_data(imag)
-        plot_real(cid_fre, ax[1, 2], plotman, 'FPI Real Part', alpha)
-        plot_imag(cid_fim, ax[1, 3], plotman, 'FPI Imaginary Part', alpha)
+        plot_real(cid_fre, ax[1, 2], plotman, 'FPI Real Part', alpha,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.real_cbtiks,
+             )
+        plot_imag(cid_fim, ax[1, 3], plotman, 'FPI Imaginary Part', alpha,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.imag_cbtiks,
+             )
     else:
         ax[1, 1].axis('off')
         ax[1, 2].axis('off')
@@ -501,7 +507,7 @@ def plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha):
 
 
 def main():
-    global options
+    #global options
     options = handle_options()
     matplotlib.style.use('default')
     mpl_style.general_settings()
@@ -510,17 +516,17 @@ def main():
                            'grid/elec.dat')
     plotman = CRPlot.plotManager(grid=grid)
     # get alpha
-    alpha, plotman = alpha_from_cov(plotman)
+    alpha, plotman = alpha_from_cov(plotman, options.alpha_cov)
     if not options.single:
         [datafiles, filetype] = list_datafiles()
         [cov, mag, pha, pha_fpi] = read_datafiles(datafiles,
                                                   filetype,
                                                   options.column)
-        plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha)
+        plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha, options)
     else:
         filename = read_iter(False)
         mag = load_rho(filename, options.column)
-        plot_single(plotman, filename, mag, alpha)
+        plot_single(plotman, filename, mag, alpha, options)
 
 
 if __name__ == '__main__':
