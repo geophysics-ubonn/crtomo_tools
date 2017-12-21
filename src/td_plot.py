@@ -442,6 +442,7 @@ def plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha, options):
     f, ax = plt.subplots(2, 4, figsize=(14, 4))
     if options.title is not None:
         plt.suptitle(options.title, fontsize=18)
+        plt.subplots_adjust(wspace=1, top=0.8)
     # plot magnitue
     if options.cmaglin:
         cid = plotman.parman.add_data(np.power(10, mag))
