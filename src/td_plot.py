@@ -226,9 +226,9 @@ def read_datafiles(files, dtype, column):
         elif filetype == 'mag':
             mag = load_rho(filename, column)
         elif filetype == 'pha':
-            pha = load_rho(filename, column)
+            pha = load_rho(filename, 2)
         elif filetype == 'pha_fpi':
-            pha_fpi = load_rho(filename, column)
+            pha_fpi = load_rho(filename, 2)
 
     return cov, mag, pha, pha_fpi
 
@@ -244,7 +244,11 @@ def load_cov(name):
 def load_rho(name, column):
     '''Load a datafile with rho structure like mag and phase
     '''
-    content = np.loadtxt(name, skiprows=1, usecols=([column]))
+    try:
+        content = np.loadtxt(name, skiprows=1, usecols=([column]))
+    except:
+        raise ValueError('Given column to open does not exist.')
+        
 
     return content
 
