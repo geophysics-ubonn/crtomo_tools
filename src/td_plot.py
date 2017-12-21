@@ -266,7 +266,7 @@ def calc_complex(mag, pha):
 
 
 def plot_real(cid, ax, plotman, title, alpha,
-             xmin, xmax, zmin, zmax, xunit, cbtiks):
+              xmin, xmax, zmin, zmax, xunit, cbtiks):
     '''Plot real parts of the complex conductivity using the real_options.
     '''
     # handle options
@@ -294,7 +294,7 @@ def plot_real(cid, ax, plotman, title, alpha,
 
 
 def plot_imag(cid, ax, plotman, title, alpha,
-             xmin, xmax, zmin, zmax, xunit, cbtiks):
+              xmin, xmax, zmin, zmax, xunit, cbtiks):
     '''Plot imag parts of the complex conductivity using the imag_options.
     '''
     # handle options
@@ -463,20 +463,20 @@ def plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha, options):
     if pha != []:
         cid = plotman.parman.add_data(pha)
         plot_pha(cid, ax[0, 1], plotman, 'Phase', alpha,
-             options.xmin, options.xmax, options.zmin, options.zmax,
-             options.unit, options.pha_cbtiks,
-             )
+                 options.xmin, options.xmax, options.zmin, options.zmax,
+                 options.unit, options.pha_cbtiks,
+                 )
         [real, imag] = calc_complex(mag, pha)
         cid_re = plotman.parman.add_data(real)
         cid_im = plotman.parman.add_data(imag)
         plot_real(cid_re, ax[0, 2], plotman, 'Real Part', alpha,
-             options.xmin, options.xmax, options.zmin, options.zmax,
-             options.unit, options.real_cbtiks,
-             )
+                  options.xmin, options.xmax, options.zmin, options.zmax,
+                  options.unit, options.real_cbtiks,
+                  )
         plot_imag(cid_im, ax[0, 3], plotman, 'Imaginary Part', alpha,
-             options.xmin, options.xmax, options.zmin, options.zmax,
-             options.unit, options.imag_cbtiks,
-             )
+                  options.xmin, options.xmax, options.zmin, options.zmax,
+                  options.unit, options.imag_cbtiks,
+                  )
     else:
         ax[0, 1].axis('off')
         ax[0, 2].axis('off')
@@ -485,20 +485,20 @@ def plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha, options):
     if pha_fpi != []:
         cid = plotman.parman.add_data(pha_fpi)
         plot_pha(cid, ax[1, 1], plotman, 'FPI Phase', alpha,
-             options.xmin, options.xmax, options.zmin, options.zmax,
-             options.unit, options.pha_cbtiks,
-             )
+                 options.xmin, options.xmax, options.zmin, options.zmax,
+                 options.unit, options.pha_cbtiks,
+                 )
         [real, imag] = calc_complex(mag, pha_fpi)
         cid_fre = plotman.parman.add_data(real)
         cid_fim = plotman.parman.add_data(imag)
         plot_real(cid_fre, ax[1, 2], plotman, 'FPI Real Part', alpha,
-             options.xmin, options.xmax, options.zmin, options.zmax,
-             options.unit, options.real_cbtiks,
-             )
+                  options.xmin, options.xmax, options.zmin, options.zmax,
+                  options.unit, options.real_cbtiks,
+                  )
         plot_imag(cid_fim, ax[1, 3], plotman, 'FPI Imaginary Part', alpha,
-             options.xmin, options.xmax, options.zmin, options.zmax,
-             options.unit, options.imag_cbtiks,
-             )
+                  options.xmin, options.xmax, options.zmin, options.zmax,
+                  options.unit, options.imag_cbtiks,
+                  )
     else:
         ax[1, 1].axis('off')
         ax[1, 2].axis('off')
@@ -509,7 +509,6 @@ def plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha, options):
 
 
 def main():
-    #global options
     options = handle_options()
     matplotlib.style.use('default')
     mpl_style.general_settings()
