@@ -344,18 +344,16 @@ class plotManager(object):
             cmap=cmap,
         )
         collection.set_cmap(cmap)
+        ax.add_collection(collection)
         no_elecs = kwargs.get('no_elecs', False)
-        print(no_elecs)
-        if self.grid.electrodes is not None:
+        if self.grid.electrodes is not None and no_elecs is not True:
             ax.scatter(
                 self.grid.electrodes[:, 1],
                 self.grid.electrodes[:, 2],
                 color=self.grid.props['electrode_color'],
-                clip_on=False,
+                # clip_on=False,
             )
 
-        
-        ax.add_collection(collection)
         ax.set_xlim(xmin, xmax)
         ax.set_ylim(zmin, zmax)
         ax.set_xlabel(kwargs.get('xlabel', 'x'))
