@@ -7,196 +7,196 @@
  Iteration   1,   2 : Calculating Potentials
 
 Chi increase:   32.48     %
-Stepsize :   7.935    
+Stepsize :   7.940    
 nrmsd/rmsreg :  0.7635    
 
   Iteration            1 ,            3  : Updating
  Iteration   1,   3 : Calculating Potentials
 
-Chi increase:   21.73     %
-Stepsize :   5.260    
-nrmsd/rmsreg :  0.8627    
+Chi increase:   21.74     %
+Stepsize :   5.269    
+nrmsd/rmsreg :  0.8628    
 
   Iteration            1 ,            4  : Updating
  Iteration   1,   4 : Calculating Potentials
 
-Chi increase:   14.79     %
-Stepsize :   3.856    
+Chi increase:   14.80     %
+Stepsize :   3.865    
 nrmsd/rmsreg :  0.9186    
 
   Iteration            1 ,            5  : Updating
  Iteration   1,   5 : Calculating Potentials
 
-Chi increase:   10.22     %
-Stepsize :   3.027    
+Chi increase:   10.23     %
+Stepsize :   3.036    
 nrmsd/rmsreg :  0.9491    
 
   Iteration            1 ,            6  : Updating
  Iteration   1,   6 : Calculating Potentials
 
-Chi increase:   7.086     %
-Stepsize :   2.487    
+Chi increase:   7.097     %
+Stepsize :   2.496    
 nrmsd/rmsreg :  0.9663    
 
   Iteration            1 ,            7  : Updating
  Iteration   1,   7 : Calculating Potentials
 
-Chi increase:   4.883     %
-Stepsize :   2.133    
+Chi increase:   4.895     %
+Stepsize :   2.141    
 nrmsd/rmsreg :  0.9768    
 
   Iteration            1 ,            8  : Updating
  Iteration   1,   8 : Calculating Potentials
 
-Chi increase:   3.284     %
-Stepsize :   1.884    
+Chi increase:   3.295     %
+Stepsize :   1.891    
 nrmsd/rmsreg :  0.9835    
 
   Iteration            1 ,            9  : Updating
  Iteration   1,   9 : Calculating Potentials
 
-Chi increase:   2.096     %
-Stepsize :   1.708    
+Chi increase:   2.108     %
+Stepsize :   1.715    
 nrmsd/rmsreg :  0.9879    
 
   Iteration            1 ,           10  : Updating
  Iteration   1,  10 : Calculating Potentials
 
-Chi increase:   1.159     %
-Stepsize :   1.570    
+Chi increase:   1.170     %
+Stepsize :   1.577    
 nrmsd/rmsreg :  0.9905    
 
   Iteration            1 ,           11  : Updating
  Iteration   1,  11 : Calculating Potentials
 
-Chi increase:  0.4584     %
-Stepsize :   1.488    
+Chi increase:  0.4699     %
+Stepsize :   1.494    
 nrmsd/rmsreg :  0.9930    
 
   Iteration            1 ,           12  : Updating
  Iteration   1,  12 : Calculating Potentials
 
-Chi increase: -0.1141     %
-Stepsize :   1.414    
+Chi increase: -0.1024     %
+Stepsize :   1.419    
 nrmsd/rmsreg :  0.9943    
 
   Iteration            1 ,           13  : Updating
  Iteration   1,  13 : Calculating Potentials
 
-Chi increase: -0.5485     %
-Stepsize :   1.381    
+Chi increase: -0.5371     %
+Stepsize :   1.387    
 nrmsd/rmsreg :  0.9957    
 
   Iteration            1 ,           14  : Updating
  Iteration   1,  14 : Calculating Potentials
 
-Chi increase: -0.9101     %
-Stepsize :   1.368    
+Chi increase: -0.8991     %
+Stepsize :   1.373    
 nrmsd/rmsreg :  0.9964    
 
   Iteration            1 ,           15  : Updating
  Iteration   1,  15 : Calculating Potentials
 
-Chi increase:  -1.257     %
-Stepsize :   1.340    
+Chi increase:  -1.246     %
+Stepsize :   1.345    
 nrmsd/rmsreg :  0.9966    
 
   Iteration            1 ,           16  : Updating
  Iteration   1,  16 : Calculating Potentials
 
-Chi increase:  -1.555     %
-Stepsize :   1.326    
+Chi increase:  -1.545     %
+Stepsize :   1.331    
 nrmsd/rmsreg :  0.9971    
 
   Iteration            1 ,           17  : Updating
  Iteration   1,  17 : Calculating Potentials
 
-Chi increase:  -1.760     %
-Stepsize :   1.354    
+Chi increase:  -1.750     %
+Stepsize :   1.359    
 nrmsd/rmsreg :  0.9980    
 
   Iteration            1 ,           18  : Updating
  Iteration   1,  18 : Calculating Potentials
 
-Chi increase:  -1.935     %
-Stepsize :   1.396    
+Chi increase:  -1.926     %
+Stepsize :   1.400    
 nrmsd/rmsreg :  0.9983    
 
   Iteration            1 ,           19  : Updating
  Iteration   1,  19 : Calculating Potentials
 
-Chi increase:  -2.156     %
-Stepsize :   1.400    
+Chi increase:  -2.147     %
+Stepsize :   1.404    
 nrmsd/rmsreg :  0.9978    
 
   Iteration            1 ,           20  : Updating
  Iteration   1,  20 : Calculating Potentials
 
-Chi increase:  -2.286     %
-Stepsize :   1.466    
+Chi increase:  -2.277     %
+Stepsize :   1.470    
 nrmsd/rmsreg :  0.9987    
 
   Iteration            1 ,           21  : Updating
  Iteration   1,  21 : Calculating Potentials
 
-Chi increase:  -2.470     %
-Stepsize :   1.475    
+Chi increase:  -2.463     %
+Stepsize :   1.479    
 nrmsd/rmsreg :  0.9982    
 
   Iteration            1 ,           22  : Updating
  Iteration   1,  22 : Calculating Potentials
 
-Chi increase:  -2.600     %
-Stepsize :   1.525    
-nrmsd/rmsreg :  0.9987    
+Chi increase:  -2.567     %
+Stepsize :   1.563    
+nrmsd/rmsreg :  0.9990    
 
   Iteration            1 ,           23  : Updating
  Iteration   1,  23 : Calculating Potentials
 
-Chi increase:  -2.690     %
-Stepsize :   1.621    
-nrmsd/rmsreg :  0.9991    
+Chi increase:  -2.685     %
+Stepsize :   1.625    
+nrmsd/rmsreg :  0.9988    
 
   Iteration            1 ,           24  : Updating
  Iteration   1,  24 : Calculating Potentials
 
-Chi increase:  -2.775     %
-Stepsize :   1.727    
+Chi increase:  -2.770     %
+Stepsize :   1.731    
 nrmsd/rmsreg :  0.9992    
 
   Iteration            1 ,           25  : Updating
  Iteration   1,  25 : Calculating Potentials
 
-Chi increase:  -2.852     %
-Stepsize :   1.844    
-nrmsd/rmsreg :  0.9993    
+Chi increase:  -2.847     %
+Stepsize :   1.847    
+nrmsd/rmsreg :  0.9992    
 
   Iteration            1 ,           26  : Updating
  Iteration   1,  26 : Calculating Potentials
 
-Chi increase:  -2.910     %
-Stepsize :   2.000    
+Chi increase:  -2.905     %
+Stepsize :   2.003    
 nrmsd/rmsreg :  0.9994    
 
   Iteration            1 ,           27  : Updating
  Iteration   1,  27 : Calculating Potentials
 
-Chi increase:  -2.972     %
-Stepsize :   2.156    
+Chi increase:  -2.968     %
+Stepsize :   2.160    
 nrmsd/rmsreg :  0.9994    
 
   Iteration            1 ,           28  : Updating
  Iteration   1,  28 : Calculating Potentials
 
-Chi increase:  -3.065     %
-Stepsize :   2.237    
+Chi increase:  -3.062     %
+Stepsize :   2.240    
 nrmsd/rmsreg :  0.9991    
 
   Iteration            1 ,           29  : Updating
  Iteration   1,  29 : Calculating Potentials
 
-Chi increase:  -3.116     %
-Stepsize :   2.430    
+Chi increase:  -3.114     %
+Stepsize :   2.435    
 nrmsd/rmsreg :  0.9995    
 
   Iteration            1 ,           30  : Updating
@@ -215,5 +215,5 @@ nrmsd/rmsreg :  0.9995
   Iteration            2 ,            2  : Updating
  Iteration   2,   2 : Calculating Potentials
  Iteration terminated: Min. rel. CHI decrease.
- CPU time:  0d/  0h/  2m/  2s/ 831ms
+ CPU time:  0d/  0h/  1m/ 44s/ 314ms
 ***finished***
