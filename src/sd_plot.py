@@ -160,10 +160,17 @@ def get_data(direc, options, column, plotman):
     linestring = linestring.replace('mag', '')
     # open data file
     name = linestring + options[1]
-    try:
-        content = np.loadtxt(name, skiprows=1, usecols=([column]))
-    except:
-        raise ValueError('Given column to open does not exist.')
+    
+    if options[1] == 'mag':
+        try:
+            content = np.loadtxt(name, skiprows=1, usecols=([column]))
+        except:
+            raise ValueError('Given column to open does not exist.')
+    if options[1] == 'pha':
+        try:
+            content = np.loadtxt(name, skiprows=1, usecols=([2]))
+        except:
+            raise ValueError('No phase data to open.')
     # add data to plotman
     if options[3] == 'logrho':
         cid = plotman.parman.add_data(np.power(10, content))
