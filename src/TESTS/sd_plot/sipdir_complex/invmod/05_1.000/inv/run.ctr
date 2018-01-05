@@ -1,0 +1,69 @@
+ Iteration   0,   0 : Calculating Potentials
+ Iteration   1,   0 : Calculating Sensitivities
+ Iteration   1,   1 : Calculating 1st regularization parameterlam_0   0.27E+04
+  Iteration            1 ,            1  : Updating
+ Iteration   1,   1 : Calculating Potentials
+  Iteration            1 ,            2  : Updating
+ Iteration   1,   2 : Calculating Potentials
+
+Rms increase:  -599.4     %
+Stepsize :   379.4    
+nrmsd/rmsreg :  0.7982    
+
+  Iteration            1 ,            3  : Updating
+ Iteration   1,   3 : Calculating Potentials
+
+Rms increase:  -667.4     %
+Stepsize :   384.1    
+nrmsd/rmsreg :  0.9114    
+
+  Iteration            1 ,            4  : Updating
+ Iteration   1,   4 : Calculating Potentials
+
+Rms increase:  -674.5     %
+Stepsize :   356.2    
+nrmsd/rmsreg :  0.9909    
+
+  Iteration            1 ,            5  : Updating
+ Iteration   1,   5 : Calculating Potentials
+
+Rms increase:  -699.2     %
+Stepsize :   359.3    
+nrmsd/rmsreg :  0.9691    
+
+  Iteration            1 ,            6  : Updating
+ Iteration   1,   6 : Calculating Potentials
+  Iteration            1 ,            7  : Updating
+ Iteration   1,   7 : Calculating Potentials
+  Iteration            1 ,            7  : Updating
+ Iteration   1,   7 : Calculating Potentials
+ Iteration   2,   0 : Calculating Sensitivities
+  Iteration            2 ,            0  : Updating
+ Iteration   2,   0 : Calculating Potentials
+  Iteration            2 ,            1  : Updating
+ Iteration   2,   1 : Calculating Potentials
+
+Rms increase:  -10.79     %
+Stepsize :   25.48    
+nrmsd/rmsreg :   1.180    
+
+  Iteration            2 ,            2  : Updating
+ Iteration   2,   2 : Calculating Potentials
+
+Rms increase:  -3.727     %
+Stepsize :   26.08    
+nrmsd/rmsreg :   1.068    
+
+  Iteration            2 ,            3  : Updating
+ Iteration   2,   3 : Calculating Potentials
+  Iteration            2 ,            4  : Updating
+ Iteration   2,   4 : Calculating Potentials
+  Iteration            2 ,            4  : Updating
+ Iteration   2,   4 : Calculating Potentials
+ Iteration terminated: Min. RMS.
+ CPU time:  0d/  0h/  4m/ 18s/ 774ms
+Calculating model uncertainty..
+ Taking lam=   549.06614741172723     
+MCM_1 = (A^TC_d^-1A + C_m^-1)^-1
+RES = (A^TC_d^-1A + C_m^-1)^-1A^TC_d^-1A
+MCM_2 = (A^TC_d^-1A + C_m^-1)^-1 A^TC_d^-1A (A^TC_d^-1A + C_m^-1)^-1

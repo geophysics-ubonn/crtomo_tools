@@ -1,0 +1,55 @@
+ Iteration   0,   0 : Calculating Potentials
+ Iteration   1,   0 : Calculating Sensitivities
+ Iteration   1,   1 : Calculating 1st regularization parameterlam_0   0.27E+04
+  Iteration            1 ,            1  : Updating
+ Iteration   1,   1 : Calculating Potentials
+  Iteration            1 ,            2  : Updating
+ Iteration   1,   2 : Calculating Potentials
+
+Rms increase:  -644.7     %
+Stepsize :   386.6    
+nrmsd/rmsreg :  0.7936    
+
+  Iteration            1 ,            3  : Updating
+ Iteration   1,   3 : Calculating Potentials
+
+Rms increase:  -713.5     %
+Stepsize :   390.2    
+nrmsd/rmsreg :  0.9154    
+
+  Iteration            1 ,            4  : Updating
+ Iteration   1,   4 : Calculating Potentials
+
+Rms increase:  -747.8     %
+Stepsize :   393.6    
+nrmsd/rmsreg :  0.9596    
+
+  Iteration            1 ,            5  : Updating
+ Iteration   1,   5 : Calculating Potentials
+  Iteration            1 ,            6  : Updating
+ Iteration   1,   6 : Calculating Potentials
+  Iteration            1 ,            6  : Updating
+ Iteration   1,   6 : Calculating Potentials
+ Iteration   2,   0 : Calculating Sensitivities
+  Iteration            2 ,            0  : Updating
+ Iteration   2,   0 : Calculating Potentials
+  Iteration            2 ,            1  : Updating
+ Iteration   2,   1 : Calculating Potentials
+
+Rms increase: -0.5417     %
+Stepsize :   8.355    
+nrmsd/rmsreg :   1.118    
+
+  Iteration            2 ,            2  : Updating
+ Iteration   2,   2 : Calculating Potentials
+  Iteration            2 ,            3  : Updating
+ Iteration   2,   3 : Calculating Potentials
+  Iteration            2 ,            3  : Updating
+ Iteration   2,   3 : Calculating Potentials
+ Iteration terminated: Min. RMS.
+ CPU time:  0d/  0h/  2m/ 36s/ 830ms
+Calculating model uncertainty..
+ Taking lam=   775.28558164884998     
+MCM_1 = (A^TC_d^-1A + C_m^-1)^-1
+RES = (A^TC_d^-1A + C_m^-1)^-1A^TC_d^-1A
+MCM_2 = (A^TC_d^-1A + C_m^-1)^-1 A^TC_d^-1A (A^TC_d^-1A + C_m^-1)^-1

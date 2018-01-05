@@ -1,0 +1,299 @@
+ Iteration   0,   0 : Calculating Potentials
+ Iteration   1,   0 : Calculating Sensitivities
+ Iteration   1,   1 : Calculating 1st regularization parameterlam_0   0.27E+04
+  Iteration            1 ,            1  : Updating
+ Iteration   1,   1 : Calculating Potentials
+  Iteration            1 ,            2  : Updating
+ Iteration   1,   2 : Calculating Potentials
+
+Rms increase:  -599.4     %
+Stepsize :   379.4    
+nrmsd/rmsreg :  0.7982    
+
+  Iteration            1 ,            3  : Updating
+ Iteration   1,   3 : Calculating Potentials
+
+Rms increase:  -667.4     %
+Stepsize :   384.1    
+nrmsd/rmsreg :  0.9114    
+
+  Iteration            1 ,            4  : Updating
+ Iteration   1,   4 : Calculating Potentials
+
+Rms increase:  -674.5     %
+Stepsize :   356.2    
+nrmsd/rmsreg :  0.9909    
+
+  Iteration            1 ,            5  : Updating
+ Iteration   1,   5 : Calculating Potentials
+
+Rms increase:  -699.2     %
+Stepsize :   359.3    
+nrmsd/rmsreg :  0.9691    
+
+  Iteration            1 ,            6  : Updating
+ Iteration   1,   6 : Calculating Potentials
+  Iteration            1 ,            7  : Updating
+ Iteration   1,   7 : Calculating Potentials
+  Iteration            1 ,            7  : Updating
+ Iteration   1,   7 : Calculating Potentials
+ Iteration   2,   0 : Calculating Sensitivities
+  Iteration            2 ,            0  : Updating
+ Iteration   2,   0 : Calculating Potentials
+  Iteration            2 ,            1  : Updating
+ Iteration   2,   1 : Calculating Potentials
+
+Rms increase:  -10.79     %
+Stepsize :   25.48    
+nrmsd/rmsreg :   1.180    
+
+  Iteration            2 ,            2  : Updating
+ Iteration   2,   2 : Calculating Potentials
+
+Rms increase:  -3.727     %
+Stepsize :   26.08    
+nrmsd/rmsreg :   1.068    
+
+  Iteration            2 ,            3  : Updating
+ Iteration   2,   3 : Calculating Potentials
+  Iteration            2 ,            4  : Updating
+ Iteration   2,   4 : Calculating Potentials
+  Iteration            2 ,            4  : Updating
+ Iteration   2,   4 : Calculating Potentials
+ Final phase improvement
+ Iteration   3,   0 : Calculating Sensitivities
+ Iteration   3,   1 : Calculating 1st regularization parameterlam_0   0.35E+10
+  Iteration            3 ,            1  : Updating
+ Iteration   3,   1 : Calculating Potentials
+  Iteration            3 ,            2  : Updating
+ Iteration   3,   2 : Calculating Potentials
+
+Rms increase:   12.66     %
+Stepsize :  0.1268E-02
+nrmsd/rmsreg :  0.7491    
+
+  Iteration            3 ,            3  : Updating
+ Iteration   3,   3 : Calculating Potentials
+
+Rms increase:  -16.77     %
+Stepsize :  0.4583E-03
+nrmsd/rmsreg :  0.7480    
+
+  Iteration            3 ,            4  : Updating
+ Iteration   3,   4 : Calculating Potentials
+
+Rms increase:  -53.70     %
+Stepsize :  0.1202E-02
+nrmsd/rmsreg :  0.7598    
+
+  Iteration            3 ,            5  : Updating
+ Iteration   3,   5 : Calculating Potentials
+
+Rms increase:  -96.14     %
+Stepsize :  0.2920E-02
+nrmsd/rmsreg :  0.7836    
+
+  Iteration            3 ,            6  : Updating
+ Iteration   3,   6 : Calculating Potentials
+
+Rms increase:  -146.0     %
+Stepsize :  0.5183E-02
+nrmsd/rmsreg :  0.7973    
+
+  Iteration            3 ,            7  : Updating
+ Iteration   3,   7 : Calculating Potentials
+
+Rms increase:  -203.3     %
+Stepsize :  0.7449E-02
+nrmsd/rmsreg :  0.8111    
+
+  Iteration            3 ,            8  : Updating
+ Iteration   3,   8 : Calculating Potentials
+
+Rms increase:  -270.7     %
+Stepsize :  0.9578E-02
+nrmsd/rmsreg :  0.8183    
+
+  Iteration            3 ,            9  : Updating
+ Iteration   3,   9 : Calculating Potentials
+
+Rms increase:  -342.8     %
+Stepsize :  0.1155E-01
+nrmsd/rmsreg :  0.8371    
+
+  Iteration            3 ,           10  : Updating
+ Iteration   3,  10 : Calculating Potentials
+
+Rms increase:  -425.7     %
+Stepsize :  0.1281E-01
+nrmsd/rmsreg :  0.8423    
+
+  Iteration            3 ,           11  : Updating
+ Iteration   3,  11 : Calculating Potentials
+
+Rms increase:  -516.7     %
+Stepsize :  0.1392E-01
+nrmsd/rmsreg :  0.8525    
+
+  Iteration            3 ,           12  : Updating
+ Iteration   3,  12 : Calculating Potentials
+
+Rms increase:  -617.2     %
+Stepsize :  0.1403E-01
+nrmsd/rmsreg :  0.8598    
+
+  Iteration            3 ,           13  : Updating
+ Iteration   3,  13 : Calculating Potentials
+
+Rms increase:  -734.8     %
+Stepsize :  0.1441E-01
+nrmsd/rmsreg :  0.8591    
+
+  Iteration            3 ,           14  : Updating
+ Iteration   3,  14 : Calculating Potentials
+
+Rms increase:  -815.6     %
+Stepsize :  0.1410E-01
+nrmsd/rmsreg :  0.9118    
+
+  Iteration            3 ,           15  : Updating
+ Iteration   3,  15 : Calculating Potentials
+
+Rms increase:  -882.2     %
+Stepsize :  0.1466E-01
+nrmsd/rmsreg :  0.9322    
+
+  Iteration            3 ,           16  : Updating
+ Iteration   3,  16 : Calculating Potentials
+
+Rms increase:  -910.5     %
+Stepsize :  0.1521E-01
+nrmsd/rmsreg :  0.9719    
+
+  Iteration            3 ,           17  : Updating
+ Iteration   3,  17 : Calculating Potentials
+  Iteration            3 ,           18  : Updating
+ Iteration   3,  18 : Calculating Potentials
+ Iteration   4,   0 : Calculating Sensitivities
+  Iteration            4 ,            0  : Updating
+ Iteration   4,   0 : Calculating Potentials
+  Iteration            4 ,            1  : Updating
+ Iteration   4,   1 : Calculating Potentials
+
+Rms increase:  -32.50     %
+Stepsize :  0.6173E-02
+nrmsd/rmsreg :  0.9243    
+
+  Iteration            4 ,            2  : Updating
+ Iteration   4,   2 : Calculating Potentials
+
+Rms increase:  -41.56     %
+Stepsize :  0.6451E-02
+nrmsd/rmsreg :  0.9360    
+
+  Iteration            4 ,            3  : Updating
+ Iteration   4,   3 : Calculating Potentials
+
+Rms increase:  -49.28     %
+Stepsize :  0.6819E-02
+nrmsd/rmsreg :  0.9483    
+
+  Iteration            4 ,            4  : Updating
+ Iteration   4,   4 : Calculating Potentials
+
+Rms increase:  -55.84     %
+Stepsize :  0.6856E-02
+nrmsd/rmsreg :  0.9579    
+
+  Iteration            4 ,            5  : Updating
+ Iteration   4,   5 : Calculating Potentials
+
+Rms increase:  -59.38     %
+Stepsize :  0.5783E-02
+nrmsd/rmsreg :  0.9778    
+
+  Iteration            4 ,            6  : Updating
+ Iteration   4,   6 : Calculating Potentials
+
+Rms increase:  -63.36     %
+Stepsize :  0.5595E-02
+nrmsd/rmsreg :  0.9757    
+
+  Iteration            4 ,            7  : Updating
+ Iteration   4,   7 : Calculating Potentials
+
+Rms increase:  -68.47     %
+Stepsize :  0.5966E-02
+nrmsd/rmsreg :  0.9696    
+
+  Iteration            4 ,            8  : Updating
+ Iteration   4,   8 : Calculating Potentials
+
+Rms increase:  -72.62     %
+Stepsize :  0.5932E-02
+nrmsd/rmsreg :  0.9760    
+
+  Iteration            4 ,            9  : Updating
+ Iteration   4,   9 : Calculating Potentials
+
+Rms increase:  -76.66     %
+Stepsize :  0.6160E-02
+nrmsd/rmsreg :  0.9771    
+
+  Iteration            4 ,           10  : Updating
+ Iteration   4,  10 : Calculating Potentials
+
+Rms increase:  -78.47     %
+Stepsize :  0.4041E-02
+nrmsd/rmsreg :  0.9899    
+
+  Iteration            4 ,           11  : Updating
+ Iteration   4,  11 : Calculating Potentials
+
+Rms increase:  -80.76     %
+Stepsize :  0.4228E-02
+nrmsd/rmsreg :  0.9873    
+
+  Iteration            4 ,           12  : Updating
+ Iteration   4,  12 : Calculating Potentials
+
+Rms increase:  -82.55     %
+Stepsize :  0.4395E-02
+nrmsd/rmsreg :  0.9902    
+
+  Iteration            4 ,           13  : Updating
+ Iteration   4,  13 : Calculating Potentials
+  Iteration            4 ,           14  : Updating
+ Iteration   4,  14 : Calculating Potentials
+  Iteration            4 ,           14  : Updating
+ Iteration   4,  14 : Calculating Potentials
+ Iteration   5,   0 : Calculating Sensitivities
+  Iteration            5 ,            0  : Updating
+ Iteration   5,   0 : Calculating Potentials
+  Iteration            5 ,            1  : Updating
+ Iteration   5,   1 : Calculating Potentials
+
+Rms increase:  -4.732     %
+Stepsize :  0.1155E-03
+nrmsd/rmsreg :  0.9970    
+
+  Iteration            5 ,            2  : Updating
+ Iteration   5,   2 : Calculating Potentials
+
+Rms increase:  -1.744     %
+Stepsize :  0.1569E-03
+nrmsd/rmsreg :   1.029    
+
+  Iteration            5 ,            3  : Updating
+ Iteration   5,   3 : Calculating Potentials
+  Iteration            5 ,            4  : Updating
+ Iteration   5,   4 : Calculating Potentials
+  Iteration            5 ,            4  : Updating
+ Iteration   5,   4 : Calculating Potentials
+ Iteration terminated: Min. rel. RMS decrease.
+ CPU time:  0d/  0h/  7m/ 45s/ 957ms
+Calculating model uncertainty..
+ Taking lam=   549.06607573949600     
+MCM_1 = (A^TC_d^-1A + C_m^-1)^-1
+RES = (A^TC_d^-1A + C_m^-1)^-1A^TC_d^-1A
+MCM_2 = (A^TC_d^-1A + C_m^-1)^-1 A^TC_d^-1A (A^TC_d^-1A + C_m^-1)^-1
