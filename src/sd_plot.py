@@ -13,7 +13,6 @@ import matplotlib
 import math
 import edf.main.units as units
 import crtomo.mpl as mpl_style
-import crtomo.td_plot as td
 
 def handle_options():
     '''Handle options.
@@ -62,12 +61,6 @@ def handle_options():
                       type='str',
                       default='m',
                       )
-    parser.add_option('--no_elecs',
-                      action='store_true',
-                      dest='no_elecs',
-                      help='Plot no electrodes (default: false)',
-                      default=False,
-                      )
     parser.add_option('--title',
                       dest='title',
                       type='string',
@@ -79,30 +72,9 @@ def handle_options():
                       dest="alpha_cov",
                       help="use coverage for transparency",
                       )
-#    parser.add_option('--x_nr',
-#                      dest='x_nr',
-#                      help='Number of X-axis tiks',
-#                      type=int,
-#                      metavar='INT',
-#                      default=None,
-#                      )
-#    parser.add_option('--y_nr',
-#                      dest='y_nr',
-#                      help='Number of Y-axis tiks',
-#                      type=int, metavar='INT',
-#                      default=None,
-#                      )
-    # options for subplots
-    parser.add_option('--cov_cbtiks',
-                      dest='cov_cbtiks',
-                      help="Number of CB tiks for coverage",
-                      type=int,
-                      metavar="INT",
-                      default=3,
-                      )
-    parser.add_option('--mag_cbtiks',
-                      dest='mag_cbtiks',
-                      help="Number of CB tiks for magnitude",
+    parser.add_option('--cbtiks',
+                      dest='cbtiks',
+                      help="Number of CB tiks",
                       type=int,
                       metavar="INT",
                       default=3,
@@ -112,124 +84,159 @@ def handle_options():
                       dest="cmaglin",
                       help="linear colorbar for magnitude",
                       )
-    parser.add_option("--single",
-                      action="store_true",
-                      dest="single",
-                      help="plot only magnitude",
-                      )
-    parser.add_option('--pha_cbtiks',
-                      dest='pha_cbtiks',
-                      help="Number of CB tiks for phase",
-                      type=int,
-                      metavar="INT",
-                      default=3,
-                      )
-    parser.add_option('--real_cbtiks',
-                      dest='real_cbtiks',
-                      help="Number of CB tiks for real part",
-                      type=int,
-                      metavar="INT",
-                      default=3,
-                      )
-    parser.add_option('--imag_cbtiks',
-                      dest='imag_cbtiks',
-                      help="Number of CB tiks for imag part",
-                      type=int,
-                      metavar="INT",
-                      default=3,
+    parser.add_option('-t',
+                      '--type',
+                      dest='type',
+                      help='what type of data should be plotted',
+                      type='str',
+                      default='mag',
                       )
 
     (options, args) = parser.parse_args()
     return options
 
 
-def list_plottypes(invmod):
-    plots = ['mag', 'cov']
-    dirs = os.listdir(invmod)
-    cfg = np.genfromtxt(invmod + dirs[0] + '/exe/crtomo.cfg',
-                        skip_header=15,
-                        dtype='str',
-                        usecols=([0]))
-    if cfg[0] == 'F':
-        plots.append('pha')
-        plots.append('real')
-        plots.append('imag')
-    if cfg[2] == 'T':
-        plots.append('pha_FPI')
-        plots.append('real_FPI')
-        plots.append('imag_FPI')
-    return plots
+def get_plotoptions(typ, cmaglin):
+    options = []
+    if typ == 'mag':
+        options.append('inv.lastmod')  # file with last iteration
+        options.append('mag')  # file ending of datafile
+        options.append('Magnitude')  # title of plot
+        if cmaglin:
+            options.append('rho')  # key for cb-unit
+        else:
+            options.append('log_rho')
+        options.append('viridis')  # cb
+    elif typ == 'pha':
+        options.append('inv.lastmod')
+        options.append('pha')
+        options.append('Phase')
+        options.append('phi')
+        options.append('plasma')
+#    elif typ == 'real':
+#        options.append('inv.lastmod')
+#        options.append('rho00.mag')
+#        options.append('Real Part')
+#        options.append('log_real')  # insert option cmaglin rho
+#        options.append('viridis_r')
+#    elif typ == 'imag':
+#        options.append('inv.lastmod')
+#        options.append('rho00.mag')
+#        options.append('Imaginary Part')
+#        options.append('log_imag')  # insert option cmaglin rho
+#        options.append('plasma_r')
+    else:
+        print("This data format isn't specified. Please select 'mag' or 'pha'")
+        exit()
+    return options
 
 
-def list_frequencies(invmod):
-    dirlist = os.listdir(invmod)
-    dirlist.sort()
-    frequencies = [dir[3:] for dir in dirlist]
-    return dirlist, frequencies
+def load_grid(td, alpha_cov):
+    '''Load grid and calculate alpha values from the coverage/2.5.
+    '''
+    grid = CRGrid.crt_grid(td + '/grid/elem.dat',
+                           td + '/grid/elec.dat')
+    plotman = CRPlot.plotManager(grid=grid)
+    
+    name = td + '/inv/coverage.mag'
+    content = np.genfromtxt(name, skip_header=1, skip_footer=1, usecols=([2]))
+    abscov = np.abs(content)
+    if alpha_cov:
+        normcov = np.divide(abscov, 2.5)
+        normcov[np.where(normcov > 1)] = 1
+        mask = np.subtract(1, normcov)
+        alpha = plotman.parman.add_data(mask)
+    else:
+        alpha = plotman.parman.add_data(np.ones(len(abscov)))
+    return alpha, plotman
 
 
-def get_plotdetails(datatype):
-    if datatype == 'mag':
-        plt_routine = 'plot_mag'
-        title = 'Magnitude'
-    if datatype == 'cov':
-        plt_routine = 'plot_cov'
-        title = 'Coverage'
-    if datatype == 'pha':
-        plt_routine = 'plot_pha'
-        title = 'Phase'
-    if datatype == 'real':
-        plt_routine = 'plot_real'
-        title = 'Real Part'
-    if datatype == 'imag':
-        plt_routine = 'plot_imag'
-        title = 'Imaginary Part'
-    if datatype == 'pha_FPI':
-        plt_routine = 'plot_pha'
-        title = 'FPI Phase'
-    if datatype == 'real_FPI':
-        plt_routine = 'plot_real'
-        title = 'FPI Real Part'
-    if datatype == 'imag_FPI':
-        plt_routine = 'plot_imag'
-        title = 'FPI Imaginary Part'
-    is_fpi = False
-    if datatype[-3:] == 'FPI':
-        is_fpi = True
-    return plt_routine, is_fpi, title
+def get_data(direc, options, column, plotman):
+    os.chdir(direc)
+    # get iteration
+    linestring = open('exe/' + options[0], 'r').readline().strip()
+    linestring = linestring.replace('\n', '')
+    linestring = linestring.replace('../', '')
+    linestring = linestring.replace('mag', '')
+    # open data file
+    name = linestring + options[1]
+    try:
+        content = np.loadtxt(name, skiprows=1, usecols=([column]))
+    except:
+        raise ValueError('Given column to open does not exist.')
+    # add data to plotman
+    if options[3] == 'logrho':
+        cid = plotman.parman.add_data(np.power(10, content))
+    else:
+        cid = plotman.parman.add_data(content)
+    os.chdir('..')
+
+    return cid
+
+
+def plot_data(plotman, ax, cid, alpha, options, xunit, title,
+              xmin, xmax, zmin, zmax, cbtiks):
+    # handle options
+    cblabel = units.get_label(options[3])
+    zlabel = 'z [' + xunit + ']'
+    xlabel = 'x [' + xunit + ']'
+    cm = options[4]
+    # plot
+    fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
+                                                           ax=ax,
+                                                           xmin=xmin,
+                                                           xmax=xmax,
+                                                           zmin=zmin,
+                                                           zmax=zmax,
+                                                           cblabel=cblabel,
+                                                           cbnrticks=cbtiks,
+                                                           title=title,
+                                                           zlabel=zlabel,
+                                                           xlabel=xlabel,
+                                                           plot_colorbar=True,
+                                                           cmap_name=cm,
+                                                           )
+    return fig, ax, cnorm, cmap, cb
+    
 
 
 def main():
+    # options
     options = handle_options()
     matplotlib.style.use('default')
     mpl_style.general_settings()
-    plotlist = list_plottypes('./')
-    dirs, freqs = list_frequencies('./')# load grid
-    grid = CRGrid.crt_grid(dirs[0] + '/grid/elem.dat',
-                           dirs[0] + '/grid/elec.dat')
-    plotman = CRPlot.plotManager(grid=grid)
-    for plot in plotlist:
-        routine, fpi, title = get_plotdetails(plot)
-        # create figure
-        f, ax = plt.subplots(len(dirs)//4, 4, figsize=(14, 2 * len(dirs)//4))
-        if options.title is not None:
-            plt.suptitle(options.title, fontsize=18)
-        else:
-            plt.suptitle(title, fontsize=18)
-        
-        for direc, frequ in zip(dirs, freqs):
-            os.chdir(direc)
-            it = td.read_iter(fpi)
-            print(it)
-            ###
-            # td.read_datafiles()
-            # cid = plotman.parman.add_data(mag)
-            os.chdir('..')
-#            td.plot...
-#            add to summary plot
+    opt = get_plotoptions(options.type, options.cmaglin)
     
+    # directories to plot
+    os.chdir('invmod')
+    freq_dirs = os.listdir('.')
+    freq_dirs.sort()
     
-
+    # create figure
+    fig, axs = plt.subplots(math.ceil(len(freq_dirs)/4),
+                            ncols=4,
+                            figsize=(15, 1.8 * math.ceil(len(freq_dirs)/4)))
+    plt.suptitle(opt[2], fontsize=18)
+    plt.subplots_adjust(wspace=1, top=2.8)
+    i = 0
+    j = 0
+    
+    # plot each subplot
+    for direc in freq_dirs:
+        alpha, plotman = load_grid(direc, options.alpha_cov)
+        cid = get_data(direc, opt, options.column, plotman)
+        plot_data(plotman, axs[i//4, j], cid, alpha, opt, options.unit, direc[3:],
+                  options.xmin, options.xmax, options.zmin, options.zmax,
+                  options.cbtiks)
+        i = i + 1
+        j = j + 1
+        if j == 4:
+            j = 0
+    axs[3, 1].axis('off')
+    axs[3, 2].axis('off')
+    axs[3, 3].axis('off')
+    fig.tight_layout()
+    fig.savefig('../sd_' + opt[1] + '.png', dpi=300)
 
 if __name__ == '__main__':
     main()
