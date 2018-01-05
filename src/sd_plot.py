@@ -225,7 +225,8 @@ def main():
     for direc in freq_dirs:
         alpha, plotman = load_grid(direc, options.alpha_cov)
         cid = get_data(direc, opt, options.column, plotman)
-        plot_data(plotman, axs[i//4, j], cid, alpha, opt, options.unit, direc[3:],
+        plot_data(plotman, axs[i//4, j], cid, alpha, opt, options.unit,
+                  direc[3:]  + ' Hz',
                   options.xmin, options.xmax, options.zmin, options.zmax,
                   options.cbtiks)
         i = i + 1
@@ -235,8 +236,10 @@ def main():
     axs[3, 1].axis('off')
     axs[3, 2].axis('off')
     axs[3, 3].axis('off')
+    
+    os.chdir('..')
     fig.tight_layout()
-    fig.savefig('../sd_' + opt[1] + '.png', dpi=300)
+    fig.savefig('sd_' + opt[1] + '.png', dpi=300)
 
 if __name__ == '__main__':
     main()
