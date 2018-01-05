@@ -183,6 +183,7 @@ def plot_data(plotman, ax, cid, alpha, options, xunit, title,
     cm = options[4]
     # plot
     fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
+                                                           cid_alpha=alpha,
                                                            ax=ax,
                                                            xmin=xmin,
                                                            xmax=xmax,
