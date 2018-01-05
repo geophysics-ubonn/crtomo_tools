@@ -14,6 +14,7 @@ import math
 import edf.main.units as units
 import crtomo.mpl as mpl_style
 
+
 def handle_options():
     '''Handle options.
     '''
@@ -137,7 +138,7 @@ def load_grid(td, alpha_cov):
     grid = CRGrid.crt_grid(td + '/grid/elem.dat',
                            td + '/grid/elec.dat')
     plotman = CRPlot.plotManager(grid=grid)
-    
+
     name = td + '/inv/coverage.mag'
     content = np.genfromtxt(name, skip_header=1, skip_footer=1, usecols=([2]))
     abscov = np.abs(content)
@@ -160,7 +161,7 @@ def get_data(direc, options, column, plotman):
     linestring = linestring.replace('mag', '')
     # open data file
     name = linestring + options[1]
-    
+
     if options[1] == 'mag':
         try:
             content = np.loadtxt(name, skiprows=1, usecols=([column]))
@@ -205,7 +206,6 @@ def plot_data(plotman, ax, cid, alpha, options, xunit, title,
                                                            cmap_name=cm,
                                                            )
     return fig, ax, cnorm, cmap, cb
-    
 
 
 def main():
@@ -214,12 +214,12 @@ def main():
     matplotlib.style.use('default')
     mpl_style.general_settings()
     opt = get_plotoptions(options.type, options.cmaglin)
-    
+
     # directories to plot
     os.chdir('invmod')
     freq_dirs = os.listdir('.')
     freq_dirs.sort()
-    
+
     # create figure
     fig, axs = plt.subplots(math.ceil(len(freq_dirs)/4),
                             ncols=4,
@@ -228,26 +228,33 @@ def main():
     plt.subplots_adjust(wspace=1, top=2.8)
     i = 0
     j = 0
-    
+
     # plot each subplot
-    for direc in freq_dirs:
-        alpha, plotman = load_grid(direc, options.alpha_cov)
-        cid = get_data(direc, opt, options.column, plotman)
-        plot_data(plotman, axs[i//4, j], cid, alpha, opt, options.unit,
-                  direc[3:]  + ' Hz',
-                  options.xmin, options.xmax, options.zmin, options.zmax,
-                  options.cbtiks)
+    for subplot in np.arange(4 * math.ceil(len(freq_dirs)/4)):
+        try:
+            #for direc in freq_dirs:
+            alpha, plotman = load_grid(freq_dirs[subplot],
+                                       options.alpha_cov)
+            cid = get_data(freq_dirs[subplot],
+                           opt,
+                           options.column,
+                           plotman)
+            plot_data(plotman, axs[i//4, j], cid, alpha, opt, options.unit,
+                      freq_dirs[subplot][3:] + ' Hz',
+                      options.xmin, options.xmax, options.zmin, options.zmax,
+                      options.cbtiks)
+        except:
+            # no subplot needed
+            axs[i//4, j].axis('off')
         i = i + 1
         j = j + 1
         if j == 4:
             j = 0
-    axs[3, 1].axis('off')
-    axs[3, 2].axis('off')
-    axs[3, 3].axis('off')
-    
+
     os.chdir('..')
     fig.tight_layout()
     fig.savefig('sd_' + opt[1] + '.png', dpi=300)
+
 
 if __name__ == '__main__':
     main()
