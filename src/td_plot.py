@@ -112,6 +112,16 @@ def handle_options():
                       metavar="INT",
                       default=3,
                       )
+    parser.add_option('--cov_vmin',
+                      dest='cov_vmin',
+                      help='Minium of colorbar',
+                      type='float',
+                      )
+    parser.add_option('--cov_vmax',
+                      dest='cov_vmax',
+                      help='Maximum of colorbar',
+                      type='float',
+                      )
     parser.add_option('--mag_cbtiks',
                       dest='mag_cbtiks',
                       help="Number of CB tiks for magnitude",
@@ -123,6 +133,16 @@ def handle_options():
                       action="store_true",
                       dest="cmaglin",
                       help="linear colorbar for magnitude",
+                      )
+    parser.add_option('--mag_vmin',
+                      dest='mag_vmin',
+                      help='Minium of colorbar',
+                      type='float',
+                      )
+    parser.add_option('--mag_vmax',
+                      dest='mag_vmax',
+                      help='Maximum of colorbar',
+                      type='float',
                       )
     parser.add_option("--single",
                       action="store_true",
@@ -136,6 +156,16 @@ def handle_options():
                       metavar="INT",
                       default=3,
                       )
+    parser.add_option('--pha_vmin',
+                      dest='pha_vmin',
+                      help='Minium of colorbar',
+                      type='float',
+                      )
+    parser.add_option('--pha_vmax',
+                      dest='pha_vmax',
+                      help='Maximum of colorbar',
+                      type='float',
+                      )
     parser.add_option('--real_cbtiks',
                       dest='real_cbtiks',
                       help="Number of CB tiks for real part",
@@ -143,12 +173,32 @@ def handle_options():
                       metavar="INT",
                       default=3,
                       )
+    parser.add_option('--real_vmin',
+                      dest='real_vmin',
+                      help='Minium of colorbar',
+                      type='float',
+                      )
+    parser.add_option('--real_vmax',
+                      dest='real_vmax',
+                      help='Maximum of colorbar',
+                      type='float',
+                      )
     parser.add_option('--imag_cbtiks',
                       dest='imag_cbtiks',
                       help="Number of CB tiks for imag part",
                       type=int,
                       metavar="INT",
                       default=3,
+                      )
+    parser.add_option('--imag_vmin',
+                      dest='imag_vmin',
+                      help='Minium of colorbar',
+                      type='float',
+                      )
+    parser.add_option('--imag_vmax',
+                      dest='imag_vmax',
+                      help='Maximum of colorbar',
+                      type='float',
                       )
 
     (options, args) = parser.parse_args()
@@ -268,7 +318,7 @@ def calc_complex(mag, pha):
     return real, imag
 
 
-def plot_real(cid, ax, plotman, title, alpha,
+def plot_real(cid, ax, plotman, title, alpha, vmin, vmax,
               xmin, xmax, zmin, zmax, xunit, cbtiks, elecs):
     '''Plot real parts of the complex conductivity using the real_options.
     '''
@@ -277,6 +327,12 @@ def plot_real(cid, ax, plotman, title, alpha,
     zlabel = 'z [' + xunit + ']'
     xlabel = 'x [' + xunit + ']'
     cm = 'viridis_r'
+    xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(plotman,
+                                                      cid,
+                                                      xmin, xmax,
+                                                      zmin, zmax,
+                                                      vmin, vmax,
+                                                      )
     # plot
     fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
                                                            cid_alpha=alpha,
@@ -293,11 +349,13 @@ def plot_real(cid, ax, plotman, title, alpha,
                                                            plot_colorbar=True,
                                                            cmap_name=cm,
                                                            no_elecs=elecs,
+                                                           cbmin=vmin,
+                                                           cbmax=vmax,
                                                            )
     return fig, ax, cnorm, cmap, cb
 
 
-def plot_imag(cid, ax, plotman, title, alpha,
+def plot_imag(cid, ax, plotman, title, alpha, vmin, vmax,
               xmin, xmax, zmin, zmax, xunit, cbtiks, elecs):
     '''Plot imag parts of the complex conductivity using the imag_options.
     '''
@@ -306,6 +364,12 @@ def plot_imag(cid, ax, plotman, title, alpha,
     zlabel = 'z [' + xunit + ']'
     xlabel = 'x [' + xunit + ']'
     cm = 'plasma_r'
+    xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(plotman,
+                                                      cid,
+                                                      xmin, xmax,
+                                                      zmin, zmax,
+                                                      vmin, vmax,
+                                                      )
     # plot
     fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
                                                            cid_alpha=alpha,
@@ -322,11 +386,13 @@ def plot_imag(cid, ax, plotman, title, alpha,
                                                            plot_colorbar=True,
                                                            cmap_name=cm,
                                                            no_elecs=elecs,
+                                                           cbmin=vmin,
+                                                           cbmax=vmax,
                                                            )
     return fig, ax, cnorm, cmap, cb
 
 
-def plot_mag(cid, ax, plotman, title, unit, alpha,
+def plot_mag(cid, ax, plotman, title, unit, alpha, vmin, vmax,
              xmin, xmax, zmin, zmax, xunit, cbtiks, elecs):
     '''Plot magnitude of the complex resistivity using the mag_options.
     '''
@@ -334,6 +400,12 @@ def plot_mag(cid, ax, plotman, title, unit, alpha,
     cblabel = units.get_label(unit)
     zlabel = 'z [' + xunit + ']'
     xlabel = 'x [' + xunit + ']'
+    xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(plotman,
+                                                      cid,
+                                                      xmin, xmax,
+                                                      zmin, zmax,
+                                                      vmin, vmax,
+                                                      )
     # plot
     fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
                                                            ax=ax,
@@ -349,11 +421,13 @@ def plot_mag(cid, ax, plotman, title, unit, alpha,
                                                            xlabel=xlabel,
                                                            plot_colorbar=True,
                                                            no_elecs=elecs,
+                                                           cbmin=vmin,
+                                                           cbmax=vmax,
                                                            )
     return fig, ax, cnorm, cmap, cb
 
 
-def plot_pha(cid, ax, plotman, title, alpha,
+def plot_pha(cid, ax, plotman, title, alpha, vmin, vmax,
              xmin, xmax, zmin, zmax, xunit, cbtiks, elecs):
     '''Plot phase of the complex resistivity using the pha_options.
     '''
@@ -362,6 +436,12 @@ def plot_pha(cid, ax, plotman, title, alpha,
     zlabel = 'z [' + xunit + ']'
     xlabel = 'x [' + xunit + ']'
     cm = 'plasma'
+    xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(plotman,
+                                                      cid,
+                                                      xmin, xmax,
+                                                      zmin, zmax,
+                                                      vmin, vmax,
+                                                      )
     # plot
     fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
                                                            ax=ax,
@@ -378,11 +458,13 @@ def plot_pha(cid, ax, plotman, title, alpha,
                                                            plot_colorbar=True,
                                                            cmap_name=cm,
                                                            no_elecs=elecs,
+                                                           cbmin=vmin,
+                                                           cbmax=vmax,
                                                            )
     return fig, ax, cnorm, cmap, cb
 
 
-def plot_cov(cid, ax, plotman, title,
+def plot_cov(cid, ax, plotman, title, vmin, vmax,
              xmin, xmax, zmin, zmax, xunit, cbtiks, elecs):
     '''Plot coverage of the complex resistivity using the cov_options.
     '''
@@ -391,6 +473,12 @@ def plot_cov(cid, ax, plotman, title,
     zlabel = 'z [' + xunit + ']'
     xlabel = 'x [' + xunit + ']'
     cm = 'GnBu'
+    xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(plotman,
+                                                      cid,
+                                                      xmin, xmax,
+                                                      zmin, zmax,
+                                                      vmin, vmax,
+                                                      )
     # plot
     fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
                                                            ax=ax,
@@ -406,8 +494,31 @@ def plot_cov(cid, ax, plotman, title,
                                                            plot_colorbar=True,
                                                            cmap_name=cm,
                                                            no_elecs=elecs,
+                                                           cbmin=vmin,
+                                                           cbmax=vmax,
                                                            )
     return fig, ax, cnorm, cmap, cb
+
+
+def check_minmax(plotman, cid, xmin, xmax, zmin, zmax, vmin, vmax):
+    if xmin is None:
+        xmin = plotman.grid.grid['x'].min()
+    if xmax is None:
+        xmax = plotman.grid.grid['x'].max()
+    if zmin is None:
+        zmin = plotman.grid.grid['z'].min()
+    if zmax is None:
+        zmax = plotman.grid.grid['z'].max()
+    if isinstance(cid, int):
+            subdata = plotman.parman.parsets[cid]
+    else:
+            subdata = cid
+    if vmin is None:
+        vmin = subdata.min()
+    if vmax is None:
+        vmax = subdata.max()
+
+    return xmin, xmax, zmin, zmax, vmin, vmax
 
 
 def plot_single(plotman, filename, mag, alpha, options):
@@ -423,6 +534,7 @@ def plot_single(plotman, filename, mag, alpha, options):
         cid = plotman.parman.add_data(mag)
         loglin = 'log_rho'
     plot_mag(cid, ax, plotman, options.title, loglin, alpha,
+             options.mag_vmin, options.mag_vmax,
              options.xmin, options.xmax, options.zmin, options.zmax,
              options.unit, options.mag_cbtiks, options.no_elecs,)
     f.tight_layout()
@@ -459,12 +571,14 @@ def plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha, options):
         cid = plotman.parman.add_data(mag)
         loglin = 'log_rho'
     plot_mag(cid, ax[0, 0], plotman, 'Magnitude', loglin, alpha,
+             options.mag_vmin, options.mag_vmax,
              options.xmin, options.xmax, options.zmin, options.zmax,
              options.unit, options.mag_cbtiks, options.no_elecs,
              )
     # plot coverage
     cid = plotman.parman.add_data(cov)
     plot_cov(cid, ax[1, 0], plotman, 'Coverage',
+             options.cov_vmin, options.cov_vmax,
              options.xmin, options.xmax, options.zmin, options.zmax,
              options.unit, options.cov_cbtiks, options.no_elecs,
              )
@@ -472,6 +586,7 @@ def plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha, options):
     if pha != []:
         cid = plotman.parman.add_data(pha)
         plot_pha(cid, ax[0, 1], plotman, 'Phase', alpha,
+                 options.pha_vmin, options.pha_vmax,
                  options.xmin, options.xmax, options.zmin, options.zmax,
                  options.unit, options.pha_cbtiks, options.no_elecs,
                  )
@@ -479,10 +594,12 @@ def plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha, options):
         cid_re = plotman.parman.add_data(real)
         cid_im = plotman.parman.add_data(imag)
         plot_real(cid_re, ax[0, 2], plotman, 'Real Part', alpha,
+                  options.real_vmin, options.real_vmax,
                   options.xmin, options.xmax, options.zmin, options.zmax,
                   options.unit, options.real_cbtiks, options.no_elecs,
                   )
         plot_imag(cid_im, ax[0, 3], plotman, 'Imaginary Part', alpha,
+                  options.imag_vmin, options.imag_vmax,
                   options.xmin, options.xmax, options.zmin, options.zmax,
                   options.unit, options.imag_cbtiks, options.no_elecs,
                   )
@@ -494,6 +611,7 @@ def plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha, options):
     if pha_fpi != []:
         cid = plotman.parman.add_data(pha_fpi)
         plot_pha(cid, ax[1, 1], plotman, 'FPI Phase', alpha,
+                 options.pha_vmin, options.pha_vmax,
                  options.xmin, options.xmax, options.zmin, options.zmax,
                  options.unit, options.pha_cbtiks, options.no_elecs,
                  )
@@ -501,10 +619,12 @@ def plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha, options):
         cid_fre = plotman.parman.add_data(real)
         cid_fim = plotman.parman.add_data(imag)
         plot_real(cid_fre, ax[1, 2], plotman, 'FPI Real Part', alpha,
+                  options.real_vmin, options.real_vmax,
                   options.xmin, options.xmax, options.zmin, options.zmax,
                   options.unit, options.real_cbtiks, options.no_elecs,
                   )
-        plot_imag(cid_fim, ax[1, 3], plotman, 'FPI Imaginary Part', alpha,
+        plot_imag(cid_fim, ax[1, 3], plotman, 'FPI Imaginary Part',
+                  alpha, options.imag_vmin, options.imag_vmax,
                   options.xmin, options.xmax, options.zmin, options.zmax,
                   options.unit, options.imag_cbtiks, options.no_elecs,
                   )

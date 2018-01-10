@@ -232,7 +232,7 @@ def main():
     # plot each subplot
     for subplot in np.arange(4 * math.ceil(len(freq_dirs)/4)):
         try:
-            #for direc in freq_dirs:
+            # for direc in freq_dirs:
             alpha, plotman = load_grid(freq_dirs[subplot],
                                        options.alpha_cov)
             cid = get_data(freq_dirs[subplot],

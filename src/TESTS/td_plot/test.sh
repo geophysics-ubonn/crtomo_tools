@@ -17,6 +17,9 @@ rm *.png
 td_plot --no_elecs --title 'no electrodes'
 cp *.png ../overview_cplx5.png
 rm *.png
+td_plot --cov_vmin -3.5 --mag_vmin .5 --pha_vmin -.1 --real_vmin -2.5 --imag_vmin -6.4 --cov_vmax 0 --mag_vmax 2.5 --pha_vmax -.05 --real_vmax -.5 --imag_vmax -4.5 --title 'CB min max'
+cp *.png ../overview_cplx6.png
+rm *.png
 td_plot --single --title 'magnitude plot only'
 cp *.png ../single_cplx1.png
 rm *.png
@@ -31,6 +34,9 @@ cp *.png ../single_cplx4.png
 rm *.png
 td_plot --single --no_elecs --title 'no electrodes'
 cp *.png ../single_cplx5.png
+rm *.png
+td_plot --single --mag_vmin .5 --mag_vmax 2.5  --title 'CB min max'
+cp *.png ../single_cplx6.png
 rm *.png
 
 # test plots for FPI data in tomodir
@@ -50,6 +56,9 @@ rm *.png
 td_plot --no_elecs --title 'no electrodes'
 cp *.png ../overview_fpi5.png
 rm *.png
+td_plot --cov_vmin -3.5 --mag_vmin .5 --pha_vmin -.1 --real_vmin -2.5 --imag_vmin -6.4 --cov_vmax 0 --mag_vmax 2.5 --pha_vmax -.05 --real_vmax -.5 --imag_vmax -4.5 --title 'CB min max'
+cp *.png ../overview_fpi6.png
+rm *.png
 td_plot --single --title 'magnitude plot only'
 cp *.png ../single_fpi1.png
 rm *.png
@@ -64,6 +73,9 @@ cp *.png ../single_fpi4.png
 rm *.png
 td_plot --single --no_elecs --title 'no electrodes'
 cp *.png ../single_fpi5.png
+rm *.png
+td_plot --single --mag_vmin .5 --mag_vmax 2.5  --title 'CB min max'
+cp *.png ../single_fpi6.png
 rm *.png
 
 # test plots for DC data in tomodir
@@ -83,6 +95,9 @@ rm *.png
 td_plot --no_elecs --title 'no electrodes'
 cp *.png ../overview_mag5.png
 rm *.png
+td_plot --cov_vmin -3.5 --mag_vmin .5 --cov_vmax 0 --mag_vmax 2.5  --title 'CB min max'
+cp *.png ../overview_mag6.png
+rm *.png
 td_plot --single --title 'magnitude plot only'
 cp *.png ../single_mag1.png
 rm *.png
@@ -97,6 +112,9 @@ cp *.png ../single_mag4.png
 rm *.png
 td_plot --single --no_elecs --title 'no electrodes'
 cp *.png ../single_mag5.png
+rm *.png
+td_plot --single --mag_vmin .5 --mag_vmax 2.5  --title 'CB min max'
+cp *.png ../single_mag6.png
 rm *.png
 
 # test plots for timelapse data in tomodir
