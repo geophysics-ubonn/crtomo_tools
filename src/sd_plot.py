@@ -92,6 +92,18 @@ def handle_options():
                       type='str',
                       default='mag',
                       )
+    parser.add_option('-v',
+                      '--vmin',
+                      dest='vmin',
+                      help='Minium of colorbar',
+                      type='float',
+                      )
+    parser.add_option('-V',
+                      '--vmax',
+                      dest='vmax',
+                      help='Maximum of colorbar',
+                      type='float',
+                      )
 
     (options, args) = parser.parse_args()
     return options
@@ -183,12 +195,18 @@ def get_data(direc, options, column, plotman):
 
 
 def plot_data(plotman, ax, cid, alpha, options, xunit, title,
-              xmin, xmax, zmin, zmax, cbtiks):
+              xmin, xmax, zmin, zmax, cbtiks, vmin, vmax):
     # handle options
     cblabel = units.get_label(options[3])
     zlabel = 'z [' + xunit + ']'
     xlabel = 'x [' + xunit + ']'
     cm = options[4]
+    xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(plotman,
+                                                      cid,
+                                                      xmin, xmax,
+                                                      zmin, zmax,
+                                                      vmin, vmax,
+                                                      )
     # plot
     fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
                                                            cid_alpha=alpha,
@@ -204,8 +222,31 @@ def plot_data(plotman, ax, cid, alpha, options, xunit, title,
                                                            xlabel=xlabel,
                                                            plot_colorbar=True,
                                                            cmap_name=cm,
+                                                           cbmin=vmin,
+                                                           cbmax=vmax,
                                                            )
     return fig, ax, cnorm, cmap, cb
+
+
+def check_minmax(plotman, cid, xmin, xmax, zmin, zmax, vmin, vmax):
+    if xmin is None:
+        xmin = plotman.grid.grid['x'].min()
+    if xmax is None:
+        xmax = plotman.grid.grid['x'].max()
+    if zmin is None:
+        zmin = plotman.grid.grid['z'].min()
+    if zmax is None:
+        zmax = plotman.grid.grid['z'].max()
+    if isinstance(cid, int):
+            subdata = plotman.parman.parsets[cid]
+    else:
+            subdata = cid
+    if vmin is None:
+        vmin = subdata.min()
+    if vmax is None:
+        vmax = subdata.max()
+
+    return xmin, xmax, zmin, zmax, vmin, vmax
 
 
 def main():
@@ -242,7 +283,7 @@ def main():
             plot_data(plotman, axs[i//4, j], cid, alpha, opt, options.unit,
                       freq_dirs[subplot][3:] + ' Hz',
                       options.xmin, options.xmax, options.zmin, options.zmax,
-                      options.cbtiks)
+                      options.cbtiks, options.vmin, options.vmax)
         except:
             # no subplot needed
             axs[i//4, j].axis('off')
