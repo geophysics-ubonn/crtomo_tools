@@ -307,6 +307,10 @@ class plotManager(object):
             cmap_name,
             kwargs.get('cbsegments', None)
         )
+        over = kwargs.get('over', 'orange')
+        under = kwargs.get('under', 'mediumblue')
+        cmap.set_over(over)
+        cmap.set_under(under)
 
         # normalize data
         data_min = kwargs.get('cbmin', subdata.min())
@@ -386,6 +390,7 @@ class plotManager(object):
                 label=kwargs.get('cblabel', ''),
                 ticks=mpl.ticker.MaxNLocator(kwargs.get('cbnrticks', 3)),
                 format=kwargs.get('cbformat', None),
+                extend='both',
             )
 
             return fig, ax, cnorm, cmap, cb
