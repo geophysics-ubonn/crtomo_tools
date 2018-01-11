@@ -33,6 +33,7 @@ def handle_options():
     parser = OptionParser()
     parser.set_defaults(cmaglin=False)
     parser.set_defaults(single=False)
+    parser.set_defaults(aniso=False)
     parser.set_defaults(alpha_cov=False)
     parser.add_option('-x',
                       '--xmin',
@@ -148,6 +149,11 @@ def handle_options():
                       action="store_true",
                       dest="single",
                       help="plot only magnitude",
+                      )
+    parser.add_option("--aniso",
+                      action="store_true",
+                      dest="aniso",
+                      help="plot anisotropic magnitude",
                       )
     parser.add_option('--pha_cbtiks',
                       dest='pha_cbtiks',
@@ -637,6 +643,45 @@ def plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha, options):
     return f, ax
 
 
+def plot_aniso(plotman, x, y, z, alpha, options):
+    '''Plot the data of the tomodir in one overview plot.
+    '''
+    # create figure
+    f, ax = plt.subplots(1, 3, figsize=(10, 2))
+    if options.title is not None:
+        plt.suptitle(options.title, fontsize=18)
+        plt.subplots_adjust(wspace=1, top=0.8)
+    # plot magnitue
+    if options.cmaglin:
+        cidx = plotman.parman.add_data(np.power(10, x))
+        cidy = plotman.parman.add_data(np.power(10, y))
+        cidz = plotman.parman.add_data(np.power(10, z))
+        loglin = 'rho'
+    else:
+        cidx = plotman.parman.add_data(x)
+        cidy = plotman.parman.add_data(y)
+        cidz = plotman.parman.add_data(z)
+        loglin = 'log_rho'
+    plot_mag(cidx, ax[0], plotman, 'x', loglin, alpha,
+             options.mag_vmin, options.mag_vmax,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.mag_cbtiks, options.no_elecs,
+             )
+    plot_mag(cidy, ax[1], plotman, 'y', loglin, alpha,
+             options.mag_vmin, options.mag_vmax,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.mag_cbtiks, options.no_elecs,
+             )
+    plot_mag(cidz, ax[2], plotman, 'z', loglin, alpha,
+             options.mag_vmin, options.mag_vmax,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.mag_cbtiks, options.no_elecs,
+             )
+    f.tight_layout()
+    f.savefig('aniso.png', dpi=300)
+    return f, ax
+
+
 def main():
     options = handle_options()
     matplotlib.style.use('default')
@@ -647,16 +692,25 @@ def main():
     plotman = CRPlot.plotManager(grid=grid)
     # get alpha
     alpha, plotman = alpha_from_cov(plotman, options.alpha_cov)
-    if not options.single:
+    if not options.single and not options.aniso:
         [datafiles, filetype] = list_datafiles()
         [cov, mag, pha, pha_fpi] = read_datafiles(datafiles,
                                                   filetype,
                                                   options.column)
         plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha, options)
-    else:
+    elif options.single and not options.aniso:
         filename = read_iter(False)
         mag = load_rho(filename, options.column)
         plot_single(plotman, filename, mag, alpha, options)
+    elif options.aniso and not options.single:
+        filename = read_iter(False)
+        x = load_rho(filename, 2)
+        y = load_rho(filename, 3)
+        z = load_rho(filename, 4)
+        plot_aniso(plotman, x, y, z, alpha, options)
+    else:
+        print('Choose option "single" or "aniso" not both.')
+        exit()
 
 
 if __name__ == '__main__':
