@@ -135,3 +135,10 @@ td_plot --single -c 6 --title 'column 7'
 cp *.png ../single_tl4.png
 rm *.png
 td_plot --single -c 7 --title 'non exsting column'
+
+# test plots for anisotropic data in tomodir
+cd ../tomodir_aniso
+td_plot --aniso
+cp m*.png ../aniso_mag1.png
+cp p*.png ../aniso_pha1.png
+rm *.png

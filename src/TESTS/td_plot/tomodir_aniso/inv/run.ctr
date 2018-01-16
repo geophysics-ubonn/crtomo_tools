@@ -1,0 +1,24 @@
+ Iteration   0,   0 : Calculating Potentials
+ Iteration   1,   0 : Calculating Sensitivities
+ Iteration   1,   1 : Calculating 1st regularization parameterlam_0   0.94E+04
+  Iteration            1 ,            1  : Updating
+ Iteration   1,   1 : Calculating Potentials
+  Iteration            1 ,            2  : Updating
+ Iteration   1,   2 : Calculating Potentials
+  Iteration            1 ,            3  : Updating
+ Iteration   1,   3 : Calculating Potentials
+  Iteration            1 ,            4  : Updating
+ Iteration   1,   4 : Calculating Potentials
+  Iteration            1 ,            4  : Updating
+ Iteration   1,   4 : Calculating Potentials
+ Iteration   2,   0 : Calculating Sensitivities
+  Iteration            2 ,            0  : Updating
+ Iteration   2,   0 : Calculating Potentials
+  Iteration            2 ,            1  : Updating
+ Iteration   2,   1 : Calculating Potentials
+  Iteration            2 ,            2  : Updating
+ Iteration   2,   2 : Calculating Potentials
+  Iteration            2 ,            2  : Updating
+ Iteration   2,   2 : Calculating Potentials
+ Iteration terminated: Min. rel. RMS decrease.
+ CPU time:  0d/  0h/  0m/ 29s/  91ms
