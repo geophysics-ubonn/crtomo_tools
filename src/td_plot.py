@@ -25,6 +25,7 @@ import matplotlib
 import math
 import edf.main.units as units
 import crtomo.mpl as mpl_style
+import matplotlib as mpl
 
 
 def handle_options():
@@ -203,6 +204,16 @@ def handle_options():
                       )
     parser.add_option('--imag_vmax',
                       dest='imag_vmax',
+                      help='Maximum of colorbar',
+                      type='float',
+                      )
+    parser.add_option('--rat_vmin',
+                      dest='rat_vmin',
+                      help='Minium of colorbar',
+                      type='float',
+                      )
+    parser.add_option('--rat_vmax',
+                      dest='rat_vmax',
                       help='Maximum of colorbar',
                       type='float',
                       )
@@ -506,6 +517,42 @@ def plot_cov(cid, ax, plotman, title, vmin, vmax,
     return fig, ax, cnorm, cmap, cb
 
 
+def plot_ratio(cid, ax, plotman, title, alpha, vmin, vmax,
+               xmin, xmax, zmin, zmax, xunit, cbtiks, elecs):
+    '''Plot coverage of the complex resistivity using the cov_options.
+    '''
+    # handle options
+    cblabel = 'anisotropy ratio'
+    zlabel = 'z [' + xunit + ']'
+    xlabel = 'x [' + xunit + ']'
+    cm = 'brg'
+    xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(plotman,
+                                                      cid,
+                                                      xmin, xmax,
+                                                      zmin, zmax,
+                                                      vmin, vmax,
+                                                      )
+    # plot
+    fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
+                                                           ax=ax,
+                                                           xmin=xmin,
+                                                           xmax=xmax,
+                                                           zmin=zmin,
+                                                           zmax=zmax,
+                                                           cblabel=cblabel,
+                                                           cbnrticks=cbtiks,
+                                                           title=title,
+                                                           zlabel=zlabel,
+                                                           xlabel=xlabel,
+                                                           plot_colorbar=True,
+                                                           cmap_name=cm,
+                                                           no_elecs=elecs,
+                                                           cbmin=vmin,
+                                                           cbmax=vmax,
+                                                           )
+    return fig, ax, cnorm, cmap, cb
+
+
 def check_minmax(plotman, cid, xmin, xmax, zmin, zmax, vmin, vmax):
     if xmin is None:
         xmin = plotman.grid.grid['x'].min()
@@ -643,11 +690,11 @@ def plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha, options):
     return f, ax
 
 
-def plot_aniso(plotman, x, y, z, alpha, options):
+def plot_maganiso(plotman, x, y, z, alpha, options):
     '''Plot the data of the tomodir in one overview plot.
     '''
     # create figure
-    f, ax = plt.subplots(1, 3, figsize=(10, 2))
+    f, ax = plt.subplots(2, 3, figsize=(10, 4))
     if options.title is not None:
         plt.suptitle(options.title, fontsize=18)
         plt.subplots_adjust(wspace=1, top=0.8)
@@ -662,23 +709,92 @@ def plot_aniso(plotman, x, y, z, alpha, options):
         cidy = plotman.parman.add_data(y)
         cidz = plotman.parman.add_data(z)
         loglin = 'log_rho'
-    plot_mag(cidx, ax[0], plotman, 'x', loglin, alpha,
+    cidxy = plotman.parman.add_data(np.divide(x, y))
+    cidyz = plotman.parman.add_data(np.divide(y, z))
+    cidzx = plotman.parman.add_data(np.divide(z, x))
+    plot_mag(cidx, ax[0, 0], plotman, 'x', loglin, alpha,
              options.mag_vmin, options.mag_vmax,
              options.xmin, options.xmax, options.zmin, options.zmax,
              options.unit, options.mag_cbtiks, options.no_elecs,
              )
-    plot_mag(cidy, ax[1], plotman, 'y', loglin, alpha,
+    plot_mag(cidy, ax[0, 1], plotman, 'y', loglin, alpha,
              options.mag_vmin, options.mag_vmax,
              options.xmin, options.xmax, options.zmin, options.zmax,
              options.unit, options.mag_cbtiks, options.no_elecs,
              )
-    plot_mag(cidz, ax[2], plotman, 'z', loglin, alpha,
+    plot_mag(cidz, ax[0, 2], plotman, 'z', loglin, alpha,
              options.mag_vmin, options.mag_vmax,
              options.xmin, options.xmax, options.zmin, options.zmax,
              options.unit, options.mag_cbtiks, options.no_elecs,
              )
+    plot_ratio(cidxy, ax[1, 0], plotman, 'x/y', alpha,
+               options.rat_vmin, options.rat_vmax,
+               options.xmin, options.xmax, options.zmin, options.zmax,
+               options.unit, options.mag_cbtiks, options.no_elecs,
+               )
+    plot_ratio(cidyz, ax[1, 1], plotman, 'y/z', alpha,
+               options.rat_vmin, options.rat_vmax,
+               options.xmin, options.xmax, options.zmin, options.zmax,
+               options.unit, options.mag_cbtiks, options.no_elecs,
+               )
+    plot_ratio(cidzx, ax[1, 2], plotman, 'z/x', alpha,
+               options.rat_vmin, options.rat_vmax,
+               options.xmin, options.xmax, options.zmin, options.zmax,
+               options.unit, options.mag_cbtiks, options.no_elecs,
+               )
     f.tight_layout()
-    f.savefig('aniso.png', dpi=300)
+    f.savefig('mag_aniso.png', dpi=300)
+    return f, ax
+
+
+def plot_phaaniso(plotman, x, y, z, alpha, options):
+    '''Plot the data of the tomodir in one overview plot.
+    '''
+    # create figure
+    f, ax = plt.subplots(2, 3, figsize=(10, 4))
+    if options.title is not None:
+        plt.suptitle(options.title, fontsize=18)
+        plt.subplots_adjust(wspace=1, top=0.8)
+    # plot phase
+    cidx = plotman.parman.add_data(x)
+    cidy = plotman.parman.add_data(y)
+    cidz = plotman.parman.add_data(z)
+    loglin = 'phi'
+    cidxy = plotman.parman.add_data(np.subtract(x, y))
+    cidyz = plotman.parman.add_data(np.subtract(y, z))
+    cidzx = plotman.parman.add_data(np.subtract(z, x))
+    plot_mag(cidx, ax[0, 0], plotman, 'x', loglin, alpha,
+             options.pha_vmin, options.pha_vmax,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.mag_cbtiks, options.no_elecs,
+             )
+    plot_mag(cidy, ax[0, 1], plotman, 'y', loglin, alpha,
+             options.pha_vmin, options.pha_vmax,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.mag_cbtiks, options.no_elecs,
+             )
+    plot_mag(cidz, ax[0, 2], plotman, 'z', loglin, alpha,
+             options.pha_vmin, options.pha_vmax,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.mag_cbtiks, options.no_elecs,
+             )
+    plot_ratio(cidxy, ax[1, 0], plotman, 'x-y', alpha,
+               options.rat_vmin, options.rat_vmax,
+               options.xmin, options.xmax, options.zmin, options.zmax,
+               options.unit, options.mag_cbtiks, options.no_elecs,
+               )
+    plot_ratio(cidyz, ax[1, 1], plotman, 'y-z', alpha,
+               options.rat_vmin, options.rat_vmax,
+               options.xmin, options.xmax, options.zmin, options.zmax,
+               options.unit, options.mag_cbtiks, options.no_elecs,
+               )
+    plot_ratio(cidzx, ax[1, 2], plotman, 'z-x', alpha,
+               options.rat_vmin, options.rat_vmax,
+               options.xmin, options.xmax, options.zmin, options.zmax,
+               options.unit, options.mag_cbtiks, options.no_elecs,
+               )
+    f.tight_layout()
+    f.savefig('pha_aniso.png', dpi=300)
     return f, ax
 
 
@@ -707,7 +823,11 @@ def main():
         x = load_rho(filename, 2)
         y = load_rho(filename, 3)
         z = load_rho(filename, 4)
-        plot_aniso(plotman, x, y, z, alpha, options)
+        plot_maganiso(plotman, x, y, z, alpha, options)
+        x = load_rho(filename[:-3] + 'pha', 2)
+        y = load_rho(filename[:-3] + 'pha', 3)
+        z = load_rho(filename[:-3] + 'pha', 4)
+        plot_phaaniso(plotman, x, y, z, alpha, options)
     else:
         print('Choose option "single" or "aniso" not both.')
         exit()
