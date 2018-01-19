@@ -11,9 +11,27 @@ Tool to plot inversion results of tomodir. Included data is
 * imaginary part
 * imaginary part of FPI
 
-But it is possible to only plot the magnitude (--single).
+The three main options are to plot everything in one figure, to plot individual
+figures (--single) or to plot anisotropic results of magnitude and phase
+(--aniso).
 The script has to be run in a tomodir. Output file will be saved in tomodir.
-END DOCUMENTATION
+
+Options
+-------
+
+--alpha_cov: use coverage values for alpha channel
+--no_elecs: do not plot electrodes
+--title: figure title
+--cmaglin: linear colorbar for magnitude instead of logarithmic
+-c, --column: choose column of magnitude input file to plot
+-x, --xmin: minimal x limit to plot
+-X, --xmax: maximal x limit to plot
+-z, --zmin: minimal z limit to plot
+-Z, --zmax: maximal z limit to plot
+-u, --unit: unit for x and z axis, default is meter
+*_cbtiks: colorbar tiks for this subplot (mag, pha, imag, real, cov, rat)
+*_vmin: minimal colorbarlimit for this subplot (mag, pha, imag, real, cov, rat)
+*_vmax: maximal colorbarlimit for this subplot (mag, pha, imag, real, cov, rat)
 '''
 import numpy as np
 import os
@@ -36,6 +54,47 @@ def handle_options():
     parser.set_defaults(single=False)
     parser.set_defaults(aniso=False)
     parser.set_defaults(alpha_cov=False)
+    # general options
+    parser.add_option("--single",
+                      action="store_true",
+                      dest="single",
+                      help="plot only magnitude",
+                      )
+    parser.add_option("--aniso",
+                      action="store_true",
+                      dest="aniso",
+                      help="plot anisotropic magnitude",
+                      )
+    parser.add_option('--no_elecs',
+                      action='store_true',
+                      dest='no_elecs',
+                      help='Plot no electrodes (default: false)',
+                      default=False,
+                      )
+    parser.add_option('--title',
+                      dest='title',
+                      type='string',
+                      help='Global override for title',
+                      default=None,
+                      )
+    parser.add_option("--alpha_cov",
+                      action="store_true",
+                      dest="alpha_cov",
+                      help="use coverage for transparency",
+                      )
+    parser.add_option('-c',
+                      '--column',
+                      dest='column',
+                      help='column to plot of input file',
+                      type='int',
+                      default=2,
+                      )
+    parser.add_option("--cmaglin",
+                      action="store_true",
+                      dest="cmaglin",
+                      help="linear colorbar for magnitude",
+                      )
+    # geometric options
     parser.add_option('-x',
                       '--xmin',
                       dest='xmin',
@@ -60,13 +119,6 @@ def handle_options():
                       help='Maximum Z range',
                       type='float',
                       )
-    parser.add_option('-c',
-                      '--column',
-                      dest='column',
-                      help='column to plot of input file',
-                      type='int',
-                      default=2,
-                      )
     parser.add_option('-u',
                       '--unit',
                       dest='unit',
@@ -76,37 +128,7 @@ def handle_options():
                       type='str',
                       default='m',
                       )
-    parser.add_option('--no_elecs',
-                      action='store_true',
-                      dest='no_elecs',
-                      help='Plot no electrodes (default: false)',
-                      default=False,
-                      )
-    parser.add_option('--title',
-                      dest='title',
-                      type='string',
-                      help='Global override for title',
-                      default=None,
-                      )
-    parser.add_option("--alpha_cov",
-                      action="store_true",
-                      dest="alpha_cov",
-                      help="use coverage for transparency",
-                      )
-#    parser.add_option('--x_nr',
-#                      dest='x_nr',
-#                      help='Number of X-axis tiks',
-#                      type=int,
-#                      metavar='INT',
-#                      default=None,
-#                      )
-#    parser.add_option('--y_nr',
-#                      dest='y_nr',
-#                      help='Number of Y-axis tiks',
-#                      type=int, metavar='INT',
-#                      default=None,
-#                      )
-    # options for subplots
+    # options for colorbars
     parser.add_option('--cov_cbtiks',
                       dest='cov_cbtiks',
                       help="Number of CB tiks for coverage",
@@ -131,11 +153,6 @@ def handle_options():
                       metavar="INT",
                       default=3,
                       )
-    parser.add_option("--cmaglin",
-                      action="store_true",
-                      dest="cmaglin",
-                      help="linear colorbar for magnitude",
-                      )
     parser.add_option('--mag_vmin',
                       dest='mag_vmin',
                       help='Minium of colorbar',
@@ -145,16 +162,6 @@ def handle_options():
                       dest='mag_vmax',
                       help='Maximum of colorbar',
                       type='float',
-                      )
-    parser.add_option("--single",
-                      action="store_true",
-                      dest="single",
-                      help="plot only magnitude",
-                      )
-    parser.add_option("--aniso",
-                      action="store_true",
-                      dest="aniso",
-                      help="plot anisotropic magnitude",
                       )
     parser.add_option('--pha_cbtiks',
                       dest='pha_cbtiks',
