@@ -792,7 +792,6 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
                 vmin, vmax
                 )
         # plot
-        print(title)
         fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(
                 cid=cid,
                 ax=ax,
