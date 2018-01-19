@@ -608,10 +608,9 @@ def alpha_from_cov(plotman, alpha_cov):
     return alpha, plotman
 
 
-def plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha, options):
-    '''Plot the data of the tomodir in one overview plot.
+def getfigsize(plotman):
+    '''calculate appropriate sizes for the subfigures
     '''
-    # get figure size
     xmin = plotman.grid.grid['x'].min()
     xmax = plotman.grid.grid['x'].max()
     zmin = plotman.grid.grid['z'].min()
@@ -624,6 +623,67 @@ def plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha, options):
         sizex = sizez * (np.abs(xmax - xmin) / np.abs(zmax - zmin))
     # add 1 inch to accommodate colorbar
     sizex += 1.3
+    return sizex, sizez
+
+
+def create_non_dcplots(plotman, ax, mag, pha, options, alpha):
+    if pha != []:
+        cid = plotman.parman.add_data(pha)
+        plot_pha(cid, ax[0, 1], plotman, 'Phase', alpha,
+                 options.pha_vmin, options.pha_vmax,
+                 options.xmin, options.xmax, options.zmin, options.zmax,
+                 options.unit, options.pha_cbtiks, options.no_elecs,
+                 )
+        [real, imag] = calc_complex(mag, pha)
+        cid_re = plotman.parman.add_data(real)
+        cid_im = plotman.parman.add_data(imag)
+        plot_real(cid_re, ax[0, 2], plotman, 'Real Part', alpha,
+                  options.real_vmin, options.real_vmax,
+                  options.xmin, options.xmax, options.zmin, options.zmax,
+                  options.unit, options.real_cbtiks, options.no_elecs,
+                  )
+        plot_imag(cid_im, ax[0, 3], plotman, 'Imaginary Part', alpha,
+                  options.imag_vmin, options.imag_vmax,
+                  options.xmin, options.xmax, options.zmin, options.zmax,
+                  options.unit, options.imag_cbtiks, options.no_elecs,
+                  )
+    else:
+        ax[0, 1].axis('off')
+        ax[0, 2].axis('off')
+        ax[0, 3].axis('off')
+
+
+def create_fpiplots(plotman, ax, mag, pha_fpi, options, alpha):
+    if pha_fpi != []:
+        cid = plotman.parman.add_data(pha_fpi)
+        plot_pha(cid, ax[1, 1], plotman, 'FPI Phase', alpha,
+                 options.pha_vmin, options.pha_vmax,
+                 options.xmin, options.xmax, options.zmin, options.zmax,
+                 options.unit, options.pha_cbtiks, options.no_elecs,
+                 )
+        [real, imag] = calc_complex(mag, pha_fpi)
+        cid_fre = plotman.parman.add_data(real)
+        cid_fim = plotman.parman.add_data(imag)
+        plot_real(cid_fre, ax[1, 2], plotman, 'FPI Real Part', alpha,
+                  options.real_vmin, options.real_vmax,
+                  options.xmin, options.xmax, options.zmin, options.zmax,
+                  options.unit, options.real_cbtiks, options.no_elecs,
+                  )
+        plot_imag(cid_fim, ax[1, 3], plotman, 'FPI Imaginary Part',
+                  alpha, options.imag_vmin, options.imag_vmax,
+                  options.xmin, options.xmax, options.zmin, options.zmax,
+                  options.unit, options.imag_cbtiks, options.no_elecs,
+                  )
+    else:
+        ax[1, 1].axis('off')
+        ax[1, 2].axis('off')
+        ax[1, 3].axis('off')
+
+
+def create_tdplot(plotman, cov, mag, pha, pha_fpi, alpha, options):
+    '''Plot the data of the tomodir in one overview plot.
+    '''
+    sizex, sizez = getfigsize(plotman)
     # create figure
     f, ax = plt.subplots(2, 4, figsize=(4 * sizex, 2 * sizez))
     if options.title is not None:
@@ -649,65 +709,20 @@ def plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha, options):
              options.unit, options.cov_cbtiks, options.no_elecs,
              )
     # plot phase, real, imag
-    if pha != []:
-        cid = plotman.parman.add_data(pha)
-        plot_pha(cid, ax[0, 1], plotman, 'Phase', alpha,
-                 options.pha_vmin, options.pha_vmax,
-                 options.xmin, options.xmax, options.zmin, options.zmax,
-                 options.unit, options.pha_cbtiks, options.no_elecs,
-                 )
-        [real, imag] = calc_complex(mag, pha)
-        cid_re = plotman.parman.add_data(real)
-        cid_im = plotman.parman.add_data(imag)
-        plot_real(cid_re, ax[0, 2], plotman, 'Real Part', alpha,
-                  options.real_vmin, options.real_vmax,
-                  options.xmin, options.xmax, options.zmin, options.zmax,
-                  options.unit, options.real_cbtiks, options.no_elecs,
-                  )
-        plot_imag(cid_im, ax[0, 3], plotman, 'Imaginary Part', alpha,
-                  options.imag_vmin, options.imag_vmax,
-                  options.xmin, options.xmax, options.zmin, options.zmax,
-                  options.unit, options.imag_cbtiks, options.no_elecs,
-                  )
-    else:
-        ax[0, 1].axis('off')
-        ax[0, 2].axis('off')
-        ax[0, 3].axis('off')
+    create_non_dcplots(plotman, ax, mag, pha, options, alpha)
     # plot fpi phase, real, imag
-    if pha_fpi != []:
-        cid = plotman.parman.add_data(pha_fpi)
-        plot_pha(cid, ax[1, 1], plotman, 'FPI Phase', alpha,
-                 options.pha_vmin, options.pha_vmax,
-                 options.xmin, options.xmax, options.zmin, options.zmax,
-                 options.unit, options.pha_cbtiks, options.no_elecs,
-                 )
-        [real, imag] = calc_complex(mag, pha_fpi)
-        cid_fre = plotman.parman.add_data(real)
-        cid_fim = plotman.parman.add_data(imag)
-        plot_real(cid_fre, ax[1, 2], plotman, 'FPI Real Part', alpha,
-                  options.real_vmin, options.real_vmax,
-                  options.xmin, options.xmax, options.zmin, options.zmax,
-                  options.unit, options.real_cbtiks, options.no_elecs,
-                  )
-        plot_imag(cid_fim, ax[1, 3], plotman, 'FPI Imaginary Part',
-                  alpha, options.imag_vmin, options.imag_vmax,
-                  options.xmin, options.xmax, options.zmin, options.zmax,
-                  options.unit, options.imag_cbtiks, options.no_elecs,
-                  )
-    else:
-        ax[1, 1].axis('off')
-        ax[1, 2].axis('off')
-        ax[1, 3].axis('off')
+    create_fpiplots(plotman, ax, mag, pha_fpi, options, alpha)
     f.tight_layout()
     f.savefig('td_overview.png', dpi=300)
     return f, ax
 
 
-def plot_maganiso(plotman, x, y, z, alpha, options):
+def create_anisomagplot(plotman, x, y, z, alpha, options):
     '''Plot the data of the tomodir in one overview plot.
     '''
+    sizex, sizez = getfigsize(plotman)
     # create figure
-    f, ax = plt.subplots(2, 3, figsize=(10, 4))
+    f, ax = plt.subplots(2, 3, figsize=(3 * sizex, 2 * sizez))
     if options.title is not None:
         plt.suptitle(options.title, fontsize=18)
         plt.subplots_adjust(wspace=1, top=0.8)
@@ -760,11 +775,12 @@ def plot_maganiso(plotman, x, y, z, alpha, options):
     return f, ax
 
 
-def plot_phaaniso(plotman, x, y, z, alpha, options):
+def create_anisophaplot(plotman, x, y, z, alpha, options):
     '''Plot the data of the tomodir in one overview plot.
     '''
+    sizex, sizez = getfigsize(plotman)
     # create figure
-    f, ax = plt.subplots(2, 3, figsize=(10, 4))
+    f, ax = plt.subplots(2, 3, figsize=(3 * sizex, 2 * sizez))
     if options.title is not None:
         plt.suptitle(options.title, fontsize=18)
         plt.subplots_adjust(wspace=1, top=0.8)
@@ -826,7 +842,7 @@ def main():
         [cov, mag, pha, pha_fpi] = read_datafiles(datafiles,
                                                   filetype,
                                                   options.column)
-        plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha, options)
+        create_tdplot(plotman, cov, mag, pha, pha_fpi, alpha, options)
     elif options.single and not options.aniso:
         filename = read_iter(False)
         mag = load_rho(filename, options.column)
@@ -836,11 +852,11 @@ def main():
         x = load_rho(filename, 2)
         y = load_rho(filename, 3)
         z = load_rho(filename, 4)
-        plot_maganiso(plotman, x, y, z, alpha, options)
+        create_anisomagplot(plotman, x, y, z, alpha, options)
         x = load_rho(filename[:-3] + 'pha', 2)
         y = load_rho(filename[:-3] + 'pha', 3)
         z = load_rho(filename[:-3] + 'pha', 4)
-        plot_phaaniso(plotman, x, y, z, alpha, options)
+        create_anisophaplot(plotman, x, y, z, alpha, options)
     else:
         print('Choose option "single" or "aniso" not both.')
         exit()
