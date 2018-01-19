@@ -501,7 +501,7 @@ def plot_cov(cid, ax, plotman, title, vmin, vmax,
     '''Plot coverage of the complex resistivity using the cov_options.
     '''
     # handle options
-    cblabel = 'L1 Coverage'
+    cblabel = units.get_label('cov')
     zlabel = 'z [' + xunit + ']'
     xlabel = 'x [' + xunit + ']'
     cm = 'GnBu'
@@ -718,24 +718,100 @@ def create_tdplot(plotman, cov, mag, pha, pha_fpi, alpha, options):
     return f, ax
 
 
-def create_singleplots(plotman, filename, mag, alpha, options):
-    '''Plot only the magnitude of the last iteration in a single plot.
+def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
+    '''Plot the data of the tomodir in individual plots.
     '''
-    f, ax = plt.subplots(1, figsize=(3.5, 2))
-    if options.title is None:
-        options.title = 'Magnitude'
-    if options.cmaglin:
-        cid = plotman.parman.add_data(np.power(10, mag))
-        loglin = 'rho'
+    magunit = 'log_rho'
+    if not pha == []:
+        [real, imag] = calc_complex(mag, pha)
+        if not pha_fpi == []:
+            [real_fpi, imag_fpi] = calc_complex(mag, pha_fpi)
+            if options.cmaglin:
+                mag = np.power(10, mag)
+                magunit = 'rho'
+            data = np.column_stack((mag, cov, pha, real, imag,
+                                    pha_fpi, real_fpi, imag_fpi))
+            titles = ['Magnitude', 'Coverage',
+                      'Phase', 'Real Part', 'Imaginary Part',
+                      'FPI Phase', 'FPI Real Part', 'FPI Imaginary Part']
+            unites = [magunit, 'cov',
+                      'phi', 'log_real', 'log_imag',
+                      'phi', 'log_real', 'log_imag']
+            vmins = [options.mag_vmin, options.cov_vmin,
+                     options.pha_vmin, options.real_vmin, options.imag_vmin,
+                     options.pha_vmin, options.real_vmin, options.imag_vmin]
+            vmaxs = [options.mag_vmax, options.cov_vmax,
+                     options.pha_vmax, options.real_vmax, options.imag_vmax,
+                     options.pha_vmax, options.real_vmax, options.imag_vmax]
+            cmaps = ['viridis', 'GnBu',
+                     'plasma', 'viridis_r', 'plasma_r',
+                     'plasma', 'viridis_r', 'plasma_r']
+            saves = ['rho', 'cov',
+                     'phi', 'real', 'imag',
+                     'fpi_phi', 'fpi_real', 'fpi_imag']
+        else:
+            if options.cmaglin:
+                mag = np.power(10, mag)
+            data = np.column_stack((mag, cov, pha, real, imag))
+            titles = ['Magnitude', 'Coverage',
+                      'Phase', 'Real Part', 'Imaginary Part']
+            unites = [magunit, 'cov',
+                      'phi', 'log_real', 'log_imag']
+            vmins = [options.mag_vmin, options.cov_vmin,
+                     options.pha_vmin, options.real_vmin, options.imag_vmin]
+            vmaxs = [options.mag_vmax, options.cov_vmax,
+                     options.pha_vmax, options.real_vmax, options.imag_vmax]
+            cmaps = ['viridis', 'GnBu',
+                     'plasma', 'viridis_r', 'plasma_r']
+            saves = ['rho', 'cov',
+                     'phi', 'real', 'imag']
     else:
-        cid = plotman.parman.add_data(mag)
-        loglin = 'log_rho'
-    plot_mag(cid, ax, plotman, options.title, loglin, alpha,
-             options.mag_vmin, options.mag_vmax,
-             options.xmin, options.xmax, options.zmin, options.zmax,
-             options.unit, options.mag_cbtiks, options.no_elecs,)
-    f.tight_layout()
-    f.savefig(filename[4:] + '.png', dpi=300)
+        data = np.column_stack((mag, cov))
+        titles = ['Magnitude', 'Coverage']
+        unites = [magunit, 'cov']
+        vmins = [options.mag_vmin, options.cov_vmin]
+        vmaxs = [options.mag_vmax, options.cov_vmax]
+        cmaps = ['viridis', 'GnBu']
+        saves = ['rho', 'cov']
+    for datum, title, unit, vmin, vmax, cm, save in zip(
+            np.transpose(data), titles, unites, vmins, vmaxs, cmaps, saves):
+        sizex, sizez = getfigsize(plotman)
+        f, ax = plt.subplots(1, figsize=(sizex, sizez))
+        cid = plotman.parman.add_data(datum)
+        # handle options
+        cblabel = units.get_label(unit)
+        if options.title is not None:
+            title = options.title
+        zlabel = 'z [' + options.unit + ']'
+        xlabel = 'x [' + options.unit + ']'
+        xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(
+                plotman,
+                cid,
+                options.xmin, options.xmax,
+                options.zmin, options.zmax,
+                vmin, vmax
+                )
+        # plot
+        print(title)
+        fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(
+                cid=cid,
+                ax=ax,
+                xmin=xmin,
+                xmax=xmax,
+                zmin=zmin,
+                zmax=zmax,
+                cblabel=cblabel,
+                title=title,
+                zlabel=zlabel,
+                xlabel=xlabel,
+                plot_colorbar=True,
+                cmap_name=cm,
+                no_elecs=options.no_elecs,
+                cbmin=vmin,
+                cbmax=vmax,
+                )
+        f.tight_layout()
+        f.savefig(save + '.png', dpi=300)
 
 
 def create_anisomagplot(plotman, x, y, z, alpha, options):
@@ -858,16 +934,23 @@ def main():
     plotman = CRPlot.plotManager(grid=grid)
     # get alpha
     alpha, plotman = alpha_from_cov(plotman, options.alpha_cov)
+    # make tomodir overview plot
     if not options.single and not options.aniso:
         [datafiles, filetype] = list_datafiles()
-        [cov, mag, pha, pha_fpi] = read_datafiles(datafiles,
-                                                  filetype,
-                                                  options.column)
+        [cov, mag, pha, pha_fpi] = read_datafiles(
+                datafiles,
+                filetype,
+                options.column)
         create_tdplot(plotman, cov, mag, pha, pha_fpi, alpha, options)
+    # make individual plots
     elif options.single and not options.aniso:
-        filename = read_iter(False)
-        mag = load_rho(filename, options.column)
-        create_singleplots(plotman, filename, mag, alpha, options)
+        [datafiles, filetype] = list_datafiles()
+        [cov, mag, pha, pha_fpi] = read_datafiles(
+                datafiles,
+                filetype,
+                options.column)
+        create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options)
+    # make plots of anisotropic results
     elif options.aniso and not options.single:
         filename = read_iter(False)
         x = load_rho(filename, 2)
