@@ -250,7 +250,7 @@ def read_iter(use_fpi):
 
 
 def td_type():
-    '''get type of the tomodir
+    '''get type of the tomodir (complex or dc and whether fpi)
     '''
     cfg = np.genfromtxt('exe/crtomo.cfg',
                         skip_header=15,
@@ -536,7 +536,7 @@ def plot_cov(cid, ax, plotman, title, vmin, vmax,
 
 def plot_ratio(cid, ax, plotman, title, alpha, vmin, vmax,
                xmin, xmax, zmin, zmax, xunit, cbtiks, elecs):
-    '''Plot coverage of the complex resistivity using the cov_options.
+    '''Plot ratio of two conductivity directions.
     '''
     # handle options
     cblabel = 'anisotropy ratio'
@@ -572,7 +572,23 @@ def plot_ratio(cid, ax, plotman, title, alpha, vmin, vmax,
     return fig, ax, cnorm, cmap, cb
 
 
+def alpha_from_cov(plotman, alpha_cov):
+    '''Calculate alpha values from the coverage/2.5.
+    '''
+    abscov = np.abs(load_cov('inv/coverage.mag'))
+    if alpha_cov:
+        normcov = np.divide(abscov, 2.5)
+        normcov[np.where(normcov > 1)] = 1
+        mask = np.subtract(1, normcov)
+        alpha = plotman.parman.add_data(mask)
+    else:
+        alpha = plotman.parman.add_data(np.ones(len(abscov)))
+    return alpha, plotman
+
+
 def check_minmax(plotman, cid, xmin, xmax, zmin, zmax, vmin, vmax):
+    '''Get min and max values for axes and colorbar if not given
+    '''
     if xmin is None:
         xmin = plotman.grid.grid['x'].min()
     if xmax is None:
@@ -591,40 +607,6 @@ def check_minmax(plotman, cid, xmin, xmax, zmin, zmax, vmin, vmax):
         vmax = subdata.max()
 
     return xmin, xmax, zmin, zmax, vmin, vmax
-
-
-def plot_single(plotman, filename, mag, alpha, options):
-    '''Plot only the magnitude of the last iteration in a single plot.
-    '''
-    f, ax = plt.subplots(1, figsize=(3.5, 2))
-    if options.title is None:
-        options.title = 'Magnitude'
-    if options.cmaglin:
-        cid = plotman.parman.add_data(np.power(10, mag))
-        loglin = 'rho'
-    else:
-        cid = plotman.parman.add_data(mag)
-        loglin = 'log_rho'
-    plot_mag(cid, ax, plotman, options.title, loglin, alpha,
-             options.mag_vmin, options.mag_vmax,
-             options.xmin, options.xmax, options.zmin, options.zmax,
-             options.unit, options.mag_cbtiks, options.no_elecs,)
-    f.tight_layout()
-    f.savefig(filename[4:] + '.png', dpi=300)
-
-
-def alpha_from_cov(plotman, alpha_cov):
-    '''Calculate alpha values from the coverage/2.5.
-    '''
-    abscov = np.abs(load_cov('inv/coverage.mag'))
-    if alpha_cov:
-        normcov = np.divide(abscov, 2.5)
-        normcov[np.where(normcov > 1)] = 1
-        mask = np.subtract(1, normcov)
-        alpha = plotman.parman.add_data(mask)
-    else:
-        alpha = plotman.parman.add_data(np.ones(len(abscov)))
-    return alpha, plotman
 
 
 def getfigsize(plotman):
@@ -734,6 +716,26 @@ def create_tdplot(plotman, cov, mag, pha, pha_fpi, alpha, options):
     f.tight_layout()
     f.savefig('td_overview.png', dpi=300)
     return f, ax
+
+
+def create_singleplots(plotman, filename, mag, alpha, options):
+    '''Plot only the magnitude of the last iteration in a single plot.
+    '''
+    f, ax = plt.subplots(1, figsize=(3.5, 2))
+    if options.title is None:
+        options.title = 'Magnitude'
+    if options.cmaglin:
+        cid = plotman.parman.add_data(np.power(10, mag))
+        loglin = 'rho'
+    else:
+        cid = plotman.parman.add_data(mag)
+        loglin = 'log_rho'
+    plot_mag(cid, ax, plotman, options.title, loglin, alpha,
+             options.mag_vmin, options.mag_vmax,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.mag_cbtiks, options.no_elecs,)
+    f.tight_layout()
+    f.savefig(filename[4:] + '.png', dpi=300)
 
 
 def create_anisomagplot(plotman, x, y, z, alpha, options):
@@ -865,7 +867,7 @@ def main():
     elif options.single and not options.aniso:
         filename = read_iter(False)
         mag = load_rho(filename, options.column)
-        plot_single(plotman, filename, mag, alpha, options)
+        create_singleplots(plotman, filename, mag, alpha, options)
     elif options.aniso and not options.single:
         filename = read_iter(False)
         x = load_rho(filename, 2)
