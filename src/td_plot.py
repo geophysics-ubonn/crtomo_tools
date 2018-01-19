@@ -611,8 +611,21 @@ def alpha_from_cov(plotman, alpha_cov):
 def plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha, options):
     '''Plot the data of the tomodir in one overview plot.
     '''
+    # get figure size
+    xmin = plotman.grid.grid['x'].min()
+    xmax = plotman.grid.grid['x'].max()
+    zmin = plotman.grid.grid['z'].min()
+    zmax = plotman.grid.grid['z'].max()
+    if np.abs(zmax - zmin) < np.abs(xmax - xmin):
+        sizex = 10 / 2.54
+        sizez = sizex * (np.abs(zmax - zmin) / np.abs(xmax - xmin))
+    else:
+        sizez = 10 / 2.54
+        sizex = sizez * (np.abs(xmax - xmin) / np.abs(zmax - zmin))
+    # add 1 inch to accommodate colorbar
+    sizex += 1.3
     # create figure
-    f, ax = plt.subplots(2, 4, figsize=(14, 4))
+    f, ax = plt.subplots(2, 4, figsize=(4 * sizex, 2 * sizez))
     if options.title is not None:
         plt.suptitle(options.title, fontsize=18)
         plt.subplots_adjust(wspace=1, top=0.8)
