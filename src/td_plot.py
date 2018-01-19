@@ -617,8 +617,8 @@ def getfigsize(plotman):
     zmin = plotman.grid.grid['z'].min()
     zmax = plotman.grid.grid['z'].max()
     if np.abs(zmax - zmin) < np.abs(xmax - xmin):
-        sizex = 10 / 2.54
-        sizez = sizex * (np.abs(zmax - zmin) / np.abs(xmax - xmin))
+        sizex =  10 / 2.54
+        sizez = 1.2 * sizex * (np.abs(zmax - zmin) / np.abs(xmax - xmin))
     else:
         sizez = 10 / 2.54
         sizex = sizez * (np.abs(xmax - xmin) / np.abs(zmax - zmin))
@@ -689,7 +689,6 @@ def create_tdplot(plotman, cov, mag, pha, pha_fpi, alpha, options):
     f, ax = plt.subplots(2, 4, figsize=(4 * sizex, 2 * sizez))
     if options.title is not None:
         plt.suptitle(options.title, fontsize=18)
-        plt.subplots_adjust(wspace=1, top=0.8)
     # plot magnitue
     if options.cmaglin:
         cid = plotman.parman.add_data(np.power(10, mag))
@@ -771,6 +770,7 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
         unites = [magunit, 'cov']
         vmins = [options.mag_vmin, options.cov_vmin]
         vmaxs = [options.mag_vmax, options.cov_vmax]
+        #plt.subplots_adjust(top=1.2)
         cmaps = ['viridis', 'GnBu']
         saves = ['rho', 'cov']
     for datum, title, unit, vmin, vmax, cm, save in zip(
