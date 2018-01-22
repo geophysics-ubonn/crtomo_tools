@@ -751,6 +751,7 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
         else:
             if options.cmaglin:
                 mag = np.power(10, mag)
+                magunit = 'rho'
             data = np.column_stack((mag, cov, pha, real, imag))
             titles = ['Magnitude', 'Coverage',
                       'Phase', 'Real Part', 'Imaginary Part']
