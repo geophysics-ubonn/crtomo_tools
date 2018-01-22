@@ -770,9 +770,19 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
         unites = [magunit, 'cov']
         vmins = [options.mag_vmin, options.cov_vmin]
         vmaxs = [options.mag_vmax, options.cov_vmax]
-        #plt.subplots_adjust(top=1.2)
         cmaps = ['viridis', 'GnBu']
         saves = ['rho', 'cov']
+    try:
+        mod = np.genfromtxt('rho/rho.dat', skip_header=1, usecols=([0]))
+        data = np.column_stack((data, mod))
+        titles.append('Model')
+        unites.append('rho')
+        vmins.append(options.mag_vmin)
+        vmaxs.append(options.mag_vmax)
+        cmaps.append('viridis')
+        saves.append('model')
+    except:
+        pass
     for datum, title, unit, vmin, vmax, cm, save in zip(
             np.transpose(data), titles, unites, vmins, vmaxs, cmaps, saves):
         sizex, sizez = getfigsize(plotman)
