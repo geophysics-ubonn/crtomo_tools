@@ -774,14 +774,21 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
         cmaps = ['viridis', 'GnBu']
         saves = ['rho', 'cov']
     try:
-        mod = np.genfromtxt('rho/rho.dat', skip_header=1, usecols=([0]))
-        data = np.column_stack((data, mod))
+        mod_rho = np.genfromtxt('rho/rho.dat', skip_header=1, usecols=([0]))
+        mod_pha = np.genfromtxt('rho/rho.dat', skip_header=1, usecols=([1]))
+        data = np.column_stack((data, mod_rho, mod_pha))
+        titles.append('Model')
         titles.append('Model')
         unites.append('rho')
+        unites.append('phi')
         vmins.append(options.mag_vmin)
+        vmins.append(options.pha_vmin)
         vmaxs.append(options.mag_vmax)
+        vmaxs.append(options.pha_vmax)
         cmaps.append('viridis')
-        saves.append('model')
+        cmaps.append('plasma')
+        saves.append('rhomod')
+        saves.append('phamod')
     except:
         pass
     for datum, title, unit, vmin, vmax, cm, save in zip(
