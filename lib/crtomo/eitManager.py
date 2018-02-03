@@ -84,7 +84,13 @@ class eitMan(object):
         if isinstance(data_dict, str):
             raise Exception('Parameter must be a dict!')
 
-        frequencies = np.loadtxt(data_dict['frequencies'])
+        frequency_data = data_dict['frequencies']
+        if isinstance(frequency_data, str):
+            frequencies = np.loadtxt(data_dict['frequencies'])
+        else:
+            # if this is not a string, assume it to be the data
+            frequencies = frequency_data
+
         if frequencies.size != len(data_dict['crt']):
             raise Exception(
                 'number of frequencies does not match the number of data files'
@@ -100,7 +106,6 @@ class eitMan(object):
             N = (subdata[:, 1] % 1e4).astype(int)
 
             ABMN = np.vstack((A, B, M, N)).T
-            print(ABMN.shape)
 
             magnitudes = subdata[:, 2]
             phases = subdata[:, 3]
