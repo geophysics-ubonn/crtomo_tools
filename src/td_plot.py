@@ -617,7 +617,7 @@ def getfigsize(plotman):
     zmin = plotman.grid.grid['z'].min()
     zmax = plotman.grid.grid['z'].max()
     if np.abs(zmax - zmin) < np.abs(xmax - xmin):
-        sizex =  10 / 2.54
+        sizex = 10 / 2.54
         sizez = 1.2 * sizex * (np.abs(zmax - zmin) / np.abs(xmax - xmin))
     else:
         sizez = 10 / 2.54
@@ -903,24 +903,23 @@ def create_anisophaplot(plotman, x, y, z, alpha, options):
     cidx = plotman.parman.add_data(x)
     cidy = plotman.parman.add_data(y)
     cidz = plotman.parman.add_data(z)
-    loglin = 'phi'
     cidxy = plotman.parman.add_data(np.subtract(x, y))
     cidyz = plotman.parman.add_data(np.subtract(y, z))
     cidzx = plotman.parman.add_data(np.subtract(z, x))
-    plot_mag(cidx, ax[0, 0], plotman, 'x', loglin, alpha,
+    plot_pha(cidx, ax[0, 0], plotman, 'x', alpha,
              options.pha_vmin, options.pha_vmax,
              options.xmin, options.xmax, options.zmin, options.zmax,
-             options.unit, options.mag_cbtiks, options.no_elecs,
+             options.unit, options.pha_cbtiks, options.no_elecs,
              )
-    plot_mag(cidy, ax[0, 1], plotman, 'y', loglin, alpha,
+    plot_pha(cidy, ax[0, 1], plotman, 'y', alpha,
              options.pha_vmin, options.pha_vmax,
              options.xmin, options.xmax, options.zmin, options.zmax,
-             options.unit, options.mag_cbtiks, options.no_elecs,
+             options.unit, options.pha_cbtiks, options.no_elecs,
              )
-    plot_mag(cidz, ax[0, 2], plotman, 'z', loglin, alpha,
+    plot_pha(cidz, ax[0, 2], plotman, 'z', alpha,
              options.pha_vmin, options.pha_vmax,
              options.xmin, options.xmax, options.zmin, options.zmax,
-             options.unit, options.mag_cbtiks, options.no_elecs,
+             options.unit, options.pha_cbtiks, options.no_elecs,
              )
     plot_ratio(cidxy, ax[1, 0], plotman, 'x-y', alpha,
                options.rat_vmin, options.rat_vmax,
