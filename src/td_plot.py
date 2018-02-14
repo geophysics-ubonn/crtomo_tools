@@ -53,6 +53,7 @@ def handle_options():
     parser.set_defaults(cmaglin=False)
     parser.set_defaults(single=False)
     parser.set_defaults(aniso=False)
+    parser.set_defaults(hlam=False)
     parser.set_defaults(alpha_cov=False)
     # general options
     parser.add_option("--single",
@@ -63,7 +64,12 @@ def handle_options():
     parser.add_option("--aniso",
                       action="store_true",
                       dest="aniso",
-                      help="plot anisotropic magnitude",
+                      help="plot anisotropic xyz",
+                      )
+    parser.add_option("--hlam",
+                      action="store_true",
+                      dest="hlam",
+                      help="plot anisotropic hor/ver",
                       )
     parser.add_option('--no_elecs',
                       action='store_true',
@@ -941,6 +947,81 @@ def create_anisophaplot(plotman, x, y, z, alpha, options):
     return f, ax
 
 
+def create_hlammagplot(plotman, h, ratio, alpha, options):
+    '''Plot the data of the tomodir in one overview plot.
+    '''
+    sizex, sizez = getfigsize(plotman)
+    # create figure
+    f, ax = plt.subplots(1, 3, figsize=(3 * sizex, sizez))
+    if options.title is not None:
+        plt.suptitle(options.title, fontsize=18)
+        plt.subplots_adjust(wspace=1, top=0.8)
+    # plot magnitue
+    if options.cmaglin:
+        cidh = plotman.parman.add_data(np.power(10, h))
+        cidv = plotman.parman.add_data(
+                np.divide(np.power(10, h), np.power(10, ratio)))
+        loglin = 'rho'
+    else:
+        cidh = plotman.parman.add_data(h)
+        cidv = plotman.parman.add_data(
+                np.log10(np.divide(np.power(10, h), np.power(10, ratio))))
+        loglin = 'log_rho'
+    
+    cidr = plotman.parman.add_data(np.power(10, ratio))
+    plot_mag(cidh, ax[0], plotman, 'horizontal', loglin, alpha,
+             options.mag_vmin, options.mag_vmax,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.mag_cbtiks, options.no_elecs,
+             )
+    plot_mag(cidv, ax[1], plotman, 'vertical', loglin, alpha,
+             options.mag_vmin, options.mag_vmax,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.mag_cbtiks, options.no_elecs,
+             )
+    plot_ratio(cidr, ax[2], plotman, 'hor/ver', alpha,
+               options.rat_vmin, options.rat_vmax,
+               options.xmin, options.xmax, options.zmin, options.zmax,
+               options.unit, options.mag_cbtiks, options.no_elecs,
+               )
+    f.tight_layout()
+    f.savefig('mag_hlam.png', dpi=300)
+    return f, ax
+
+
+def create_hlamphaplot(plotman, h, ratio, alpha, options):
+    '''Plot the data of the tomodir in one overview plot.
+    '''
+    sizex, sizez = getfigsize(plotman)
+    # create figure
+    f, ax = plt.subplots(1, 3, figsize=(3 * sizex, sizez))
+    if options.title is not None:
+        plt.suptitle(options.title, fontsize=18)
+        plt.subplots_adjust(wspace=1, top=0.8)
+    cidh = plotman.parman.add_data(h)
+    cidv = plotman.parman.add_data(np.divide(h, ratio))
+    
+    cidr = plotman.parman.add_data(ratio)
+    plot_pha(cidh, ax[0], plotman, 'horizontal', alpha,
+             options.pha_vmin, options.pha_vmax,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.pha_cbtiks, options.no_elecs,
+             )
+    plot_pha(cidv, ax[1], plotman, 'vertical', alpha,
+             options.pha_vmin, options.pha_vmax,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.pha_cbtiks, options.no_elecs,
+             )
+    plot_ratio(cidr, ax[2], plotman, 'hor/ver', alpha,
+               options.rat_vmin, options.rat_vmax,
+               options.xmin, options.xmax, options.zmin, options.zmax,
+               options.unit, options.pha_cbtiks, options.no_elecs,
+               )
+    f.tight_layout()
+    f.savefig('pha_hlam.png', dpi=300)
+    return f, ax
+
+
 def main():
     options = handle_options()
     matplotlib.style.use('default')
@@ -952,7 +1033,7 @@ def main():
     # get alpha
     alpha, plotman = alpha_from_cov(plotman, options.alpha_cov)
     # make tomodir overview plot
-    if not options.single and not options.aniso:
+    if not options.single and not options.aniso and not options.hlam:
         [datafiles, filetype] = list_datafiles()
         [cov, mag, pha, pha_fpi] = read_datafiles(
                 datafiles,
@@ -960,7 +1041,7 @@ def main():
                 options.column)
         create_tdplot(plotman, cov, mag, pha, pha_fpi, alpha, options)
     # make individual plots
-    elif options.single and not options.aniso:
+    elif options.single and not options.aniso and not options.hlam:
         [datafiles, filetype] = list_datafiles()
         [cov, mag, pha, pha_fpi] = read_datafiles(
                 datafiles,
@@ -968,7 +1049,7 @@ def main():
                 options.column)
         create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options)
     # make plots of anisotropic results
-    elif options.aniso and not options.single:
+    elif options.aniso and not options.single and not options.hlam:
         filename = read_iter(False)
         x = load_rho(filename, 2)
         y = load_rho(filename, 3)
@@ -978,8 +1059,16 @@ def main():
         y = load_rho(filename[:-3] + 'pha', 3)
         z = load_rho(filename[:-3] + 'pha', 4)
         create_anisophaplot(plotman, x, y, z, alpha, options)
+    elif options.hlam and not options.single and not options.aniso:
+        filename = read_iter(False)
+        hor = load_rho(filename, 2)
+        lam = load_rho(filename, 3)
+        create_hlammagplot(plotman, hor, lam, alpha, options)
+        hor = load_rho(filename[:-3] + 'pha', 2)
+        lam = load_rho(filename[:-3] + 'pha', 4)
+        create_hlamphaplot(plotman, hor, lam, alpha, options)
     else:
-        print('Choose option "single" or "aniso" not both.')
+        print('Choose option "single", "hlam" or "aniso" not two at the same time.')
         exit()
 
 
