@@ -185,7 +185,7 @@ def get_data(direc, options, column, plotman):
         except:
             raise ValueError('No phase data to open.')
     # add data to plotman
-    if options[3] == 'logrho':
+    if options[3] == 'logrho' and options[1] == 'mag':
         cid = plotman.parman.add_data(np.power(10, content))
     else:
         cid = plotman.parman.add_data(content)
