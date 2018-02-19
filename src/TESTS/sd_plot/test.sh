@@ -36,7 +36,7 @@ rm *.png
 
 # test plots for FPI data in sipdir
 cd ../sipdir_fpi
-sd_plot --title
+sd_plot
 cp *Magnitude.png ../mag_fpi1.png
 cp *Phase.png ../phase_fpi1.png
 cp *Real\ Part.png ../real_fpi1.png
@@ -69,7 +69,7 @@ rm *.png
 
 # test plots for DC data in sipdir
 cd ../sipdir_mag
-sd_plot --title
+sd_plot
 cp *.png ../mag_dc1.png
 rm *.png
 sd_plot -x -10 -X 40 -z -10 -Z 0 
