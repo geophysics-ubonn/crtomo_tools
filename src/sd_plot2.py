@@ -153,7 +153,7 @@ def check_minmax(plotman, cid, xmin, xmax, zmin, zmax, vmin, vmax):
 
 class overview_plot():
 
-    def __init__(self, title, liste, alpha, unit):
+    def __init__(self, title, liste, alpha, unit, opt):
         self.title = title
         self.dirs = liste
         N = len(self.dirs)
@@ -161,8 +161,8 @@ class overview_plot():
         self.columns = 4
         self.cbunit = units.get_label(unit)
 
-        self.create_figure()
         self.load_grid(alpha)
+        self.create_figure(opt)
         self.cm(unit)
 
     def cm(self, unit):
@@ -178,12 +178,40 @@ class overview_plot():
             print('No colorbar defined')
             exit()
 
-    def create_figure(self):
+    def create_figure(self, opt):
+        self.getfigsize(opt)
         self.fig, self.axs = plt.subplots(self.rows,
                                           ncols=4,
-                                          figsize=(15, 1.8 * self.rows))
+                                          figsize=(self.sizex,
+                                                   self.sizez))
         plt.suptitle(self.title, fontsize=18)
-        plt.subplots_adjust(wspace=1, top=2.8)
+        plt.subplots_adjust(wspace=4, hspace=4, top=5)
+
+    def getfigsize(self, opt):
+        '''calculate appropriate sizes for the subfigures
+        '''
+        if opt.xmin is None:
+            opt.xmin = self.plotman.grid.grid['x'].min()
+        if opt.xmax is None:
+            opt.xmax = self.plotman.grid.grid['x'].max()
+        if opt.zmin is None:
+            opt.zmin = self.plotman.grid.grid['z'].min()
+        if opt.zmax is None:
+            opt.zmax = self.plotman.grid.grid['z'].max()
+        if np.abs(opt.zmax - opt.zmin) < np.abs(opt.xmax - opt.xmin):
+            self.sizex = 2 / 2.54
+            self.sizez = self.sizex * (
+                    np.abs(opt.zmax - opt.zmin) / np.abs(opt.xmax - opt.xmin))
+        else:
+            self.sizez = 2 / 2.54
+            self.sizex = 0.5 * self.sizez * (
+                    np.abs(opt.xmax - opt.xmin) / np.abs(opt.zmax - opt.zmin))
+            print('schmal')
+        # add 1 inch to accommodate colorbar
+        self.sizex += 4 * .5
+        self.sizex *= 4
+        self.sizez *= self.rows
+        self.sizez += 5
 
     def save(self):
         self.fig.tight_layout()
@@ -313,16 +341,19 @@ def plot_cmplx(options, freq_dirs, ov_mag):
                            liste=freq_dirs,
                            alpha=options.alpha_cov,
                            unit='phi',
+                           opt=options,
                            )
     ov_real = overview_plot(title='Real Part',
                             liste=freq_dirs,
                             alpha=options.alpha_cov,
                             unit='log_real',
+                            opt=options,
                             )
     ov_imag = overview_plot(title='Imaginary Part',
                             liste=freq_dirs,
                             alpha=options.alpha_cov,
                             unit='log_imag',
+                            opt=options,
                             )
     # create figure
 
@@ -334,16 +365,20 @@ def plot_cmplx(options, freq_dirs, ov_mag):
         try:
             mag = subplot(ov_plot=ov_mag,
                           title=freq_dirs[sub],
-                          typ='mag')
+                          typ='mag',
+                          )
             pha = subplot(ov_plot=ov_pha,
                           title=freq_dirs[sub],
-                          typ='pha')
+                          typ='pha',
+                          )
             imag = subplot(ov_plot=ov_imag,
                            title=freq_dirs[sub],
-                           typ='imag')
+                           typ='imag',
+                           )
             real = subplot(ov_plot=ov_real,
                            title=freq_dirs[sub],
-                           typ='real')
+                           typ='real',
+                           )
 
             mag.load_data(options)
             pha.load_data(options)
@@ -417,6 +452,7 @@ def main():
                            liste=freq_dirs,
                            alpha=options.alpha_cov,
                            unit='log_rho',
+                           opt=options,
                            )
     # check for phase
     if os.path.isfile(ov_mag.dirs[0] + '/inv/rho00.pha'):
