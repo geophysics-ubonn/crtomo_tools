@@ -85,13 +85,6 @@ def handle_options():
                       dest="cmaglin",
                       help="linear colorbar for magnitude",
                       )
-    parser.add_option('-t',
-                      '--type',
-                      dest='type',
-                      help='what type of data should be plotted',
-                      type='str',
-                      default='mag',
-                      )
     parser.add_option('-v',
                       '--vmin',
                       dest='vmin',
@@ -273,23 +266,8 @@ def calc_complex(mag, pha):
     return real, imag
 
 
-def main():
-    # options
-    options = handle_options()
-    matplotlib.style.use('default')
-    mpl_style.general_settings()
-
-    # directories to plot
-    os.chdir('invmod')
-    freq_dirs = os.listdir('.')
-    freq_dirs.sort()
-
-    # init overview plots
-    ov_mag = overview_plot(title='Magnitude',
-                           liste=freq_dirs,
-                           alpha=options.alpha_cov,
-                           unit='log_rho',
-                           )
+def plot_cmplx(options, freq_dirs, ov_mag):
+    # init overview plotsit='log_rho',
     ov_pha = overview_plot(title='Phase',
                            liste=freq_dirs,
                            alpha=options.alpha_cov,
@@ -351,6 +329,64 @@ def main():
     ov_pha.save()
     ov_real.save()
     ov_imag.save()
+
+
+def plot_dc(options, freq_dirs, ov_mag):
+    # init overview plots
+    # create figure
+
+    i = 0
+    j = 0
+
+    # plot each subplot
+    for sub in np.arange(ov_mag.rows * ov_mag.columns):
+        try:
+            mag = subplot(ov_plot=ov_mag,
+                          title=freq_dirs[sub],
+                          typ='mag')
+
+            mag.load_data(options)
+
+            mag.plot_data(ov_mag, options, i//4, j)
+        except:
+            # no subplot needed
+            ov_mag.axs[i//4, j].axis('off')
+        i = i + 1
+        j = j + 1
+        if j == 4:
+            j = 0
+
+    os.chdir('..')
+    # save plots
+    ov_mag.save()
+
+
+def main():
+    # options
+    options = handle_options()
+    matplotlib.style.use('default')
+    mpl_style.general_settings()
+
+    # directories to plot
+    os.chdir('invmod')
+    freq_dirs = os.listdir('.')
+    freq_dirs.sort()
+
+    ov_mag = overview_plot(title='Magnitude',
+                           liste=freq_dirs,
+                           alpha=options.alpha_cov,
+                           unit='log_rho',
+                           )
+    # check for phase
+    if os.path.isfile(ov_mag.dirs[0] + '/inv/rho00.pha'):
+        phase = True
+    else:
+        phase = False
+
+    if phase:
+        plot_cmplx(options, freq_dirs, ov_mag)
+    else:
+        plot_dc(options, freq_dirs, ov_mag)
 
 
 if __name__ == '__main__':
