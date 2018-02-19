@@ -85,15 +85,43 @@ def handle_options():
                       dest="cmaglin",
                       help="linear colorbar for magnitude",
                       )
-    parser.add_option('-v',
-                      '--vmin',
-                      dest='vmin',
+    parser.add_option('--mag_vmin',
+                      dest='mag_vmin',
                       help='Minium of colorbar',
                       type='float',
                       )
-    parser.add_option('-V',
-                      '--vmax',
-                      dest='vmax',
+    parser.add_option('--mag_vmax',
+                      dest='mag_vmax',
+                      help='Maximum of colorbar',
+                      type='float',
+                      )
+    parser.add_option('--pha_vmin',
+                      dest='pha_vmin',
+                      help='Minium of colorbar',
+                      type='float',
+                      )
+    parser.add_option('--pha_vmax',
+                      dest='pha_vmax',
+                      help='Maximum of colorbar',
+                      type='float',
+                      )
+    parser.add_option('--real_vmin',
+                      dest='real_vmin',
+                      help='Minium of colorbar',
+                      type='float',
+                      )
+    parser.add_option('--real_vmax',
+                      dest='real_vmax',
+                      help='Maximum of colorbar',
+                      type='float',
+                      )
+    parser.add_option('--imag_vmin',
+                      dest='imag_vmin',
+                      help='Minium of colorbar',
+                      type='float',
+                      )
+    parser.add_option('--imag_vmax',
+                      dest='imag_vmax',
                       help='Maximum of colorbar',
                       type='float',
                       )
@@ -223,11 +251,24 @@ class subplot():
         cblabel = units.get_label(ov_plot.cbunit)
         zlabel = 'z [' + opt.xunit + ']'
         xlabel = 'x [' + opt.xunit + ']'
+        if self.type == 'mag':
+            vmin = opt.mag_vmin
+            vmax = opt.mag_vmax
+        elif self.type == 'pha':
+            vmin = opt.pha_vmin
+            vmax = opt.pha_vmax
+        elif self.type == 'imag':
+            vmin = opt.imag_vmin
+            vmax = opt.imag_vmax
+        else:
+            vmin = opt.real_vmin
+            vmax = opt.real_vmax
+
         xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(ov_plot.plotman,
                                                           self.cid,
                                                           opt.xmin, opt.xmax,
                                                           opt.zmin, opt.zmax,
-                                                          opt.vmin, opt.vmax,
+                                                          vmin, vmax,
                                                           )
         # plot
         fig, ax, cnorm, cmap, cb = ov_plot.plotman.plot_elements_to_ax(
@@ -299,10 +340,10 @@ def plot_cmplx(options, freq_dirs, ov_mag):
                           typ='pha')
             imag = subplot(ov_plot=ov_imag,
                            title=freq_dirs[sub],
-                           )
+                           typ='imag')
             real = subplot(ov_plot=ov_real,
                            title=freq_dirs[sub],
-                           )
+                           typ='real')
 
             mag.load_data(options)
             pha.load_data(options)
