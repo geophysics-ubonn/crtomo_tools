@@ -62,12 +62,6 @@ def handle_options():
                       type='str',
                       default='m',
                       )
-    parser.add_option('--title',
-                      dest='title',
-                      type='string',
-                      help='Global override for title',
-                      default=None,
-                      )
     parser.add_option("--alpha_cov",
                       action="store_true",
                       dest="alpha_cov",
