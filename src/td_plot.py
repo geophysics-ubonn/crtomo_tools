@@ -630,6 +630,7 @@ def getfigsize(plotman):
         sizex = sizez * (np.abs(xmax - xmin) / np.abs(zmax - zmin))
     # add 1 inch to accommodate colorbar
     sizex += 1.3
+    sizez += 1
     return sizex, sizez
 
 
@@ -846,7 +847,7 @@ def create_anisomagplot(plotman, x, y, z, alpha, options):
     f, ax = plt.subplots(2, 3, figsize=(3 * sizex, 2 * sizez))
     if options.title is not None:
         plt.suptitle(options.title, fontsize=18)
-        plt.subplots_adjust(wspace=1, top=0.8)
+        plt.subplots_adjust(wspace=1.5, top=2)
     # plot magnitue
     if options.cmaglin:
         cidx = plotman.parman.add_data(np.power(10, x))
