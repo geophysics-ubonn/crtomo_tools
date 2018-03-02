@@ -548,7 +548,8 @@ def plot_ratio(cid, ax, plotman, title, alpha, vmin, vmax,
     cblabel = 'anisotropy ratio'
     zlabel = 'z [' + xunit + ']'
     xlabel = 'x [' + xunit + ']'
-    cm = 'brg'
+    #cm = 'brg'
+    cm = 'RdYlGn'
     xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(
             plotman,
             cid,
@@ -990,7 +991,7 @@ def create_hlammagplot(plotman, h, ratio, alpha, options):
     return f, ax
 
 
-def create_hlamphaplot(plotman, h, ratio, alpha, options):
+def create_hlamphaplot(plotman, h, v, alpha, options):
     '''Plot the data of the tomodir in one overview plot.
     '''
     sizex, sizez = getfigsize(plotman)
@@ -1000,9 +1001,9 @@ def create_hlamphaplot(plotman, h, ratio, alpha, options):
         plt.suptitle(options.title, fontsize=18)
         plt.subplots_adjust(wspace=1, top=0.8)
     cidh = plotman.parman.add_data(h)
-    cidv = plotman.parman.add_data(np.divide(h, ratio))
+    cidv = plotman.parman.add_data(v)
     
-    cidr = plotman.parman.add_data(ratio)
+    cidr = plotman.parman.add_data(np.subtract(h, v))
     plot_pha(cidh, ax[0], plotman, 'horizontal', alpha,
              options.pha_vmin, options.pha_vmax,
              options.xmin, options.xmax, options.zmin, options.zmax,
@@ -1013,7 +1014,7 @@ def create_hlamphaplot(plotman, h, ratio, alpha, options):
              options.xmin, options.xmax, options.zmin, options.zmax,
              options.unit, options.pha_cbtiks, options.no_elecs,
              )
-    plot_ratio(cidr, ax[2], plotman, 'hor/ver', alpha,
+    plot_ratio(cidr, ax[2], plotman, 'hor - ver', alpha,
                options.rat_vmin, options.rat_vmax,
                options.xmin, options.xmax, options.zmin, options.zmax,
                options.unit, options.pha_cbtiks, options.no_elecs,
@@ -1066,8 +1067,8 @@ def main():
         lam = load_rho(filename, 3)
         create_hlammagplot(plotman, hor, lam, alpha, options)
         hor = load_rho(filename[:-3] + 'pha', 2)
-        lam = load_rho(filename[:-3] + 'pha', 4)
-        create_hlamphaplot(plotman, hor, lam, alpha, options)
+        ver = load_rho(filename[:-3] + 'pha', 4)
+        create_hlamphaplot(plotman, hor, ver, alpha, options)
     else:
         print('Choose option "single", "hlam" or "aniso" not two at the same time.')
         exit()

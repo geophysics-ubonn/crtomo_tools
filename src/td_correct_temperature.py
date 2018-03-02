@@ -47,12 +47,13 @@ def handle_options():
     # input options
     parser.add_option("--temp",
                       dest="temp_file",
-                      help="temperature profile",
+                      help="file with temperature data",
+                      metavar="file",
                       default='temp/tprofile.mag',
                       )
     parser.add_option("--filename",
                       dest='filename',
-                      help='filename of input file',
+                      help='file with resistivity data',
                       metavar="file",
                       type='string',
                       default=None,
@@ -67,8 +68,8 @@ def handle_options():
     parser.add_option("-o",
                       "--output",
                       dest="output",
-                      help="Output file",
-                      metavar="FILE",
+                      help="output file",
+                      metavar="file",
                       default="temp/rho_T.mag",
                       )
 
@@ -79,7 +80,7 @@ def handle_options():
 def readin_temp(temp_file):
     """The temperature file should be in mag-format: header + 3 columns with
     coordinates and value of temperature. The coordinates  have to be the same
-    as from the rho-file.
+    as from the resistivity data.
     Such a temperature file can be produced with #############
     """
     with open(temp_file, 'r') as fid:
@@ -89,7 +90,7 @@ def readin_temp(temp_file):
 
 
 def read_iter():
-    '''Return the path to the final .mag file.
+    '''Return the path to the final rho*.mag file from the tomodir.
     '''
     filename = 'exe/inv.lastmod'
     linestring = open(filename, 'r').readline().strip()
@@ -99,31 +100,42 @@ def read_iter():
 
 
 def readin_rho(filename, rhofile=True):
-    """Read in the values in Ohmm to which the temperature should be added.
+    """Read in the values of the resistivity in Ohmm.
     The format is variable: rho-file or mag-file.
     """
-    # if input is rhofile, get magnitude values from rhofile instead
     if rhofile:
         if filename is None:
             filename = 'rho/rho.dat'
         with open(filename, 'r') as fid:
-            content = np.loadtxt(fid, skiprows=1)
-            mag = content[:, 0]  # extract only magnitudes
+            mag = np.loadtxt(fid, skiprows=1, usecols([0]))
 
     else:
         if filename is None:
-            # get magfile for coordinates and magnitude
             filename = read_iter()
         with open(filename, 'r') as fid:
-            mag = np.loadtxt(fid, skiprows=1, usecols=([2]))
-        mag = [10 ** m for m in mag]  # remove logarithm
+            mag = np.power(10, np.loadtxt(fid, skiprows=1, usecols=([2])))
 
     return mag
 
 
-def calc_correction(temp, mag, add, T_std=10, m=0.021):
-    """Add or substract the temperature effect to the data.
-    The data is given and returned in Ohmm.
+def calc_correction(temp, mag, add=False, T_std=10, m=0.021):
+    """Function to add or substract the temperature effect to given data. The
+    function can be called in python scripts. For application via command line
+    in a file system use the script td_correct_temperature.py. The data is
+    taken and given in Ohmm.
+
+    rho_std_i = (m * (T_i - 25°) + 1) / (m * (T_std - 25°) + 1) * rho_i
+    rho_i = (m * (T_std - 25°) + 1) / (m * (T_i - 25°) + 1) * rho_std_i
+
+    Hayley (2007)
+
+    Parameters:
+        temp: temperature values corresponding to the individual resistivity
+              values
+        mag: resistivity values to be corrected
+        add: switch for adding instead of substracting the effect
+        T_std: standard temperature t or from which to correct (default=10°)
+        m:coeffcient (default=0.021)
     """
     if add:
         data_i = (m * (T_std - 25) + 1) / (m * (temp - 25) + 1) * mag
@@ -134,7 +146,7 @@ def calc_correction(temp, mag, add, T_std=10, m=0.021):
 
 
 def save_mag_to_file(mag, filename, rhofile):
-    """Save the new values in rho.dat (add) or rho.mag (sub).
+    """Save the values in rho- or mag-format.
     """
     if rhofile:
         # bring data in shape
@@ -162,7 +174,7 @@ def save_mag_to_file(mag, filename, rhofile):
 
 
 def main():
-    """
+    """Function to add or substract the temperature effect to data in a tomodir
     """
     options = handle_options()
 
