@@ -8,6 +8,7 @@ Options:
 * m: choose coeffcient m
 * T_std: choose standard temperatur to which to correct the data
 * add: add the effect of temperature instead of substracting it (for modelling)
+* aniso: resistivity data is anisotropic (three columns)
 * temp: file with temperature information in 3rd column with a headerline
         (mag-format)
 * filename: file with resistivity information
@@ -25,6 +26,7 @@ def handle_options():
     parser = OptionParser()
     parser.set_defaults(add=False)
     parser.set_defaults(rhofile=False)
+    parser.set_defaults(aniso=False)
 
     parser.add_option("-m",
                       dest="m",
@@ -41,6 +43,12 @@ def handle_options():
     parser.add_option("--add",
                       help="add temperature effect, default=sub",
                       dest='add',
+                      action='store_true',
+                      default=False
+                      )
+    parser.add_option("--aniso",
+                      help="resistivity data in anisotropic (three columns)",
+                      dest='aniso',
                       action='store_true',
                       default=False
                       )
@@ -99,21 +107,25 @@ def read_iter():
     return linestring
 
 
-def readin_rho(filename, rhofile=True):
+def readin_rho(filename, rhofile=True, aniso=False):
     """Read in the values of the resistivity in Ohmm.
     The format is variable: rho-file or mag-file.
     """
+    if aniso:
+        a = [[0, 1, 2], [2, 3, 4]]
+    else:
+        a = [0, 2]
     if rhofile:
         if filename is None:
             filename = 'rho/rho.dat'
         with open(filename, 'r') as fid:
-            mag = np.loadtxt(fid, skiprows=1, usecols([0]))
+            mag = np.loadtxt(fid, skiprows=1, usecols=(a[0]))
 
     else:
         if filename is None:
             filename = read_iter()
         with open(filename, 'r') as fid:
-            mag = np.power(10, np.loadtxt(fid, skiprows=1, usecols=([2])))
+            mag = np.power(10, np.loadtxt(fid, skiprows=1, usecols=(a[1])))
 
     return mag
 
@@ -137,12 +149,24 @@ def calc_correction(temp, mag, add=False, T_std=10, m=0.021):
         T_std: standard temperature t or from which to correct (default=10°)
         m:coeffcient (default=0.021)
     """
-    if add:
-        data_i = (m * (T_std - 25) + 1) / (m * (temp - 25) + 1) * mag
-        return data_i
+    if mag.shape[1] == 3:
+        if add:
+            data_x = (m * (T_std - 25) + 1) / (m * (temp - 25) + 1) * mag[:, 0]
+            data_y = (m * (T_std - 25) + 1) / (m * (temp - 25) + 1) * mag[:, 1]
+            data_z = (m * (T_std - 25) + 1) / (m * (temp - 25) + 1) * mag[:, 2]
+            return np.column_stack((data_x, data_y, data_z))
+        else:
+            data_x = (m * (temp - 25) + 1) / (m * (T_std - 25) + 1) * mag[:, 0]
+            data_y = (m * (temp - 25) + 1) / (m * (T_std - 25) + 1) * mag[:, 1]
+            data_z = (m * (temp - 25) + 1) / (m * (T_std - 25) + 1) * mag[:, 2]
+            return np.column_stack((data_x, data_y, data_z))
     else:
-        data_std = (m * (temp - 25) + 1) / (m * (T_std - 25) + 1) * mag
-        return data_std
+        if add:
+            data_i = (m * (T_std - 25) + 1) / (m * (temp - 25) + 1) * mag
+            return data_i
+        else:
+            data_std = (m * (temp - 25) + 1) / (m * (T_std - 25) + 1) * mag
+            return data_std
 
 
 def save_mag_to_file(mag, filename, rhofile):
@@ -151,7 +175,9 @@ def save_mag_to_file(mag, filename, rhofile):
     if rhofile:
         # bring data in shape
         null = np.zeros(len(mag))
-        result = np.transpose(np.vstack((mag, null)))
+        if mag.shape[1] == 3:
+            null = np.column_stack((null, null, null, null))
+        result = np.column_stack((mag, null))
 
         # save datapoints
         with open(filename, 'w') as fid:
@@ -163,7 +189,14 @@ def save_mag_to_file(mag, filename, rhofile):
         # bring data in shape
         with open('inv/rho00.mag', 'r') as fid:
             coor = np.loadtxt(fid, skiprows=1, usecols=[0, 1])
-        mag_log = [math.log(d, 10) for d in mag]  # calculated back to log
+        # calculated back to log
+        if mag.shape[1] == 3:
+            logx = [math.log(d, 10) for d in mag[:, 0]]
+            logy = [math.log(d, 10) for d in mag[:, 1]]
+            logz = [math.log(d, 10) for d in mag[:, 2]]
+            mag_log = np.column_stack((logx, logy, logz))
+        else:
+            mag_log = [math.log(d, 10) for d in mag]
         content = np.column_stack((coor[:, 0], coor[:, 1], mag_log))
 
         # Osave datapoints
@@ -181,7 +214,8 @@ def main():
     # read in temperature and resistivity data
     tempdata = readin_temp(options.temp_file)
     magdata = readin_rho(options.filename,
-                         options.rhofile)
+                         options.rhofile,
+                         aniso=options.aniso)
     # calculate and save corrected data
     mag_corr = calc_correction(temp=tempdata,
                                mag=magdata,
