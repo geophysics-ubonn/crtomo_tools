@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 '''
 Tool to add or substract the temperature effect on/of resistivity data.
-The calculation is done after Hayley (2007).
+The calculation is done after Hayley (2007):
+    
+    rho_std_i = (m * (T_i - 25°) + 1) / (m * (T_std - 25°) + 1) * rho_i
 
 Options:
 * m: choose coeffcient m
@@ -199,7 +201,7 @@ def save_mag_to_file(mag, filename, rhofile):
             mag_log = [math.log(d, 10) for d in mag]
         content = np.column_stack((coor[:, 0], coor[:, 1], mag_log))
 
-        # Osave datapoints
+        # save datapoints
         with open(filename, 'w') as fid:
             fid.write('{0}\n'.format(content.shape[0]))
         with open(filename, 'ab') as fid:
@@ -216,7 +218,7 @@ def main():
     magdata = readin_rho(options.filename,
                          options.rhofile,
                          aniso=options.aniso)
-    # calculate and save corrected data
+    # calculate corrected data
     mag_corr = calc_correction(temp=tempdata,
                                mag=magdata,
                                add=options.add,
