@@ -75,11 +75,13 @@ def interpolate3d():
     exit()
 
 
-def save_tprofile(data, filename):
+def save_tprofile(data, filename, grid):
+    coords = grid.get_element_centroids()
+    content = np.column_stack((coords, data))
     with open(filename, 'w') as fid:
         fid.write('{0}\n'.format(data.shape[0]))
     with open(filename, 'ab') as fid:
-        np.savetxt(fid, np.array(data), fmt='%f')
+        np.savetxt(fid, np.array(content), fmt='%f')
 
 
 def main():
@@ -94,7 +96,8 @@ def main():
     elif dimension == 3:
         temp = interpolate3d(data, grid)
     save_tprofile(temp,
-                  options.out)
+                  options.out,
+                  grid)
 
 
 if __name__ == '__main__':
