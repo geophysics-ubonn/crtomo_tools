@@ -103,7 +103,6 @@ def save_tprofile(data, filename, grid):
 
 def plot(data, grid):
     f, ax = plt.subplots(1)
-    print(data)
     plotman = CRPlot.plotManager(grid=grid)
     cid = plotman.parman.add_data(data)
     plotman.plot_elements_to_ax(
@@ -128,10 +127,11 @@ def main():
         temp = interpolate2d(data, grid)
     elif dimension == 3:
         temp = interpolate3d(data, grid)
+    save_tprofile(temp, options.out, grid)
     if np.any(np.isnan(temp)):
         print('Not enough temperature information to interpolate to the whole'
               + ' grid. Please add information to cover the grid dimension.')
-    save_tprofile(temp, options.out, grid)
+        exit()
     plot(temp, grid)
 
 
