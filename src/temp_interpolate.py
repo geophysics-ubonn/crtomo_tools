@@ -8,6 +8,9 @@ Created on Wed Mar 14 08:25:32 2018
 import numpy as np
 from optparse import OptionParser
 import crtomo.grid as CRGrid
+from scipy.interpolate import griddata
+import crtomo.plotManager as CRPlot
+import matplotlib.pyplot as plt
 
 
 def handle_options():
@@ -65,12 +68,26 @@ def interpolate1d(data, grid):
     return np.array(profile)
 
 
-def interpolate2d():
-    print('Not implemented yet!')
-    exit()
+def interpolate2d(data, grid):
+    xdim = grid.get_minmax()[0]
+    xmin = []
+    xmax = []
+    xmin.extend([xdim[0]] * len(data))
+    xmax.extend([xdim[1]] * len(data))
+    coordinate = np.column_stack((xmin, data[:, 0]))
+    coordinate = np.append(coordinate, np.column_stack((xmax, data[:, 0])))
+    coordinate = np.reshape(coordinate, (-1, 2))
+    temp = np.hstack((data[:, 1], data[:, 1]))
+    centroids = grid.get_element_centroids()
+    profile = griddata(coordinate,
+                       temp,
+                       centroids,
+                       method='linear',
+                       )
+    return profile
 
 
-def interpolate3d():
+def interpolate3d(data, grid):
     print('Not implemented yet!')
     exit()
 
@@ -84,6 +101,22 @@ def save_tprofile(data, filename, grid):
         np.savetxt(fid, np.array(content), fmt='%f')
 
 
+def plot(data, grid):
+    f, ax = plt.subplots(1)
+    print(data)
+    plotman = CRPlot.plotManager(grid=grid)
+    cid = plotman.parman.add_data(data)
+    plotman.plot_elements_to_ax(
+            cid=cid,
+            ax=ax,
+            cblabel='Temperature',
+            plot_colorbar=True,
+            cmap_name='jet',
+            )
+    f.tight_layout()
+    f.savefig('temp/tprofile.png', dpi=300)
+
+
 def main():
     options = handle_options()
     dimension, data = read_data(options.input)
@@ -95,9 +128,11 @@ def main():
         temp = interpolate2d(data, grid)
     elif dimension == 3:
         temp = interpolate3d(data, grid)
-    save_tprofile(temp,
-                  options.out,
-                  grid)
+    if np.any(np.isnan(temp)):
+        print('Not enough temperature information to interpolate to the whole'
+              + ' grid. Please add information to cover the grid dimension.')
+    save_tprofile(temp, options.out, grid)
+    plot(temp, grid)
 
 
 if __name__ == '__main__':
