@@ -1,9 +1,20 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
-Created on Wed Mar 14 08:25:32 2018
+Script to interpolate temperature data to a grid. Output is needed for a temp-
+erature correction.
 
-@author: budler
+Options
+-------
+* -d: dimension of given temprature data (1d, 2d, 3d)
+* -i: input file with temperature information (1d, 2d, 3d)
+    0d: only one temperature, give only one number
+    1d: temperature only depth dependent, give z coordinate and temperature
+        (2 column-file)
+    2d: temperature informationd ependent on x- and z-coordinate (3 columns)
+* -o: output file name
+* --elem: path to elem.dat of the grid
+* --elec: path to elec.dat of the grid
 """
 import numpy as np
 from optparse import OptionParser
@@ -49,26 +60,41 @@ def handle_options():
 
 
 def read_data(filename):
+    '''Read in the data from the given file (filename), check its dimension and
+    for at lest two different depth values (if not 0d).
+    '''
     try:
         data = np.loadtxt(filename, usecols=([0, 1, 2]))
-        dimension = 3
+        dimension = 2
     except:
         try:
             data = np.loadtxt(filename, usecols=([0, 1]))
-            dimension = 2
+            dimension = 1
         except:
             data = np.loadtxt(filename, usecols=([0]))
-            dimension = 1
+            dimension = 0
+    if not dimension == 0:
+        try:
+            length = data.shape[1]
+        except:
+            print('Give at least 2 different depth values')
+            exit()
+
     return dimension, data
 
 
-def interpolate1d(data, grid):
+def interpolate0d(data, grid):
+    '''Interpolate the given data value on the given grid.
+    '''
     profile = []
     profile.extend([data] * len(grid.elements))
     return np.array(profile)
 
 
-def interpolate2d(data, grid):
+def interpolate1d(data, grid):
+    '''Interpolate the given temperature-depth data to the given grid. It is
+    expected, that the surface in the grid is horizontal.
+    '''
     xdim = grid.get_minmax()[0]
     xmin = []
     xmax = []
@@ -87,12 +113,18 @@ def interpolate2d(data, grid):
     return profile
 
 
-def interpolate3d(data, grid):
+def interpolate2d(data, grid):
+    '''Interpolate the 2d given temperature information on the given grid.
+    Not implemented yet.
+    '''
     print('Not implemented yet!')
     exit()
 
 
 def save_tprofile(data, filename, grid):
+    '''Save the interpolated temperature information to file. Grid is needed
+    for the coordinate-information.
+    '''
     coords = grid.get_element_centroids()
     content = np.column_stack((coords, data))
     with open(filename, 'w') as fid:
@@ -102,6 +134,8 @@ def save_tprofile(data, filename, grid):
 
 
 def plot(data, grid):
+    '''Plot the interpolated tempreature data on the grid to temp/tprofile.png.
+    '''
     f, ax = plt.subplots(1)
     plotman = CRPlot.plotManager(grid=grid)
     cid = plotman.parman.add_data(data)
@@ -117,16 +151,22 @@ def plot(data, grid):
 
 
 def main():
+    '''Function to interpolate temperature data from file to a grid, read from
+    file, and write and plot the interpolated data to file.
+    '''
     options = handle_options()
     dimension, data = read_data(options.input)
     grid = CRGrid.crt_grid(options.elem,
                            options.elec)
-    if dimension == 1:
+    if dimension == 0:
+        print('Using 0d temperature information.')
+        temp = interpolate0d(data[0], grid)
+    elif dimension == 1:
+        print('Using 1d temperature information.')
         temp = interpolate1d(data, grid)
     elif dimension == 2:
+        print('Using 2d temperature information.')
         temp = interpolate2d(data, grid)
-    elif dimension == 3:
-        temp = interpolate3d(data, grid)
     save_tprofile(temp, options.out, grid)
     if np.any(np.isnan(temp)):
         print('Not enough temperature information to interpolate to the whole'
