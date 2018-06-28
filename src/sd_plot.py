@@ -11,7 +11,7 @@ import crtomo.grid as CRGrid
 import matplotlib.pyplot as plt
 import matplotlib
 import math
-import edf.main.units as units
+import reda.main.units as units
 import crtomo.mpl as mpl_style
 
 

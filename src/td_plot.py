@@ -41,7 +41,7 @@ import crtomo.grid as CRGrid
 import matplotlib.pyplot as plt
 import matplotlib
 import math
-import edf.main.units as units
+import reda.main.units as units
 import crtomo.mpl as mpl_style
 import matplotlib as mpl
 
@@ -969,7 +969,7 @@ def create_hlammagplot(plotman, h, ratio, alpha, options):
         cidv = plotman.parman.add_data(
                 np.log10(np.divide(np.power(10, h), np.power(10, ratio))))
         loglin = 'log_rho'
-    
+
     cidr = plotman.parman.add_data(np.power(10, ratio))
     plot_mag(cidh, ax[0], plotman, 'horizontal', loglin, alpha,
              options.mag_vmin, options.mag_vmax,
@@ -1002,7 +1002,7 @@ def create_hlamphaplot(plotman, h, v, alpha, options):
         plt.subplots_adjust(wspace=1, top=0.8)
     cidh = plotman.parman.add_data(h)
     cidv = plotman.parman.add_data(v)
-    
+
     cidr = plotman.parman.add_data(np.subtract(h, v))
     plot_pha(cidh, ax[0], plotman, 'horizontal', alpha,
              options.pha_vmin, options.pha_vmax,
