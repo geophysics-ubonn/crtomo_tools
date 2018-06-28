@@ -7,6 +7,7 @@ A sEIT-dir (or sipdir) has the following structure:
 
 """
 import os
+from glob import glob
 
 import numpy as np
 
@@ -23,8 +24,15 @@ class eitMan(object):
         """
         Parameters
         ----------
-        frequencies: numpy.ndarray
-            frequencies that we work with
+        grid: crtomo.crt_grid.crt_grid, optional
+            A grid instance
+        elem_file: string, optional
+            Path to elem file
+        elec_file: string, optional
+            Path to elec file
+        crt_data_dir: string, optional
+            if given, then try to load data from this directory. Expect a
+            'frequencies.dat' file and corresponding 'volt_*.dat' files.
         """
         # load/assign grid
         if 'grid' in kwargs:
@@ -55,6 +63,15 @@ class eitMan(object):
 
         # for each frequency we have a separate tomodir object
         self.tds = {}
+
+        crt_data_dir = kwargs.get('crt_data_dir', None)
+        if crt_data_dir is not None:
+            data_files = {}
+            data_files['frequencies'] = '{}/frequencies.dat'.format(
+                crt_data_dir)
+            files = sorted(glob('{}/volt_*.crt'.format(crt_data_dir)))
+            data_files['crt'] = files
+            self.load_data_crt_files(data_files)
 
     def _init_frequencies(self, frequencies):
         self.frequencies = frequencies
