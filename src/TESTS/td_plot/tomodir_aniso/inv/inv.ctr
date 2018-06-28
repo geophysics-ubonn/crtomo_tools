@@ -1,0 +1,123 @@
+##
+## Complex Resistivity Tomography (CRTomo)
+##
+## Git-Branch anisotropy_xyz
+## Git-ID     35a926565e44bc375a81fbc52841d189d4e2f8c8
+## Compiler   gfortran
+## OS         GNU/Linux
+##
+## Created  Do-21-Dez-2017-09:04:25-CET
+##
+
+       1           #  mswitch
+../grid/elem.dat
+../grid/elec.dat
+../mod/volt.dat
+../inv
+F                  ! difference inversion or (m - m_{prior})
+
+
+
+***PARAMETERS***
+       0           ! nx-switch or # cells in x-direction
+      -1           ! nz-switch or # cells in z-direction
+ 1.0000            ! smoothing parameter in x-direction
+ 1.0000            ! smoothing parameter in z-direction
+      20           ! max. # inversion iterations
+F                  ! DC inversion ?
+F                  ! robust inversion ?
+F                  ! final phase improvement ?
+0.50000E-02        ! rel. resistance error level (%)  (parameter A1 in err(R) = A1*abs(R) + A2)
+0.10000E-02        ! min. abs. resistance error (ohm) (parameter A2 in err(R) = A1*abs(R) + A2)
+ 0.0000            ! phase error model parameter A1 (mrad/ohm^B) (in err(pha) = A1*abs(R)**B + A2*abs(pha) + A3)
+ 0.0000            ! phase error model parameter B  (-)          (in err(pha) = A1*abs(R)**B + A2*abs(pha) + A3)
+ 0.0000            ! phase error model parameter A2 (%)          (in err(pha) = A1*abs(R)**B + A2*abs(pha) + A3)
+ 0.0000            ! phase error model parameter A3 (mrad)       (in err(pha) = A1*abs(R)**B + A2*abs(pha) + A3)
+T                  ! homogeneous background resistivity ?
+ 20.000            ! background magnitude (ohm*m)
+ 0.0000            ! background phase (mrad)
+F                  ! Another dataset?
+       0           ! 2D (=0) or 2.5D (=1)
+T                  ! fictitious sink ?
+    7166           ! fictitious sink node number
+F                  ! boundary values ?
+boundary.dat
+ 1
+
+***Model stats***
+Anisotropy lambda            .93600E-03
+# Model parameters               9360
+# Data points                     336
+Add data noise ?                      F
+Couple to Err. Modl?                  T
+    seed                            1
+    Variance                 0.0000    
+Add model noise ?                     F
+    seed                            0
+    Variance                 0.0000    
+
+******** Regularization Part *********
+Prior regualrization                  F
+Regularization-switch                 1
+Regular grid smooth                   F
+Triangular regu                       T
+Triangular regu2                      F
+Levenberg damping                     F
+Marquardt damping                     F
+Minimum grad supp                     F
+MGS beta/sns1 (RM)                    F
+MGS beta/sns2 (RM)                    F
+MGS beta/sns1 (RB)                    F
+MGS beta/sns2 (RB)                    F
+TV (Huber)                            F
+Stochastic regu                       F
+Fixed lambda?                         F
+Taking easy lam_0 :    9360.00000    
+
+******** Additional output *********
+mswitch                               1
+Read start model?                     F
+Write coverage?                       T
+Write MCM 1?                          F
+Write resolution?                     F
+Write MCM 2?                          F
+Using Gauss ols?                      F
+Forcing negative phase?               F
+Calculate sytop?                      F
+Verbose?                              F
+Error Ellipses?                       T
+Restart FPI with homogenous phase?    F
+
+***FIXED***
+ Force negative phase ?                          F
+ Ratio dataset ?                                 F
+ Min. rel. decrease of data RMS :                0.20000E-01
+ Min. steplength              :                  0.10000E-02
+ Min. stepsize (||\delta m||) :                   0.0000    
+ Min. error in relaxation :                      0.33333E-04
+ Max. # relaxation iterations :                   2808
+ Max. # regularization steps :                    30
+ Initial step factor :                           0.50000    
+ Final   step factor :                           0.90000    
+
+-------------------------------------------------------------------------------------------------------------
+
+ ID it.   data RMS    stepsize    lambda      roughn.    CG-steps    mag RMS     pha RMS    - # data    steplength
+
+************************************************************************************************************* 
+ IT   0    16.57                                                     15.27        Infinity     0
+************************************************************************************************************* 
+ UP   1    15.38       2.50       9360.      0.1033        50                                           1.000
+ UP   2    13.98       2.28       4680.      0.8088E-01    46                                           1.000
+ UP   3    15.57       1.69       2389.      0.5591E-01    28                                           1.000
+ UP   4    7.121       1.14       4680.      0.2022E-01    46                                           0.500
+************************************************************************************************************* 
+ IT   1    6.981       1.232      4680.      0.2356E-01    46        6.409        Infinity     0        0.540
+************************************************************************************************************* 
+ UP   0    11.25      0.197       4680.      0.3671E-01    25                                           1.000
+ UP   1    11.36      0.223       2503.      0.3982E-01    30                                           1.000
+ UP   2    8.412      0.984E-01   4680.      0.2878E-01    25                                           0.500
+************************************************************************************************************* 
+ IT   2    6.981      0.1969E-03  4680.      0.2357E-01    25        6.410        Infinity     0        0.001
+************************************************************************************************************* 
+***finished***
