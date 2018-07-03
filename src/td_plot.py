@@ -16,22 +16,6 @@ figures (--single) or to plot anisotropic results of magnitude and phase
 (--aniso).
 The script has to be run in a tomodir. Output file will be saved in tomodir.
 
-Options
--------
-
---alpha_cov: use coverage values for alpha channel
---no_elecs: do not plot electrodes
---title: figure title
---cmaglin: linear colorbar for magnitude instead of logarithmic
--c, --column: choose column of magnitude input file to plot
--x, --xmin: minimal x limit to plot
--X, --xmax: maximal x limit to plot
--z, --zmin: minimal z limit to plot
--Z, --zmax: maximal z limit to plot
--u, --unit: unit for x and z axis, default is meter
-*_cbtiks: colorbar tiks for this subplot (mag, pha, imag, real, cov, rat)
-*_vmin: minimal colorbarlimit for this subplot (mag, pha, imag, real, cov, rat)
-*_vmax: maximal colorbarlimit for this subplot (mag, pha, imag, real, cov, rat)
 '''
 import numpy as np
 import os
