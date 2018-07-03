@@ -3,10 +3,11 @@
 '''
 Tool to add or substract the temperature effect on/of resistivity data.
 The calculation is done after Hayley (2007):
-    
+
     rho_std_i = (m * (T_i - 25°) + 1) / (m * (T_std - 25°) + 1) * rho_i
 
 Options:
+
 * m: choose coeffcient m
 * T_std: choose standard temperatur to which to correct the data
 * add: add the effect of temperature instead of substracting it (for modelling)
@@ -16,6 +17,7 @@ Options:
 * filename: file with resistivity information
 * rho: resistivity input and output files are in rho- instead of mag-format
 * output: output file
+
 '''
 import numpy as np
 from optparse import OptionParser
