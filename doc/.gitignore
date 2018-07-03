@@ -2,3 +2,4 @@ _build/
 api/*.rst
 api/*.png
 scripts/grid_tools/*.rst
+pyplots/
