@@ -254,12 +254,17 @@ class plotManager(object):
             colorbar label
         cbsegments: int, optional
         cbnrticks: int, optional
-        plot_colorbar: bool
+        plot_colorbar: bool, optional
         title: string, optional
             plot title string
         xlabel: string, optional
+            Set xlabel of the resulting plot
         ylabel: string, optional
+            Set ylabel of the resulting plot
         no_elecs: boolean, optional
+            If True, plot no electrodes
+        rasterize: bool, optional
+            if True, rasterize the plot. Default: False
 
         Returns
         -------
@@ -275,6 +280,7 @@ class plotManager(object):
             only of plot_colorbar is True
         """
 
+        rasterize = kwargs.get('rasterize', False)
         xmin = kwargs.get('xmin', self.grid.grid['x'].min())
         xmax = kwargs.get('xmax', self.grid.grid['x'].max())
         zmin = kwargs.get('zmin', self.grid.grid['z'].min())
@@ -346,6 +352,7 @@ class plotManager(object):
             facecolor=fcolors,
             linewidth=0.0,
             cmap=cmap,
+            rasterized=rasterize,
         )
         collection.set_cmap(cmap)
         ax.add_collection(collection)

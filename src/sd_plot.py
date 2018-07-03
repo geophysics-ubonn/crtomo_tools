@@ -11,7 +11,7 @@ import crtomo.grid as CRGrid
 import matplotlib.pyplot as plt
 import matplotlib
 import math
-import edf.main.units as units
+import reda.main.units as units
 import crtomo.mpl as mpl_style
 
 
@@ -55,18 +55,12 @@ def handle_options():
                       )
     parser.add_option('-u',
                       '--unit',
-                      dest='unit',
+                      dest='xunit',
                       help='Unit of length scale, typically meters (m) ' +
                       'or centimeters (cm)',
                       metavar='UNIT',
                       type='str',
                       default='m',
-                      )
-    parser.add_option('--title',
-                      dest='title',
-                      type='string',
-                      help='Global override for title',
-                      default=None,
                       )
     parser.add_option("--alpha_cov",
                       action="store_true",
@@ -85,147 +79,49 @@ def handle_options():
                       dest="cmaglin",
                       help="linear colorbar for magnitude",
                       )
-    parser.add_option('-t',
-                      '--type',
-                      dest='type',
-                      help='what type of data should be plotted',
-                      type='str',
-                      default='mag',
-                      )
-    parser.add_option('-v',
-                      '--vmin',
-                      dest='vmin',
+    parser.add_option('--mag_vmin',
+                      dest='mag_vmin',
                       help='Minium of colorbar',
                       type='float',
                       )
-    parser.add_option('-V',
-                      '--vmax',
-                      dest='vmax',
+    parser.add_option('--mag_vmax',
+                      dest='mag_vmax',
+                      help='Maximum of colorbar',
+                      type='float',
+                      )
+    parser.add_option('--pha_vmin',
+                      dest='pha_vmin',
+                      help='Minium of colorbar',
+                      type='float',
+                      )
+    parser.add_option('--pha_vmax',
+                      dest='pha_vmax',
+                      help='Maximum of colorbar',
+                      type='float',
+                      )
+    parser.add_option('--real_vmin',
+                      dest='real_vmin',
+                      help='Minium of colorbar',
+                      type='float',
+                      )
+    parser.add_option('--real_vmax',
+                      dest='real_vmax',
+                      help='Maximum of colorbar',
+                      type='float',
+                      )
+    parser.add_option('--imag_vmin',
+                      dest='imag_vmin',
+                      help='Minium of colorbar',
+                      type='float',
+                      )
+    parser.add_option('--imag_vmax',
+                      dest='imag_vmax',
                       help='Maximum of colorbar',
                       type='float',
                       )
 
     (options, args) = parser.parse_args()
     return options
-
-
-def get_plotoptions(typ, cmaglin):
-    options = []
-    if typ == 'mag':
-        options.append('inv.lastmod')  # file with last iteration
-        options.append('mag')  # file ending of datafile
-        options.append('Magnitude')  # title of plot
-        if cmaglin:
-            options.append('rho')  # key for cb-unit
-        else:
-            options.append('log_rho')
-        options.append('viridis')  # cb
-    elif typ == 'pha':
-        options.append('inv.lastmod')
-        options.append('pha')
-        options.append('Phase')
-        options.append('phi')
-        options.append('plasma')
-#    elif typ == 'real':
-#        options.append('inv.lastmod')
-#        options.append('rho00.mag')
-#        options.append('Real Part')
-#        options.append('log_real')  # insert option cmaglin rho
-#        options.append('viridis_r')
-#    elif typ == 'imag':
-#        options.append('inv.lastmod')
-#        options.append('rho00.mag')
-#        options.append('Imaginary Part')
-#        options.append('log_imag')  # insert option cmaglin rho
-#        options.append('plasma_r')
-    else:
-        print("This data format isn't specified. Please select 'mag' or 'pha'")
-        exit()
-    return options
-
-
-def load_grid(td, alpha_cov):
-    '''Load grid and calculate alpha values from the coverage/2.5.
-    '''
-    grid = CRGrid.crt_grid(td + '/grid/elem.dat',
-                           td + '/grid/elec.dat')
-    plotman = CRPlot.plotManager(grid=grid)
-
-    name = td + '/inv/coverage.mag'
-    content = np.genfromtxt(name, skip_header=1, skip_footer=1, usecols=([2]))
-    abscov = np.abs(content)
-    if alpha_cov:
-        normcov = np.divide(abscov, 2.5)
-        normcov[np.where(normcov > 1)] = 1
-        mask = np.subtract(1, normcov)
-        alpha = plotman.parman.add_data(mask)
-    else:
-        alpha = plotman.parman.add_data(np.ones(len(abscov)))
-    return alpha, plotman
-
-
-def get_data(direc, options, column, plotman):
-    os.chdir(direc)
-    # get iteration
-    linestring = open('exe/' + options[0], 'r').readline().strip()
-    linestring = linestring.replace('\n', '')
-    linestring = linestring.replace('../', '')
-    linestring = linestring.replace('mag', '')
-    # open data file
-    name = linestring + options[1]
-
-    if options[1] == 'mag':
-        try:
-            content = np.loadtxt(name, skiprows=1, usecols=([column]))
-        except:
-            raise ValueError('Given column to open does not exist.')
-    if options[1] == 'pha':
-        try:
-            content = np.loadtxt(name, skiprows=1, usecols=([2]))
-        except:
-            raise ValueError('No phase data to open.')
-    # add data to plotman
-    if options[3] == 'logrho':
-        cid = plotman.parman.add_data(np.power(10, content))
-    else:
-        cid = plotman.parman.add_data(content)
-    os.chdir('..')
-
-    return cid
-
-
-def plot_data(plotman, ax, cid, alpha, options, xunit, title,
-              xmin, xmax, zmin, zmax, cbtiks, vmin, vmax):
-    # handle options
-    cblabel = units.get_label(options[3])
-    zlabel = 'z [' + xunit + ']'
-    xlabel = 'x [' + xunit + ']'
-    cm = options[4]
-    xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(plotman,
-                                                      cid,
-                                                      xmin, xmax,
-                                                      zmin, zmax,
-                                                      vmin, vmax,
-                                                      )
-    # plot
-    fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
-                                                           cid_alpha=alpha,
-                                                           ax=ax,
-                                                           xmin=xmin,
-                                                           xmax=xmax,
-                                                           zmin=zmin,
-                                                           zmax=zmax,
-                                                           cblabel=cblabel,
-                                                           cbnrticks=cbtiks,
-                                                           title=title,
-                                                           zlabel=zlabel,
-                                                           xlabel=xlabel,
-                                                           plot_colorbar=True,
-                                                           cmap_name=cm,
-                                                           cbmin=vmin,
-                                                           cbmax=vmax,
-                                                           )
-    return fig, ax, cnorm, cmap, cb
 
 
 def check_minmax(plotman, cid, xmin, xmax, zmin, zmax, vmin, vmax):
@@ -249,52 +145,319 @@ def check_minmax(plotman, cid, xmin, xmax, zmin, zmax, vmin, vmax):
     return xmin, xmax, zmin, zmax, vmin, vmax
 
 
-def main():
-    # options
-    options = handle_options()
-    matplotlib.style.use('default')
-    mpl_style.general_settings()
-    opt = get_plotoptions(options.type, options.cmaglin)
+class overview_plot():
 
-    # directories to plot
-    os.chdir('invmod')
-    freq_dirs = os.listdir('.')
-    freq_dirs.sort()
+    def __init__(self, title, liste, alpha, unit, opt):
+        self.title = title
+        self.dirs = liste
+        N = len(self.dirs)
+        self.rows = math.ceil(N/4)
+        self.columns = 4
+        self.cbunit = units.get_label(unit)
 
+        self.load_grid(alpha)
+        self.create_figure(opt)
+        self.cm(unit)
+
+    def cm(self, unit):
+        if unit == 'log_rho':
+            self.cm = 'viridis'
+        elif unit == 'phi':
+            self.cm = 'plasma'
+        elif unit == 'log_real':
+            self.cm = 'viridis_r'
+        elif unit == 'log_imag':
+            self.cm = 'plasma_r'
+        else:
+            print('No colorbar defined')
+            exit()
+
+    def create_figure(self, opt):
+        self.getfigsize(opt)
+        self.fig, self.axs = plt.subplots(self.rows,
+                                          ncols=4,
+                                          figsize=(self.sizex,
+                                                   self.sizez))
+        plt.suptitle(self.title, fontsize=18)
+        plt.subplots_adjust(wspace=4, hspace=4, top=5)
+
+    def getfigsize(self, opt):
+        '''calculate appropriate sizes for the subfigures
+        '''
+        if opt.xmin is None:
+            opt.xmin = self.plotman.grid.grid['x'].min()
+        if opt.xmax is None:
+            opt.xmax = self.plotman.grid.grid['x'].max()
+        if opt.zmin is None:
+            opt.zmin = self.plotman.grid.grid['z'].min()
+        if opt.zmax is None:
+            opt.zmax = self.plotman.grid.grid['z'].max()
+        if np.abs(opt.zmax - opt.zmin) < np.abs(opt.xmax - opt.xmin):
+            self.sizex = 2 / 2.54
+            self.sizez = self.sizex * (
+                    np.abs(opt.zmax - opt.zmin) / np.abs(opt.xmax - opt.xmin))
+        else:
+            self.sizez = 2 / 2.54
+            self.sizex = 0.5 * self.sizez * (
+                    np.abs(opt.xmax - opt.xmin) / np.abs(opt.zmax - opt.zmin))
+            print('schmal')
+        # add 1 inch to accommodate colorbar
+        self.sizex += 4 * .5
+        self.sizex *= 4
+        self.sizez *= self.rows
+        self.sizez += 5
+
+    def save(self):
+        self.fig.tight_layout()
+        self.fig.savefig('sd_' + self.title + '.png', dpi=300)
+
+    def load_grid(self, alpha):
+        '''Load grid and calculate alpha values from the coverage/2.5.
+        '''
+        grid = CRGrid.crt_grid(self.dirs[0] + '/grid/elem.dat',
+                               self.dirs[0] + '/grid/elec.dat')
+        self.plotman = CRPlot.plotManager(grid=grid)
+
+        name = self.dirs[0] + '/inv/coverage.mag'
+        content = np.genfromtxt(name, skip_header=1,
+                                skip_footer=1, usecols=([2]))
+        abscov = np.abs(content)
+        if alpha:
+            normcov = np.divide(abscov, 2.5)
+            normcov[np.where(normcov > 1)] = 1
+            mask = np.subtract(1, normcov)
+            self.alpha = self.plotman.parman.add_data(mask)
+        else:
+            self.alpha = self.plotman.parman.add_data(np.ones(len(abscov)))
+
+
+class subplot():
+
+    def __init__(self, ov_plot, title, typ='cmplx'):
+        self.title = title
+        self.type = typ
+        self.plotman = ov_plot.plotman
+
+    def load_data(self, opt):
+        os.chdir(self.title)
+        # get iteration
+        linestring = open('exe/inv.lastmod', 'r').readline().strip()
+        linestring = linestring.replace('\n', '')
+        linestring = linestring.replace('../', '')
+        linestring = linestring.replace('mag', '')
+        # open data file
+        name = linestring + self.type
+
+        if self.type == 'mag':
+            try:
+                self.data = np.loadtxt(name, skiprows=1,
+                                       usecols=([opt.column]))
+            except:
+                raise ValueError('Given column to open does not exist.')
+        if self.type == 'pha':
+            try:
+                self.data = np.loadtxt(name, skiprows=1, usecols=([2]))
+            except:
+                raise ValueError('No phase data to open.')
+        os.chdir('..')
+
+    def plot_data(self, ov_plot, opt, i, j):
+        self.ax = ov_plot.axs[i, j]
+        # add data to plotman
+        if opt.cmaglin and self.type == 'mag':
+            self.cid = self.plotman.parman.add_data(np.power(10, self.data))
+            ov_plot.cbunit = 'rho'
+        else:
+            self.cid = self.plotman.parman.add_data(self.data)
+        # handle options
+        cblabel = units.get_label(ov_plot.cbunit)
+        zlabel = 'z [' + opt.xunit + ']'
+        xlabel = 'x [' + opt.xunit + ']'
+        if self.type == 'mag':
+            vmin = opt.mag_vmin
+            vmax = opt.mag_vmax
+        elif self.type == 'pha':
+            vmin = opt.pha_vmin
+            vmax = opt.pha_vmax
+        elif self.type == 'imag':
+            vmin = opt.imag_vmin
+            vmax = opt.imag_vmax
+        else:
+            vmin = opt.real_vmin
+            vmax = opt.real_vmax
+
+        xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(ov_plot.plotman,
+                                                          self.cid,
+                                                          opt.xmin, opt.xmax,
+                                                          opt.zmin, opt.zmax,
+                                                          vmin, vmax,
+                                                          )
+        # plot
+        fig, ax, cnorm, cmap, cb = ov_plot.plotman.plot_elements_to_ax(
+               cid=self.cid,
+               cid_alpha=ov_plot.alpha,
+               ax=self.ax,
+               xmin=xmin,
+               xmax=xmax,
+               zmin=zmin,
+               zmax=zmax,
+               cblabel=cblabel,
+               cbnrticks=opt.cbtiks,
+               title=self.title[3:],
+               zlabel=zlabel,
+               xlabel=xlabel,
+               plot_colorbar=True,
+               cmap_name=ov_plot.cm,
+               cbmin=vmin,
+               cbmax=vmax,
+               )
+
+
+def calc_complex(mag, pha):
+    ''' Calculate real and imaginary part of the complex conductivity from
+    magnitude and phase in log10.
+    '''
+    complx = [10 ** m * math.e ** (1j * p / 1e3) for m, p in zip(mag, pha)]
+    real = [math.log10((1 / c).real) for c in complx]
+    imag = []
+    for c in complx:
+        if ((1 / c).imag) == 0:
+            imag.append(math.nan)
+        else:
+            i = math.log10(abs((1 / c).imag))
+            imag.append(i)
+    return real, imag
+
+
+def plot_cmplx(options, freq_dirs, ov_mag):
+    # init overview plotsit='log_rho',
+    ov_pha = overview_plot(title='Phase',
+                           liste=freq_dirs,
+                           alpha=options.alpha_cov,
+                           unit='phi',
+                           opt=options,
+                           )
+    ov_real = overview_plot(title='Real Part',
+                            liste=freq_dirs,
+                            alpha=options.alpha_cov,
+                            unit='log_real',
+                            opt=options,
+                            )
+    ov_imag = overview_plot(title='Imaginary Part',
+                            liste=freq_dirs,
+                            alpha=options.alpha_cov,
+                            unit='log_imag',
+                            opt=options,
+                            )
     # create figure
-    fig, axs = plt.subplots(math.ceil(len(freq_dirs)/4),
-                            ncols=4,
-                            figsize=(15, 1.8 * math.ceil(len(freq_dirs)/4)))
-    plt.suptitle(opt[2], fontsize=18)
-    plt.subplots_adjust(wspace=1, top=2.8)
+
     i = 0
     j = 0
 
     # plot each subplot
-    for subplot in np.arange(4 * math.ceil(len(freq_dirs)/4)):
+    for sub in np.arange(ov_mag.rows * ov_mag.columns):
         try:
-            # for direc in freq_dirs:
-            alpha, plotman = load_grid(freq_dirs[subplot],
-                                       options.alpha_cov)
-            cid = get_data(freq_dirs[subplot],
-                           opt,
-                           options.column,
-                           plotman)
-            plot_data(plotman, axs[i//4, j], cid, alpha, opt, options.unit,
-                      freq_dirs[subplot][3:] + ' Hz',
-                      options.xmin, options.xmax, options.zmin, options.zmax,
-                      options.cbtiks, options.vmin, options.vmax)
+            mag = subplot(ov_plot=ov_mag,
+                          title=freq_dirs[sub],
+                          typ='mag',
+                          )
+            pha = subplot(ov_plot=ov_pha,
+                          title=freq_dirs[sub],
+                          typ='pha',
+                          )
+            imag = subplot(ov_plot=ov_imag,
+                           title=freq_dirs[sub],
+                           typ='imag',
+                           )
+            real = subplot(ov_plot=ov_real,
+                           title=freq_dirs[sub],
+                           typ='real',
+                           )
+
+            mag.load_data(options)
+            pha.load_data(options)
+            real.data, imag.data = calc_complex(mag.data, pha.data)
+
+            mag.plot_data(ov_mag, options, i//4, j)
+            pha.plot_data(ov_pha, options, i//4, j)
+            imag.plot_data(ov_imag, options, i//4, j)
+            real.plot_data(ov_real, options, i//4, j)
         except:
             # no subplot needed
-            axs[i//4, j].axis('off')
+            ov_mag.axs[i//4, j].axis('off')
+            ov_pha.axs[i//4, j].axis('off')
+            ov_imag.axs[i//4, j].axis('off')
+            ov_real.axs[i//4, j].axis('off')
         i = i + 1
         j = j + 1
         if j == 4:
             j = 0
 
     os.chdir('..')
-    fig.tight_layout()
-    fig.savefig('sd_' + opt[1] + '.png', dpi=300)
+    # save plots
+    ov_mag.save()
+    ov_pha.save()
+    ov_real.save()
+    ov_imag.save()
+
+
+def plot_dc(options, freq_dirs, ov_mag):
+    # init overview plots
+    # create figure
+
+    i = 0
+    j = 0
+
+    # plot each subplot
+    for sub in np.arange(ov_mag.rows * ov_mag.columns):
+        try:
+            mag = subplot(ov_plot=ov_mag,
+                          title=freq_dirs[sub],
+                          typ='mag')
+
+            mag.load_data(options)
+
+            mag.plot_data(ov_mag, options, i//4, j)
+        except:
+            # no subplot needed
+            ov_mag.axs[i//4, j].axis('off')
+        i = i + 1
+        j = j + 1
+        if j == 4:
+            j = 0
+
+    os.chdir('..')
+    # save plots
+    ov_mag.save()
+
+
+def main():
+    # options
+    options = handle_options()
+    matplotlib.style.use('default')
+    mpl_style.general_settings()
+
+    # directories to plot
+    os.chdir('invmod')
+    freq_dirs = os.listdir('.')
+    freq_dirs.sort()
+
+    ov_mag = overview_plot(title='Magnitude',
+                           liste=freq_dirs,
+                           alpha=options.alpha_cov,
+                           unit='log_rho',
+                           opt=options,
+                           )
+    # check for phase
+    if os.path.isfile(ov_mag.dirs[0] + '/inv/rho00.pha'):
+        phase = True
+    else:
+        phase = False
+
+    if phase:
+        plot_cmplx(options, freq_dirs, ov_mag)
+    else:
+        plot_dc(options, freq_dirs, ov_mag)
 
 
 if __name__ == '__main__':

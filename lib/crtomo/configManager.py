@@ -26,8 +26,8 @@ import scipy.interpolate as si
 import numpy as np
 
 from crtomo.mpl_setup import *
-import edf.utils.geometric_factors as edfK
-import edf.utils.filter_config_types as fT
+import reda.utils.geometric_factors as edfK
+import reda.utils.filter_config_types as fT
 
 
 class ConfigManager(object):

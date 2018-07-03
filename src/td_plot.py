@@ -11,9 +11,27 @@ Tool to plot inversion results of tomodir. Included data is
 * imaginary part
 * imaginary part of FPI
 
-But it is possible to only plot the magnitude (--single).
+The three main options are to plot everything in one figure, to plot individual
+figures (--single) or to plot anisotropic results of magnitude and phase
+(--aniso).
 The script has to be run in a tomodir. Output file will be saved in tomodir.
-END DOCUMENTATION
+
+Options
+-------
+
+--alpha_cov: use coverage values for alpha channel
+--no_elecs: do not plot electrodes
+--title: figure title
+--cmaglin: linear colorbar for magnitude instead of logarithmic
+-c, --column: choose column of magnitude input file to plot
+-x, --xmin: minimal x limit to plot
+-X, --xmax: maximal x limit to plot
+-z, --zmin: minimal z limit to plot
+-Z, --zmax: maximal z limit to plot
+-u, --unit: unit for x and z axis, default is meter
+*_cbtiks: colorbar tiks for this subplot (mag, pha, imag, real, cov, rat)
+*_vmin: minimal colorbarlimit for this subplot (mag, pha, imag, real, cov, rat)
+*_vmax: maximal colorbarlimit for this subplot (mag, pha, imag, real, cov, rat)
 '''
 import numpy as np
 import os
@@ -23,8 +41,9 @@ import crtomo.grid as CRGrid
 import matplotlib.pyplot as plt
 import matplotlib
 import math
-import edf.main.units as units
+import reda.main.units as units
 import crtomo.mpl as mpl_style
+import matplotlib as mpl
 
 
 def handle_options():
@@ -34,7 +53,54 @@ def handle_options():
     parser.set_defaults(cmaglin=False)
     parser.set_defaults(single=False)
     parser.set_defaults(aniso=False)
+    parser.set_defaults(hlam=False)
     parser.set_defaults(alpha_cov=False)
+    # general options
+    parser.add_option("--single",
+                      action="store_true",
+                      dest="single",
+                      help="plot only magnitude",
+                      )
+    parser.add_option("--aniso",
+                      action="store_true",
+                      dest="aniso",
+                      help="plot anisotropic xyz",
+                      )
+    parser.add_option("--hlam",
+                      action="store_true",
+                      dest="hlam",
+                      help="plot anisotropic hor/ver",
+                      )
+    parser.add_option('--no_elecs',
+                      action='store_true',
+                      dest='no_elecs',
+                      help='Plot no electrodes (default: false)',
+                      default=False,
+                      )
+    parser.add_option('--title',
+                      dest='title',
+                      type='string',
+                      help='Global override for title',
+                      default=None,
+                      )
+    parser.add_option("--alpha_cov",
+                      action="store_true",
+                      dest="alpha_cov",
+                      help="use coverage for transparency",
+                      )
+    parser.add_option('-c',
+                      '--column',
+                      dest='column',
+                      help='column to plot of input file',
+                      type='int',
+                      default=2,
+                      )
+    parser.add_option("--cmaglin",
+                      action="store_true",
+                      dest="cmaglin",
+                      help="linear colorbar for magnitude",
+                      )
+    # geometric options
     parser.add_option('-x',
                       '--xmin',
                       dest='xmin',
@@ -59,13 +125,6 @@ def handle_options():
                       help='Maximum Z range',
                       type='float',
                       )
-    parser.add_option('-c',
-                      '--column',
-                      dest='column',
-                      help='column to plot of input file',
-                      type='int',
-                      default=2,
-                      )
     parser.add_option('-u',
                       '--unit',
                       dest='unit',
@@ -75,37 +134,7 @@ def handle_options():
                       type='str',
                       default='m',
                       )
-    parser.add_option('--no_elecs',
-                      action='store_true',
-                      dest='no_elecs',
-                      help='Plot no electrodes (default: false)',
-                      default=False,
-                      )
-    parser.add_option('--title',
-                      dest='title',
-                      type='string',
-                      help='Global override for title',
-                      default=None,
-                      )
-    parser.add_option("--alpha_cov",
-                      action="store_true",
-                      dest="alpha_cov",
-                      help="use coverage for transparency",
-                      )
-#    parser.add_option('--x_nr',
-#                      dest='x_nr',
-#                      help='Number of X-axis tiks',
-#                      type=int,
-#                      metavar='INT',
-#                      default=None,
-#                      )
-#    parser.add_option('--y_nr',
-#                      dest='y_nr',
-#                      help='Number of Y-axis tiks',
-#                      type=int, metavar='INT',
-#                      default=None,
-#                      )
-    # options for subplots
+    # options for colorbars
     parser.add_option('--cov_cbtiks',
                       dest='cov_cbtiks',
                       help="Number of CB tiks for coverage",
@@ -130,11 +159,6 @@ def handle_options():
                       metavar="INT",
                       default=3,
                       )
-    parser.add_option("--cmaglin",
-                      action="store_true",
-                      dest="cmaglin",
-                      help="linear colorbar for magnitude",
-                      )
     parser.add_option('--mag_vmin',
                       dest='mag_vmin',
                       help='Minium of colorbar',
@@ -144,16 +168,6 @@ def handle_options():
                       dest='mag_vmax',
                       help='Maximum of colorbar',
                       type='float',
-                      )
-    parser.add_option("--single",
-                      action="store_true",
-                      dest="single",
-                      help="plot only magnitude",
-                      )
-    parser.add_option("--aniso",
-                      action="store_true",
-                      dest="aniso",
-                      help="plot anisotropic magnitude",
                       )
     parser.add_option('--pha_cbtiks',
                       dest='pha_cbtiks',
@@ -206,6 +220,16 @@ def handle_options():
                       help='Maximum of colorbar',
                       type='float',
                       )
+    parser.add_option('--rat_vmin',
+                      dest='rat_vmin',
+                      help='Minium of colorbar',
+                      type='float',
+                      )
+    parser.add_option('--rat_vmax',
+                      dest='rat_vmax',
+                      help='Maximum of colorbar',
+                      type='float',
+                      )
 
     (options, args) = parser.parse_args()
     return options
@@ -232,7 +256,7 @@ def read_iter(use_fpi):
 
 
 def td_type():
-    '''get type of the tomodir
+    '''get type of the tomodir (complex or dc and whether fpi)
     '''
     cfg = np.genfromtxt('exe/crtomo.cfg',
                         skip_header=15,
@@ -333,31 +357,33 @@ def plot_real(cid, ax, plotman, title, alpha, vmin, vmax,
     zlabel = 'z [' + xunit + ']'
     xlabel = 'x [' + xunit + ']'
     cm = 'viridis_r'
-    xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(plotman,
-                                                      cid,
-                                                      xmin, xmax,
-                                                      zmin, zmax,
-                                                      vmin, vmax,
-                                                      )
+    xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(
+            plotman,
+            cid,
+            xmin, xmax,
+            zmin, zmax,
+            vmin, vmax,
+            )
     # plot
-    fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
-                                                           cid_alpha=alpha,
-                                                           ax=ax,
-                                                           xmin=xmin,
-                                                           xmax=xmax,
-                                                           zmin=zmin,
-                                                           zmax=zmax,
-                                                           cblabel=cblabel,
-                                                           cbnrticks=cbtiks,
-                                                           title=title,
-                                                           zlabel=zlabel,
-                                                           xlabel=xlabel,
-                                                           plot_colorbar=True,
-                                                           cmap_name=cm,
-                                                           no_elecs=elecs,
-                                                           cbmin=vmin,
-                                                           cbmax=vmax,
-                                                           )
+    fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(
+            cid=cid,
+            cid_alpha=alpha,
+            ax=ax,
+            xmin=xmin,
+            xmax=xmax,
+            zmin=zmin,
+            zmax=zmax,
+            cblabel=cblabel,
+            cbnrticks=cbtiks,
+            title=title,
+            zlabel=zlabel,
+            xlabel=xlabel,
+            plot_colorbar=True,
+            cmap_name=cm,
+            no_elecs=elecs,
+            cbmin=vmin,
+            cbmax=vmax,
+            )
     return fig, ax, cnorm, cmap, cb
 
 
@@ -370,31 +396,33 @@ def plot_imag(cid, ax, plotman, title, alpha, vmin, vmax,
     zlabel = 'z [' + xunit + ']'
     xlabel = 'x [' + xunit + ']'
     cm = 'plasma_r'
-    xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(plotman,
-                                                      cid,
-                                                      xmin, xmax,
-                                                      zmin, zmax,
-                                                      vmin, vmax,
-                                                      )
+    xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(
+            plotman,
+            cid,
+            xmin, xmax,
+            zmin, zmax,
+            vmin, vmax,
+            )
     # plot
-    fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
-                                                           cid_alpha=alpha,
-                                                           ax=ax,
-                                                           xmin=xmin,
-                                                           xmax=xmax,
-                                                           zmin=zmin,
-                                                           zmax=zmax,
-                                                           cblabel=cblabel,
-                                                           cbnrticks=cbtiks,
-                                                           title=title,
-                                                           zlabel=zlabel,
-                                                           xlabel=xlabel,
-                                                           plot_colorbar=True,
-                                                           cmap_name=cm,
-                                                           no_elecs=elecs,
-                                                           cbmin=vmin,
-                                                           cbmax=vmax,
-                                                           )
+    fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(
+            cid=cid,
+            cid_alpha=alpha,
+            ax=ax,
+            xmin=xmin,
+            xmax=xmax,
+            zmin=zmin,
+            zmax=zmax,
+            cblabel=cblabel,
+            cbnrticks=cbtiks,
+            title=title,
+            zlabel=zlabel,
+            xlabel=xlabel,
+            plot_colorbar=True,
+            cmap_name=cm,
+            no_elecs=elecs,
+            cbmin=vmin,
+            cbmax=vmax,
+            )
     return fig, ax, cnorm, cmap, cb
 
 
@@ -406,30 +434,32 @@ def plot_mag(cid, ax, plotman, title, unit, alpha, vmin, vmax,
     cblabel = units.get_label(unit)
     zlabel = 'z [' + xunit + ']'
     xlabel = 'x [' + xunit + ']'
-    xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(plotman,
-                                                      cid,
-                                                      xmin, xmax,
-                                                      zmin, zmax,
-                                                      vmin, vmax,
-                                                      )
+    xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(
+            plotman,
+            cid,
+            xmin, xmax,
+            zmin, zmax,
+            vmin, vmax,
+            )
     # plot
-    fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
-                                                           ax=ax,
-                                                           cid_alpha=alpha,
-                                                           xmin=xmin,
-                                                           xmax=xmax,
-                                                           zmin=zmin,
-                                                           zmax=zmax,
-                                                           cblabel=cblabel,
-                                                           cbnrticks=cbtiks,
-                                                           title=title,
-                                                           zlabel=zlabel,
-                                                           xlabel=xlabel,
-                                                           plot_colorbar=True,
-                                                           no_elecs=elecs,
-                                                           cbmin=vmin,
-                                                           cbmax=vmax,
-                                                           )
+    fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(
+            cid=cid,
+            ax=ax,
+            cid_alpha=alpha,
+            xmin=xmin,
+            xmax=xmax,
+            zmin=zmin,
+            zmax=zmax,
+            cblabel=cblabel,
+            cbnrticks=cbtiks,
+            title=title,
+            zlabel=zlabel,
+            xlabel=xlabel,
+            plot_colorbar=True,
+            no_elecs=elecs,
+            cbmin=vmin,
+            cbmax=vmax,
+            )
     return fig, ax, cnorm, cmap, cb
 
 
@@ -442,31 +472,33 @@ def plot_pha(cid, ax, plotman, title, alpha, vmin, vmax,
     zlabel = 'z [' + xunit + ']'
     xlabel = 'x [' + xunit + ']'
     cm = 'plasma'
-    xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(plotman,
-                                                      cid,
-                                                      xmin, xmax,
-                                                      zmin, zmax,
-                                                      vmin, vmax,
-                                                      )
+    xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(
+            plotman,
+            cid,
+            xmin, xmax,
+            zmin, zmax,
+            vmin, vmax,
+            )
     # plot
-    fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
-                                                           ax=ax,
-                                                           cid_alpha=alpha,
-                                                           xmin=xmin,
-                                                           xmax=xmax,
-                                                           zmin=zmin,
-                                                           zmax=zmax,
-                                                           cblabel=cblabel,
-                                                           cbnrticks=cbtiks,
-                                                           title=title,
-                                                           zlabel=zlabel,
-                                                           xlabel=xlabel,
-                                                           plot_colorbar=True,
-                                                           cmap_name=cm,
-                                                           no_elecs=elecs,
-                                                           cbmin=vmin,
-                                                           cbmax=vmax,
-                                                           )
+    fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(
+            cid=cid,
+            ax=ax,
+            cid_alpha=alpha,
+            xmin=xmin,
+            xmax=xmax,
+            zmin=zmin,
+            zmax=zmax,
+            cblabel=cblabel,
+            cbnrticks=cbtiks,
+            title=title,
+            zlabel=zlabel,
+            xlabel=xlabel,
+            plot_colorbar=True,
+            cmap_name=cm,
+            no_elecs=elecs,
+            cbmin=vmin,
+            cbmax=vmax,
+            )
     return fig, ax, cnorm, cmap, cb
 
 
@@ -475,38 +507,95 @@ def plot_cov(cid, ax, plotman, title, vmin, vmax,
     '''Plot coverage of the complex resistivity using the cov_options.
     '''
     # handle options
-    cblabel = 'L1 Coverage'
+    cblabel = units.get_label('cov')
     zlabel = 'z [' + xunit + ']'
     xlabel = 'x [' + xunit + ']'
     cm = 'GnBu'
-    xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(plotman,
-                                                      cid,
-                                                      xmin, xmax,
-                                                      zmin, zmax,
-                                                      vmin, vmax,
-                                                      )
+    xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(
+            plotman,
+            cid,
+            xmin, xmax,
+            zmin, zmax,
+            vmin, vmax,
+            )
     # plot
-    fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(cid=cid,
-                                                           ax=ax,
-                                                           xmin=xmin,
-                                                           xmax=xmax,
-                                                           zmin=zmin,
-                                                           zmax=zmax,
-                                                           cblabel=cblabel,
-                                                           cbnrticks=cbtiks,
-                                                           title=title,
-                                                           zlabel=zlabel,
-                                                           xlabel=xlabel,
-                                                           plot_colorbar=True,
-                                                           cmap_name=cm,
-                                                           no_elecs=elecs,
-                                                           cbmin=vmin,
-                                                           cbmax=vmax,
-                                                           )
+    fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(
+            cid=cid,
+            ax=ax,
+            xmin=xmin,
+            xmax=xmax,
+            zmin=zmin,
+            zmax=zmax,
+            cblabel=cblabel,
+            cbnrticks=cbtiks,
+            title=title,
+            zlabel=zlabel,
+            xlabel=xlabel,
+            plot_colorbar=True,
+            cmap_name=cm,
+            no_elecs=elecs,
+            cbmin=vmin,
+            cbmax=vmax,
+            )
     return fig, ax, cnorm, cmap, cb
 
 
+def plot_ratio(cid, ax, plotman, title, alpha, vmin, vmax,
+               xmin, xmax, zmin, zmax, xunit, cbtiks, elecs):
+    '''Plot ratio of two conductivity directions.
+    '''
+    # handle options
+    cblabel = 'anisotropy ratio'
+    zlabel = 'z [' + xunit + ']'
+    xlabel = 'x [' + xunit + ']'
+    #cm = 'brg'
+    cm = 'RdYlGn'
+    xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(
+            plotman,
+            cid,
+            xmin, xmax,
+            zmin, zmax,
+            vmin, vmax,
+            )
+    # plot
+    fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(
+            cid=cid,
+            ax=ax,
+            xmin=xmin,
+            xmax=xmax,
+            zmin=zmin,
+            zmax=zmax,
+            cblabel=cblabel,
+            cbnrticks=cbtiks,
+            title=title,
+            zlabel=zlabel,
+            xlabel=xlabel,
+            plot_colorbar=True,
+            cmap_name=cm,
+            no_elecs=elecs,
+            cbmin=vmin,
+            cbmax=vmax,
+            )
+    return fig, ax, cnorm, cmap, cb
+
+
+def alpha_from_cov(plotman, alpha_cov):
+    '''Calculate alpha values from the coverage/2.5.
+    '''
+    abscov = np.abs(load_cov('inv/coverage.mag'))
+    if alpha_cov:
+        normcov = np.divide(abscov, 2.5)
+        normcov[np.where(normcov > 1)] = 1
+        mask = np.subtract(1, normcov)
+        alpha = plotman.parman.add_data(mask)
+    else:
+        alpha = plotman.parman.add_data(np.ones(len(abscov)))
+    return alpha, plotman
+
+
 def check_minmax(plotman, cid, xmin, xmax, zmin, zmax, vmin, vmax):
+    '''Get min and max values for axes and colorbar if not given
+    '''
     if xmin is None:
         xmin = plotman.grid.grid['x'].min()
     if xmax is None:
@@ -527,68 +616,26 @@ def check_minmax(plotman, cid, xmin, xmax, zmin, zmax, vmin, vmax):
     return xmin, xmax, zmin, zmax, vmin, vmax
 
 
-def plot_single(plotman, filename, mag, alpha, options):
-    '''Plot only the magnitude of the last iteration in a single plot.
+def getfigsize(plotman):
+    '''calculate appropriate sizes for the subfigures
     '''
-    f, ax = plt.subplots(1, figsize=(3.5, 2))
-    if options.title is None:
-        options.title = 'Magnitude'
-    if options.cmaglin:
-        cid = plotman.parman.add_data(np.power(10, mag))
-        loglin = 'rho'
+    xmin = plotman.grid.grid['x'].min()
+    xmax = plotman.grid.grid['x'].max()
+    zmin = plotman.grid.grid['z'].min()
+    zmax = plotman.grid.grid['z'].max()
+    if np.abs(zmax - zmin) < np.abs(xmax - xmin):
+        sizex = 10 / 2.54
+        sizez = 1.2 * sizex * (np.abs(zmax - zmin) / np.abs(xmax - xmin))
     else:
-        cid = plotman.parman.add_data(mag)
-        loglin = 'log_rho'
-    plot_mag(cid, ax, plotman, options.title, loglin, alpha,
-             options.mag_vmin, options.mag_vmax,
-             options.xmin, options.xmax, options.zmin, options.zmax,
-             options.unit, options.mag_cbtiks, options.no_elecs,)
-    f.tight_layout()
-    f.savefig(filename[4:] + '.png', dpi=300)
+        sizez = 10 / 2.54
+        sizex = sizez * (np.abs(xmax - xmin) / np.abs(zmax - zmin))
+    # add 1 inch to accommodate colorbar
+    sizex += 1.3
+    sizez += 1
+    return sizex, sizez
 
 
-def alpha_from_cov(plotman, alpha_cov):
-    '''Calculate alpha values from the coverage/2.5.
-    '''
-    abscov = np.abs(load_cov('inv/coverage.mag'))
-    if alpha_cov:
-        normcov = np.divide(abscov, 2.5)
-        normcov[np.where(normcov > 1)] = 1
-        mask = np.subtract(1, normcov)
-        alpha = plotman.parman.add_data(mask)
-    else:
-        alpha = plotman.parman.add_data(np.ones(len(abscov)))
-    return alpha, plotman
-
-
-def plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha, options):
-    '''Plot the data of the tomodir in one overview plot.
-    '''
-    # create figure
-    f, ax = plt.subplots(2, 4, figsize=(14, 4))
-    if options.title is not None:
-        plt.suptitle(options.title, fontsize=18)
-        plt.subplots_adjust(wspace=1, top=0.8)
-    # plot magnitue
-    if options.cmaglin:
-        cid = plotman.parman.add_data(np.power(10, mag))
-        loglin = 'rho'
-    else:
-        cid = plotman.parman.add_data(mag)
-        loglin = 'log_rho'
-    plot_mag(cid, ax[0, 0], plotman, 'Magnitude', loglin, alpha,
-             options.mag_vmin, options.mag_vmax,
-             options.xmin, options.xmax, options.zmin, options.zmax,
-             options.unit, options.mag_cbtiks, options.no_elecs,
-             )
-    # plot coverage
-    cid = plotman.parman.add_data(cov)
-    plot_cov(cid, ax[1, 0], plotman, 'Coverage',
-             options.cov_vmin, options.cov_vmax,
-             options.xmin, options.xmax, options.zmin, options.zmax,
-             options.unit, options.cov_cbtiks, options.no_elecs,
-             )
-    # plot phase, real, imag
+def create_non_dcplots(plotman, ax, mag, pha, options, alpha):
     if pha != []:
         cid = plotman.parman.add_data(pha)
         plot_pha(cid, ax[0, 1], plotman, 'Phase', alpha,
@@ -613,7 +660,9 @@ def plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha, options):
         ax[0, 1].axis('off')
         ax[0, 2].axis('off')
         ax[0, 3].axis('off')
-    # plot fpi phase, real, imag
+
+
+def create_fpiplots(plotman, ax, mag, pha_fpi, options, alpha):
     if pha_fpi != []:
         cid = plotman.parman.add_data(pha_fpi)
         plot_pha(cid, ax[1, 1], plotman, 'FPI Phase', alpha,
@@ -638,19 +687,168 @@ def plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha, options):
         ax[1, 1].axis('off')
         ax[1, 2].axis('off')
         ax[1, 3].axis('off')
+
+
+def create_tdplot(plotman, cov, mag, pha, pha_fpi, alpha, options):
+    '''Plot the data of the tomodir in one overview plot.
+    '''
+    sizex, sizez = getfigsize(plotman)
+    # create figure
+    f, ax = plt.subplots(2, 4, figsize=(4 * sizex, 2 * sizez))
+    if options.title is not None:
+        plt.suptitle(options.title, fontsize=18)
+    # plot magnitue
+    if options.cmaglin:
+        cid = plotman.parman.add_data(np.power(10, mag))
+        loglin = 'rho'
+    else:
+        cid = plotman.parman.add_data(mag)
+        loglin = 'log_rho'
+    plot_mag(cid, ax[0, 0], plotman, 'Magnitude', loglin, alpha,
+             options.mag_vmin, options.mag_vmax,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.mag_cbtiks, options.no_elecs,
+             )
+    # plot coverage
+    cid = plotman.parman.add_data(cov)
+    plot_cov(cid, ax[1, 0], plotman, 'Coverage',
+             options.cov_vmin, options.cov_vmax,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.cov_cbtiks, options.no_elecs,
+             )
+    # plot phase, real, imag
+    create_non_dcplots(plotman, ax, mag, pha, options, alpha)
+    # plot fpi phase, real, imag
+    create_fpiplots(plotman, ax, mag, pha_fpi, options, alpha)
     f.tight_layout()
     f.savefig('td_overview.png', dpi=300)
     return f, ax
 
 
-def plot_aniso(plotman, x, y, z, alpha, options):
+def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
+    '''Plot the data of the tomodir in individual plots.
+    '''
+    magunit = 'log_rho'
+    if not pha == []:
+        [real, imag] = calc_complex(mag, pha)
+        if not pha_fpi == []:
+            [real_fpi, imag_fpi] = calc_complex(mag, pha_fpi)
+            if options.cmaglin:
+                mag = np.power(10, mag)
+                magunit = 'rho'
+            data = np.column_stack((mag, cov, pha, real, imag,
+                                    pha_fpi, real_fpi, imag_fpi))
+            titles = ['Magnitude', 'Coverage',
+                      'Phase', 'Real Part', 'Imaginary Part',
+                      'FPI Phase', 'FPI Real Part', 'FPI Imaginary Part']
+            unites = [magunit, 'cov',
+                      'phi', 'log_real', 'log_imag',
+                      'phi', 'log_real', 'log_imag']
+            vmins = [options.mag_vmin, options.cov_vmin,
+                     options.pha_vmin, options.real_vmin, options.imag_vmin,
+                     options.pha_vmin, options.real_vmin, options.imag_vmin]
+            vmaxs = [options.mag_vmax, options.cov_vmax,
+                     options.pha_vmax, options.real_vmax, options.imag_vmax,
+                     options.pha_vmax, options.real_vmax, options.imag_vmax]
+            cmaps = ['viridis', 'GnBu',
+                     'plasma', 'viridis_r', 'plasma_r',
+                     'plasma', 'viridis_r', 'plasma_r']
+            saves = ['rho', 'cov',
+                     'phi', 'real', 'imag',
+                     'fpi_phi', 'fpi_real', 'fpi_imag']
+        else:
+            if options.cmaglin:
+                mag = np.power(10, mag)
+                magunit = 'rho'
+            data = np.column_stack((mag, cov, pha, real, imag))
+            titles = ['Magnitude', 'Coverage',
+                      'Phase', 'Real Part', 'Imaginary Part']
+            unites = [magunit, 'cov',
+                      'phi', 'log_real', 'log_imag']
+            vmins = [options.mag_vmin, options.cov_vmin,
+                     options.pha_vmin, options.real_vmin, options.imag_vmin]
+            vmaxs = [options.mag_vmax, options.cov_vmax,
+                     options.pha_vmax, options.real_vmax, options.imag_vmax]
+            cmaps = ['viridis', 'GnBu',
+                     'plasma', 'viridis_r', 'plasma_r']
+            saves = ['rho', 'cov',
+                     'phi', 'real', 'imag']
+    else:
+        data = np.column_stack((mag, cov))
+        titles = ['Magnitude', 'Coverage']
+        unites = [magunit, 'cov']
+        vmins = [options.mag_vmin, options.cov_vmin]
+        vmaxs = [options.mag_vmax, options.cov_vmax]
+        cmaps = ['viridis', 'GnBu']
+        saves = ['rho', 'cov']
+    try:
+        mod_rho = np.genfromtxt('rho/rho.dat', skip_header=1, usecols=([0]))
+        mod_pha = np.genfromtxt('rho/rho.dat', skip_header=1, usecols=([1]))
+        data = np.column_stack((data, mod_rho, mod_pha))
+        titles.append('Model')
+        titles.append('Model')
+        unites.append('rho')
+        unites.append('phi')
+        vmins.append(options.mag_vmin)
+        vmins.append(options.pha_vmin)
+        vmaxs.append(options.mag_vmax)
+        vmaxs.append(options.pha_vmax)
+        cmaps.append('viridis')
+        cmaps.append('plasma')
+        saves.append('rhomod')
+        saves.append('phamod')
+    except:
+        pass
+    for datum, title, unit, vmin, vmax, cm, save in zip(
+            np.transpose(data), titles, unites, vmins, vmaxs, cmaps, saves):
+        sizex, sizez = getfigsize(plotman)
+        f, ax = plt.subplots(1, figsize=(sizex, sizez))
+        cid = plotman.parman.add_data(datum)
+        # handle options
+        cblabel = units.get_label(unit)
+        if options.title is not None:
+            title = options.title
+        zlabel = 'z [' + options.unit + ']'
+        xlabel = 'x [' + options.unit + ']'
+        xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(
+                plotman,
+                cid,
+                options.xmin, options.xmax,
+                options.zmin, options.zmax,
+                vmin, vmax
+                )
+        # plot
+        fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(
+                cid=cid,
+                cid_alpha=alpha,
+                ax=ax,
+                xmin=xmin,
+                xmax=xmax,
+                zmin=zmin,
+                zmax=zmax,
+                cblabel=cblabel,
+                title=title,
+                zlabel=zlabel,
+                xlabel=xlabel,
+                plot_colorbar=True,
+                cmap_name=cm,
+                no_elecs=options.no_elecs,
+                cbmin=vmin,
+                cbmax=vmax,
+                )
+        f.tight_layout()
+        f.savefig(save + '.png', dpi=300)
+
+
+def create_anisomagplot(plotman, x, y, z, alpha, options):
     '''Plot the data of the tomodir in one overview plot.
     '''
+    sizex, sizez = getfigsize(plotman)
     # create figure
-    f, ax = plt.subplots(1, 3, figsize=(10, 2))
+    f, ax = plt.subplots(2, 3, figsize=(3 * sizex, 2 * sizez))
     if options.title is not None:
         plt.suptitle(options.title, fontsize=18)
-        plt.subplots_adjust(wspace=1, top=0.8)
+        plt.subplots_adjust(wspace=1.5, top=2)
     # plot magnitue
     if options.cmaglin:
         cidx = plotman.parman.add_data(np.power(10, x))
@@ -662,23 +860,167 @@ def plot_aniso(plotman, x, y, z, alpha, options):
         cidy = plotman.parman.add_data(y)
         cidz = plotman.parman.add_data(z)
         loglin = 'log_rho'
-    plot_mag(cidx, ax[0], plotman, 'x', loglin, alpha,
+    cidxy = plotman.parman.add_data(np.divide(x, y))
+    cidyz = plotman.parman.add_data(np.divide(y, z))
+    cidzx = plotman.parman.add_data(np.divide(z, x))
+    plot_mag(cidx, ax[0, 0], plotman, 'x', loglin, alpha,
              options.mag_vmin, options.mag_vmax,
              options.xmin, options.xmax, options.zmin, options.zmax,
              options.unit, options.mag_cbtiks, options.no_elecs,
              )
-    plot_mag(cidy, ax[1], plotman, 'y', loglin, alpha,
+    plot_mag(cidy, ax[0, 1], plotman, 'y', loglin, alpha,
              options.mag_vmin, options.mag_vmax,
              options.xmin, options.xmax, options.zmin, options.zmax,
              options.unit, options.mag_cbtiks, options.no_elecs,
              )
-    plot_mag(cidz, ax[2], plotman, 'z', loglin, alpha,
+    plot_mag(cidz, ax[0, 2], plotman, 'z', loglin, alpha,
              options.mag_vmin, options.mag_vmax,
              options.xmin, options.xmax, options.zmin, options.zmax,
              options.unit, options.mag_cbtiks, options.no_elecs,
              )
+    plot_ratio(cidxy, ax[1, 0], plotman, 'x/y', alpha,
+               options.rat_vmin, options.rat_vmax,
+               options.xmin, options.xmax, options.zmin, options.zmax,
+               options.unit, options.mag_cbtiks, options.no_elecs,
+               )
+    plot_ratio(cidyz, ax[1, 1], plotman, 'y/z', alpha,
+               options.rat_vmin, options.rat_vmax,
+               options.xmin, options.xmax, options.zmin, options.zmax,
+               options.unit, options.mag_cbtiks, options.no_elecs,
+               )
+    plot_ratio(cidzx, ax[1, 2], plotman, 'z/x', alpha,
+               options.rat_vmin, options.rat_vmax,
+               options.xmin, options.xmax, options.zmin, options.zmax,
+               options.unit, options.mag_cbtiks, options.no_elecs,
+               )
     f.tight_layout()
-    f.savefig('aniso.png', dpi=300)
+    f.savefig('mag_aniso.png', dpi=300)
+    return f, ax
+
+
+def create_anisophaplot(plotman, x, y, z, alpha, options):
+    '''Plot the data of the tomodir in one overview plot.
+    '''
+    sizex, sizez = getfigsize(plotman)
+    # create figure
+    f, ax = plt.subplots(2, 3, figsize=(3 * sizex, 2 * sizez))
+    if options.title is not None:
+        plt.suptitle(options.title, fontsize=18)
+        plt.subplots_adjust(wspace=1, top=0.8)
+    # plot phase
+    cidx = plotman.parman.add_data(x)
+    cidy = plotman.parman.add_data(y)
+    cidz = plotman.parman.add_data(z)
+    cidxy = plotman.parman.add_data(np.subtract(x, y))
+    cidyz = plotman.parman.add_data(np.subtract(y, z))
+    cidzx = plotman.parman.add_data(np.subtract(z, x))
+    plot_pha(cidx, ax[0, 0], plotman, 'x', alpha,
+             options.pha_vmin, options.pha_vmax,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.pha_cbtiks, options.no_elecs,
+             )
+    plot_pha(cidy, ax[0, 1], plotman, 'y', alpha,
+             options.pha_vmin, options.pha_vmax,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.pha_cbtiks, options.no_elecs,
+             )
+    plot_pha(cidz, ax[0, 2], plotman, 'z', alpha,
+             options.pha_vmin, options.pha_vmax,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.pha_cbtiks, options.no_elecs,
+             )
+    plot_ratio(cidxy, ax[1, 0], plotman, 'x-y', alpha,
+               options.rat_vmin, options.rat_vmax,
+               options.xmin, options.xmax, options.zmin, options.zmax,
+               options.unit, options.mag_cbtiks, options.no_elecs,
+               )
+    plot_ratio(cidyz, ax[1, 1], plotman, 'y-z', alpha,
+               options.rat_vmin, options.rat_vmax,
+               options.xmin, options.xmax, options.zmin, options.zmax,
+               options.unit, options.mag_cbtiks, options.no_elecs,
+               )
+    plot_ratio(cidzx, ax[1, 2], plotman, 'z-x', alpha,
+               options.rat_vmin, options.rat_vmax,
+               options.xmin, options.xmax, options.zmin, options.zmax,
+               options.unit, options.mag_cbtiks, options.no_elecs,
+               )
+    f.tight_layout()
+    f.savefig('pha_aniso.png', dpi=300)
+    return f, ax
+
+
+def create_hlammagplot(plotman, h, ratio, alpha, options):
+    '''Plot the data of the tomodir in one overview plot.
+    '''
+    sizex, sizez = getfigsize(plotman)
+    # create figure
+    f, ax = plt.subplots(1, 3, figsize=(3 * sizex, sizez))
+    if options.title is not None:
+        plt.suptitle(options.title, fontsize=18)
+        plt.subplots_adjust(wspace=1, top=0.8)
+    # plot magnitue
+    if options.cmaglin:
+        cidh = plotman.parman.add_data(np.power(10, h))
+        cidv = plotman.parman.add_data(
+                np.divide(np.power(10, h), np.power(10, ratio)))
+        loglin = 'rho'
+    else:
+        cidh = plotman.parman.add_data(h)
+        cidv = plotman.parman.add_data(
+                np.log10(np.divide(np.power(10, h), np.power(10, ratio))))
+        loglin = 'log_rho'
+
+    cidr = plotman.parman.add_data(np.power(10, ratio))
+    plot_mag(cidh, ax[0], plotman, 'horizontal', loglin, alpha,
+             options.mag_vmin, options.mag_vmax,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.mag_cbtiks, options.no_elecs,
+             )
+    plot_mag(cidv, ax[1], plotman, 'vertical', loglin, alpha,
+             options.mag_vmin, options.mag_vmax,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.mag_cbtiks, options.no_elecs,
+             )
+    plot_ratio(cidr, ax[2], plotman, 'hor/ver', alpha,
+               options.rat_vmin, options.rat_vmax,
+               options.xmin, options.xmax, options.zmin, options.zmax,
+               options.unit, options.mag_cbtiks, options.no_elecs,
+               )
+    f.tight_layout()
+    f.savefig('mag_hlam.png', dpi=300)
+    return f, ax
+
+
+def create_hlamphaplot(plotman, h, v, alpha, options):
+    '''Plot the data of the tomodir in one overview plot.
+    '''
+    sizex, sizez = getfigsize(plotman)
+    # create figure
+    f, ax = plt.subplots(1, 3, figsize=(3 * sizex, sizez))
+    if options.title is not None:
+        plt.suptitle(options.title, fontsize=18)
+        plt.subplots_adjust(wspace=1, top=0.8)
+    cidh = plotman.parman.add_data(h)
+    cidv = plotman.parman.add_data(v)
+
+    cidr = plotman.parman.add_data(np.subtract(h, v))
+    plot_pha(cidh, ax[0], plotman, 'horizontal', alpha,
+             options.pha_vmin, options.pha_vmax,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.pha_cbtiks, options.no_elecs,
+             )
+    plot_pha(cidv, ax[1], plotman, 'vertical', alpha,
+             options.pha_vmin, options.pha_vmax,
+             options.xmin, options.xmax, options.zmin, options.zmax,
+             options.unit, options.pha_cbtiks, options.no_elecs,
+             )
+    plot_ratio(cidr, ax[2], plotman, 'hor - ver', alpha,
+               options.rat_vmin, options.rat_vmax,
+               options.xmin, options.xmax, options.zmin, options.zmax,
+               options.unit, options.pha_cbtiks, options.no_elecs,
+               )
+    f.tight_layout()
+    f.savefig('pha_hlam.png', dpi=300)
     return f, ax
 
 
@@ -692,24 +1034,43 @@ def main():
     plotman = CRPlot.plotManager(grid=grid)
     # get alpha
     alpha, plotman = alpha_from_cov(plotman, options.alpha_cov)
-    if not options.single and not options.aniso:
+    # make tomodir overview plot
+    if not options.single and not options.aniso and not options.hlam:
         [datafiles, filetype] = list_datafiles()
-        [cov, mag, pha, pha_fpi] = read_datafiles(datafiles,
-                                                  filetype,
-                                                  options.column)
-        plot_tomodir(plotman, cov, mag, pha, pha_fpi, alpha, options)
-    elif options.single and not options.aniso:
-        filename = read_iter(False)
-        mag = load_rho(filename, options.column)
-        plot_single(plotman, filename, mag, alpha, options)
-    elif options.aniso and not options.single:
+        [cov, mag, pha, pha_fpi] = read_datafiles(
+                datafiles,
+                filetype,
+                options.column)
+        create_tdplot(plotman, cov, mag, pha, pha_fpi, alpha, options)
+    # make individual plots
+    elif options.single and not options.aniso and not options.hlam:
+        [datafiles, filetype] = list_datafiles()
+        [cov, mag, pha, pha_fpi] = read_datafiles(
+                datafiles,
+                filetype,
+                options.column)
+        create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options)
+    # make plots of anisotropic results
+    elif options.aniso and not options.single and not options.hlam:
         filename = read_iter(False)
         x = load_rho(filename, 2)
         y = load_rho(filename, 3)
         z = load_rho(filename, 4)
-        plot_aniso(plotman, x, y, z, alpha, options)
+        create_anisomagplot(plotman, x, y, z, alpha, options)
+        x = load_rho(filename[:-3] + 'pha', 2)
+        y = load_rho(filename[:-3] + 'pha', 3)
+        z = load_rho(filename[:-3] + 'pha', 4)
+        create_anisophaplot(plotman, x, y, z, alpha, options)
+    elif options.hlam and not options.single and not options.aniso:
+        filename = read_iter(False)
+        hor = load_rho(filename, 2)
+        lam = load_rho(filename, 3)
+        create_hlammagplot(plotman, hor, lam, alpha, options)
+        hor = load_rho(filename[:-3] + 'pha', 2)
+        ver = load_rho(filename[:-3] + 'pha', 4)
+        create_hlamphaplot(plotman, hor, ver, alpha, options)
     else:
-        print('Choose option "single" or "aniso" not both.')
+        print('Choose option "single", "hlam" or "aniso" not two at the same time.')
         exit()
 
 
