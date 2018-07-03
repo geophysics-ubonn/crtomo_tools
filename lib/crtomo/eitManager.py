@@ -25,6 +25,20 @@ class eitMan(object):
         ----------
         frequencies: numpy.ndarray
             frequencies that we work with
+        grid:
+
+        elem_file
+
+        elec_file
+
+        frequencies
+
+        crmod_cfg
+
+        crtomo_cfg
+
+        parman
+
         """
         # load/assign grid
         if 'grid' in kwargs:
@@ -42,12 +56,12 @@ class eitMan(object):
                 'elem_file/elec_file file paths'
             )
 
-        self.frequencies = None
+        self.frequencies = kwargs.get('frequencies', None)
 
         # the following variables will be partially duplicated in the tomodir
         # instances down below. Thus, they are used primarily to store blue
         # prints or "parent" files for the various frequencies. For example:
-        # mask files that are then parameterized using some kind of SIP model
+        # mask-files that are then parameterized using some kind of SIP model
         # such as the Cole-Cole model.
         self.crmod_cfg = kwargs.get('crmod_cfg', None)
         self.crtomo_cfg = kwargs.get('crtomo_cfg', CRcfg.crtomo_config())
@@ -61,6 +75,18 @@ class eitMan(object):
         for frequency in frequencies:
             td = CRman.tdMan(grid=self.grid)
             self.tds[frequency] = td
+
+    def set_sip_parameterization(self, ):
+        """
+
+        Parameters
+        ----------
+        data: numpy.ndarray
+            data, in the format specified in the `format' string
+        format:string
+
+        """
+        pass
 
     def load_data_crt_files(self, data_dict):
         """Load sEIT data from .ctr files (volt.dat files readable by CRTomo,
@@ -121,6 +147,11 @@ class eitMan(object):
 
     def save_to_eitdir(self, directory):
         """Save the eit data into a eit/sip directory structure
+
+        Parameters
+        ----------
+        directory: string|path
+            output directory
         """
         if os.path.isdir(directory):
             raise Exception('output directory already exists')
