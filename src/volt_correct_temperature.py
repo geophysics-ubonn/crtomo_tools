@@ -67,15 +67,19 @@ def readin_volt(filename):
 def calc_correction(volt1, volt2, volt3):
     """Remove the temperature effect from field data using inversion results of
     that data:
-        print(volt[0])
 
+        print(volt[0])
         d_obs^TC = d_obs + (d_est^TC - d_est)
 
-    Parameters:
-    * d_obs: measured field data to correct (volt1)
-    * d_est: synthetic data of inversion result from d_obs (volt2)
-    * d_estTC: synthetic data of temperature corrected inversion result of
-               d_obs (volt3)
+    Parameters
+    ----------
+    d_obs:
+        measured field data to correct (volt1)
+    d_est:
+        synthetic data of inversion result from d_obs (volt2)
+    d_estTC:
+        synthetic data of temperature corrected inversion result of d_obs
+        (volt3)
     """
     volt = np.array([a - b + c for a, b, c in zip(volt1, volt2, volt3)])
     volt[np.where(volt < 0)] = 0.000001
