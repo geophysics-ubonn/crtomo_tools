@@ -68,6 +68,7 @@ class eitMan(object):
         self.crmod_cfg = kwargs.get('crmod_cfg', None)
         self.crtomo_cfg = kwargs.get('crtomo_cfg', CRcfg.crtomo_config())
         self.parman = kwargs.get('parman', None)
+        self.noise_model = kwargs.get('noise_model', None)
 
         # for each frequency we have a separate tomodir object
         self.tds = {}
@@ -88,13 +89,15 @@ class eitMan(object):
             self.tds[frequency] = td
 
     def set_sip_parameterization(self, ):
-        """
+        """DEFUNCT Parameterize the eit instance by supplying one or more
+        SIP spectra
 
         Parameters
         ----------
         data: numpy.ndarray
-            data, in the format specified in the `format' string
+            data, in the format specified in the 'format' string
         format:string
+            ?
 
         """
         pass
@@ -155,6 +158,12 @@ class eitMan(object):
         """
         for key in sorted(self.tds.keys()):
             self.tds[key].crtomo_cfg = self.crtomo_cfg
+
+    def apply_noise_models(self):
+        """Set the global noise_model for all frequencies
+        """
+        for key in sorted(self.tds.keys()):
+            self.tds[key].noise_model = self.noise_model
 
     def save_to_eitdir(self, directory):
         """Save the eit data into a eit/sip directory structure
