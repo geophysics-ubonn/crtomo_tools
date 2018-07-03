@@ -72,6 +72,39 @@ import crtomo.cfg as CRcfg
 import crtomo.plotManager as PlotManager
 
 
+class noise_model(object):
+    """noise model as contained in the crt.noisemod file
+
+    Notes
+    -----
+
+    1. line: 1       # Ensemble seed
+    2. line: 0.300 # Relative error resistance A (noise) [%] dR=AR+B
+    3. line: 0.100E-01 # Absolute errior resistance B (noise) [Ohm m]
+    4. line: 0.00  # Phase error parameter A1 [mRad/Ohm/m] dp=A1*R^B1+A2*p+p0
+    5. line: 0.00        # Phase error parameter B1 (noise) []
+    6. line: 0.00        # Relative phase error A2 (noise) [%]
+    7. line: 0.00        # Absolute phase error p0 (noise) [mRad]
+
+    """
+    def __init__(
+            self, seed, mag_rel, mag_abs, pha_a1, pha_b1, pha_rel, pha_abs):
+        self.seed = 1
+        self.mag_rel = mag_rel
+        self.mag_abs = mag_abs
+        self.pha_a1 = pha_a1
+        self.pha_b1 = pha_b1
+        self.pha_rel = pha_rel
+        self.pha_abs = pha_abs
+
+    def write_crt_noisemod(self, filename):
+        with open(filename, 'w') as fid:
+            for value in (self.seed, self.mag_rel, self.mag_abs,
+                          self.pha_a1, self.pha_b1, self.pha_rel,
+                          self.pha_abs):
+                fid.write('{}\n'.format(value))
+
+
 class tdMan(object):
     """Manage tomodirs
 
@@ -101,6 +134,8 @@ class tdMan(object):
         self.parman = None
         self.configs = None
         self.plotman = None
+        self.crmod_cfg = None
+        self.crtomo_cfg = None
         # we need a struct to organize the assignments
         self.assignments = {
             # should contain a two-item list with ids in parman
@@ -117,6 +152,9 @@ class tdMan(object):
         }
         # short-cut
         self.a = self.assignments
+
+        # if set, use this class for the decoupled error model
+        self.noise_model = kwargs.get('noise_model', None)
 
         # indicates if all information for modeling are present
         self.can_model = False
@@ -300,6 +338,11 @@ class tdMan(object):
         self.crtomo_cfg.write_to_file(
             directory + os.sep + 'exe/crtomo.cfg'
         )
+
+        if self.noise_model is not None:
+            self.noise_model.write_crt_noisemod(
+                directory + os.sep + 'exe/crt.noisemod'
+            )
 
         if not os.path.isdir(directory + os.sep + 'inv'):
             os.makedirs(directory + os.sep + 'inv')
