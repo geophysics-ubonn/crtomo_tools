@@ -88,7 +88,9 @@ class noise_model(object):
 
     """
     def __init__(
-            self, seed, mag_rel, mag_abs, pha_a1, pha_b1, pha_rel, pha_abs):
+            self, seed,
+            mag_rel=0, mag_abs=0,
+            pha_a1=0, pha_b1=0, pha_rel=0, pha_abs=0):
         self.seed = 1
         self.mag_rel = mag_rel
         self.mag_abs = mag_abs
