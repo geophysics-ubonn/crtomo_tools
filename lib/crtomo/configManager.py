@@ -218,7 +218,12 @@ class ConfigManager(object):
         return ABMN
 
     def load_configs(self, filename):
-        """Load configurations from a file with four columns: a b m n
+        """Load configurations from a file with four columns a b m n
+
+        Parameters
+        ----------
+        filename: string
+            absolute or relative path to a config file with four columns
         """
         configs = np.loadtxt(filename)
         self.add_to_configs(configs)
