@@ -768,7 +768,8 @@ class crt_grid(object):
         add_boundary_nodes_right = []
 
         if lines is not None:
-            lines[np.where(lines < 0)] *= -1
+            lines = np.array(lines)
+            lines[np.where(np.array(lines) < 0)] *= -1
             lines = sorted(lines)
             for line_depth in lines:
                 extra_lines.append(
