@@ -668,9 +668,13 @@ class crt_grid(object):
     @staticmethod
     def create_surface_grid(nr_electrodes=None, spacing=None,
                             electrodes_x=None,
-                            depth=None, left=None,
-                            right=None, char_lengths=None,
-                            lines=None):
+                            depth=None,
+                            left=None,
+                            right=None,
+                            char_lengths=None,
+                            lines=None,
+                            debug=False,
+                            workdir=None):
         """This is a simple wrapper for cr_trig_create to create simple surface
         grids.
 
@@ -693,13 +697,31 @@ class crt_grid(object):
         right: float, optional
             the space allocated right of the first electrode. If not given,
             compute as a fourth of the maximum inter-electrode distance
-        lines: list of ints, optional
-            at the given depths, add horizontal lines in the grid
+        char_lengths: float|list of 4 floats, optional
+            characteristic lengths, as used by cr_trig_create
+        lines: list of floats, optional
+            at the given depths, add horizontal lines in the grid. Note that
+            all positive values will be multiplied by -1!
+        debug: bool, optional
+            default: False. If true, don't hide the output of cr_trig_create
+        workdir: string, optional
+            if set, use this directory to create the grid. Don't delete files
+            afterwards.
 
         Returns
         -------
         grid: :class:`crtomo.grid.crt_grid` instance
             the generated grid
+
+        Examples
+        --------
+        >>> from crtomo.grid import crt_grid
+        >>> grid = crt_grid.create_surface_grid(40, spacing=0.25, depth=5,
+        ...     left=2, right=2, char_lengths=[0.1, 0.5, 0.1, 0.5],
+        ...     lines=[0.4, 0.8], debug=False, workdir=None)
+        >>> import pylab as plt
+        >>> fig, ax = plt.subplots()
+        >>> grid.plot_grid_to_ax(ax)
 
         """
         # check if all required information are present
@@ -732,54 +754,103 @@ class crt_grid(object):
         if depth is None:
             depth = max_distance / 2
 
-        # prepare extra lines
-        # extra_lines = []
-        # # we need to add the start/end points to the boundaries
-        # add_boundary_nodes_left = []
-        # add_boundary_nodes_right = []
-        # if lines is not None:
-        #     # go through all depths/objects
-        #     for line in lines:
-        #         if line <  or line > 0
+        # min/max coordinates of final grid
+        minimum_x = minx - left
+        maximum_x = maxx + left
+        minimum_z = -depth
+        maximum_z = 0
 
         boundary_noflow = 11
         boundary_mixed = 12
-        boundaries = np.vstack((
-            (minx - left, 0, boundary_noflow),
-            np.hstack((
+        # prepare extra lines
+        extra_lines = []
+        add_boundary_nodes_left = []
+        add_boundary_nodes_right = []
+
+        if lines is not None:
+            lines[np.where(lines < 0)] *= -1
+            lines = sorted(lines)
+            for line_depth in lines:
+                extra_lines.append(
+                    (minimum_x, -line_depth, maximum_x, -line_depth)
+                )
+                add_boundary_nodes_left.append(
+                    (minimum_x, -line_depth, boundary_noflow)
+                )
+                add_boundary_nodes_right.append(
+                    (maximum_x, -line_depth, boundary_noflow)
+                )
+            # reverse direction of right nodes
+            add_boundary_nodes_left = np.array(add_boundary_nodes_left)[::-1]
+            add_boundary_nodes_right = np.array(add_boundary_nodes_right)
+
+        surface_electrodes = np.hstack((
                 electrodes, boundary_noflow * np.ones((electrodes.shape[0], 1))
-            )),
-            (maxx + right, 0, boundary_mixed),
-            (maxx + right, -depth, boundary_mixed),
-            (minx - left, -depth, boundary_mixed),
+        ))
+        # import IPython
+        # IPython.embed()
+        boundaries = np.vstack((
+            (minimum_x, 0, boundary_noflow),
+            surface_electrodes,
+            (maximum_x, maximum_z, boundary_mixed),
+            add_boundary_nodes_right,
+            (maximum_x, minimum_z, boundary_mixed),
+            (minimum_x, minimum_z, boundary_mixed),
+            add_boundary_nodes_left,
         ))
 
         if char_lengths is None:
             char_lengths = [1, ]
 
-        with tempfile.TemporaryDirectory() as tempdir:
-            np.savetxt(tempdir + os.sep + 'electrodes.dat', electrodes)
-            np.savetxt(tempdir + os.sep + 'boundaries.dat', boundaries)
-            np.savetxt(tempdir + os.sep + 'char_length.dat', char_lengths)
-            pwd = os.getcwd()
-            os.chdir(tempdir)
-            try:
+        if workdir is None:
+            tempdir_obj = tempfile.TemporaryDirectory()
+            tempdir = tempdir_obj.name
+        else:
+            if not os.path.isdir(workdir):
+                os.makedirs(workdir)
+            tempdir = workdir
+
+        np.savetxt(tempdir + os.sep + 'electrodes.dat', electrodes)
+        np.savetxt(tempdir + os.sep + 'boundaries.dat', boundaries,
+                   fmt='%.4f %.4f %i')
+        np.savetxt(
+            tempdir + os.sep + 'char_length.dat',
+            np.atleast_1d(char_lengths)
+        )
+        np.savetxt(
+            tempdir + os.sep + 'extra_lines.dat',
+            np.atleast_2d(extra_lines),
+            fmt='%.4f %.4f %.4f %.4f'
+        )
+        pwd = os.getcwd()
+        os.chdir(tempdir)
+        try:
+            if debug:
+                subprocess.call(
+                    'cr_trig_create grid',
+                    shell=True,
+                )
+            else:
                 subprocess.check_output(
                     'cr_trig_create grid',
                     shell=True,
-                    stderr=subprocess.STDOUT,
+                    # stdout=subprocess.STDOUT,
+                    # stderr=subprocess.STDOUT,
                 )
-            except subprocess.CalledProcessError as e:
-                print('there was an error generating the grid')
-                print(e.returncode)
-                print(e.output)
-                import shutil
-                shutil.copytree(tempdir, pwd + os.sep + 'GRID_FAIL')
-                exit()
-
+        except subprocess.CalledProcessError as e:
+            print('there was an error generating the grid')
+            print(e.returncode)
+            print(e.output)
+            import shutil
+            shutil.copytree(tempdir, pwd + os.sep + 'GRID_FAIL')
+            exit()
+        finally:
             os.chdir(pwd)
-            grid = crt_grid(
-                elem_file=tempdir + os.sep + 'grid' + os.sep + 'elem.dat',
-                elec_file=tempdir + os.sep + 'grid' + os.sep + 'elec.dat',
-            )
+        grid = crt_grid(
+            elem_file=tempdir + os.sep + 'grid' + os.sep + 'elem.dat',
+            elec_file=tempdir + os.sep + 'grid' + os.sep + 'elec.dat',
+        )
+        if workdir is None:
+            tempdir_obj.cleanup()
+
         return grid
