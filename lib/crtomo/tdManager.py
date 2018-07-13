@@ -91,7 +91,7 @@ class noise_model(object):
             self, seed,
             mag_rel=0, mag_abs=0,
             pha_a1=0, pha_b1=0, pha_rel=0, pha_abs=0):
-        self.seed = 1
+        self.seed = seed
         self.mag_rel = mag_rel
         self.mag_abs = mag_abs
         self.pha_a1 = pha_a1
