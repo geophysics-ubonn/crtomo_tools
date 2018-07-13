@@ -775,10 +775,10 @@ class crt_grid(object):
                     (minimum_x, -line_depth, maximum_x, -line_depth)
                 )
                 add_boundary_nodes_left.append(
-                    (minimum_x, -line_depth, boundary_noflow)
+                    (minimum_x, -line_depth, boundary_mixed)
                 )
                 add_boundary_nodes_right.append(
-                    (maximum_x, -line_depth, boundary_noflow)
+                    (maximum_x, -line_depth, boundary_mixed)
                 )
             # reverse direction of right nodes
             add_boundary_nodes_left = np.array(add_boundary_nodes_left)[::-1]
