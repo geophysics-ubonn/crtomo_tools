@@ -249,6 +249,8 @@ class plotManager(object):
         cmap_name: string, optional
             name of the colorbar to use. Default is "viridis". To reverse colors,
             use the _r version "viridis_r"
+        converter
+
         cbposition
         cblabel: string, optional
             colorbar label
@@ -431,7 +433,7 @@ def converter_pm_log10(data):
 
     data_converted = np.zeros(data.shape)
     data_converted[indices_gt_zero] = np.log10(data[indices_gt_zero])
-    data_converted[indices_lt_zero] = np.log10(-data[indices_lt_zero])
+    data_converted[indices_lt_zero] = -np.log10(-data[indices_lt_zero])
     return data_converted
 
 
