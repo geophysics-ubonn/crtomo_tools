@@ -3,6 +3,7 @@
 that correspond to the elements of the grid. Usually this is a resistivity or
 phase distribution, but can also be a cumulated sensitivity distribution.
 """
+import scipy.interpolate as spi
 import numpy as np
 import shapely.geometry as shapgeo
 
@@ -329,3 +330,64 @@ class ParMan(object):
         # change the values
         pid_clean = self._clean_pid(pid)
         self.parsets[pid_clean][elements_in_area] = value
+
+    def extract_line(self, pid, line, n=50):
+        """Extract values along a line from a given parameter set. Cells are
+        selected by interpolating the centroids of the cells towards the line
+        using a `nearest' scheme.
+
+        Parameters
+        ----------
+        pid: int
+            The parameter id to extract values from
+        line: list with four entries
+            [x0, y0, x1, y1]
+        n: int, optional
+            number of points to extract along the line, defaults to 50
+
+        Returns
+        -------
+        s: numpy.ndarray (n x 1)
+            arc length along the line
+        x: numpy.ndarray (n x 1)
+            x coordinates of extracted data points
+        z: numpy.ndarray (n x 1)
+            z coordinates of extracted data points
+        values: numpy.ndarray (n x 1)
+            data values for extracted data points
+        """
+        xy = self.grid.get_element_centroids()
+        data = self.parsets[pid]
+
+        iobj = spi.NearestNDInterpolator(xy, data)
+        p = np.polyfit(
+            (line[0], line[2]),
+            (line[1], line[3]),
+            deg=1
+        )
+        x = np.linspace(line[0], line[2], n)
+        y = np.polyval(p, x)
+        s = np.sqrt(x ** 2 + y ** 2)
+        values = iobj(x, y)
+        return s, x, y, values
+
+    def extract_polygon_area(self, pid, polygon_points):
+        """Extract all data points whose element centroid lies within the given
+        polygon.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        """
+        polygon = shapgeo.Polygon(polygon_points)
+        xy = self.grid.get_element_centroids()
+        in_poly = []
+        for nr, point in enumerate(xy):
+            if shapgeo.Point(point).within(polygon):
+                in_poly.append(nr)
+
+        values = self.parsets[pid][in_poly]
+        return np.array(in_poly), values
+
