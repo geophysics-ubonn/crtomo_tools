@@ -43,7 +43,7 @@ def handle_options():
     parser.add_option("--single",
                       action="store_true",
                       dest="single",
-                      help="plot only magnitude",
+                      help="plot each value into a separate file",
                       )
     parser.add_option("--aniso",
                       action="store_true",
@@ -532,7 +532,7 @@ def plot_ratio(cid, ax, plotman, title, alpha, vmin, vmax,
     cblabel = 'anisotropy ratio'
     zlabel = 'z [' + xunit + ']'
     xlabel = 'x [' + xunit + ']'
-    #cm = 'brg'
+    # cm = 'brg'
     cm = 'RdYlGn'
     xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(
             plotman,
@@ -1054,7 +1054,10 @@ def main():
         ver = load_rho(filename[:-3] + 'pha', 4)
         create_hlamphaplot(plotman, hor, ver, alpha, options)
     else:
-        print('Choose option "single", "hlam" or "aniso" not two at the same time.')
+        print(
+            'You can only use one option out of these: '
+            '"single", "hlam" or "aniso", not two at the same time.'
+        )
         exit()
 
 
