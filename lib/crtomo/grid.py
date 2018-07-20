@@ -794,9 +794,20 @@ class crt_grid(object):
             (minimum_x, 0, boundary_noflow),
             surface_electrodes,
             (maximum_x, maximum_z, boundary_mixed),
-            add_boundary_nodes_right,
+        ))
+        if add_boundary_nodes_right:
+            boundaries = np.vstack((
+                boundaries,
+                add_boundary_nodes_right,
+            ))
+
+        boundaries = np.vstack((
+            boundaries,
             (maximum_x, minimum_z, boundary_mixed),
             (minimum_x, minimum_z, boundary_mixed),
+        ))
+        if add_boundary_nodes_left:
+            boundaries = np.vstack((
             add_boundary_nodes_left,
         ))
 
@@ -818,11 +829,12 @@ class crt_grid(object):
             tempdir + os.sep + 'char_length.dat',
             np.atleast_1d(char_lengths)
         )
-        np.savetxt(
-            tempdir + os.sep + 'extra_lines.dat',
-            np.atleast_2d(extra_lines),
-            fmt='%.4f %.4f %.4f %.4f'
-        )
+        if extra_lines:
+            np.savetxt(
+                tempdir + os.sep + 'extra_lines.dat',
+                np.atleast_2d(extra_lines),
+                fmt='%.4f %.4f %.4f %.4f'
+            )
         pwd = os.getcwd()
         os.chdir(tempdir)
         try:

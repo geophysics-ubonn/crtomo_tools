@@ -554,25 +554,38 @@ class tdMan(object):
 
         Examples
         --------
+
+        .. plot::
+
+            import crtomo.debug
+            import crtomo
+            grid = crtomo.debug.get_grid(key=20)
+            td = crtomo.tdMan(grid=grid)
+            td.configs.add_to_configs([1, 5, 9, 13])
+            cid_mag, cid_pha = td.add_homogeneous_model(25, 0)
+            td.register_forward_model(cid_mag, cid_pha)
+            td.model(sensitivities=True)
+            fig, axes = td.plot_sensitivity(0)
+
         """
         cids = self.assignments['sensitivities'][config_nr]
 
-        fig, axes = plt.subplots(1, 2, figsize=(15 / 2.54, 15 / 2.54))
+        fig, axes = plt.subplots(1, 2, figsize=(15 / 2.54, 12 / 2.54))
         # magnitude
         ax = axes[0]
         self.plot.plot_elements_to_ax(
-            ax,
-            cids[0],
-            config={},
+            cid=cids[0],
+            ax=ax,
         )
 
         # phase
         ax = axes[1]
         self.plot.plot_elements_to_ax(
-            ax,
-            cids[1],
-            config={},
+            cid=cids[1],
+            ax=ax,
         )
+
+        fig.tight_layout()
 
         return fig, axes
 

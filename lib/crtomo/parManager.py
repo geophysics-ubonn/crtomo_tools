@@ -270,7 +270,7 @@ class ParMan(object):
                     zmin=-0.5,
                     value=2,
             )
-            fig, ax = tdman.plotman.plot_elements_to_ax(pid)
+            fig, ax = tdman.plot.plot_elements_to_ax(pid)
             fig.savefig('out.png')
 
         """
@@ -334,7 +334,7 @@ class ParMan(object):
     def extract_points(self, pid, points):
         """Extract values at certain points in the grid from a given parameter
         set. Cells are selected by interpolating the centroids of the cells
-        towards the line using a `nearest' scheme.
+        towards the line using a "nearest" scheme.
 
         Parameters
         ----------

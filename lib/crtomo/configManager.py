@@ -1078,7 +1078,7 @@ class ConfigManager(object):
                 'Schlumberger sounding for different layer resistivities')
             ax = axes[1]
             # grid.plot_grid_to_ax(ax)
-            man.plotman.plot_elements_to_ax(
+            man.plot.plot_elements_to_ax(
                 pid_mag,
                 ax=ax,
                 plot_colorbar=True,
