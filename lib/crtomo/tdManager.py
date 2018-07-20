@@ -135,7 +135,7 @@ class tdMan(object):
         self.nodeman = None
         self.parman = None
         self.configs = None
-        self.plotman = None
+        self.plot = None
         self.crmod_cfg = None
         self.crtomo_cfg = None
         # we need a struct to organize the assignments
@@ -218,7 +218,7 @@ class tdMan(object):
             cids = self.configs.load_crmod_volt(voltage_file)
             self.assignments['measurements'] = cids
 
-        self.plotman = PlotManager.plotManager(
+        self.plot = PlotManager.plotManager(
             grid=self.grid,
             np=self.nodeman,
             pm=self.parman,
@@ -551,13 +551,16 @@ class tdMan(object):
     def plot_sensitivity(self, config_nr):
         """Create a nice looking plot of the sensitivity distribution for the
         given configuration nr. Configs start at 1!
+
+        Examples
+        --------
         """
         cids = self.assignments['sensitivities'][config_nr]
 
         fig, axes = plt.subplots(1, 2, figsize=(15 / 2.54, 15 / 2.54))
         # magnitude
         ax = axes[0]
-        self.plotman.plot_elements_to_ax(
+        self.plot.plot_elements_to_ax(
             ax,
             cids[0],
             config={},
@@ -565,7 +568,7 @@ class tdMan(object):
 
         # phase
         ax = axes[1]
-        self.plotman.plot_elements_to_ax(
+        self.plot.plot_elements_to_ax(
             ax,
             cids[1],
             config={},
