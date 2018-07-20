@@ -251,6 +251,7 @@ class plotManager(object):
             use the _r version "viridis_r"
         converter
 
+        norm
         cbposition
         cblabel: string, optional
             colorbar label
@@ -349,12 +350,15 @@ class plotManager(object):
             tmp = np.vstack((x, z)).T
             all_xz.append(tmp)
 
+        norm = kwargs.get('norm', None)
+
         collection = mpl.collections.PolyCollection(
             all_xz,
             edgecolor=fcolors,
             facecolor=fcolors,
             linewidth=0.0,
             cmap=cmap,
+            norm=norm,
             rasterized=rasterize,
         )
         collection.set_cmap(cmap)
@@ -408,8 +412,6 @@ class plotManager(object):
         return fig, ax, cnorm, cmap
 
 
-# def formatter_log10(x, s):
-
 def converter_pm_log10(data):
     """Convert the given data to:
 
@@ -435,7 +437,7 @@ def converter_pm_log10(data):
     data_converted = np.zeros(data.shape)
     data_converted[indices_gt_zero] = np.log10(data[indices_gt_zero])
     data_converted[indices_lt_zero] = -np.log10(-data[indices_lt_zero])
-    return data_converted
+    return indices_gt_zero, indices_lt_zero, data_converted
 
 
 def converter_abs_log10(data):
