@@ -5,8 +5,8 @@ import glob
 
 scripts = glob.glob('src/*.py')
 
-version_short = '0.1'
-version_long = '0.1.0'
+version_short = '0.2'
+version_long = '0.2.0'
 
 # generate entry points
 entry_points = {'console_scripts': []}
@@ -27,11 +27,11 @@ if __name__ == '__main__':
     setup(
         name='crtomo_tools',
         version=version_long,
-        description='???',
+        description='CRTomo Python Toolbox',
         author='Maximilian Weigand',
-        license='GPL-3',
+        license='MIT',
         author_email='mweigand@geo.uni-bonn.de',
-        url='http://www.geo.uni-bonn.de/~mweigand',
+        url='https://github.com/geophysics-ubonn/crtomo_tools',
         entry_points=entry_points,
         # entry_points={
         #     'console_scripts': [
