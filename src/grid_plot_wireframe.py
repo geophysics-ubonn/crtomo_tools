@@ -74,8 +74,16 @@ def handle_cmd_options():
         "--fancy",
         action="store_true",
         dest="plot_fancy",
-        help="Create a fancy plot (default:false)",
+        help="Create a fancy plot (default: True)",
         default=True,
+    )
+    parser.add_option(
+        '-n',
+        "--plot_elec_nr",
+        action="store_true",
+        dest="plot_elec_nr",
+        help="Plot electrode numbers next to the electrodes",
+        default=False,
     )
     (options, args) = parser.parse_args()
     return options
@@ -113,6 +121,13 @@ def plot_wireframe(options):
         label='electrodes',
         s=elec_size
     )
+
+    if options.plot_elec_nr:
+        for nr, (x, y) in enumerate(grid.electrodes):
+            ax.annotate(
+                '{}'.format(nr + 1),
+                xy=(x, y)
+            )
 
     # mark nodes
     if options.mark_node is not None:
