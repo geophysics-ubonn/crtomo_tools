@@ -123,10 +123,11 @@ def plot_wireframe(options):
     )
 
     if options.plot_elec_nr:
-        for nr, (x, y) in enumerate(grid.electrodes):
-            ax.annotate(
+        for nr, xy in enumerate(grid.electrodes[:, 1:3]):
+            ax.text(
+                xy[0], xy[1],
                 '{}'.format(nr + 1),
-                xy=(x, y)
+                bbox=dict(boxstyle='circle', facecolor='red', alpha=0.8)
             )
 
     # mark nodes
