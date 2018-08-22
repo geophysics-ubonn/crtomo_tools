@@ -318,8 +318,10 @@ class plotManager(object):
         )
         over = kwargs.get('over', 'orange')
         under = kwargs.get('under', 'mediumblue')
+        bad = kwargs.get('bad', 'white')
         cmap.set_over(over)
         cmap.set_under(under)
+        cmap.set_bad(bad)
 
         # normalize data
         data_min = kwargs.get('cbmin', subdata.min())

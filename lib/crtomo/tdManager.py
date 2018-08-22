@@ -566,6 +566,8 @@ class tdMan(object):
             td.register_forward_model(cid_mag, cid_pha)
             td.model(sensitivities=True)
             fig, axes = td.plot_sensitivity(0)
+            fig.tight_layout()
+            fig.savefig('sens_plot.pdf', bboch_inches='tight')
 
         """
         cids = self.assignments['sensitivities'][config_nr]
