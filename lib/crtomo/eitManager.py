@@ -22,6 +22,8 @@ class eitMan(object):
         """
         Parameters
         ----------
+        seitdir: string, optional
+
         frequencies: numpy.ndarray
             frequencies that we work with
         crmod_cfg: ?, optional
