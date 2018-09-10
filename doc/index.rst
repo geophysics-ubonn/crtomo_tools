@@ -27,6 +27,7 @@ Contents:
 .. toctree::
     :maxdepth: 2
 
+    _examples/index.rst
     scripts/grid_tools/modules.rst
     api/modules.rst
 

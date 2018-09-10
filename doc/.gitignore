@@ -1,4 +1,7 @@
 _build/
+_api/
+_examples/
+sens_plot.py
 api/*.rst
 api/*.png
 scripts/grid_tools/*.rst

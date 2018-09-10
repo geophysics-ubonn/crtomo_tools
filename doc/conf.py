@@ -41,8 +41,37 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
+    'sphinx_gallery.gen_gallery',
 ]
 
+# Gallery conf
+sphinx_gallery_conf = {
+    'examples_dirs': [
+        '../examples',
+        '../examples/00_grids',
+        '../examples/01_modelling',
+    ],
+    'gallery_dirs': ['_examples'],
+    'filename_pattern': 'plot_',
+    'abort_on_example_error': True,
+    'reference_url': {
+        # The module you locally document uses a None
+        'crtomo': None,
+        # External python modules use their documentation websites
+        'matplotlib': 'http://matplotlib.org',
+        'numpy': 'http://docs.scipy.org/doc/numpy',
+        'pandas': 'https://pandas.pydata.org/pandas-docs/stable/'
+    },
+
+    # Don't report time of fast scripts (< 10 sec)
+    "min_reported_time": 10,
+
+    # path where to store your example linker templates
+    'backreferences_dir': '_api',
+
+    # Your documented modules. You can use a string or a list of strings
+    'doc_module': 'crtomo'
+}
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
