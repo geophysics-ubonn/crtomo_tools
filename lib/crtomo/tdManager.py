@@ -220,7 +220,7 @@ class tdMan(object):
 
         self.plot = PlotManager.plotManager(
             grid=self.grid,
-            np=self.nodeman,
+            nm=self.nodeman,
             pm=self.parman,
         )
 
@@ -522,7 +522,17 @@ class tdMan(object):
                 self.assignments['potentials'][nr] = nids
 
     def get_potential(self, config_nr):
-        """
+        """Return potential data for a given measurement configuration.
+
+        Parameters
+        ----------
+        config_nr: int
+            Number of the configurations. Starts at 0
+
+        Returns
+        -------
+        pot_data: list with two numpy.ndarrays
+            First array: magnitude potentials, second array: phase potentials
 
         """
         if self.assignments['potentials'] is None:
@@ -716,9 +726,10 @@ class tdMan(object):
 
             return 1
         else:
-            print(
-                'Sorry, no measurements present, cannot model yet'
-            )
+            print('Sorry, not all required information to model are present')
+            print('Check:')
+            print('1) configurations present: self.configs.configs')
+            print('2) is a model present')
             return None
 
     def _invert(self, tempdir, catch_output=True, **kwargs):
