@@ -449,6 +449,11 @@ class crt_grid(object):
         # ax.autoscale_view()
         ax.set_aspect('equal')
 
+    def plot_grid(self):
+        fig, ax = plt.subplots(1, 1)
+        self.plot_grid_to_ax(ax)
+        return fig, ax
+
     def test_plot(self):
         # play with plot routines
         fig, ax = plt.subplots(1, 1)
@@ -786,7 +791,7 @@ class crt_grid(object):
             add_boundary_nodes_right = np.array(add_boundary_nodes_right)
 
         surface_electrodes = np.hstack((
-                electrodes, boundary_noflow * np.ones((electrodes.shape[0], 1))
+            electrodes, boundary_noflow * np.ones((electrodes.shape[0], 1))
         ))
         # import IPython
         # IPython.embed()
@@ -807,9 +812,11 @@ class crt_grid(object):
             (minimum_x, minimum_z, boundary_mixed),
         ))
         if add_boundary_nodes_left:
-            boundaries = np.vstack((
-            add_boundary_nodes_left,
-        ))
+            boundaries = np.vstack(
+                (
+                    add_boundary_nodes_left,
+                )
+            )
 
         if char_lengths is None:
             char_lengths = [1, ]
