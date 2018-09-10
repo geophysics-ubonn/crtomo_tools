@@ -60,10 +60,27 @@ class plotManager(object):
         # par manager
         self.parman = kwargs.get('pm', pM.ParMan(self.grid))
 
-    def plot_nodes_pcolor_to_ax(self, ax, cid, config):
-        """
+    def plot_nodes_pcolor_to_ax(self, ax, nid, **kwargs):
+        """Plot node data to an axes object
+
+        Parameters
+        ----------
+        ax : axes object
+            axes to plot to
+        nid : int
+            node id pointing to the respective data set
+        cmap : string, optional
+            color map to use. Default: jet
+        vmin : float, optional
+            Minimum colorbar value
+        vmax : float, optional
+            Maximum colorbar value
+
+        Returns
+        -------
 
         """
+        fig = ax.get_figure()
         x = self.grid.nodes['presort'][:, 1]
         z = self.grid.nodes['presort'][:, 2]
         ax.scatter(x, z)
@@ -75,7 +92,7 @@ class plotManager(object):
             np.linspace(z.min(), z.max(), 100),
         )
 
-        values = np.array(self.nodeman.nodevals[cid])
+        values = np.array(self.nodeman.nodevals[nid])
         # linear
         # cubic
         cint = scipy.interpolate.griddata(
@@ -90,15 +107,65 @@ class plotManager(object):
         cint_ma = np.ma.masked_invalid(cint)
 
         pc = ax.pcolormesh(
-            X, Z, cint_ma,
-            vmin=-40,
-            vmax=40,
+            X, Z,
+            cint_ma,
+            cmap=kwargs.get('cmap', 'jet'),
+            vmin=kwargs.get('vmin', None),
+            vmax=kwargs.get('vmax', None),
         )
-        # cb = fig.colorbar(pc)
-        return pc
+        if kwargs.get('plot_colorbar', False):
+            divider = make_axes_locatable(ax)
+            cbposition = kwargs.get('cbposition', 'vertical')
+            if cbposition == 'horizontal':
+                ax_cb = divider.new_vertical(
+                    size=0.1, pad=0.4, pack_start=True
+                )
+            elif cbposition == 'vertical':
+                ax_cb = divider.new_horizontal(
+                    size=0.1, pad=0.4,
+                )
+            else:
+                raise Exception('cbposition not recognized')
 
-    def plot_nodes_contour_to_ax(self, ax, cid, config):
-        """
+            ax.get_figure().add_axes(ax_cb)
+
+            cb = fig.colorbar(
+                pc,
+                cax=ax_cb,
+                orientation=cbposition,
+                label=kwargs.get('cblabel', ''),
+                ticks=mpl.ticker.MaxNLocator(kwargs.get('cbnrticks', 3)),
+                format=kwargs.get('cbformat', None),
+                extend='both',
+            )
+
+        no_elecs = kwargs.get('no_elecs', False)
+        if self.grid.electrodes is not None and no_elecs is not True:
+            ax.scatter(
+                self.grid.electrodes[:, 1],
+                self.grid.electrodes[:, 2],
+                color=self.grid.props['electrode_color'],
+                # clip_on=False,
+            )
+
+            return fig, ax, pc, cb
+        return fig, ax, pc
+
+    def plot_nodes_contour_to_ax(self, ax, nid, **kwargs):
+        """Plot node data to an axes object
+
+        Parameters
+        ----------
+        ax : axes object
+            axes to plot to
+        nid : int
+            node id pointing to the respective data set
+        cmap : string, optional
+            color map to use. Default: jet
+        vmin : float, optional
+            Minimum colorbar value
+        vmax : float, optional
+            Maximum colorbar value
 
         """
         x = self.grid.nodes['presort'][:, 1]
@@ -112,7 +179,7 @@ class plotManager(object):
             np.linspace(z.min(), z.max(), 100),
         )
 
-        values = np.array(self.nodeman.nodevals[cid])
+        values = np.array(self.nodeman.nodevals[nid])
         # linear
         # cubic
         cint = scipy.interpolate.griddata(
@@ -128,8 +195,9 @@ class plotManager(object):
 
         pc = ax.contourf(
             X, Z, cint_ma,
-            vmin=-40,
-            vmax=40,
+            cmap=kwargs.get('cmap', 'jet'),
+            vmin=kwargs.get('vmin', None),
+            vmax=kwargs.get('vmax', None),
         )
         # pc = ax.pcolormesh(
         #     X, Z, cint_ma,
@@ -247,9 +315,9 @@ class plotManager(object):
         zmax: float, optional
             maximial z limit to plot
         cmap_name: string, optional
-            name of the colorbar to use. Default is "viridis". To reverse colors,
-            use the _r version "viridis_r"
-        converter
+            name of the colorbar to use. Default is "viridis". To reverse
+            colors, use the _r version "viridis_r"
+        converter : ,optional
 
         norm
         cbposition
