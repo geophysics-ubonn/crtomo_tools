@@ -57,6 +57,8 @@ import subprocess
 from io import StringIO
 import itertools
 
+import matplotlib.colors
+import matplotlib.cm
 import numpy as np
 import pandas as pd
 
@@ -427,7 +429,7 @@ class tdMan(object):
         )).T
         return measurements
 
-    def _read_modeling_results(self, directory):
+    def _read_modeling_results(self, directory, silent=False):
         """Read modeling results from a given mod/ directory. Possible values
         to read in are:
 
@@ -439,7 +441,8 @@ class tdMan(object):
 
         voltage_file = directory + os.sep + 'volt.dat'
         if os.path.isfile(voltage_file):
-            print('reading voltages')
+            if not silent:
+                print('reading voltages')
             self._read_voltages(voltage_file)
 
         sens_files = sorted(glob.glob(
@@ -558,9 +561,12 @@ class tdMan(object):
 
         return sens_data, meta_data
 
-    def plot_sensitivity(self, config_nr):
+    def plot_sensitivity(self, config_nr, mag_only=False, absv=False, **kwargs):
         """Create a nice looking plot of the sensitivity distribution for the
         given configuration nr. Configs start at 1!
+
+        absv: bool
+            If true, plot absolute values of sensitivity
 
         Examples
         --------
@@ -580,22 +586,113 @@ class tdMan(object):
             fig.savefig('sens_plot.pdf', bboch_inches='tight')
 
         """
+
+        def _rescale_sensivitiy(sens_data):
+            norm_value = np.abs(sens_data).max()
+            sens_normed = sens_data / norm_value
+
+            indices_gt_zero = sens_data > 1e-5
+            indices_lt_zero = sens_data < -1e-5
+
+            # map all values greater than zero to the range [0.5, 1]
+            x = np.log10(sens_normed[indices_gt_zero])
+            # log_norm_factor = np.abs(x).max()
+            log_norm_factor = -5
+            y1 = 1 -  x / (2 * log_norm_factor)
+
+            # map all values smaller than zero to the range [0, 0.5]
+            x = np.log10(np.abs(sens_normed[indices_lt_zero]))
+            y = x / (2 * log_norm_factor)
+
+            y2 = np.abs(y)
+
+            # reassign values
+            sens_data[:] = 0.5
+            sens_data[indices_gt_zero] = y1
+            sens_data[indices_lt_zero] = y2
+            return sens_data
+
         cids = self.assignments['sensitivities'][config_nr]
 
-        fig, axes = plt.subplots(1, 2, figsize=(15 / 2.54, 12 / 2.54))
+        sens_mag = self.parman.parsets[cids[0]]
+        sens_pha = self.parman.parsets[cids[1]]
+
+        if absv:
+            sens_mag = np.log10(np.abs(sens_mag) / np.abs(sens_mag).max())
+            sens_pha = np.log10(np.abs(sens_pha) / np.abs(sens_pha).max())
+            print(sens_mag.min(), sens_mag.max())
+            cbmin=sens_mag.min()
+            cbmax=sens_mag.max()
+        else:
+            _rescale_sensivitiy(sens_mag)
+            _rescale_sensivitiy(sens_pha)
+            cbmin=0
+            cbmax=1
+
+        cmap_jet = matplotlib.cm.get_cmap('jet')
+        colors = [cmap_jet(i) for  i in  np.arange(0, 1.1, 0.1)]
+        cmap = matplotlib.colors.LinearSegmentedColormap.from_list(
+            'jetn9', colors, N=9)
+        over = kwargs.get('over', 'orange')
+        under = kwargs.get('under', 'cyan')
+        bad = kwargs.get('bad', 'white')
+        cmap.set_over(over)
+        cmap.set_under(under)
+        cmap.set_bad(bad)
+        if mag_only:
+            Nx = 1
+        else:
+            Nx = 2
+        fig, axes = plt.subplots(1, Nx, figsize=(15 / 2.54, 12 / 2.54))
+        axes = np.atleast_1d(axes)
         # magnitude
         ax = axes[0]
-        self.plot.plot_elements_to_ax(
-            cid=cids[0],
+        cid = self.parman.add_data(sens_mag)
+        fig, ax, cnorm, cmap, cb = self.plot.plot_elements_to_ax(
+            cid=cid,
             ax=ax,
+            plot_colorbar=True,
+            # cmap_name='seismic',
+            cmap_name='jet_r',
+            cbsegments=18,
+            cbmin=cbmin,
+            cbmax=cbmax,
+            bad='white',
+            # cbmin=-cblim,
+            # cbmax=cblim,
+            # converter=converter_pm_log10,
+            # norm = colors.SymLogNorm(
+            #     linthresh=0.03,
+            #     linscale=0.03,
+            #     vmin=-1.0,
+            #     vmax=1.0
+            # ),
+            # xmin=-0.25,
+            # xmax=10,
+            # zmin=-2,
         )
+        if not absv:
+            cb.set_ticks([0, 0.25, 0.5, 0.75, 1])
+            cb.set_ticklabels([
+                    '-1',
+                    r'$-10^{-2.5}$',
+                    '0',
+                    r'$10^{-2.5}$',
+                    '1',
+            ])
 
-        # phase
-        ax = axes[1]
-        self.plot.plot_elements_to_ax(
-            cid=cids[1],
-            ax=ax,
-        )
+        # self.plot.plot_elements_to_ax(
+        #     cid=cids[0],
+        #     ax=ax,
+        # )
+
+        if not mag_only:
+            # phase
+            ax = axes[1]
+            self.plot.plot_elements_to_ax(
+                cid=cids[1],
+                ax=ax,
+            )
 
         fig.tight_layout()
 
@@ -663,10 +760,11 @@ class tdMan(object):
 
         self.assignments['measurements'] = [mid_mag, mid_pha]
 
-    def _model(self, voltages, sensitivities, potentials, tempdir):
+    def _model(self, voltages, sensitivities, potentials, tempdir, silent=False):
         self._check_state()
         if self.can_model:
-            print('attempting modeling')
+            if not silent:
+                print('attempting modeling')
             pwd = os.getcwd()
             os.chdir(tempdir)
             # store the configuration temporarily
@@ -691,7 +789,8 @@ class tdMan(object):
             #     raise Exception('There was an error using CRMod')
 
             os.chdir(pwd)
-            self._read_modeling_results(tempdir + os.sep + 'mod')
+            self._read_modeling_results(
+                tempdir + os.sep + 'mod', silent=silent)
             return 1
         else:
             print(
@@ -704,6 +803,7 @@ class tdMan(object):
               sensitivities=False,
               potentials=False,
               output_directory=None,
+              silent=False,
               ):
         """Forward model the tomodir and read in the results
         """
@@ -722,7 +822,8 @@ class tdMan(object):
                     )
             else:
                 with tempfile.TemporaryDirectory() as tempdir:
-                    self._model(voltages, sensitivities, potentials, tempdir)
+                    self._model(voltages, sensitivities, potentials, tempdir,
+                                silent=silent)
 
             return 1
         else:
@@ -1671,3 +1772,12 @@ i6,t105,g9.3,t117,f5.3)
             return results, fig, axes
         else:
             return results
+
+
+    def show_parset(self, pid):
+        """Plot a given parameter set
+        """
+        fig, ax = plt.subplots()
+        self.plot.plot_elements_to_ax(pid, ax=ax)
+        return fig, ax
+
