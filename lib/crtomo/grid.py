@@ -819,7 +819,7 @@ class crt_grid(object):
             )
 
         if char_lengths is None:
-            char_lengths = [1, ]
+            char_lengths = [spacing / 3.0, ]
 
         if workdir is None:
             tempdir_obj = tempfile.TemporaryDirectory()
