@@ -4,5 +4,6 @@ _examples/
 sens_plot.py
 api/*.rst
 api/*.png
+api/*.pdf
 scripts/grid_tools/*.rst
 pyplots/

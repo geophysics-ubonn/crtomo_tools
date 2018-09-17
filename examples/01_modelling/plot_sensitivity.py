@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 # *-* coding: utf-8 *-*
+"""
+Plotting sensitivities
+======================
+
+Sensitivity distributions can be easily plotted using the tdMan class:
+"""
 ###############################################################################
 # imports
 import numpy as np
