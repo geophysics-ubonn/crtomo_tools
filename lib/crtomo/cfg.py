@@ -94,7 +94,6 @@ class crmod_config(dict):
         return self.__copy__()
 
     def __copy__(self):
-        print('copying')
         new_copy = crmod_config()
         # translate the keys
         for key in self.keys():
@@ -231,7 +230,6 @@ class crtomo_config(dict):
         return self.__copy__()
 
     def __copy__(self):
-        print('copying')
         new_copy = crmod_config()
         # translate the keys
         for key in self.keys():
