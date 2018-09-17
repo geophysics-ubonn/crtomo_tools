@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # *-* coding: utf-8 *-*
 """
 This is my example script
@@ -56,4 +56,3 @@ td.plot.plot_nodes_pcolor_to_ax(
 )
 ax.set_aspect('equal')
 fig.savefig('test.pdf')
-
