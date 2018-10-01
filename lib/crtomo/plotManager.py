@@ -349,6 +349,9 @@ class plotManager(object):
 
         cb: colorbar instance, optional
             only of plot_colorbar is True
+        scalarMap:
+            use to create custom colorbars
+
         """
 
         rasterize = kwargs.get('rasterize', False)
@@ -477,9 +480,9 @@ class plotManager(object):
                 extend='both',
             )
 
-            return fig, ax, cnorm, cmap, cb
+            return fig, ax, cnorm, cmap, cb, scalarMap
 
-        return fig, ax, cnorm, cmap
+        return fig, ax, cnorm, cmap, scalarMap
 
 
 def converter_pm_log10(data):
