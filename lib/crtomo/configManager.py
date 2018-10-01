@@ -1696,3 +1696,7 @@ class ConfigManager(object):
         """Write configs to file in four columns
         """
         np.savetxt(filename, self.configs, fmt='%i %i %i %i')
+
+    @property
+    def get_unique_injections(self):
+        return np.unique(self.configs[:, 0:2], axis=1)
