@@ -349,7 +349,7 @@ def plot_real(cid, ax, plotman, title, alpha, vmin, vmax,
             vmin, vmax,
             )
     # plot
-    fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(
+    fig, ax, cnorm, cmap, cb, scalarMap = plotman.plot_elements_to_ax(
             cid=cid,
             cid_alpha=alpha,
             ax=ax,
@@ -388,7 +388,7 @@ def plot_imag(cid, ax, plotman, title, alpha, vmin, vmax,
             vmin, vmax,
             )
     # plot
-    fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(
+    fig, ax, cnorm, cmap, cb, scalarMap = plotman.plot_elements_to_ax(
             cid=cid,
             cid_alpha=alpha,
             ax=ax,
@@ -426,7 +426,7 @@ def plot_mag(cid, ax, plotman, title, unit, alpha, vmin, vmax,
             vmin, vmax,
             )
     # plot
-    fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(
+    fig, ax, cnorm, cmap, cb, scalarMap = plotman.plot_elements_to_ax(
             cid=cid,
             ax=ax,
             cid_alpha=alpha,
@@ -464,7 +464,7 @@ def plot_pha(cid, ax, plotman, title, alpha, vmin, vmax,
             vmin, vmax,
             )
     # plot
-    fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(
+    fig, ax, cnorm, cmap, cb, scalarMap = plotman.plot_elements_to_ax(
             cid=cid,
             ax=ax,
             cid_alpha=alpha,
@@ -503,7 +503,7 @@ def plot_cov(cid, ax, plotman, title, vmin, vmax,
             vmin, vmax,
             )
     # plot
-    fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(
+    fig, ax, cnorm, cmap, cb, scalarMap = plotman.plot_elements_to_ax(
             cid=cid,
             ax=ax,
             xmin=xmin,
@@ -542,7 +542,7 @@ def plot_ratio(cid, ax, plotman, title, alpha, vmin, vmax,
             vmin, vmax,
             )
     # plot
-    fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(
+    fig, ax, cnorm, cmap, cb, scalarMap = plotman.plot_elements_to_ax(
             cid=cid,
             ax=ax,
             xmin=xmin,
@@ -802,7 +802,7 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
                 vmin, vmax
                 )
         # plot
-        fig, ax, cnorm, cmap, cb = plotman.plot_elements_to_ax(
+        fig, ax, cnorm, cmap, cb, scalarMap = plotman.plot_elements_to_ax(
                 cid=cid,
                 cid_alpha=alpha,
                 ax=ax,
