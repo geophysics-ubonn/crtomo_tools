@@ -295,7 +295,7 @@ class crt_grid(object):
             # calculate the dimensions of the grid
             try:
                 self.calculate_dimensions()
-            except:
+            except Exception as e:
                 self.nr_nodes_x = None
                 self.nr_nodes_z = None
                 self.nr_elements_x = None
@@ -338,7 +338,7 @@ class crt_grid(object):
         try:
             for i in range(0, sizes):
                 self.neighbors.append(int(fid.readline().strip()))
-        except:
+        except Exception as e:
             raise Exception('Not enough neighbors in file')
 
     def load_elem_file(self, elem_file):
@@ -425,7 +425,13 @@ class crt_grid(object):
             elec_node = elec_node_raw - 1
         return int(elec_node)
 
-    def plot_grid_to_ax(self, ax):
+    def plot_grid_to_ax(self, ax, **kwargs):
+        """
+        Additional Parameters
+        ---------------------
+        plot_electrode_numbers: bool, optional
+            Plot electrode numbers in the grid, default: False
+        """
         all_xz = []
         for x, z in zip(self.grid['x'], self.grid['z']):
             tmp = np.vstack((x, z)).T
@@ -449,9 +455,23 @@ class crt_grid(object):
         # ax.autoscale_view()
         ax.set_aspect('equal')
 
-    def plot_grid(self):
+        if kwargs.get('plot_electrode_numbers', False):
+            for nr, xy in enumerate(self.electrodes[:, 1:3]):
+                ax.text(
+                    xy[0], xy[1],
+                    format(nr + 1),
+                    bbox=dict(boxstyle='circle', facecolor='red', alpha=0.8)
+                )
+
+    def plot_grid(self, **kwargs):
+        """
+        Additional Parameters
+        ---------------------
+        plot_electrode_numbers: bool, optional
+            Plot electrode numbers in the grid, default: False
+        """
         fig, ax = plt.subplots(1, 1)
-        self.plot_grid_to_ax(ax)
+        self.plot_grid_to_ax(ax, **kwargs)
         return fig, ax
 
     def test_plot(self):
