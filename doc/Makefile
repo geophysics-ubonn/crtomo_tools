@@ -50,6 +50,7 @@ clean:
 	rm -rf $(BUILDDIR)/*
 	rm -f api/*.rst
 	rm -f scripts/grid_tools/*.rst
+	rm -rf _examples
 
 html:
 	rm -f api/*.rst

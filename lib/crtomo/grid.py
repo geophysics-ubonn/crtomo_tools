@@ -427,8 +427,8 @@ class crt_grid(object):
 
     def plot_grid_to_ax(self, ax, **kwargs):
         """
-        Additional Parameters
-        ---------------------
+        Other Parameters
+        ---------------
         plot_electrode_numbers: bool, optional
             Plot electrode numbers in the grid, default: False
         """
@@ -465,8 +465,8 @@ class crt_grid(object):
 
     def plot_grid(self, **kwargs):
         """
-        Additional Parameters
-        ---------------------
+        Other Parameters
+        ----------------
         plot_electrode_numbers: bool, optional
             Plot electrode numbers in the grid, default: False
         """
