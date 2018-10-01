@@ -26,8 +26,8 @@
   plots should be generated for dipole-dipole only, and all additional
   configurations that we can find reliable z-estimators for.
 
-  Provide corresponding filter functions, or use EDF for that (do we want to
-  depend on EDF? I think it's ok to do this).
+  Provide corresponding filter functions, or use reda for that (do we want to
+  depend on reda? I think it's ok to do this).
 
   In case only a subset of data is plotted, note the number of missing values
   in the plot!
@@ -49,7 +49,7 @@
       (sigma) and potential data (nodes) in j = sigma E
 
 """
-import glob
+from glob import glob
 import re
 import os
 import tempfile
@@ -117,7 +117,7 @@ class tdMan(object):
         """The following initialization permutations are possible:
 
             * initialize empty
-            * initialize from an exisiting tomodir
+            * initialize from an existing tomodir
                 * tomodir: [tomodir path]
             * supply one or more of the building blocks of a tomodir
                 * grid: crtomo.grid.crt_grid instance
@@ -153,6 +153,8 @@ class tdMan(object):
             'potentials': None,
             # store the ID of the resolution matrix
             'resm': None,
+            # last iteration of inversion results
+            'inversion': None
         }
         # short-cut
         self.a = self.assignments
@@ -176,9 +178,20 @@ class tdMan(object):
             \*\*kwargs dict as received by __init__()
 
         """
+        tomodir = None
 
         # load/assign grid
-        if 'grid' in kwargs:
+        if 'tomodir' in kwargs:
+            # load grid
+            tomodir = kwargs.get('tomodir')
+            print('importing tomodir {}'.format(tomodir))
+            assert os.path.isdir(tomodir)
+            grid = CRGrid.crt_grid(
+                tomodir + os.sep + 'grid' + os.sep + 'elem.dat',
+                tomodir + os.sep + 'grid' + os.sep + 'elec.dat',
+            )
+            self.grid = grid
+        elif 'grid' in kwargs:
             self.grid = kwargs.get('grid')
         elif 'elem_file' in kwargs and 'elec_file' in kwargs:
             grid = CRGrid.crt_grid()
@@ -225,6 +238,16 @@ class tdMan(object):
             nm=self.nodeman,
             pm=self.parman,
         )
+
+        # if we load from a tomodir, also load configs and inversion results
+        if tomodir is not None:
+            print('importing tomodir results')
+            # forward configurations
+            config_file = tomodir + os.sep + 'config' + os.sep + 'config.dat'
+            if os.path.isfile(config_file):
+                self.configs.load_crmod_config(config_file)
+            # load inversion results
+            self.read_inversion_results(tomodir)
 
     def create_tomodir(self, directory):
         """Create a tomodir subdirectory structure in the given directory
@@ -445,7 +468,7 @@ class tdMan(object):
                 print('reading voltages')
             self._read_voltages(voltage_file)
 
-        sens_files = sorted(glob.glob(
+        sens_files = sorted(glob(
             directory + os.sep + 'sens' + os.sep + 'sens*.dat')
         )
         # check if there are sensitivity files, and that the nr corresponds to
@@ -456,7 +479,7 @@ class tdMan(object):
             self._read_sensitivities(directory + os.sep + 'sens')
 
         # same for potentials
-        pot_files = sorted(glob.glob(
+        pot_files = sorted(glob(
             directory + os.sep + 'pot' + os.sep + 'pot*.dat')
         )
         # check if there are sensitivity files, and that the nr corresponds to
@@ -482,9 +505,7 @@ class tdMan(object):
         else:
             self.assignments['sensitivities'] = {}
 
-        sens_files = sorted(glob.glob(
-            sens_dir + os.sep + 'sens*.dat')
-        )
+        sens_files = sorted(glob(sens_dir + os.sep + 'sens*.dat'))
         for nr, filename in enumerate(sens_files):
             with open(filename, 'r') as fid:
                 metadata = np.fromstring(
@@ -511,9 +532,7 @@ class tdMan(object):
         else:
             self.assignments['potentials'] = {}
 
-        pot_files = sorted(glob.glob(
-            pot_dir + os.sep + 'pot*.dat')
-        )
+        pot_files = sorted(glob(pot_dir + os.sep + 'pot*.dat'))
         for nr, filename in enumerate(pot_files):
             with open(filename, 'r') as fid:
                 pot_data = np.loadtxt(fid)
@@ -561,7 +580,8 @@ class tdMan(object):
 
         return sens_data, meta_data
 
-    def plot_sensitivity(self, config_nr, mag_only=False, absv=False, **kwargs):
+    def plot_sensitivity(self, config_nr, mag_only=False, absv=False,
+                         **kwargs):
         """Create a nice looking plot of the sensitivity distribution for the
         given configuration nr. Configs start at 1!
 
@@ -598,7 +618,7 @@ class tdMan(object):
             x = np.log10(sens_normed[indices_gt_zero])
             # log_norm_factor = np.abs(x).max()
             log_norm_factor = -5
-            y1 = 1 -  x / (2 * log_norm_factor)
+            y1 = 1 - x / (2 * log_norm_factor)
 
             # map all values smaller than zero to the range [0, 0.5]
             x = np.log10(np.abs(sens_normed[indices_lt_zero]))
@@ -621,16 +641,16 @@ class tdMan(object):
             sens_mag = np.log10(np.abs(sens_mag) / np.abs(sens_mag).max())
             sens_pha = np.log10(np.abs(sens_pha) / np.abs(sens_pha).max())
             print(sens_mag.min(), sens_mag.max())
-            cbmin=sens_mag.min()
-            cbmax=sens_mag.max()
+            cbmin = sens_mag.min()
+            cbmax = sens_mag.max()
         else:
             _rescale_sensivitiy(sens_mag)
             _rescale_sensivitiy(sens_pha)
-            cbmin=0
-            cbmax=1
+            cbmin = 0
+            cbmax = 1
 
         cmap_jet = matplotlib.cm.get_cmap('jet')
-        colors = [cmap_jet(i) for  i in  np.arange(0, 1.1, 0.1)]
+        colors = [cmap_jet(i) for i in np.arange(0, 1.1, 0.1)]
         cmap = matplotlib.colors.LinearSegmentedColormap.from_list(
             'jetn9', colors, N=9)
         over = kwargs.get('over', 'orange')
@@ -648,7 +668,7 @@ class tdMan(object):
         # magnitude
         ax = axes[0]
         cid = self.parman.add_data(sens_mag)
-        fig, ax, cnorm, cmap, cb = self.plot.plot_elements_to_ax(
+        fig, ax, cnorm, cmap, cb, sM = self.plot.plot_elements_to_ax(
             cid=cid,
             ax=ax,
             plot_colorbar=True,
@@ -674,11 +694,11 @@ class tdMan(object):
         if not absv:
             cb.set_ticks([0, 0.25, 0.5, 0.75, 1])
             cb.set_ticklabels([
-                    '-1',
-                    r'$-10^{-2.5}$',
-                    '0',
-                    r'$10^{-2.5}$',
-                    '1',
+                '-1',
+                r'$-10^{-2.5}$',
+                '0',
+                r'$10^{-2.5}$',
+                '1',
             ])
 
         # self.plot.plot_elements_to_ax(
@@ -760,7 +780,8 @@ class tdMan(object):
 
         self.assignments['measurements'] = [mid_mag, mid_pha]
 
-    def _model(self, voltages, sensitivities, potentials, tempdir, silent=False):
+    def _model(self, voltages, sensitivities, potentials, tempdir,
+               silent=False):
         self._check_state()
         if self.can_model:
             if not silent:
@@ -926,10 +947,38 @@ class tdMan(object):
 
     def read_inversion_results(self, tomodir):
         """Import inversion results from a tomodir into this instance
+
+        WARNING: Not finished!
         """
+        self._read_inversion_results(tomodir)
         self._read_inv_ctr(tomodir)
         self._read_resm_m(tomodir)
         self._read_eps_ctr(tomodir)
+
+    def _read_inversion_results(self, tomodir):
+        """Import resistivity magnitude/phase and real/imaginary part of
+        conductivity for all iterations
+        """
+        basedir = tomodir + os.sep + 'inv' + os.sep
+        print(basedir)
+        inv_mag = sorted(glob(basedir + 'rho*.mag'))
+        inv_pha = sorted(glob(basedir + 'rho*.pha'))
+        inv_sig = sorted(glob(basedir + 'rho*.sig'))
+
+        assert len(inv_mag) == len(inv_pha)
+        assert len(inv_mag) == len(inv_sig)
+
+        pids_mag = [self.parman.load_inv_result(filename) for filename in
+                    inv_mag]
+        pids_pha = [self.parman.load_inv_result(filename) for filename in
+                    inv_pha]
+        pids_sig = [self.parman.load_inv_result(filename, columns=[0, 1]) for
+                    filename in inv_sig]
+        self.assignments['inversion'] = {
+            'rmag': pids_mag,
+            'rpha': pids_pha,
+            'cre_cim': pids_sig,
+        }
 
     def plot_eps_data_hist(self, dfs):
         """Plot histograms of data residuals and data error weighting
@@ -1773,11 +1822,35 @@ i6,t105,g9.3,t117,f5.3)
         else:
             return results
 
-
     def show_parset(self, pid):
         """Plot a given parameter set
         """
         fig, ax = plt.subplots()
         self.plot.plot_elements_to_ax(pid, ax=ax)
         return fig, ax
+
+    def plot_forward_models(self):
+        """Plot the forward models (requires the forward models to be loaded)
+        """
+        pids_rho = self.assignments.get('forward_model', None)
+        if pids_rho is None:
+            raise Exception('you need to load the forward model first')
+        fig, axes = plt.subplots(1, 2, figsize=(16 / 2.54, 8 / 2.54))
+        ax = axes[0]
+        self.plot.plot_elements_to_ax(
+            pids_rho[0],
+            ax=ax,
+            plot_colorbar=True,
+            cblabel=r'$|\rho| [\Omega m]$',
+        )
+
+        ax = axes[1]
+        self.plot.plot_elements_to_ax(
+            pids_rho[1],
+            ax=ax,
+            plot_colorbar=True,
+            cblabel=r'$\phi [mrad]$',
+        )
+        fig.tight_layout()
+        return fig, axes
 
