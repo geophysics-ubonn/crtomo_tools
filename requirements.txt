@@ -5,5 +5,6 @@ numpy>=1.12.0
 scipy>=0.18.1
 Shapely>=1.5.17
 reda
+git+git://github.com/geophysics-ubonn/reda@06a3277876d41d20140d214e020945a5a1c52619
 sip_models
 geccoinv
