@@ -1662,17 +1662,17 @@ i6,t105,g9.3,t117,f5.3)
 
         Parameters
         ----------
-        magnitude: float
+        magnitude : float
             magnitude [Ohm m] value of the homogeneous model
-        phase: float, optional
+        phase : float, optional
             phase [mrad] value of the homogeneous model
 
 
         Returns
         -------
-        pid_mag: int
+        pid_mag : int
             ID value of the parameter set of the magnitude model
-        pid_pha: int
+        pid_pha : int
             ID value of the parameter set of the phase model
 
         Note that the parameter sets are automatically registered as the
@@ -1697,16 +1697,16 @@ i6,t105,g9.3,t117,f5.3)
 
         Parameters
         ----------
-        magnitude: float
+        magnitude : float
             magnitude used for the homogeneous model
-        phase: float, optional, default=0
+        phase : float, optional, default=0
             phase value used for the homogeneous model
-        return_plot: bool, optional, default=False
+        return_plot : bool, optional, default=False
             create a plot analyzing the differences
 
         Returns
         -------
-        results: Nx6 numpy.ndarray
+        results : Nx6 numpy.ndarray
             Results of the analysis.
 
             * magnitude measurement [Ohm]
@@ -1714,9 +1714,9 @@ i6,t105,g9.3,t117,f5.3)
             * relative deviation of sensitivity-sum from measurement [in
               percent]
 
-        fig: matplotlib.figure, optional
+        fig : matplotlib.figure, optional
             figure object. Only returned of return_plot=True
-        axes: list
+        axes : list
             list of axes corresponding to the figure
 
         Examples

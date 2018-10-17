@@ -67,7 +67,14 @@ class eitMan(object):
         self.tds = {}
         # when we load data from inversion results, we need to store the
         # corresponding parameter ids for the various quantities
-        self.assigments = {}
+        self.assigments = {
+            'rmag': {},
+            'rpha': {},
+            'cre': {},
+            'cim': {},
+            'forward_rmag': {},
+            'forward_rpha': {},
+        }
         # shortcut
         self.a = self.assigments
 
@@ -183,7 +190,9 @@ class eitMan(object):
 
         print(sorted(self.tds.keys()))
         for freq in frequencies:
-            self.tds[freq].add_homogeneous_model(magnitude, phase)
+            pidm, pidp = self.tds[freq].add_homogeneous_model(magnitude, phase)
+            self.a['forward_rmag'][freq] = pidm
+            self.a['forward_rpha'][freq] = pidp
 
     def load_data_crt_files(self, data_dict):
         """Load sEIT data from .ctr files (volt.dat files readable by CRTomo,
@@ -282,46 +291,45 @@ class eitMan(object):
         self._init_frequencies(frequencies)
 
         # cycle through all tomodirs on disc and load the data
-        for nr, (key, item) in enumerate(sorted(self.tds.items())):
+        for nr, (frequency_key, item) in enumerate(sorted(self.tds.items())):
             for label in ('rmag', 'rpha', 'cre', 'cim'):
                 if label not in self.assigments:
                     self.a[label] = {}
 
             tdir = sipdir + os.sep + 'invmod' + os.sep + '{:02}_{:.6f}'.format(
-                nr, key) + os.sep
+                nr, frequency_key) + os.sep
             print(tdir, tdir)
 
             rmag_file = sorted(glob(tdir + 'inv/*.mag'))[-1]
             rmag_data = np.loadtxt(rmag_file, skiprows=1)[:, 2]
             pid_rmag = item.parman.add_data(rmag_data)
-            self.a['rmag'][key] = pid_rmag
+            self.a['rmag'][frequency_key] = pid_rmag
 
             rpha_file = sorted(glob(tdir + 'inv/*.pha'))[-1]
             rpha_data = np.loadtxt(rpha_file, skiprows=1)[:, 2]
             pid_rpha = item.parman.add_data(rpha_data)
-            self.a['rpha'][key] = pid_rpha
+            self.a['rpha'][frequency_key] = pid_rpha
 
             sigma_file = sorted(glob(tdir + 'inv/*.sig'))[-1]
             sigma_data = np.loadtxt(sigma_file, skiprows=1)
             pid_cre = item.parman.add_data(sigma_data[:, 0])
             pid_cim = item.parman.add_data(sigma_data[:, 1])
-            self.a['cre'][key] = pid_cre
-            self.a['cim'][key] = pid_cim
+            self.a['cre'][frequency_key] = pid_cre
+            self.a['cim'][frequency_key] = pid_cim
 
     def extract_points(self, label, points):
         """Extract data points along a given line
 
         Parameters
         ----------
-        label: str
+        label : str
             the label for the assignments.
-
-        points: Nx2 numpy.ndarray
+        points : Nx2 numpy.ndarray
             (x, y) pairs
 
         Returns
         -------
-            df_all: pandas.DataFrame
+            df_all : pandas.DataFrame
                 A dataframe with the extracted data
 
         """
@@ -408,6 +416,12 @@ class eitMan(object):
 
     def add_to_configs(self, configs):
         """Add configurations to all tomodirs
+
+        Parameters
+        ----------
+        configs : :class:`numpy.ndarray`
+            Nx4 numpy array with abmn configurations
+
         """
         if self.configs is None:
             print('It seems that no global configs object was initialized.')
@@ -423,9 +437,9 @@ class eitMan(object):
     def measurements(self):
         """Return modeled measurements
 
-        1. dimension:
-        2. dimension:
-        3. dimension:
+        1. dimension: frequency
+        2. dimension: config-number
+        3. dimension: 2: magnitude and phase (resistivity)
 
         """
         m_all = np.array([self.tds[key].measurements() for key in
