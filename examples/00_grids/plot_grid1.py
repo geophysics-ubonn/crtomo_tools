@@ -37,9 +37,11 @@ grid1.plot_grid()
 ###############################################################################
 # Create a grid with layering
 grid = crtomo.crt_grid.create_surface_grid(
-    nr_electrodes=10, spacing=1.5,
-    lines=[-0.5, -1],
+    nr_electrodes=10,
+    spacing=1.5,
+    lines=[0.5, 1],
 )
+print(grid)
 grid.plot_grid()
 
 
