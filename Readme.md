@@ -1,6 +1,6 @@
 ## CRTomo tools
 
-[![Build Status](https://travis-ci.org/geophysics-ubonn/crtomo_tools.svg?branch=master)[https://travis-ci.org/geophysics-ubonn/crtomo_tools]
+[![Build Status](https://travis-ci.org/geophysics-ubonn/crtomo_tools.svg?branch=master)](https://travis-ci.org/geophysics-ubonn/crtomo_tools)
 
 CRTomo user space tools and libraries.
 
