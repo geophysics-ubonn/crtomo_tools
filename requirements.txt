@@ -5,3 +5,5 @@ numpy>=1.12.0
 scipy>=0.18.1
 Shapely>=1.5.17
 reda
+sip_models
+geccoinv
