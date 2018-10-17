@@ -820,7 +820,7 @@ class crt_grid(object):
             surface_electrodes,
             (maximum_x, maximum_z, boundary_mixed),
         ))
-        if add_boundary_nodes_right:
+        if len(add_boundary_nodes_right) != 0:
             boundaries = np.vstack((
                 boundaries,
                 add_boundary_nodes_right,
@@ -831,7 +831,7 @@ class crt_grid(object):
             (maximum_x, minimum_z, boundary_mixed),
             (minimum_x, minimum_z, boundary_mixed),
         ))
-        if add_boundary_nodes_left:
+        if len(add_boundary_nodes_left) != 0:
             boundaries = np.vstack(
                 (
                     add_boundary_nodes_left,
