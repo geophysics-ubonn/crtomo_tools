@@ -3,15 +3,25 @@
 
 A sEIT-dir (or sipdir) has the following structure:
 """
+from numbers import Number
 import os
 from glob import glob
 
 import pandas as pd
 import numpy as np
 
+import pylab as plt
+
+from crtomo.configManager import ConfigManager
 from crtomo.grid import crt_grid
 import crtomo.cfg as CRcfg
 import crtomo.tdManager as CRman
+
+import sip_models.res.cc as cc_res
+from reda.eis.plots import sip_response
+# this is the same object as sip_response, but for legacy reasons we have
+# multiple locations for it
+from sip_models.sip_response import sip_response as sip_response2
 
 
 class eitMan(object):
@@ -51,6 +61,7 @@ class eitMan(object):
         self.crtomo_cfg = kwargs.get('crtomo_cfg', CRcfg.crtomo_config())
         self.parman = kwargs.get('parman', None)
         self.noise_model = kwargs.get('noise_model', None)
+        self.configs = None
 
         # for each frequency we have a separate tomodir object
         self.tds = {}
@@ -63,8 +74,10 @@ class eitMan(object):
         self.frequencies = kwargs.get('frequencies', None)
 
         # # now load data/initialize things
-
         seit_dir = kwargs.get('seitdir', None)
+        crt_data_dir = kwargs.get('crt_data_dir', None)
+
+        # these are the principle ways to add data
         if seit_dir is not None:
             # load the grid from the first invmod subdirectory
             tdirs = sorted(glob(seit_dir + '/invmod/*'))
@@ -75,7 +88,13 @@ class eitMan(object):
             self.grid = grid
 
             self.load_inversion_results(seit_dir)
-
+        elif crt_data_dir is not None:
+            data_files = {}
+            data_files['frequencies'] = '{}/frequencies.dat'.format(
+                crt_data_dir)
+            files = sorted(glob('{}/volt_*.crt'.format(crt_data_dir)))
+            data_files['crt'] = files
+            self.load_data_crt_files(data_files)
         else:
             # load/assign grid
             if 'grid' in kwargs:
@@ -93,34 +112,78 @@ class eitMan(object):
                     'elem_file/elec_file file paths'
                 )
 
-        crt_data_dir = kwargs.get('crt_data_dir', None)
-        if crt_data_dir is not None:
-            data_files = {}
-            data_files['frequencies'] = '{}/frequencies.dat'.format(
-                crt_data_dir)
-            files = sorted(glob('{}/volt_*.crt'.format(crt_data_dir)))
-            data_files['crt'] = files
-            self.load_data_crt_files(data_files)
+            self.configs = kwargs.get(
+                'configs',
+                ConfigManager(
+                    nr_of_electrodes=self.grid.nr_of_electrodes
+                )
+            )
+
+            # initialize frquency tomodirs
+            if 'frequencies' in kwargs:
+                self._init_frequencies(kwargs.get('frequencies'))
 
     def _init_frequencies(self, frequencies):
         self.frequencies = frequencies
         for frequency in frequencies:
-            td = CRman.tdMan(grid=self.grid)
+            td = CRman.tdMan(grid=self.grid, configs=self.configs)
             self.tds[frequency] = td
 
-    def set_sip_parameterization(self, ):
-        """DEFUNCT Parameterize the eit instance by supplying one or more
-        SIP spectra
+    def set_area_to_sip_signature(self, xmin, xmax, zmin, zmax, spectrum):
+        """Parameterize the eit instance by supplying one
+        SIP spectrum and the area to apply to.
 
         Parameters
         ----------
-        data: numpy.ndarray
-            data, in the format specified in the 'format' string
-        format:string
-            ?
+        xmin: float
+            Minimum x coordinate of the area
+        xmax: float
+            Maximum x coordinate of the area
+        zmin: float
+            Minimum z coordinate of the area
+        zmax: float
+            Maximum z coordinate of the area
+        spectrum: sip_response
+            SIP spectrum to use for parameterization
 
         """
-        pass
+        assert isinstance(spectrum, (sip_response, sip_response2))
+        assert np.all(self.frequencies == spectrum.frequencies)
+        for frequency, rmag, rpha in zip(
+                self.frequencies, spectrum.rmag, spectrum.rpha):
+            td = self.tds[frequency]
+            pidm, pidp = td.a['forward_model']
+            td.parman.modify_area(pidm, xmin, xmax, zmin, zmax, rmag)
+            td.parman.modify_area(pidp, xmin, xmax, zmin, zmax, rpha)
+
+    def set_area_to_single_colecole(self, xmin, xmax, zmin, zmax, ccpars):
+        objcc = cc_res.cc(self.frequencies)
+        response = objcc.response(ccpars)
+        self.set_area_to_sip_signature(xmin, xmax, zmin, zmax, response)
+
+    def add_homogeneous_model(self, magnitude, phase=0, frequency=None):
+        """Add homogeneous models to one or all tomodirs. Register those as
+        forward models
+
+        Parameters
+        ----------
+        magnitude: float
+            Value of homogeneous magnitude model
+        phase: float, optional
+            Value of homogeneous phase model. Default 0
+        frequency: float, optional
+            Frequency of of the tomodir to use. If None, then apply to all
+            tomodirs. Default is None.
+        """
+        if frequency is None:
+            frequencies = self.frequencies
+        else:
+            assert isinstance(frequency, Number)
+            frequencies = [frequency, ]
+
+        print(sorted(self.tds.keys()))
+        for freq in frequencies:
+            self.tds[freq].add_homogeneous_model(magnitude, phase)
 
     def load_data_crt_files(self, data_dict):
         """Load sEIT data from .ctr files (volt.dat files readable by CRTomo,
@@ -245,19 +308,21 @@ class eitMan(object):
             self.a['cre'][key] = pid_cre
             self.a['cim'][key] = pid_cim
 
-
     def extract_points(self, label, points):
         """Extract data points along a given line
 
         Parameters
         ----------
         label: str
+            the label for the assignments.
 
         points: Nx2 numpy.ndarray
             (x, y) pairs
 
         Returns
         -------
+            df_all: pandas.DataFrame
+                A dataframe with the extracted data
 
         """
         if isinstance(label, str):
@@ -280,4 +345,106 @@ class eitMan(object):
         df_all = pd.concat(data_list)
 
         return df_all
+
+    def plot_forward_models(self, maglim=None, phalim=None, **kwargs):
+        """Create plots of the forward models
+
+        Returns
+        -------
+        mag_fig: dict
+            Dictionary containing the figure and axes objects of the magnitude
+            plots
+
+        """
+        return_dict = {}
+
+        N = len(self.frequencies)
+        nrx = min(N, 4)
+        nrz = int(np.ceil(N / nrx))
+
+        for index, key, limits in zip(
+                (0, 1), ('rmag', 'rpha'), (maglim, phalim)):
+            if limits is None:
+                cbmin = None
+                cbmax = None
+            else:
+                cbmin = limits[0]
+                cbmax = limits[1]
+
+            fig, axes = plt.subplots(
+                nrz, nrx,
+                figsize=(16 / 2.54, nrz * 3 / 2.54),
+                sharex=True, sharey=True,
+            )
+            for ax in axes.flat:
+                ax.set_visible(False)
+
+            for ax, frequency in zip(axes.flat, self.frequencies):
+                ax.set_visible(True)
+                td = self.tds[frequency]
+                pids = td.a['forward_model']
+                td.plot.plot_elements_to_ax(
+                    pids[index],
+                    ax=ax,
+                    plot_colorbar=True,
+                    cbposition='horizontal',
+                    cbmin=cbmin,
+                    cbmax=cbmax,
+                    **kwargs
+                )
+            for ax in axes[0:-1, :].flat:
+                ax.set_xlabel('')
+
+            for ax in axes[:, 1:].flat:
+                ax.set_ylabel('')
+
+            fig.tight_layout()
+            return_dict[key] = {
+                'fig': fig,
+                'axes': axes,
+            }
+
+        return return_dict
+
+    def add_to_configs(self, configs):
+        """Add configurations to all tomodirs
+        """
+        if self.configs is None:
+            print('It seems that no global configs object was initialized.')
+            print('This could be because you loaded existing data')
+            exit()
+        self.configs.add_to_configs(configs)
+
+    def model(self, **kwargs):
+        """Model"""
+        for key, td in self.tds.items():
+            td.model(**kwargs)
+
+    def measurements(self):
+        """Return modeled measurements
+
+        1. dimension:
+        2. dimension:
+        3. dimension:
+
+        """
+        m_all = np.array([self.tds[key].measurements() for key in
+                          sorted(self.tds.keys())])
+        return m_all
+
+    def get_measurement_responses(self):
+        """Return a dictionary of sip_responses for the modeled SIP spectra
+        """
+        measurements = self.measurements()
+        responses = {}
+        for config, sip_measurement in zip(self.configs.configs,
+                                           np.rollaxis(measurements, 1)):
+            sip = sip_response(
+                frequencies=self.frequencies,
+                rmag=sip_measurement[:, 0],
+                rpha=sip_measurement[:, 1]
+            )
+            responses[tuple(config)] = sip
+        return responses
+
 
