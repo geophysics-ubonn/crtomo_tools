@@ -218,10 +218,12 @@ class tdMan(object):
         nodeman = kwargs.get('nodeman', nM.NodeMan(self.grid))
         self.nodeman = nodeman
 
-        config = kwargs.get(
-            'configs',
-            cConf.ConfigManager(nr_of_electrodes=self.grid.nr_of_electrodes)
+        configs_abmn = kwargs.get('configs_abmn', None)
+        config = cConf.ConfigManager(
+            nr_of_electrodes=self.grid.nr_of_electrodes
         )
+        if configs_abmn is not None:
+            config.add_to_configs(configs_abmn)
         self.configs = config
 
         config_file = kwargs.get('config_file', None)
