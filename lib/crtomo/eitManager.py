@@ -12,7 +12,6 @@ import numpy as np
 
 import pylab as plt
 
-from crtomo.configManager import ConfigManager
 from crtomo.grid import crt_grid
 import crtomo.cfg as CRcfg
 import crtomo.tdManager as CRman
@@ -61,7 +60,6 @@ class eitMan(object):
         self.crtomo_cfg = kwargs.get('crtomo_cfg', CRcfg.crtomo_config())
         self.parman = kwargs.get('parman', None)
         self.noise_model = kwargs.get('noise_model', None)
-        self.configs = None
 
         # for each frequency we have a separate tomodir object
         self.tds = {}
@@ -119,21 +117,17 @@ class eitMan(object):
                     'elem_file/elec_file file paths'
                 )
 
-            self.configs = kwargs.get(
-                'configs',
-                ConfigManager(
-                    nr_of_electrodes=self.grid.nr_of_electrodes
-                )
-            )
-
-            # initialize frquency tomodirs
+            # initialize frequency tomodirs
             if 'frequencies' in kwargs:
-                self._init_frequencies(kwargs.get('frequencies'))
+                self._init_frequencies(
+                    kwargs.get('frequencies'),
+                    kwargs.get('configs_abmn', None)
+                )
 
-    def _init_frequencies(self, frequencies):
+    def _init_frequencies(self, frequencies, configs_abmn=None):
         self.frequencies = frequencies
         for frequency in frequencies:
-            td = CRman.tdMan(grid=self.grid, configs=self.configs)
+            td = CRman.tdMan(grid=self.grid, configs_abmn=configs_abmn)
             self.tds[frequency] = td
 
     def set_area_to_sip_signature(self, xmin, xmax, zmin, zmax, spectrum):
@@ -188,7 +182,6 @@ class eitMan(object):
             assert isinstance(frequency, Number)
             frequencies = [frequency, ]
 
-        print(sorted(self.tds.keys()))
         for freq in frequencies:
             pidm, pidp = self.tds[freq].add_homogeneous_model(magnitude, phase)
             self.a['forward_rmag'][freq] = pidm
@@ -275,7 +268,6 @@ class eitMan(object):
         os.makedirs(invmod_dir)
         for nr, key in enumerate(sorted(self.tds.keys())):
             outdir = invmod_dir + os.sep + '{0:02}_{1:.6f}'.format(nr, key)
-            print(outdir)
             self.tds[key].save_to_tomodir(outdir)
 
     def load_inversion_results(self, sipdir):
@@ -298,7 +290,6 @@ class eitMan(object):
 
             tdir = sipdir + os.sep + 'invmod' + os.sep + '{:02}_{:.6f}'.format(
                 nr, frequency_key) + os.sep
-            print(tdir, tdir)
 
             rmag_file = sorted(glob(tdir + 'inv/*.mag'))[-1]
             rmag_data = np.loadtxt(rmag_file, skiprows=1)[:, 2]
@@ -423,11 +414,8 @@ class eitMan(object):
             Nx4 numpy array with abmn configurations
 
         """
-        if self.configs is None:
-            print('It seems that no global configs object was initialized.')
-            print('This could be because you loaded existing data')
-            exit()
-        self.configs.add_to_configs(configs)
+        for f, td in self.tds.items():
+            td.configs.add_to_configs(configs)
 
     def model(self, **kwargs):
         """Model"""
@@ -448,10 +436,22 @@ class eitMan(object):
 
     def get_measurement_responses(self):
         """Return a dictionary of sip_responses for the modeled SIP spectra
+
+        Note that this function does NOT check that each frequency contains the
+        same configurations!
+
+        Returns
+        -------
+        responses : dict
+            Dictionary with configurations as keys
+
         """
+        # take configurations from first tomodir
+        configs = self.tds[sorted(self.tds.keys())[0]].configs.configs
+
         measurements = self.measurements()
         responses = {}
-        for config, sip_measurement in zip(self.configs.configs,
+        for config, sip_measurement in zip(configs,
                                            np.rollaxis(measurements, 1)):
             sip = sip_response(
                 frequencies=self.frequencies,
