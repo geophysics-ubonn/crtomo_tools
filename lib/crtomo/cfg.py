@@ -152,7 +152,7 @@ class crmod_config(dict):
         return representation
 
     def __str__(self):
-        self.__repr__()
+        return self.__repr__()
 
 
 class crtomo_config(dict):
@@ -230,7 +230,7 @@ class crtomo_config(dict):
         return self.__copy__()
 
     def __copy__(self):
-        new_copy = crmod_config()
+        new_copy = crtomo_config()
         # translate the keys
         for key in self.keys():
             new_copy[key] = self[key]
@@ -250,7 +250,7 @@ class crtomo_config(dict):
         return representation
 
     def __str__(self):
-        self.__repr__()
+        return self.__repr__()
 
     def help(key):
         """Return the help text specific to a certain key
