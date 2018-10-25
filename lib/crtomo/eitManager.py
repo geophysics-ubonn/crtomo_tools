@@ -126,8 +126,16 @@ class eitMan(object):
 
     def _init_frequencies(self, frequencies, configs_abmn=None):
         self.frequencies = frequencies
+        kwargs = {}
+
         for frequency in frequencies:
-            td = CRman.tdMan(grid=self.grid, configs_abmn=configs_abmn)
+            if self.crtomo_cfg is not None:
+                kwargs['crtomo_cfg'] = self.crtomo_cfg.copy()
+            td = CRman.tdMan(
+                grid=self.grid,
+                configs_abmn=configs_abmn,
+                **kwargs
+            )
             self.tds[frequency] = td
 
     def set_area_to_sip_signature(self, xmin, xmax, zmin, zmax, spectrum):
@@ -223,7 +231,10 @@ class eitMan(object):
         self._init_frequencies(frequencies)
 
         for frequency, filename in zip(frequencies, data_dict['crt']):
-            subdata = np.loadtxt(filename, skiprows=1)
+            subdata = np.atleast_2d(np.loadtxt(filename, skiprows=1))
+            print(subdata.shape)
+            if subdata.shape[0] == 0:
+                continue
             # extract configurations
             A = (subdata[:, 0] / 1e4).astype(int)
             B = (subdata[:, 0] % 1e4).astype(int)
@@ -242,7 +253,7 @@ class eitMan(object):
         """Set the global crtomo_cfg for all frequencies
         """
         for key in sorted(self.tds.keys()):
-            self.tds[key].crtomo_cfg = self.crtomo_cfg
+            self.tds[key].crtomo_cfg = self.crtomo_cfg.copy()
 
     def apply_noise_models(self):
         """Set the global noise_model for all frequencies
@@ -418,7 +429,18 @@ class eitMan(object):
             td.configs.add_to_configs(configs)
 
     def model(self, **kwargs):
-        """Model"""
+        """Run the forward modeling for all frequencies.
+
+        Use :py:func:`crtomo.eitManager.eitMan.measurements` to retrieve the
+        resulting synthetic measurement spectra.
+
+        Parameters
+        ----------
+        **kwargs : dict, optional
+            All kwargs are directly provide to the underlying
+            :py:func:`crtomo.tdManager.tdMan.model` function calls.
+
+        """
         for key, td in self.tds.items():
             td.model(**kwargs)
 
@@ -460,5 +482,4 @@ class eitMan(object):
             )
             responses[tuple(config)] = sip
         return responses
-
 
