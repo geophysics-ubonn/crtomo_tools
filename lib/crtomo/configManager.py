@@ -25,7 +25,8 @@ import itertools
 import scipy.interpolate as si
 import numpy as np
 
-from crtomo.mpl_setup import *
+import crtomo.mpl
+plt, mpl = crtomo.mpl.setup()
 import reda.utils.geometric_factors as edfK
 import reda.utils.filter_config_types as fT
 
@@ -925,14 +926,14 @@ class ConfigManager(object):
         all_quadpoles = []
         for idipole in injections:
             # sort current electrodes and convert to array indices
-            I = np.sort(idipole) - 1
+            Icurrent = np.sort(idipole) - 1
 
             # voltage electrodes
             velecs = list(range(1, N + 1))
 
             # remove current electrodes
-            del(velecs[I[1]])
-            del(velecs[I[0]])
+            del(velecs[Icurrent[1]])
+            del(velecs[Icurrent[0]])
 
             # permutate remaining
             voltages = itertools.permutations(velecs, 2)
@@ -1258,10 +1259,10 @@ class ConfigManager(object):
         return reciprocals
 
     def plot_error_pars(self, mid):
-        """
+        """ ???
 
         """
-        axes = plt.subplots(1, 2, figsize=(10, 6))
+        fig, axes = plt.subplots(1, 2, figsize=(10, 6))
 
         def plot_error_pars(axes, a, b, R, label=''):
             dR = a * R + b
@@ -1436,7 +1437,7 @@ class ConfigManager(object):
         }
         return ee_ids
 
-    def test_get_unique_identifiers():
+    def test_get_unique_identifiers(self):
         np.random.seed(1)
         results = []
         for i in range(0, 10):
@@ -1700,3 +1701,29 @@ class ConfigManager(object):
     @property
     def get_unique_injections(self):
         return np.unique(self.configs[:, 0:2], axis=1)
+
+    def gen_voltage_dipoles_skip(self, cinj, skip=0):
+        """For given current injections, generate all possible voltage dipoles
+        with skip **skip**.
+
+        Parameters
+        ----------
+        cinj : :py:class:`numpy.ndarray`
+            Nx2 array containing the current injection electrodes a,b
+        skip : int, optional
+            Skip used for voltage electrodes. Default: 0
+
+        """
+        new_configs = []
+        for ab in cinj:
+            for i in range(1, self.nr_electrodes + 1):
+                m = i
+                n = i + skip + 1
+                if m in ab or n in ab:
+                    continue
+                if n > self.nr_electrodes:
+                    continue
+                new_configs.append((ab[0], ab[1], m, n))
+        configs = np.array(new_configs)
+        self.add_to_configs(configs)
+        return configs
