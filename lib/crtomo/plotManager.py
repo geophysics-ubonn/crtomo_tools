@@ -296,44 +296,56 @@ class plotManager(object):
 
         Parameters
         ----------
-        cid: int or numpy.ndarray
+        cid : int or :py:class:`numpy.ndarray`
             if *cid* is an int, then treat it as the id of the parameter set
             stored in self.parman. Otherwise, expect it to be the data to plot.
             At the moment no checks are made that the data fits the grid.
-        ax: matplotlib.Axes, optional
+        ax : matplotlib.Axes, optional
             plot to this axes object, if provided
-        alpha_cid: int, optional
+        alpha_cid : int, optional
             if given, use the corresponding dataset in self.parman as the alpha
             channel. No checks are made if all values of this data set lie
             between 0 and 1 (0 being fully transparent, and 1 being opaque).
-        xmin: float, optional
+        xmin : float, optional
             minimal x limit to plot
-        xmax: float, optional
+        xmax : float, optional
             maximal x limit to plot
-        zmin: float, optional
+        zmin : float, optional
             minimal z limit to plot
-        zmax: float, optional
+        zmax : float, optional
             maximial z limit to plot
-        converter : ,optional
-
+        converter : function, optional
+            if given, then use this function to convert the data into another
+            representation. The given function must work with a numpy array.
+            Default: None
         norm : norm object, optional
-
-        cmap_name: string, optional
+            the norm object for matplotlib plotting can be provided here
+        cmap_name : string, optional
             name of the colorbar to use. Default is "viridis". To reverse
             colors, use the _r version "viridis_r"
-        cbposition
-        cblabel: string, optional
+        cbposition : ?
+            ?
+        cblabel : string, optional
             colorbar label
-        cbsegments: int, optional
-        cbnrticks: int, optional
-        plot_colorbar: bool, optional
-        title: string, optional
+        cbsegments : int, optional
+            ?
+        cbnrticks : int, optional
+            ?
+        over : color, optional
+            color to use for values above the current cb-limit. Default: ?
+        under :
+            color to use for values below the current cb-limit. Default: ?
+        bad :
+            color to use for nan-values. Default: ?
+        plot_colorbar : bool, optional
+            if true, plot a colorbar next to the plot
+        title : string, optional
             plot title string
-        xlabel: string, optional
+        xlabel : string, optional
             Set xlabel of the resulting plot
-        ylabel: string, optional
+        ylabel : string, optional
             Set ylabel of the resulting plot
-        no_elecs: boolean, optional
+        no_elecs : bool, optional
             If True, plot no electrodes
         rasterize: bool, optional
             if True, rasterize the plot. Default: False
