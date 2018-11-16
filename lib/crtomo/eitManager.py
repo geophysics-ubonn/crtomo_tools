@@ -319,6 +319,28 @@ class eitMan(object):
             self.a['cre'][frequency_key] = pid_cre
             self.a['cim'][frequency_key] = pid_cim
 
+    def extract_polygon_area(self, label, polygon):
+        if isinstance(label, str):
+            label = [label, ]
+
+        data_list = []
+        for label_key in label:
+            value_list = {}
+            for key, item in sorted(self.tds.items()):
+                values = item.parman.extract_points(
+                    pid=self.a[label_key][key],
+                    points=points
+                )
+                value_list[key] = values
+            df = pd.DataFrame(value_list)
+            df['x'] = points[:, 0]
+            df['z'] = points[:, 1]
+            df['key'] = label_key
+            data_list.append(df)
+        df_all = pd.concat(data_list)
+
+        return df_all
+
     def extract_points(self, label, points):
         """Extract data points along a given line
 

@@ -340,7 +340,7 @@ def plot_real(cid, ax, plotman, title, alpha, vmin, vmax,
     cblabel = units.get_label('log_real')
     zlabel = 'z [' + xunit + ']'
     xlabel = 'x [' + xunit + ']'
-    cm = 'viridis_r'
+    cm = 'jet_r'
     xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(
             plotman,
             cid,
@@ -456,6 +456,7 @@ def plot_pha(cid, ax, plotman, title, alpha, vmin, vmax,
     zlabel = 'z [' + xunit + ']'
     xlabel = 'x [' + xunit + ']'
     cm = 'plasma'
+    cm = 'jet_r'
     xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(
             plotman,
             cid,
@@ -734,9 +735,9 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
             vmaxs = [options.mag_vmax, options.cov_vmax,
                      options.pha_vmax, options.real_vmax, options.imag_vmax,
                      options.pha_vmax, options.real_vmax, options.imag_vmax]
-            cmaps = ['viridis', 'GnBu',
-                     'plasma', 'viridis_r', 'plasma_r',
-                     'plasma', 'viridis_r', 'plasma_r']
+            cmaps = ['jet', 'GnBu',
+                     'plasma', 'jet_r', 'plasma_r',
+                     'plasma', 'jet_r', 'plasma_r']
             saves = ['rho', 'cov',
                      'phi', 'real', 'imag',
                      'fpi_phi', 'fpi_real', 'fpi_imag']
@@ -753,8 +754,8 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
                      options.pha_vmin, options.real_vmin, options.imag_vmin]
             vmaxs = [options.mag_vmax, options.cov_vmax,
                      options.pha_vmax, options.real_vmax, options.imag_vmax]
-            cmaps = ['viridis', 'GnBu',
-                     'plasma', 'viridis_r', 'plasma_r']
+            cmaps = ['jet', 'GnBu',
+                     'plasma', 'jet_r', 'plasma_r']
             saves = ['rho', 'cov',
                      'phi', 'real', 'imag']
     else:
@@ -763,7 +764,7 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
         unites = [magunit, 'cov']
         vmins = [options.mag_vmin, options.cov_vmin]
         vmaxs = [options.mag_vmax, options.cov_vmax]
-        cmaps = ['viridis', 'GnBu']
+        cmaps = ['jet', 'GnBu']
         saves = ['rho', 'cov']
     try:
         mod_rho = np.genfromtxt('rho/rho.dat', skip_header=1, usecols=([0]))
@@ -777,7 +778,7 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
         vmins.append(options.pha_vmin)
         vmaxs.append(options.mag_vmax)
         vmaxs.append(options.pha_vmax)
-        cmaps.append('viridis')
+        cmaps.append('jet')
         cmaps.append('plasma')
         saves.append('rhomod')
         saves.append('phamod')
