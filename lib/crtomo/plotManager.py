@@ -314,12 +314,13 @@ class plotManager(object):
             minimal z limit to plot
         zmax: float, optional
             maximial z limit to plot
+        converter : ,optional
+
+        norm : norm object, optional
+
         cmap_name: string, optional
             name of the colorbar to use. Default is "viridis". To reverse
             colors, use the _r version "viridis_r"
-        converter : ,optional
-
-        norm
         cbposition
         cblabel: string, optional
             colorbar label
