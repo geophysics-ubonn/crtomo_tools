@@ -726,9 +726,11 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
             titles = ['Magnitude', 'Coverage',
                       'Phase', 'Real Part', 'Imaginary Part',
                       'FPI Phase', 'FPI Real Part', 'FPI Imaginary Part']
-            unites = [magunit, 'cov',
-                      'phi', 'log_real', 'log_imag',
-                      'phi', 'log_real', 'log_imag']
+            unites = [
+                magunit, 'cov',
+                'phi', 'log_real', 'log_imag',
+                'phi', 'log_real', 'log_imag'
+            ]
             vmins = [options.mag_vmin, options.cov_vmin,
                      options.pha_vmin, options.real_vmin, options.imag_vmin,
                      options.pha_vmin, options.real_vmin, options.imag_vmin]
@@ -736,7 +738,7 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
                      options.pha_vmax, options.real_vmax, options.imag_vmax,
                      options.pha_vmax, options.real_vmax, options.imag_vmax]
             cmaps = ['jet', 'GnBu',
-                     'plasma', 'jet_r', 'plasma_r',
+                     'jet_r', 'jet_r', 'plasma_r',
                      'plasma', 'jet_r', 'plasma_r']
             saves = ['rho', 'cov',
                      'phi', 'real', 'imag',
@@ -755,7 +757,7 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
             vmaxs = [options.mag_vmax, options.cov_vmax,
                      options.pha_vmax, options.real_vmax, options.imag_vmax]
             cmaps = ['jet', 'GnBu',
-                     'plasma', 'jet_r', 'plasma_r']
+                     'jet_r', 'jet_r', 'plasma_r']
             saves = ['rho', 'cov',
                      'phi', 'real', 'imag']
     else:
