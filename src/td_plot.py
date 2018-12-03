@@ -28,6 +28,7 @@ import math
 import reda.main.units as units
 import crtomo.mpl as mpl_style
 import matplotlib as mpl
+import matplotlib.cm as mpl_cm
 
 
 def handle_options():
@@ -805,6 +806,7 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
                 vmin, vmax
                 )
         # plot
+        cmap = mpl_cm.get_cmap(cm)
         fig, ax, cnorm, cmap, cb, scalarMap = plotman.plot_elements_to_ax(
                 cid=cid,
                 cid_alpha=alpha,
@@ -819,6 +821,8 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
                 xlabel=xlabel,
                 plot_colorbar=True,
                 cmap_name=cm,
+                over=cmap(1.0),
+            under=cmap(0.0),
                 no_elecs=options.no_elecs,
                 cbmin=vmin,
                 cbmax=vmax,
