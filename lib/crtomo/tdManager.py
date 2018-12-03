@@ -468,7 +468,7 @@ class tdMan(object):
         if os.path.isfile(voltage_file):
             if not silent:
                 print('reading voltages')
-            self._read_voltages(voltage_file)
+            self.read_voltages(voltage_file)
 
         sens_files = sorted(glob(
             directory + os.sep + 'sens' + os.sep + 'sens*.dat')
@@ -720,8 +720,13 @@ class tdMan(object):
 
         return fig, axes
 
-    def _read_voltages(self, voltage_file):
+    def read_voltages(self, voltage_file):
         """import voltages from a volt.dat file
+
+        Parameters
+        ----------
+        voltage_file : string
+            Path to volt.dat file
         """
 
         measurements_raw = np.loadtxt(
@@ -861,12 +866,12 @@ class tdMan(object):
 
         Parameters
         ----------
-        tempdir: string
+        tempdir : string
             directory which to use as a tomodir
-        catch_output: bool, optional
-            if True, catch all outputs of the CRTomo call
-        cores: int, optional
-            how many cores to use. defaults to 2
+        catch_output : bool, optional
+            if True, catch all outputs of the CRTomo call (default: True)
+        cores : int, optional
+            how many cores to use. (default 2)
         """
         nr_cores = kwargs.get('cores', 2)
         print('attempting inversion in directory: {0}'.format(tempdir))
