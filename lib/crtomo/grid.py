@@ -620,7 +620,7 @@ class crt_grid(object):
         good starting point for further optimizations.
 
         In order to speed things up, we could search using the raw data, i.e.,
-        with CutMcK enabled sorting, and then restrict the loops to the 2x the
+        with CutMcK enabled sorting, and then restrict the loops to 2x the
         bandwidth (before - after).
 
         While not being returned, this function also sets the variable
@@ -629,7 +629,7 @@ class crt_grid(object):
 
         Returns
         -------
-        neighbors: list
+        neighbors : list
             a list (length equal to nr of elements) with neighboring elements
 
         Examples
@@ -649,8 +649,8 @@ class crt_grid(object):
         # determine neighbors
         print('Looking for neighbors')
         for nr, element_nodes in enumerate(self.elements):
-            print('element {0}/{1}'.format(nr + 1, self.nr_of_elements))
-            print(element_nodes)
+            # print('element {0}/{1}'.format(nr + 1, self.nr_of_elements))
+            # print(element_nodes)
             neighbors = []
             neighbors_edges = []  # store the edges to this neighbor
             for nr1, el in enumerate(self.elements):
@@ -669,7 +669,7 @@ class crt_grid(object):
         return self.element_neighbors_data
 
     def Wm(self):
-        """Return the smoothing regularization matrix Wm
+        """Return the smoothing regularization matrix Wm of the grid
 
         """
         centroids = self.get_element_centroids()
