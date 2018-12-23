@@ -675,7 +675,8 @@ class crt_grid(object):
         """
         centroids = self.get_element_centroids()
 
-        Wm = scipy.sparse.csr((self.nr_of_elements, self.nr_of_elements))
+        Wm = scipy.sparse.csr_matrix(
+            (self.nr_of_elements, self.nr_of_elements))
         # Wm = np.zeros((self.nr_of_elements, self.nr_of_elements))
         for i, nb in enumerate(self.element_neighbors):
             for j, edges in zip(nb, self.element_neighbors_edges[i]):
