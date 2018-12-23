@@ -1606,14 +1606,15 @@ i6,t105,g9.3,t117,f5.3)
         Parameters
         ----------
         mag: int|numpy.ndarray
-            magnitude measurements id for the corresponding measurement data in
+            magnitude measurement id for the corresponding measurement data in
             self.configs.measurements. If mag is a numpy.ndarray, assume
             mag to be the data itself an register it
         pha: int, optional
-            phase measurements id for the corresponding measurement data in
+            phase measurement id for the corresponding measurement data in
             self.configs.measurements. If not present, a new measurement set
             will be added with zeros only.
         """
+        assert len(mag.squeeze().shape) == 1
         if isinstance(mag, np.ndarray):
             mid_mag = self.configs.add_measurements(mag)
         else:
@@ -1624,7 +1625,6 @@ i6,t105,g9.3,t117,f5.3)
                 mid_pha = self.configs.add_measurements(pha)
             else:
                 mid_pha = pha
-
         else:
             mid_pha = self.configs.add_measurements(
                 np.zeros_like(
