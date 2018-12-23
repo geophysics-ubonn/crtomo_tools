@@ -33,7 +33,7 @@ mpl.rcParams['mathtext.default'] = 'regular'
 # mpl.rcParams['font.family'] = 'Droid Sans'
 
 mpl.rcParams['text.usetex'] = True
-mpl.rcParams['text.latex.unicode'] = True
+# mpl.rcParams['text.latex.unicode'] = True
 
 mpl.rc(
     'text.latex',
