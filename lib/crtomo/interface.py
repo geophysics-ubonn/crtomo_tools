@@ -25,6 +25,7 @@ class crmod_interface(object):
 
     def _get_tdm(self, m):
         m = np.atleast_2d(m)
+        assert len(m.shape) == 2
         tdm = crtomo.tdMan(grid=self.grid)
         tdm.configs.add_to_configs(self.configs)
 
