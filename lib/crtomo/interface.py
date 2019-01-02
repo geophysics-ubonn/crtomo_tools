@@ -9,6 +9,7 @@ another, better interfaced forward code such as pygimli.
 The plan is to support both resistivity-only and complex (magnitude/phase)
 versions.
 """
+import os
 import numpy as np
 
 import crtomo
@@ -16,17 +17,40 @@ from crtomo.grid import crt_grid
 
 
 class crmod_interface(object):
-    def __init__(self, grid, configs):
+    def __init__(self, grid, configs, tempdir=None):
+        """Initialize the CRMod interface
+
+        Parameters
+        ----------
+        grid : crtomo.grid.crt_grid
+            FE grid to work with
+        configs : Nx4 numpy.ndarray
+            Measurement configurations to work with (ABMN)
+        tempdir : string, optional
+            If set, use this directory for (temporary) file output. For example
+            using the RAM-disc (/dev/shm) can potentially speed things up a
+            lot.
+        """
         assert isinstance(configs, np.ndarray)
         assert isinstance(grid, crt_grid)
+        if tempdir is not None:
+            assert os.path.isdir(tempdir)
 
         self.grid = grid
         self.configs = configs
+        self.tempdir = tempdir
 
     def _get_tdm(self, m):
+        """For a given model, return a tdMan instance
+
+        Parameters
+        ----------
+        m : ndarray
+            Model parameters (linear, ohm m)
+        """
         m = np.atleast_2d(m)
         assert len(m.shape) == 2
-        tdm = crtomo.tdMan(grid=self.grid)
+        tdm = crtomo.tdMan(grid=self.grid, tempdir=self.tempdir)
         tdm.configs.add_to_configs(self.configs)
 
         pid_mag = tdm.parman.add_data(m[0, :])
@@ -49,14 +73,15 @@ class crmod_interface(object):
 
         Returns
         -------
-
+        measurements : Nx2 numpy nd array
+            Return log_e sigma values of computed forward response
         """
         m = 1.0 / np.exp(log_sigma)
         tdm = self._get_tdm(m)
         measurements = tdm.measurements()
         # import IPython
         # IPython.embed()
-        # convert R to logR
+        # convert R to log sigma
         measurements[:, 0] = np.log(1.0 / measurements[:, 0])
         return measurements
 
@@ -65,6 +90,8 @@ class crmod_interface(object):
 
         Parameters
         ----------
+        log_sigma : numpy.ndarray
+            log_e conductivities
 
         """
         m = 1.0 / np.exp(log_sigma)

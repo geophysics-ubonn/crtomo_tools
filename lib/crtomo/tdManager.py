@@ -127,8 +127,13 @@ class tdMan(object):
         Parameters
         ----------
 
-        grid: crtomo.grid.crt_grid
-            A fully initialized grid object
+        **kwargs :
+            grid: crtomo.grid.crt_grid
+                A fully initialized grid object
+            tempdir : string|None, optional
+                if set, use this directory to create all temporary directories
+                in. For example, settings this to /dev/shm can result in faster
+                generation of large Jacobians
         """
         # these variables will be filled later
         self.grid = None
@@ -140,6 +145,7 @@ class tdMan(object):
         self.plot = None
         self.crmod_cfg = None
         self.crtomo_cfg = None
+        self.tempdir = kwargs.get('tempdir', None)
         # we need a struct to organize the assignments
         self.assignments = {
             # should contain a two-item list with ids in parman
@@ -582,13 +588,29 @@ class tdMan(object):
 
         return sens_data, meta_data
 
-    def plot_sensitivity(self, config_nr, mag_only=False, absv=False,
+    def plot_sensitivity(self, config_nr=None, sens_data=None,
+                         mag_only=False, absv=False,
                          **kwargs):
         """Create a nice looking plot of the sensitivity distribution for the
         given configuration nr. Configs start at 1!
 
-        absv: bool
+        Parameters
+        ----------
+        config_nr : int, optional
+            The configuration number (starting with 0) to compute the
+            sensitivity for.
+        sens_data : Nx2 numpy.ndarray, optional
+            If provided, use this data as sensitivity data (do not compute
+            anything)
+        mag_only : bool, optional
+            Plot only the magnitude sensitivities
+        absv : bool, optional
             If true, plot absolute values of sensitivity
+
+        Returns
+        -------
+        fig
+        ax
 
         Examples
         --------
@@ -609,7 +631,7 @@ class tdMan(object):
 
         """
 
-        def _rescale_sensivitiy(sens_data):
+        def _rescale_sensitivity(sens_data):
             norm_value = np.abs(sens_data).max()
             sens_normed = sens_data / norm_value
 
@@ -634,20 +656,26 @@ class tdMan(object):
             sens_data[indices_lt_zero] = y2
             return sens_data
 
-        cids = self.assignments['sensitivities'][config_nr]
+        assert config_nr is not None or sens_data is not None
+        assert not (config_nr is not None and sens_data is not None)
 
-        sens_mag = self.parman.parsets[cids[0]]
-        sens_pha = self.parman.parsets[cids[1]]
+        if config_nr is not None:
+            cids = self.assignments['sensitivities'][config_nr]
+
+            sens_mag = self.parman.parsets[cids[0]]
+            sens_pha = self.parman.parsets[cids[1]]
+        else:
+            sens_mag = sens_data[:, 0]
+            sens_pha = sens_data[:, 1]
 
         if absv:
             sens_mag = np.log10(np.abs(sens_mag) / np.abs(sens_mag).max())
             sens_pha = np.log10(np.abs(sens_pha) / np.abs(sens_pha).max())
-            print(sens_mag.min(), sens_mag.max())
             cbmin = sens_mag.min()
             cbmax = sens_mag.max()
         else:
-            _rescale_sensivitiy(sens_mag)
-            _rescale_sensivitiy(sens_pha)
+            _rescale_sensitivity(sens_mag)
+            _rescale_sensitivity(sens_pha)
             cbmin = 0
             cbmax = 1
 
@@ -665,6 +693,7 @@ class tdMan(object):
             Nx = 1
         else:
             Nx = 2
+
         fig, axes = plt.subplots(1, Nx, figsize=(15 / 2.54, 12 / 2.54))
         axes = np.atleast_1d(axes)
         # magnitude
@@ -709,12 +738,29 @@ class tdMan(object):
         # )
 
         if not mag_only:
-            # phase
+            cid = self.parman.add_data(sens_pha)
+            # plot phase
             ax = axes[1]
-            self.plot.plot_elements_to_ax(
-                cid=cids[1],
+            fig, ax, cnorm, cmap, cb, sM = self.plot.plot_elements_to_ax(
+                cid=cid,
                 ax=ax,
+                plot_colorbar=True,
+                # cmap_name='seismic',
+                cmap_name='jet_r',
+                cbsegments=18,
+                cbmin=cbmin,
+                cbmax=cbmax,
+                bad='white',
             )
+            if not absv:
+                cb.set_ticks([0, 0.25, 0.5, 0.75, 1])
+                cb.set_ticklabels([
+                    '-1',
+                    r'$-10^{-2.5}$',
+                    '0',
+                    r'$10^{-2.5}$',
+                    '1',
+                ])
 
         fig.tight_layout()
 
@@ -849,9 +895,11 @@ class tdMan(object):
                         )
                     )
             else:
-                with tempfile.TemporaryDirectory() as tempdir:
-                    self._model(voltages, sensitivities, potentials, tempdir,
-                                silent=silent)
+                with tempfile.TemporaryDirectory(dir=self.tempdir) as tempdir:
+                    self._model(
+                        voltages, sensitivities, potentials, tempdir,
+                        silent=silent
+                    )
 
             return 1
         else:
@@ -942,7 +990,7 @@ class tdMan(object):
                         )
                     )
             else:
-                with tempfile.TemporaryDirectory() as tempdir:
+                with tempfile.TemporaryDirectory(dir=self.tempdir) as tempdir:
                     self._invert(tempdir, catch_output, **kwargs)
 
             return 0
