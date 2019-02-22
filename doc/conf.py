@@ -33,7 +33,6 @@ sys.path.append(
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    # 'matplotlib.sphinxext.only_directives',
     'matplotlib.sphinxext.plot_directive',
     'sphinx.ext.autodoc',
     'sphinxcontrib.napoleon',
@@ -43,6 +42,9 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx_gallery.gen_gallery',
 ]
+import matplotlib
+if matplotlib.__version__[0] == '2':
+    extensions.append('matplotlib.sphinxext.only_directives')
 
 # Gallery conf
 sphinx_gallery_conf = {
