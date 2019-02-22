@@ -523,7 +523,7 @@ def main():
     gmsh_binary = cBin.get('gmsh')
     print('Calling binary: {0}'.format(gmsh_binary))
     return_code = subprocess.call(
-        '{0} -2 commands.geo'.format(gmsh_binary),
+        '{0} -format msh2 -2 commands.geo'.format(gmsh_binary),
         shell=True
     )
     if return_code != 0:
