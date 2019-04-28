@@ -29,27 +29,34 @@ class eitMan(object):
     """
     def __init__(self, **kwargs):
         """
+        Data/frequency input: Note that only one of the parameters seitdir,
+        crt_data_dir, seit_data will be used during initialization, in the
+        stated priority.
+
         Parameters
         ----------
-        seitdir: string, optional
-
-        frequencies: numpy.ndarray
-            frequencies that we work with
-        crmod_cfg: ?, optional
-
-        crtomo_cfg ?, optional
-
-        parman ?, optional
-
-        grid: crtomo.crt_grid.crt_grid, optional
-            A grid instance
-        elem_file: string, optional
-            Path to elem file
-        elec_file: string, optional
-            Path to elec file
-        crt_data_dir: string, optional
+        seitdir : string, optional
+            Load frequencies, grid, and data from an existing sEIT directory
+        crt_data_dir : string, optional
             if given, then try to load data from this directory. Expect a
             'frequencies.dat' file and corresponding 'volt_*.dat' files.
+        seit_data : dict
+            A dictionary with frequencies as keys, and numpy arrays as items.
+            Each array must have 6 columns: a,b,m,n,magnitude[Ohm],phase[mrad]
+        frequencies : numpy.ndarray, optional
+            frequencies that we work with
+        grid : crtomo.crt_grid.crt_grid, optional
+            A grid instance
+        elem_file : string, optional
+            Path to elem file
+        elec_file : string, optional
+            Path to elec file
+        crmod_cfg : ?, optional
+
+        crtomo_cfg : ?, optional
+
+        parman : ?, optional
+
         """
         # the following variables will be partially duplicated in the tomodir
         # instances down below. Thus, they are used primarily to store blue
@@ -81,6 +88,20 @@ class eitMan(object):
         # # now load data/initialize things
         seit_dir = kwargs.get('seitdir', None)
         crt_data_dir = kwargs.get('crt_data_dir', None)
+        seit_data = kwargs.get('seit_data', None)
+
+        # load/assign grid
+        if 'grid' in kwargs:
+            self.grid = kwargs.get('grid')
+        elif 'elem_file' in kwargs and 'elec_file' in kwargs:
+            grid = crt_grid()
+            grid.load_grid(
+                kwargs['elem_file'],
+                kwargs['elec_file'],
+            )
+            self.grid = grid
+        else:
+            self.grid = None
 
         # these are the principle ways to add data
         if seit_dir is not None:
@@ -100,29 +121,30 @@ class eitMan(object):
             files = sorted(glob('{}/volt_*.crt'.format(crt_data_dir)))
             data_files['crt'] = files
             self.load_data_crt_files(data_files)
-        else:
-            # load/assign grid
-            if 'grid' in kwargs:
-                self.grid = kwargs.get('grid')
-            elif 'elem_file' in kwargs and 'elec_file' in kwargs:
-                grid = crt_grid()
-                grid.load_grid(
-                    kwargs['elem_file'],
-                    kwargs['elec_file'],
-                )
-                self.grid = grid
-            else:
-                raise Exception(
-                    'You must provide either a grid instance or ' +
-                    'elem_file/elec_file file paths'
-                )
+        elif seit_data is not None:
+            frequencies = sorted(seit_data.keys())
+            self._init_frequencies(frequencies)
 
+            for frequency in frequencies:
+                abmn = seit_data[frequency][:, 0:4]
+                rmag = seit_data[frequency][:, 4]
+                rpha = seit_data[frequency][:, 5]
+
+                self.tds[frequency].configs.add_to_configs(abmn)
+                self.tds[frequency].register_measurements(rmag, rpha)
+        else:
             # initialize frequency tomodirs
             if 'frequencies' in kwargs:
                 self._init_frequencies(
                     kwargs.get('frequencies'),
                     kwargs.get('configs_abmn', None)
                 )
+
+        if self.grid is None:
+            raise Exception(
+                'You must provide either a grid instance or ' +
+                'elem_file/elec_file file paths'
+            )
 
     def _init_frequencies(self, frequencies, configs_abmn=None):
         self.frequencies = frequencies
@@ -144,15 +166,15 @@ class eitMan(object):
 
         Parameters
         ----------
-        xmin: float
+        xmin : float
             Minimum x coordinate of the area
-        xmax: float
+        xmax : float
             Maximum x coordinate of the area
-        zmin: float
+        zmin : float
             Minimum z coordinate of the area
-        zmax: float
+        zmax : float
             Maximum z coordinate of the area
-        spectrum: sip_response
+        spectrum : sip_response
             SIP spectrum to use for parameterization
 
         """
@@ -176,11 +198,11 @@ class eitMan(object):
 
         Parameters
         ----------
-        magnitude: float
+        magnitude : float
             Value of homogeneous magnitude model
-        phase: float, optional
+        phase : float, optional
             Value of homogeneous phase model. Default 0
-        frequency: float, optional
+        frequency : float, optional
             Frequency of of the tomodir to use. If None, then apply to all
             tomodirs. Default is None.
         """
@@ -201,7 +223,7 @@ class eitMan(object):
 
         Parameters
         ----------
-        data_dict: dict
+        data_dict : dict
             Data files that are imported. See example down below
 
         Examples
@@ -232,8 +254,7 @@ class eitMan(object):
 
         for frequency, filename in zip(frequencies, data_dict['crt']):
             subdata = np.atleast_2d(np.loadtxt(filename, skiprows=1))
-            print(subdata.shape)
-            if subdata.shape[0] == 0:
+            if subdata.size == 0:
                 continue
             # extract configurations
             A = (subdata[:, 0] / 1e4).astype(int)
