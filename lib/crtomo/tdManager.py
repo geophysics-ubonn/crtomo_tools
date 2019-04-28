@@ -1662,8 +1662,10 @@ i6,t105,g9.3,t117,f5.3)
             self.configs.measurements. If not present, a new measurement set
             will be added with zeros only.
         """
-        assert len(mag.squeeze().shape) == 1
         if isinstance(mag, np.ndarray):
+            # make sure that this array is 1D at the most
+            # the 0 indicates only one measurement
+            assert len(mag.squeeze().shape) in (0, 1)
             mid_mag = self.configs.add_measurements(mag)
         else:
             mid_mag = mag
