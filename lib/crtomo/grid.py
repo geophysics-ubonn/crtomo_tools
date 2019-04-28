@@ -706,6 +706,9 @@ class crt_grid(object):
         """This is a simple wrapper for cr_trig_create to create simple surface
         grids.
 
+        Automatically generated electrode positions are rounded to the third
+        digit.
+
         Parameters
         ----------
         nr_electrodes: int, optional
@@ -765,6 +768,7 @@ class crt_grid(object):
                 [(x, 0.0) for x in np.arange(0.0, nr_electrodes)]
             )
             electrodes[:, 0] = electrodes[:, 0] * spacing
+            electrodes = np.round(electrodes, 3)
         else:
             nr_electrodes = len(electrodes_x)
             electrodes = np.hstack((electrodes_x, np.zeros_like(electrodes_x)))
@@ -852,7 +856,10 @@ class crt_grid(object):
                 os.makedirs(workdir)
             tempdir = workdir
 
-        np.savetxt(tempdir + os.sep + 'electrodes.dat', electrodes)
+        np.savetxt(
+            tempdir + os.sep + 'electrodes.dat', electrodes,
+            fmt='%.3f %.3f'
+        )
         np.savetxt(tempdir + os.sep + 'boundaries.dat', boundaries,
                    fmt='%.4f %.4f %i')
         np.savetxt(
