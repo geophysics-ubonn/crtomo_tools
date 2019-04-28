@@ -17,18 +17,23 @@ figures (--single) or to plot anisotropic results of magnitude and phase
 The script has to be run in a tomodir. Output file will be saved in tomodir.
 
 '''
-import numpy as np
 import os
 from optparse import OptionParser
+import math
+
+import numpy as np
+
+import crtomo.mpl
+import crtomo.mpl as mpl_style
+plt, mpl = crtomo.mpl.setup()
+import matplotlib
+import matplotlib.cm as mpl_cm
+# import matplotlib.pyplot as plt
+# import matplotlib as mpl
+
 import crtomo.plotManager as CRPlot
 import crtomo.grid as CRGrid
-import matplotlib.pyplot as plt
-import matplotlib
-import math
 import reda.main.units as units
-import crtomo.mpl as mpl_style
-import matplotlib as mpl
-import matplotlib.cm as mpl_cm
 
 
 def handle_options():
