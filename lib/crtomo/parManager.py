@@ -42,11 +42,11 @@ class ParMan(object):
 
         Parameters
         ----------
-        data: numpy.ndarray
+        data : numpy.ndarray
             one or more parameter sets. It must either be 1D or 2D, with the
             first dimension the number of parameter sets (K), and the second
             the number of elements (N): K x N
-        metadata: object, optional
+        metadata : object, optional
             the provided object will be stored in in the metadata dict and can
             be received with the ID that is returned. If multiple (K) datasets
             are added at ones, provide a list of objects with len K.

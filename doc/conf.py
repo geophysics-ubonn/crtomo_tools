@@ -41,10 +41,13 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx_gallery.gen_gallery',
+    'sphinxcontrib.blockdiag',
 ]
 import matplotlib
 if matplotlib.__version__[0] == '2':
     extensions.append('matplotlib.sphinxext.only_directives')
+
+napoleon_include_init_with_doc = True
 
 # Gallery conf
 sphinx_gallery_conf = {

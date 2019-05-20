@@ -173,6 +173,9 @@ class tdMan(object):
         # indicates if all information for inversion are present
         self.can_invert = False
 
+        self.eps_data = None
+        self.inv_stats = None
+
         self._initialize_components(kwargs)
 
     def _initialize_components(self, kwargs):
@@ -237,8 +240,10 @@ class tdMan(object):
             self.configs.load_crmod_config(config_file)
 
         voltage_file = kwargs.get('volt_file', None)
-        if voltage_file is not None:
-            cids = self.configs.load_crmod_volt(voltage_file)
+        voltage_data = kwargs.get('volt_data', voltage_file)
+
+        if voltage_data is not None:
+            cids = self.configs.load_crmod_data(voltage_data)
             self.assignments['measurements'] = cids
 
         self.plot = PlotManager.plotManager(
@@ -353,11 +358,7 @@ class tdMan(object):
             directory + os.sep + 'exe/crmod.cfg'
         )
 
-        if self.assignments['measurements'] is not None:
-            self.configs.write_crmod_volt(
-                directory + os.sep + 'mod/volt.dat',
-                self.assignments['measurements']
-            )
+        self.save_measurements(directory + os.sep + 'mod/volt.dat')
 
         if self.assignments['sensitivities'] is not None:
             self._save_sensitivities(
@@ -381,6 +382,23 @@ class tdMan(object):
 
         if not os.path.isdir(directory + os.sep + 'inv'):
             os.makedirs(directory + os.sep + 'inv')
+
+    def save_measurements(self, filename):
+        """Save measurements in a file. Use the CRTomo format.
+
+        Do not save anything if no measurements are present in this tdMan
+        instance.
+
+        Parameters
+        ----------
+        filename : string
+            path to output filename
+        """
+        if self.assignments['measurements'] is not None:
+            self.configs.write_crmod_volt(
+                filename,
+                self.assignments['measurements']
+            )
 
     def _save_sensitivities(self, directory):
         """save sensitivities to a directory
@@ -952,6 +970,8 @@ class tdMan(object):
 
         os.chdir(pwd)
         self.read_inversion_results(tempdir)
+        print('Statistics of last iteration:')
+        print(self.inv_stats.iloc[-1])
 
     def invert(self, output_directory=None, catch_output=True, **kwargs):
         """Invert this instance, and import the result files
@@ -961,18 +981,18 @@ class tdMan(object):
 
         Parameters
         ----------
-        output_directory: string, optional
+        output_directory : string, optional
             use this directory as output directory for the generated tomodir.
             If None, then a temporary directory will be used that is deleted
-            after import.
-        catch_output: bool, optional
-            Do not show CRTomo output
-        cores: int, optional
+            after data import.
+        catch_output : bool, optional
+            if True, do not show CRTomo output. Default:True
+        cores : int, optional
             how many cores to use for CRTomo
 
         Returns
         -------
-        return_code: bool
+        return_code : bool
             Return 0 if the inversion completed successfully. Return 1 if no
             measurements are present.
         """
@@ -1006,9 +1026,9 @@ class tdMan(object):
         WARNING: Not finished!
         """
         self._read_inversion_results(tomodir)
-        self._read_inv_ctr(tomodir)
+        self.inv_stats = self._read_inv_ctr(tomodir)
         self._read_resm_m(tomodir)
-        self._read_eps_ctr(tomodir)
+        self.eps_data = self._read_eps_ctr(tomodir)
 
     def _read_inversion_results(self, tomodir):
         """Import resistivity magnitude/phase and real/imaginary part of
@@ -1035,12 +1055,25 @@ class tdMan(object):
             'cre_cim': pids_sig,
         }
 
-    def plot_eps_data_hist(self, dfs):
+    def plot_eps_data_hist(self, filename=None):
         """Plot histograms of data residuals and data error weighting
 
-        TODO:
+        TODO :
             * add percentage of data below/above the RMS value
+
+        Parameters
+        ----------
+        filename : string|None
+            if not None, then save plot to this file
+
+        Returns
+        -------
+        figure : matplotlib.Figure|None
+            if filename is None, then return the generated figure
+
         """
+        assert self.eps_data is not None
+        dfs = self.eps_data
         # check if this is a DC inversion
         if 'datum' in dfs[0]:
             dc_inv = True
@@ -1137,9 +1170,27 @@ class tdMan(object):
             ax.set_ylabel(r'$\phi_{mod}~[mrad]$')
 
         fig.tight_layout()
-        fig.savefig('eps_plot_hist.png', dpi=300)
+        if filename is not None:
+            fig.savefig(filename, dpi=300)
+        else:
+            return fig
 
-    def plot_eps_data(self, dfs):
+    def plot_eps_data(self, filename=None):
+        """Plot data residuals and data error weighting
+
+        Parameters
+        ----------
+        filename : string|None
+            if not None, then save plot to this file
+
+        Returns
+        -------
+        figure : matplotlib.Figure|None
+            if filename is None, then return the generated figure
+
+        """
+        assert self.eps_data is not None
+        dfs = self.eps_data
         # check if this is a DC inversion
         if 'datum' in dfs[0]:
             dc_inv = True
@@ -1212,7 +1263,10 @@ class tdMan(object):
             ax.set_ylabel(r'$\Psi$')
 
         fig.tight_layout()
-        fig.savefig('eps_plot.png', dpi=300)
+        if filename is not None:
+            fig.savefig(filename, dpi=300)
+        else:
+            return fig
 
     @staticmethod
     def _read_eps_ctr(tomodir):
@@ -1222,7 +1276,7 @@ class tdMan(object):
 
         Parameters
         ----------
-        tomodir: string
+        tomodir : string
             Path to directory path
 
         Returns
@@ -1262,12 +1316,12 @@ class tdMan(object):
 
         Parameters
         ----------
-        tomodir: string
+        tomodir : string
             directory path to a tomodir
 
         Returns
         -------
-        inv_ctr:    ?
+        inv_ctr :    ?
             structure containing inv.ctr data
 
         """
@@ -1565,7 +1619,7 @@ i6,t105,g9.3,t117,f5.3)
                 iterations.append(values)
 
         df = pd.DataFrame(iterations)
-        df = df.reindex_axis([
+        df = df.reindex([
             'iteration',
             'main_iteration',
             'it_type',
@@ -1585,46 +1639,92 @@ i6,t105,g9.3,t117,f5.3)
         df['nrdata'] = nr_of_data_points - df['nrdata']
         return df
 
-    def plot_inversion_evolution(self, df, filename):
-        g = df.groupby('iteration')
-        fig, ax = plt.subplots()
-        # update iterations
-        for name, group in g:
-            # plot update evolution
-            updates = group.query('type == "update"')
-            ax.scatter(
-                np.ones(updates.shape[0]) * name,
-                updates['lambda'],
-                color='k',
-            )
+    def plot_inversion_evolution(self, filename=None):
+        """Plot the evolution of inversion properties (lambda, RMS, ...)
+        Parameters
+        ----------
+        filename : string|None
+            if not None, save plot to this file
+
+        Returns
+        -------
+        fig : matplotlib.Figure|None
+            if filename is None, return the figure object
+        """
+        assert self.inv_stats is not None
+        df = self.inv_stats
+        fig, ax = plt.subplots(figsize=(16 / 2.54, 9 / 2.54), dpi=300)
+
+        plot_objs = []
 
         # main iterations
         main = df.query('type == "main"')
-        ax.plot(
+        obj = ax.plot(
             main['main_iteration'],
             main['lambda'],
             '.-',
             color='k',
+            label=r'$\lambda$'
         )
+        # import IPython
+        # IPython.embed()
+        plot_objs.append(obj[0])
         ax.set_ylabel(r'$\lambda$')
         ax2 = ax.twinx()
-        ax2.plot(
+        obj = ax2.plot(
             main['main_iteration'],
             main['dataRMS'],
             '.-',
             color='r',
+            label='dataRMS',
         )
+        plot_objs.append(obj[0])
         ax2.set_ylabel('data RMS')
+        ax3 = ax.twinx()
+        ax3.spines['right'].set_position(('axes', 1.2))
+
+        # update iterations
+        g = df.groupby('main_iteration')
+        cm = mpl.cm.get_cmap('jet')
+        SM = mpl.cm.ScalarMappable(norm=None, cmap=cm)
+        colors = SM.to_rgba(np.linspace(0, 1, g.ngroups))
+        for color, (name, group) in zip(colors, g):
+            # plot update evolution
+            updates = group.query('type == "update"')
+            print('#############################')
+            print(name)
+            print(updates)
+            obj = ax3.scatter(
+                range(0, updates.shape[0]),
+                updates['lambda'],
+                color=color,
+                label='it {}'.format(name),
+            )
+            plot_objs.append(obj)
+        ax3.set_ylabel('update lambdas')
+
+        ax.set_xlabel('iteration number')
+
+        ax.grid(None)
+        ax2.grid(None)
+        ax3.grid(None)
+
+        # added these three lines
+        labs = [l.get_label() for l in plot_objs]
+        ax.legend(plot_objs, labs, loc=0, fontsize=6.0)
 
         fig.tight_layout()
-        fig.savefig('inversion_evolution.png', dpi=300)
+        if filename is None:
+            return fig
+        else:
+            fig.savefig(filename, dpi=300)
 
     def _read_resm_m(self, tomodir):
         """Read in the resolution matrix of an inversion
 
         Parameters
         ----------
-        tomodir: string
+        tomodir : string
             directory path to a tomodir
 
         """

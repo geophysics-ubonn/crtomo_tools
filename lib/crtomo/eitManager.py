@@ -33,6 +33,34 @@ class eitMan(object):
         crt_data_dir, seit_data will be used during initialization, in the
         stated priority.
 
+        Initialization diagram:
+
+        .. blockdiag::
+
+            diagram {
+                group g_grid {
+                    par_grid -> a_grid [label="loads"];
+                    group g_elmc {
+                        par_elem -> a_grid [label="loads"];
+                        par_elec -> a_grid [label="loads"];
+                    }
+                }
+                a_grid [label="grid"]
+                seitdir[label="sEIT inversion directory"];
+                seitdir -> a_grid [label="grid"];
+                seitdir -> frequencies [label="loads"];
+                seitdir -> inv_results [label="loads"];
+                seitdir -> seit_data [label="loads"];
+                crt_data_dir -> seit_data [label="loads"];
+                inv_results[label="loads"];
+                crt_data_dir[label="CRTomo style multi-frequency data"];
+                crt_data_dir -> frequencies [label="loads"];
+                crt_data_dir -> seit_data [label="loads"];
+                dict_seit_data [label="data dictionary"];
+                par_frequencies -> frequencies [label="loads"];
+
+           }
+
         Parameters
         ----------
         seitdir : string, optional
@@ -188,6 +216,13 @@ class eitMan(object):
             td.parman.modify_area(pidp, xmin, xmax, zmin, zmax, rpha)
 
     def set_area_to_single_colecole(self, xmin, xmax, zmin, zmax, ccpars):
+        """Parameterize a rectangular area of the forward model using a
+        single-term Cole-Cole response.
+
+        Parameters
+        ----------
+
+        """
         objcc = cc_res.cc(self.frequencies)
         response = objcc.response(ccpars)
         self.set_area_to_sip_signature(xmin, xmax, zmin, zmax, response)
@@ -308,6 +343,11 @@ class eitMan(object):
 
         Note that all previous data stored in this instance of the eitManager
         will be overwritten, if required!
+
+        Parameters
+        ----------
+        sipdir : string
+            path to a CRTomo sip-invdir (i.e., a full sEIT inversion directory)
         """
         # load frequencies and initialize tomodir objects for all frequencies
         frequency_file = sipdir + os.sep + 'frequencies.dat'
@@ -368,14 +408,16 @@ class eitMan(object):
         Parameters
         ----------
         label : str
-            the label for the assignments.
+            the label (data type) to extract. This corresponds to a key in
+            eitMan.assignments. Possible values are rmag, rpha, cre,
+            cim
         points : Nx2 numpy.ndarray
             (x, y) pairs
 
         Returns
         -------
-            df_all : pandas.DataFrame
-                A dataframe with the extracted data
+        df_all : pandas.DataFrame
+            A dataframe with the extracted data
 
         """
         if isinstance(label, str):
@@ -404,7 +446,7 @@ class eitMan(object):
 
         Returns
         -------
-        mag_fig: dict
+        return_dict : dict
             Dictionary containing the figure and axes objects of the magnitude
             plots
 
@@ -488,11 +530,15 @@ class eitMan(object):
             td.model(**kwargs)
 
     def measurements(self):
-        """Return modeled measurements
+        """Return modeled measurements. If not already done, call CRMod for
+        each frequency to actually compute the forward response.
 
-        1. dimension: frequency
-        2. dimension: config-number
-        3. dimension: 2: magnitude and phase (resistivity)
+        Returns
+        -------
+        m_all : numpy.ndarray
+            1. dimension: frequency
+            2. dimension: config-number
+            3. dimension: 2: magnitude and phase (resistivity)
 
         """
         m_all = np.array([self.tds[key].measurements() for key in
@@ -525,4 +571,22 @@ class eitMan(object):
             )
             responses[tuple(config)] = sip
         return responses
+
+    def save_measurements_to_directory(self, directory):
+        """Store the measurements (either from a previous import, or from
+        forward modeling, in one directory in the CRTomo 'crt'-style.
+
+        Frequencies are stored in a file frequencies.dat.
+
+        For each frequency, data is stored in a file volt_%.2i.dat in the
+        CRTomo format.
+        """
+        os.makedirs(directory, exist_ok=True)
+        np.savetxt(directory + os.sep + 'frequencies.dat', self.frequencies)
+        for nr, (frequency, td) in enumerate(sorted(self.tds.items())):
+            td.save_measurements(
+                directory + os.sep + 'volt_{:02}_f{:08.3f}.dat'.format(
+                    nr, frequency
+                )
+            )
 

@@ -2,7 +2,7 @@
 # *-* coding: utf-8 *-*
 """
 Generating sEIT forward models
-==============================
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The eit manager can be used to easily create forward models using different
 parameterizations.

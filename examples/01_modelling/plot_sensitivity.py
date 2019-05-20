@@ -2,7 +2,7 @@
 # *-* coding: utf-8 *-*
 """
 Plotting sensitivities
-======================
+^^^^^^^^^^^^^^^^^^^^^^
 
 Sensitivity distributions can be easily plotted using the tdMan class:
 """
