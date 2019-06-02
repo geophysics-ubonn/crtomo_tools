@@ -449,6 +449,7 @@ def plot_mag(cid, ax, plotman, title, unit, alpha, vmin, vmax,
             no_elecs=elecs,
             cbmin=vmin,
             cbmax=vmax,
+            cmap_name='Spectral_r',
             )
     return fig, ax, cnorm, cmap, cb
 
