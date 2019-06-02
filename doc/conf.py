@@ -91,7 +91,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'crtomo tools'
-copyright = u'2017, CRTomo contributors'
+copyright = u'2017-2019, CRTomo contributors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -157,7 +157,7 @@ html_theme = 'alabaster'
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-# html_title = None
+html_title = "<project> v<release> documentation (<today>)"
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 # html_short_title = None

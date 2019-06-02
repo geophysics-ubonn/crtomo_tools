@@ -25,11 +25,12 @@ by either of the programs.
 Contents:
 
 .. toctree::
-    :maxdepth: 2
+   :maxdepth: 2
 
-    _examples/index.rst
-    scripts/grid_tools/modules.rst
-    api/modules.rst
+   grid_creation.rst
+   _examples/index.rst
+   scripts/grid_tools/modules.rst
+   api/modules.rst
 
 
 Indices and tables
