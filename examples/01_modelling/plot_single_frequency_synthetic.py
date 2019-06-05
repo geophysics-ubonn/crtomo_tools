@@ -11,6 +11,7 @@ grid = crtomo.crt_grid.create_surface_grid(
     nr_electrodes=30, spacing=1, char_lengths=[0.3, 1, 1, 1]
 )
 fig, ax = grid.plot_grid()
+fig.savefig('grid.jpg')
 
 man = crtomo.tdMan(grid=grid)
 pid_mag, pid_pha = man.add_homogeneous_model(
@@ -32,7 +33,9 @@ man.parman.modify_area(
 )
 
 fig, ax = man.show_parset(pid_mag)
+fig.savefig('model_magnitude.jpg')
 fig, ax = man.show_parset(pid_pha)
+fig.savefig('model_phase.jpg')
 
 man.configs.gen_dipole_dipole(skipc=1)
 
@@ -47,6 +50,7 @@ ax.set_xlabel('magnitudes')
 ax = axes[1]
 ax.hist(rmag_rpha_mod[:, 1], 100)
 ax.set_xlabel('phases')
+fig.savefig('modeled_data.jpg')
 
 # now add syntehtic noise
 # TODO
@@ -58,3 +62,4 @@ tdman.invert()
 
 print(tdman.a)
 fig, ax = tdman.show_parset(tdman.a['inversion']['rmag'][-1])
+fig.savefig('inversion_result.jpg')
