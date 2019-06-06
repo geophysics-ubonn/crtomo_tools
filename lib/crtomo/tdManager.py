@@ -134,6 +134,13 @@ class tdMan(object):
                 if set, use this directory to create all temporary directories
                 in. For example, settings this to /dev/shm can result in faster
                 generation of large Jacobians
+            volt_file : None|str|numpy.ndarray
+                if this is None, assume we didn't get any measurement data. If
+                this is a str, assume it to be the filename to a CRTomo
+                volt.dat file. If it is a numpy array, assume 6 columns:
+                a,b,m,n,rmag,rpha
+            volt_data : synonym for volt_file parameter
+                see description for volt_file
         """
         # these variables will be filled later
         self.grid = None
@@ -179,12 +186,12 @@ class tdMan(object):
         self._initialize_components(kwargs)
 
     def _initialize_components(self, kwargs):
-        """initialize the various components using the supplied \*\*kwargs
+        r"""initialize the various components using the supplied \*\*kwargs
 
         Parameters
         ----------
         kwargs: dict
-            \*\*kwargs dict as received by __init__()
+            kwargs dict as received by __init__()
 
         """
         tomodir = None
@@ -211,7 +218,7 @@ class tdMan(object):
             self.grid = grid
         else:
             raise Exception(
-                'You must provide either a grid instance or ' +
+                'You must provide either a grid instance or '
                 'elem_file/elec_file file paths'
             )
 
@@ -239,9 +246,11 @@ class tdMan(object):
         if config_file is not None:
             self.configs.load_crmod_config(config_file)
 
+        # we can load data eiterh from file, or directly from a numpy array
         voltage_file = kwargs.get('volt_file', None)
         voltage_data = kwargs.get('volt_data', voltage_file)
 
+        # did we get either a file name OR data? then import it
         if voltage_data is not None:
             cids = self.configs.load_crmod_data(voltage_data)
             self.assignments['measurements'] = cids
@@ -1387,17 +1396,17 @@ i6,t105,g9.3,t117,f5.3)
 
         # this identifies a float number, or a NaN value
         reg_float = ''.join((
-            '((?:[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?)',
+            r'((?:[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?)',
             '|',
             '(?:NaN))'
         ))
 
-        reg_int = '(\d{1,3})'
+        reg_int = r'(\d{1,3})'
 
         # (t1,a3,t5,i3,t11,g10.4,t69,g10.4,t81,g10.4,t93,i4)
         # first iteration line of non-robust inversion
         reg_it1_norob = ''.join((
-            '([a-zA-Z]{1,3})',
+            r'([a-zA-Z]{1,3})',
             ' *' + reg_int,
             ' *' + reg_float,
             ' *' + reg_float,
@@ -1407,7 +1416,7 @@ i6,t105,g9.3,t117,f5.3)
         # first iteration line of robust inversion
         reg_it1_robust = ''.join((
             '([a-zA-Z]{1,3})',
-            ' *(\d{1,3})',
+            r' *(\d{1,3})',
             ' *' + reg_float,   # data RMS
             ' *' + reg_float,   # mag RMS
             ' *' + reg_float,   # pha RMS
@@ -1417,8 +1426,8 @@ i6,t105,g9.3,t117,f5.3)
 
         # second-to-last iterations, robust
         reg_it2plus_rob = ''.join((
-            '([a-zA-Z]{1,3})',
-            ' *(\d{1,3})',
+            r'([a-zA-Z]{1,3})',
+            r' *(\d{1,3})',
             ' *' + reg_float,   # data RMS
             ' *' + reg_float,   # stepsize
             ' *' + reg_float,   # lambda
@@ -1436,7 +1445,7 @@ i6,t105,g9.3,t117,f5.3)
         # i6,t69,g10.4,t81,g10.4,t93,i4,t105,f5.3)
         reg_it2plus_norob = ''.join((
             '([a-zA-Z]{1,3})',
-            ' *(\d{1,3})',
+            r' *(\d{1,3})',
             ' *' + reg_float,   # data RMS
             ' *' + reg_float,   # stepsize
             ' *' + reg_float,   # lambda
@@ -1451,7 +1460,7 @@ i6,t105,g9.3,t117,f5.3)
         # update robust
         reg_update_rob = ''.join((
             '([a-zA-Z]{1,3})',
-            ' *(\d{1,3})',
+            r' *(\d{1,3})',
             ' *' + reg_float,  # data RMS
             ' *' + reg_float,  # stepsize
             ' *' + reg_float,  # lambda
@@ -1462,7 +1471,7 @@ i6,t105,g9.3,t117,f5.3)
         # update non-robust
         reg_update_norob = ''.join((
             '([a-zA-Z]{1,3})',
-            ' *(\d{1,3})',
+            r' *(\d{1,3})',
             ' *' + reg_float,  # data RMS
             ' *' + reg_float,  # stepsize
             ' *' + reg_float,  # lambda
@@ -2010,4 +2019,3 @@ i6,t105,g9.3,t117,f5.3)
         )
         fig.tight_layout()
         return fig, axes
-
