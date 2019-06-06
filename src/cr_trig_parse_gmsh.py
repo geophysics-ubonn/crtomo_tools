@@ -298,7 +298,7 @@ def debug_plot_mesh(mesh, boundary_elements):
         dpi = 600
     else:
         dpi = 300
-    fig.savefig('../../triangle_grid.png', dpi=dpi)
+    fig.savefig('../../triangle_grid.jpg', dpi=dpi)
 
 
 def get_header(mesh):
