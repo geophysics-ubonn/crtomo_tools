@@ -56,6 +56,7 @@ import tempfile
 import subprocess
 from io import StringIO
 import itertools
+import functools
 
 import matplotlib.colors
 import matplotlib.cm
@@ -185,6 +186,43 @@ class tdMan(object):
 
         self._initialize_components(kwargs)
 
+    def __repr__(self):
+        """Give meaningful information on current state of the object"""
+        str_list = []
+        str_list.append(80 * '-')
+        str_list.append('tdMan instance')
+        str_list.append(80 * '-')
+        # status of grid
+        str_list.append('GRID:')
+        if self.grid is None:
+            str_list.append('no grid loaded')
+        else:
+            str_list.append(self.grid.__repr__())
+
+        # status of configs
+        str_list.append('')
+        str_list.append('CONFIGS:')
+        if self.configs.configs is None:
+            str_list.append('no configs present')
+        else:
+            str_list.append(
+                '{} configs present'.format(self.configs.configs.shape[0])
+            )
+
+        # status of parsets
+        str_list.append('')
+        str_list.append('PARSETS:')
+        str_list.append(
+            '{} parsets loaded'.format(len(self.parman.parsets.keys()))
+        )
+
+        str_list.append('')
+        str_list.append('ASSIGNMENTS:')
+        str_list.append('{}'.format(self.assignments))
+
+        str_list.append(80 * '-')
+        return '\n'.join(str_list)
+
     def _initialize_components(self, kwargs):
         r"""initialize the various components using the supplied \*\*kwargs
 
@@ -306,19 +344,38 @@ class tdMan(object):
            self.assignments['measurements'] is not None):
             self.can_invert = True
 
+    def load_parset_from_file(self, filename, columns=0):
+        """
+        Parameters
+        ----------
+        filename : string
+            filename to rho.dat file
+        columns : int|list of int
+            which columns to use/treat as parameter sets. This settings uses
+            zero-indexing, i.e., the first column is 0. Default: column 0
+
+        Returns
+        -------
+        pids : int|list
+            the parameter ids of the imported files
+
+        """
+        pids = self.parman.load_model_from_file(filename, columns=columns)
+        return pids
+
     def load_rho_file(self, filename):
         """Load a forward model from a rho.dat file
 
         Parameters
         ----------
-        filename: string
+        filename : string
             filename to rho.dat file
 
         Returns
         -------
-        pid_mag: int
+        pid_mag : int
             parameter id for the magnitude model
-        pid_pha: int
+        pid_pha : int
             parameter id for the phase model
 
         """
@@ -2019,3 +2076,13 @@ i6,t105,g9.3,t117,f5.3)
         )
         fig.tight_layout()
         return fig, axes
+
+    @functools.wraps(pM.ParMan.extract_points)
+    def extract_points(self, pid, points):
+        values = self.parman.extract_points(pid, points)
+        return values
+
+    @functools.wraps(pM.ParMan.extract_along_line)
+    def extract_along_line(self, pid, xy0, xy1, N=10):
+        values = self.parman.extract_along_line(pid, xy0, xy1, N)
+        return values
