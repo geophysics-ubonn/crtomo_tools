@@ -63,7 +63,9 @@ seit.print_data_journal()
 seit.print_log()
 ###############################################################################
 # export to volt.dat file
-seit.export_to_crtomo_one_frequency('volt.dat', 70.0, 'nor')
+# note that this is not required for the following code
+with reda.CreateEnterDirectory('output_single_freq_inversion'):
+    seit.export_to_crtomo_one_frequency('volt.dat', 70.0, 'nor')
 
 ###############################################################################
 # alternatively: directly create a tdman object that represents a
@@ -84,7 +86,7 @@ tdman.crtomo_cfg['fic_sink_node'] = 6467
 # run the inversion, use the given output directory to store the CRTomo
 # directory structure for later use
 # only invert if the output directory does not exists
-outdir = 'tomodir_inversion'
+outdir = 'output_single_freq_inversion/tomodir_inversion'
 if not os.path.isdir(outdir):
     tdman.invert(
         catch_output=False,
@@ -98,7 +100,8 @@ else:
 ###############################################################################
 # evolution of the inversion
 fig = tdman.plot_inversion_evolution()
-fig.savefig('inversion_evolution.png')
+with reda.CreateEnterDirectory('output_single_freq_inversion'):
+    fig.savefig('inversion_evolution.png')
 
 # the statistics are stored in a data frame
 print(tdman.inv_stats)
@@ -118,11 +121,13 @@ r = tdman.plot.plot_elements_to_ax(
     plot_colorbar=True,
     cmap_name='jet_r',
 )
-r[0].savefig('rmag.png', bbox_inches='tight')
+with reda.CreateEnterDirectory('output_single_freq_inversion'):
+    r[0].savefig('rmag.png', bbox_inches='tight')
 
 r = tdman.plot.plot_elements_to_ax(
     tdman.a['inversion']['rpha'][-1],
     plot_colorbar=True,
     cmap_name='jet_r',
 )
-r[0].savefig('rpha_last_it.png', bbox_inches='tight')
+with reda.CreateEnterDirectory('output_single_freq_inversion'):
+    r[0].savefig('rpha_last_it.png', bbox_inches='tight')
