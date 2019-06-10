@@ -48,6 +48,7 @@ Examples
 import tempfile
 import subprocess
 import os
+import time
 
 import numpy as np
 import scipy.sparse
@@ -297,6 +298,7 @@ class crt_grid(object):
             try:
                 self.calculate_dimensions()
             except Exception as e:
+                e
                 self.nr_nodes_x = None
                 self.nr_nodes_z = None
                 self.nr_elements_x = None
@@ -340,6 +342,7 @@ class crt_grid(object):
             for i in range(0, sizes):
                 self.neighbors.append(int(fid.readline().strip()))
         except Exception as e:
+            e
             raise Exception('Not enough neighbors in file')
 
     def load_elem_file(self, elem_file):
@@ -649,6 +652,7 @@ class crt_grid(object):
 
         # determine neighbors
         print('Looking for neighbors')
+        time_start = time.time()
         for nr, element_nodes in enumerate(self.elements):
             # print('element {0}/{1}'.format(nr + 1, self.nr_of_elements))
             # print(element_nodes)
@@ -667,16 +671,34 @@ class crt_grid(object):
                         break
             self.element_neighbors_data.append(neighbors)
             self.element_neighbors_edges.append(neighbors_edges)
+        time_end = time.time()
+        print('elapsed time: {} s'.format(time_end - time_start))
         return self.element_neighbors_data
 
     def Wm(self):
-        """Return the smoothing regularization matrix Wm of the grid
+        r"""Return the smoothing regularization matrix Wm of the grid
+
+        See PhD Thesis Roland Blaschek, eq. 3.48ff
+
+        ..math::
+
+            \Psi_m = ||\underline{\underline{W}}_m \underline{m}||^2_2\\
+            = \sum_{j=1}^M \sum_{i=nb(j)} \alpha_{r_ij} |\frac{m_j -
+            m_i}{\Delta c_{ij}|^2 \Delta b_{ij} \Delta c_{ij}
+
+        Note that the anisotropic regularization parameter :math:`\alpha` is
+        not implemented yet.
+
+        i and j are swapped in the implementation.
+
+        See Fig 3.5 in the thesis.
 
         """
         centroids = self.get_element_centroids()
 
-        Wm = scipy.sparse.csr_matrix(
-            (self.nr_of_elements, self.nr_of_elements))
+        Wm = scipy.sparse.lil_matrix(
+            (self.nr_of_elements, self.nr_of_elements)
+        )
         # Wm = np.zeros((self.nr_of_elements, self.nr_of_elements))
         for i, nb in enumerate(self.element_neighbors):
             for j, edges in zip(nb, self.element_neighbors_edges[i]):
@@ -688,9 +710,61 @@ class crt_grid(object):
                 distance = np.linalg.norm(centroids[i] - centroids[j])
 
                 # main diagonal
-                Wm[i, i] += edge_length / distance
+                Wm[i, i] += np.sqrt(edge_length / distance)
                 # side diagonals
-                Wm[i, j] -= edge_length / distance
+                Wm[i, j] -= np.sqrt(edge_length / distance)
+        return Wm
+
+    def Wm_mgs(self, m, beta):
+        r"""Return the MGS regularization matrix Wm of the grid
+
+        See PhD Thesis Roland Blaschek, eq. 3.50
+
+        Note that alpha and f are set 1
+
+        Parameters
+        ----------
+        m : numpy.ndarray
+            model parameters to compute MGS matrix for
+        beta : float
+            MGS beta parameter
+
+        Returns
+        -------
+        Wm : scipy.sparse.csr_matrix
+            Sparse MGS matrix
+        """
+        assert m is not None
+        assert beta is not None
+        centroids = self.get_element_centroids()
+
+        Wm = scipy.sparse.csr_matrix(
+            (self.nr_of_elements, self.nr_of_elements)
+        )
+        for j, nb in enumerate(self.element_neighbors):
+            for i, edges in zip(nb, self.element_neighbors_edges[j]):
+                # side length
+                edge_coords = self.nodes['presort'][edges][:, 1:]
+                # b_ij
+                edge_length = np.linalg.norm(
+                    edge_coords[1, :] - edge_coords[0, :]
+                )
+                # c_ij
+                distance = np.linalg.norm(centroids[j] - centroids[i])
+
+                # |model difference|
+                m_diff = np.abs(m[i] - m[j])
+
+                term = np.sqrt(
+                    edge_length / distance * 1 / (
+                        (m_diff / distance) ** 2 + beta ** 2
+                    )
+                )
+
+                # main diagonal
+                Wm[j, j] += term
+                # side diagonals
+                Wm[j, i] -= term
         return Wm
 
     @staticmethod
