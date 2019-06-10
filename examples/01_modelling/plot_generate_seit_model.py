@@ -11,6 +11,7 @@ parameterizations.
 # imports
 import numpy as np
 import crtomo
+import reda
 
 ###############################################################################
 # we need a FE grid
@@ -32,8 +33,9 @@ r = eitman.plot_forward_models(maglim=[90, 110])
 print(r)
 
 # save to files
-r['rmag']['fig'].savefig('fwd_model_hom_rmag.png', dpi=300)
-r['rpha']['fig'].savefig('fwd_model_hom_rpha.png', dpi=300)
+with reda.CreateEnterDirectory('output_gen_seit_model'):
+    r['rmag']['fig'].savefig('fwd_model_hom_rmag.png', dpi=300)
+    r['rpha']['fig'].savefig('fwd_model_hom_rpha.png', dpi=300)
 
 ###############################################################################
 # now we can start parameterizing the subsurface
@@ -45,8 +47,9 @@ eitman.set_area_to_single_colecole(
 r = eitman.plot_forward_models(maglim=[90, 110], phalim=[-30, 0])
 
 # save to files
-r['rmag']['fig'].savefig('fwd_model_par_rmag.png', dpi=300)
-r['rpha']['fig'].savefig('fwd_model_par_rpha.png', dpi=300)
+with reda.CreateEnterDirectory('output_gen_seit_model'):
+    r['rmag']['fig'].savefig('fwd_model_par_rmag.png', dpi=300)
+    r['rpha']['fig'].savefig('fwd_model_par_rpha.png', dpi=300)
 
 ###############################################################################
 # add configurations
@@ -69,7 +72,8 @@ print(sip_sigs)
 ###############################################################################
 # plot modeled SIP signatures
 
-for key, obj in eitman.get_measurement_responses().items():
+with reda.CreateEnterDirectory('output_gen_seit_model'):
+    for key, obj in eitman.get_measurement_responses().items():
         obj.plot(filename='mod_sip_{}.png'.format(key), dtype='r')
 
 ###############################################################################
