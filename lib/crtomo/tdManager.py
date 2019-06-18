@@ -940,7 +940,7 @@ class tdMan(object):
                 shell=True,
                 stderr=subprocess.STDOUT,
             )
-            return_text
+            # print('Return text:', return_text)
             # restore the configuration
             self.crmod_cfg = cfg_save
             # if return_code != 0:
