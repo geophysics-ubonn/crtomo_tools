@@ -7,8 +7,8 @@ A single-frequency inversion
 Full processing of one frequency of one timestep of the data from Weigand and
 Kemna 2017 (Biogeosciences).
 
-This example uses the sEIT container to load multi-frequency data from the
-original measurement data.
+This example uses the CR container to load single-frequency data from a
+CRTomo-style volt.dat file.
 """
 ###############################################################################
 # imports
@@ -22,31 +22,13 @@ from reda.utils.fix_sign_with_K import fix_sign_with_K
 import reda.importers.eit_fzj as eit_fzj
 ###############################################################################
 # define an output directory for all files
-output_directory = 'output_single_freq_inversion_sEIT'
+output_directory = 'output_single_freq_inversion_CR'
 
 ###############################################################################
-# import the sEIT data set
-seit = reda.sEIT()
-seit.import_eit_fzj(
-    'data/bnk_raps_20130408_1715_03_einzel.mat',
-    'data/configs.dat'
-)
-###############################################################################
-with reda.CreateEnterDirectory(output_directory):
-    # export the data into CRTomo-style data files. Each frequency gets its own
-    # file
-    seit.export_to_crtomo_multi_frequency('result_raw_data')
-
-    # just for demonstration purposes, data could be imported from this
-    # directory:
-    # create a new sEIT container
-    seit_temp = reda.sEIT()
-    seit_temp.import_crtomo('result_raw_data')
-    # delete it to prevent any confusions
-    del(seit_temp)
-
-###############################################################################
+cr = reda.CR()
+cr.import_crtomo_data('data/volt.dat')
 # this is a container measurement, we need to compute geometric factors using
+
 # numerical modeling
 # Note that this only work if CRMod is available
 settings = {
@@ -56,45 +38,46 @@ settings = {
     'sink_node': '6467',
     '2D': True,
 }
-k = geom_facs.compute_K_numerical(seit.data, settings)
-seit.data = geom_facs.apply_K(seit.data, k)
-fix_sign_with_K(seit.data)
+k = geom_facs.compute_K_numerical(cr.data, settings)
+cr.data = geom_facs.apply_K(cr.data, k)
+fix_sign_with_K(cr.data)
+print(cr.data.iloc[0:5])
 ###############################################################################
 # apply correction factors, as described in Weigand and Kemna, 2017 BG
 corr_facs_nor = np.loadtxt('data/corr_fac_avg_nor.dat')
 corr_facs_rec = np.loadtxt('data/corr_fac_avg_rec.dat')
 corr_facs = np.vstack((corr_facs_nor, corr_facs_rec))
-seit.data, cfacs = eit_fzj.apply_correction_factors(seit.data, corr_facs)
+cr.data, cfacs = eit_fzj.apply_correction_factors(cr.data, corr_facs)
 
 ###############################################################################
 # apply some filters
 # import IPython
 # IPython.embed()
-seit.filter('r < 0')
-seit.filter('rho_a < 15 or rho_a > 35')
-seit.filter('rpha < - 40 or rpha > 3')
-seit.filter('rphadiff < -5 or rphadiff > 5')
-seit.filter('k > 400')
-seit.filter('rho_a < 0')
-seit.filter('a == 12 or b == 12 or m == 12 or n == 12')
-seit.filter('a == 13 or b == 13 or m == 13 or n == 13')
+cr.filter('r < 0')
+cr.filter('rho_a < 15 or rho_a > 35')
+cr.filter('rpha < - 40 or rpha > 3')
+cr.filter('rphadiff < -5 or rphadiff > 5')
+cr.filter('k > 400')
+cr.filter('rho_a < 0')
+cr.filter('a == 12 or b == 12 or m == 12 or n == 12')
+cr.filter('a == 13 or b == 13 or m == 13 or n == 13')
 
-# seit.filter_incomplete_spectra(flimit=300, percAccept=85)
-seit.print_data_journal()
-seit.print_log()
+# NOTE: this is also a single-frequency filtering,
+
+cr.print_data_journal()
+cr.print_log()
 ###############################################################################
-# export normal data to volt.dat file
-# note that this is not required for the subsequent code and could be
-# completely removed !!!
+# export to volt.dat file
+# note that this is not required for the subsequent code
 with reda.CreateEnterDirectory(output_directory):
-    seit.export_to_crtomo_one_frequency('volt.dat', 70.0, 'nor')
+    cr.export_crtomo('volt.dat', 'nor')
 
 ###############################################################################
 # alternatively: directly create a tdman object that represents a
 # single-frequency inversion with CRTomo
 import crtomo
 grid = crtomo.crt_grid('data/elem.dat', 'data/elec.dat')
-tdman = seit.export_to_crtomo_td_manager(grid, frequency=70.0, norrec='nor')
+tdman = cr.export_to_crtomo_td_manager(grid, norrec='nor')
 
 # set inversion settings
 tdman.crtomo_cfg['robust_inv'] = 'F'
