@@ -17,8 +17,8 @@ man = crtomo.tdMan(grid=grid)
 pid_mag, pid_pha = man.add_homogeneous_model(
     magnitude=100, phase=-5
 )
-import IPython
-IPython.embed()
+# import IPython
+# IPython.embed()
 
 man.parman.modify_area(
     pid_mag,

@@ -79,16 +79,32 @@ seitinv.crtomo_cfg['fic_sink'] = 'T'
 seitinv.crtomo_cfg['fic_sink_node'] = 6467
 seitinv.apply_crtomo_cfg()
 
-# save to a sip-directory
-seitinv.save_to_eitdir('sipdir')
 
 ###############################################################################
 # now run the inversion
 # we do this the "old" style using the command td_run_all_local, which is also
 # included in the crtomo_tools
-os.chdir('sipdir')
-subprocess.call('td_run_all_local -t 1 -n 2', shell=True)
+
+# only invert if the sipdir does not already exist
+if not os.path.isdir('sipdir'):
+    # save to a sip-directory
+    seitinv.save_to_eitdir('sipdir')
+
+    os.chdir('sipdir')
+    subprocess.call('td_run_all_local -t 1 -n 2', shell=True)
+    os.chdir('..')
 
 ###############################################################################
 # Now plot the results
+# at this point all plot scripts for sEIT results are located in old,
+# deprecated, packages, and thus we need to write a new plotting tools.
+# In the mean time you can enter each tomodir in the sipdir/invmod subdirectory
+# and plot it using the single-frequency plot command "td_plot"
+
 # TODO
+###############################################################################
+import crtomo
+import numpy as np
+sinv = crtomo.eitMan(seitdir='sipdir/')
+# sinv.extract_points('rpha', np.atleast_2d(np.array((-0.5, 13))))
+sinv.extract_points('rpha', np.atleast_2d(np.array((20, -5))))
