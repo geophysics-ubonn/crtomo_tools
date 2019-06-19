@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-A single-frequency inversion
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+A single-frequency inversion (sEIT container)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Full processing of one frequency of one timestep of the data from Weigand and
 Kemna 2017 (Biogeosciences).
