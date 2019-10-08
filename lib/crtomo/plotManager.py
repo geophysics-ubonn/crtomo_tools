@@ -6,10 +6,12 @@ import numpy as np
 import scipy.interpolate
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-from crtomo.mpl_setup import *
+# from crtomo.mpl_setup import *
+import crtomo.mpl
 import crtomo.grid as CRGrid
 import crtomo.parManager as pM
 import crtomo.nodeManager as nM
+mpl, plt = crtomo.mpl.setup()
 
 
 class plotManager(object):
@@ -151,23 +153,30 @@ class plotManager(object):
             return fig, ax, pc, cb
         return fig, ax, pc
 
-    def plot_nodes_contour_to_ax(self, ax, nid, **kwargs):
+    def plot_nodes_contour_to_ax(self, nid, **kwargs):
         """Plot node data to an axes object
 
         Parameters
         ----------
-        ax : axes object
-            axes to plot to
+        ax : axes object, optional
+            axes to plot to. If not provided, generate a new figure and axes
         nid : int
             node id pointing to the respective data set
         cmap : string, optional
             color map to use. Default: jet
-        vmin : float, optional
+        cbmin : float, optional
             Minimum colorbar value
-        vmax : float, optional
+        cbmax : float, optional
             Maximum colorbar value
+        plot_colorbar : bool, optional
+            if true, plot a colorbar next to the plot
 
         """
+        if 'ax' not in kwargs:
+            fig, ax = plt.subplots(1, 1)
+        else:
+            ax = kwargs.get('ax')
+
         x = self.grid.nodes['presort'][:, 1]
         z = self.grid.nodes['presort'][:, 2]
         ax.scatter(x, z)
@@ -175,8 +184,8 @@ class plotManager(object):
 
         # generate grid
         X, Z = np.meshgrid(
-            np.linspace(x.min(), x.max(), 100),
-            np.linspace(z.min(), z.max(), 100),
+            np.linspace(x.min(), x.max(), 1000),
+            np.linspace(z.min(), z.max(), 1000),
         )
 
         values = np.array(self.nodeman.nodevals[nid])
@@ -196,16 +205,19 @@ class plotManager(object):
         pc = ax.contourf(
             X, Z, cint_ma,
             cmap=kwargs.get('cmap', 'jet'),
-            vmin=kwargs.get('vmin', None),
-            vmax=kwargs.get('vmax', None),
+            vmin=kwargs.get('cbmin', None),
+            vmax=kwargs.get('cbmax', None),
         )
         # pc = ax.pcolormesh(
         #     X, Z, cint_ma,
         #     vmin=-40,
         #     vmax=40,
         # )
-        # cb = fig.colorbar(pc)
-        return pc
+        if kwargs.get('plot_colorbar', False):
+            fig = ax.get_figure()
+            cb = fig.colorbar(pc)
+            return fig, ax, pc, cb
+        return fig, ax, pc
 
     def plot_nodes_streamlines_to_ax(self, ax, cid, config):
         """
@@ -278,14 +290,13 @@ class plotManager(object):
         #                   coordinates='figure')
         # Q, qk
 
-
-#         pc = ax.pcolormesh(
-#             X, Z, cint_ma,
-#             vmin=-40,
-#             vmax=40,
-#         )
-#         # cb = fig.colorbar(pc)
-#         return pc
+        #         pc = ax.pcolormesh(
+        #             X, Z, cint_ma,
+        #             vmin=-40,
+        #             vmax=40,
+        #         )
+        #         # cb = fig.colorbar(pc)
+        #         return pc
 
     def plot_elements_to_ax(self, cid, ax=None, **kwargs):
         """Plot element data (parameter sets).
@@ -320,6 +331,8 @@ class plotManager(object):
             Default: None
         norm : norm object, optional
             the norm object for matplotlib plotting can be provided here
+        plot_colorbar : bool, optional
+            if true, plot a colorbar next to the plot
         cmap_name : string, optional
             name of the colorbar to use. Default is "viridis". To reverse
             colors, use the _r version "viridis_r"
@@ -337,8 +350,6 @@ class plotManager(object):
             color to use for values below the current cb-limit. Default: ?
         bad :
             color to use for nan-values. Default: ?
-        plot_colorbar : bool, optional
-            if true, plot a colorbar next to the plot
         title : string, optional
             plot title string
         xlabel : string, optional

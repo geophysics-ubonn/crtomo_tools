@@ -52,6 +52,7 @@ import time
 
 import numpy as np
 import scipy.sparse
+from scipy.spatial.distance import pdist
 
 import crtomo.mpl
 plt, mpl = crtomo.mpl.setup()
@@ -499,14 +500,49 @@ class crt_grid(object):
 
         Returns
         -------
-        Nx2 array
-            x/z coordinates for all (N) elements
+        centroids: numpy.ndarray
+            Nx2 array x/z coordinates for all (N) elements
         """
         centroids = np.vstack((
             np.mean(self.grid['x'], axis=1), np.mean(self.grid['z'], axis=1)
         )).T
 
         return centroids
+
+    @staticmethod
+    def _get_area_polygon(points_x, points_z):
+        """Return the area of a polygon. The node coordinates must be ordered,
+        but the direction does not matter - we return the abs-value
+
+        >>> points_x = [4,  4,  8,  8, -4, -4]
+        >>> points_z = [6, -4, -4, -8, -8, 6]
+        >>> self._get_area_polygon(points_x, points_z)
+        ... 128
+        """
+        area = 0
+        j = len(points_x) - 1
+        for i in range(len(points_x)):
+            area = area + (
+                points_x[j] + points_x[i]
+            ) * (points_z[j] - points_z[i])
+            j = i
+        return np.abs(area / 2)
+
+    def get_element_areas(self):
+        """return the areas of the elements
+
+        note that this formula is generic, see CRMod code for a simpler one
+
+        Returns
+        -------
+        areas : numpy.ndarray
+        """
+        areas = [
+            self._get_area_polygon(
+                points_x, points_z
+            ) for points_x, points_z in zip(self.grid['x'], self.grid['z'])
+        ]
+        return np.array(areas)
 
     def get_electrode_positions(self):
         """Return the electrode positions in an numpy.ndarray
@@ -518,6 +554,19 @@ class crt_grid(object):
             contains x positions, the second z positions.
         """
         return self.electrodes[:, 1:3]
+
+    def get_min_max_electrode_distances(self):
+        """Return the minimal and the maximal electrode distance of the grid
+
+        Returns
+        -------
+        amin : float
+            minimal electrode distance
+        amax : float
+            maximal electrode distance
+        """
+        distances = pdist(self.get_electrode_positions())
+        return distances.min(), distances.max()
 
     def get_internal_angles(self):
         """Compute all internal angles of the grid
@@ -776,7 +825,8 @@ class crt_grid(object):
                             char_lengths=None,
                             lines=None,
                             debug=False,
-                            workdir=None):
+                            workdir=None,
+                            force_neumann_only=False):
         """This is a simple wrapper for cr_trig_create to create simple surface
         grids.
 
@@ -812,6 +862,10 @@ class crt_grid(object):
         workdir: string, optional
             if set, use this directory to create the grid. Don't delete files
             afterwards.
+        force_neumann_only : bool, optional
+            sometimes we want to use only Neumann boundary conditions. Setting
+            this switch to True will force all boundaries to Neumann. Use only
+            if you know what you are doing! default: False
 
         Returns
         -------
@@ -868,6 +922,10 @@ class crt_grid(object):
 
         boundary_noflow = 11
         boundary_mixed = 12
+
+        if force_neumann_only:
+            boundary_mixed = 11
+
         # prepare extra lines
         extra_lines = []
         add_boundary_nodes_left = []
@@ -887,15 +945,14 @@ class crt_grid(object):
                 add_boundary_nodes_right.append(
                     (maximum_x, -line_depth, boundary_mixed)
                 )
-            # reverse direction of right nodes
+            # reverse direction of nodes on the right side of the grid
             add_boundary_nodes_left = np.array(add_boundary_nodes_left)[::-1]
             add_boundary_nodes_right = np.array(add_boundary_nodes_right)
 
         surface_electrodes = np.hstack((
             electrodes, boundary_noflow * np.ones((electrodes.shape[0], 1))
         ))
-        # import IPython
-        # IPython.embed()
+
         boundaries = np.vstack((
             (minimum_x, 0, boundary_noflow),
             surface_electrodes,
