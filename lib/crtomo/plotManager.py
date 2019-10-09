@@ -11,7 +11,7 @@ import crtomo.mpl
 import crtomo.grid as CRGrid
 import crtomo.parManager as pM
 import crtomo.nodeManager as nM
-mpl, plt = crtomo.mpl.setup()
+plt, mpl = crtomo.mpl.setup()
 
 
 class plotManager(object):
@@ -170,6 +170,8 @@ class plotManager(object):
             Maximum colorbar value
         plot_colorbar : bool, optional
             if true, plot a colorbar next to the plot
+        use_aspect: bool, optional
+            plot grid in correct aspect ratio. Default: True
 
         """
         if 'ax' not in kwargs:
@@ -179,7 +181,6 @@ class plotManager(object):
 
         x = self.grid.nodes['presort'][:, 1]
         z = self.grid.nodes['presort'][:, 2]
-        ax.scatter(x, z)
         xz = np.vstack((x, z)).T
 
         # generate grid
@@ -208,24 +209,33 @@ class plotManager(object):
             vmin=kwargs.get('cbmin', None),
             vmax=kwargs.get('cbmax', None),
         )
+
+        # plot electrodes
+        ax.scatter(
+            self.grid.electrodes[:, 1],
+            self.grid.electrodes[:, 2],
+        )
+
         # pc = ax.pcolormesh(
         #     X, Z, cint_ma,
         #     vmin=-40,
         #     vmax=40,
         # )
+        if kwargs.get('use_aspect', True):
+            ax.set_aspect('equal')
         if kwargs.get('plot_colorbar', False):
             fig = ax.get_figure()
             cb = fig.colorbar(pc)
             return fig, ax, pc, cb
         return fig, ax, pc
 
-    def plot_nodes_streamlines_to_ax(self, ax, cid, config):
+    def plot_nodes_streamlines_to_ax(self, ax, cid, **kwargs):
         """
 
         """
+        # node locations
         x = self.grid.nodes['presort'][:, 1]
         z = self.grid.nodes['presort'][:, 2]
-        # ax.scatter(x, z)
         xz = np.vstack((x, z)).T
 
         # generate grid
@@ -273,7 +283,8 @@ class plotManager(object):
             Z,
             current,
         )
-        ax.contour(
+
+        pc = ax.contourf(
             X,
             Z,
             cint,
@@ -297,6 +308,12 @@ class plotManager(object):
         #         )
         #         # cb = fig.colorbar(pc)
         #         return pc
+        if kwargs.get('use_aspect', True):
+            ax.set_aspect('equal')
+        if kwargs.get('plot_colorbar', False):
+            fig = ax.get_figure()
+            cb = fig.colorbar(pc)
+            return cb
 
     def plot_elements_to_ax(self, cid, ax=None, **kwargs):
         """Plot element data (parameter sets).
