@@ -225,7 +225,7 @@ class plotManager(object):
             ax.set_aspect('equal')
         if kwargs.get('plot_colorbar', False):
             fig = ax.get_figure()
-            cb = fig.colorbar(pc)
+            cb = fig.colorbar(pc, ax=ax)
             return fig, ax, pc, cb
         return fig, ax, pc
 
