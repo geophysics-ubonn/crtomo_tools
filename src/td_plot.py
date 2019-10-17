@@ -118,7 +118,7 @@ def handle_options():
     parser.add_option('-u',
                       '--unit',
                       dest='unit',
-                      help='Unit of length scale, typically meters (m) ' +
+                      help='Unit of length scale, typically meters (m) '
                       'or centimeters (cm)',
                       metavar='UNIT',
                       type='str',
@@ -316,7 +316,7 @@ def load_rho(name, column):
     '''
     try:
         content = np.loadtxt(name, skiprows=1, usecols=([column]))
-    except:
+    except Exception:
         raise ValueError('Given column to open does not exist.')
 
     return content
@@ -348,32 +348,32 @@ def plot_real(cid, ax, plotman, title, alpha, vmin, vmax,
     xlabel = 'x [' + xunit + ']'
     cm = 'jet_r'
     xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(
-            plotman,
-            cid,
-            xmin, xmax,
-            zmin, zmax,
-            vmin, vmax,
-            )
+        plotman,
+        cid,
+        xmin, xmax,
+        zmin, zmax,
+        vmin, vmax,
+    )
     # plot
     fig, ax, cnorm, cmap, cb, scalarMap = plotman.plot_elements_to_ax(
-            cid=cid,
-            cid_alpha=alpha,
-            ax=ax,
-            xmin=xmin,
-            xmax=xmax,
-            zmin=zmin,
-            zmax=zmax,
-            cblabel=cblabel,
-            cbnrticks=cbtiks,
-            title=title,
-            zlabel=zlabel,
-            xlabel=xlabel,
-            plot_colorbar=True,
-            cmap_name=cm,
-            no_elecs=elecs,
-            cbmin=vmin,
-            cbmax=vmax,
-            )
+        cid=cid,
+        cid_alpha=alpha,
+        ax=ax,
+        xmin=xmin,
+        xmax=xmax,
+        zmin=zmin,
+        zmax=zmax,
+        cblabel=cblabel,
+        cbnrticks=cbtiks,
+        title=title,
+        zlabel=zlabel,
+        xlabel=xlabel,
+        plot_colorbar=True,
+        cmap_name=cm,
+        no_elecs=elecs,
+        cbmin=vmin,
+        cbmax=vmax,
+    )
     return fig, ax, cnorm, cmap, cb
 
 
@@ -387,32 +387,32 @@ def plot_imag(cid, ax, plotman, title, alpha, vmin, vmax,
     xlabel = 'x [' + xunit + ']'
     cm = 'plasma_r'
     xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(
-            plotman,
-            cid,
-            xmin, xmax,
-            zmin, zmax,
-            vmin, vmax,
-            )
+        plotman,
+        cid,
+        xmin, xmax,
+        zmin, zmax,
+        vmin, vmax,
+    )
     # plot
     fig, ax, cnorm, cmap, cb, scalarMap = plotman.plot_elements_to_ax(
-            cid=cid,
-            cid_alpha=alpha,
-            ax=ax,
-            xmin=xmin,
-            xmax=xmax,
-            zmin=zmin,
-            zmax=zmax,
-            cblabel=cblabel,
-            cbnrticks=cbtiks,
-            title=title,
-            zlabel=zlabel,
-            xlabel=xlabel,
-            plot_colorbar=True,
-            cmap_name=cm,
-            no_elecs=elecs,
-            cbmin=vmin,
-            cbmax=vmax,
-            )
+        cid=cid,
+        cid_alpha=alpha,
+        ax=ax,
+        xmin=xmin,
+        xmax=xmax,
+        zmin=zmin,
+        zmax=zmax,
+        cblabel=cblabel,
+        cbnrticks=cbtiks,
+        title=title,
+        zlabel=zlabel,
+        xlabel=xlabel,
+        plot_colorbar=True,
+        cmap_name=cm,
+        no_elecs=elecs,
+        cbmin=vmin,
+        cbmax=vmax,
+    )
     return fig, ax, cnorm, cmap, cb
 
 
@@ -425,32 +425,32 @@ def plot_mag(cid, ax, plotman, title, unit, alpha, vmin, vmax,
     zlabel = 'z [' + xunit + ']'
     xlabel = 'x [' + xunit + ']'
     xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(
-            plotman,
-            cid,
-            xmin, xmax,
-            zmin, zmax,
-            vmin, vmax,
-            )
+        plotman,
+        cid,
+        xmin, xmax,
+        zmin, zmax,
+        vmin, vmax,
+    )
     # plot
     fig, ax, cnorm, cmap, cb, scalarMap = plotman.plot_elements_to_ax(
-            cid=cid,
-            ax=ax,
-            cid_alpha=alpha,
-            xmin=xmin,
-            xmax=xmax,
-            zmin=zmin,
-            zmax=zmax,
-            cblabel=cblabel,
-            cbnrticks=cbtiks,
-            title=title,
-            zlabel=zlabel,
-            xlabel=xlabel,
-            plot_colorbar=True,
-            no_elecs=elecs,
-            cbmin=vmin,
-            cbmax=vmax,
-            cmap_name='Spectral_r',
-            )
+        cid=cid,
+        ax=ax,
+        cid_alpha=alpha,
+        xmin=xmin,
+        xmax=xmax,
+        zmin=zmin,
+        zmax=zmax,
+        cblabel=cblabel,
+        cbnrticks=cbtiks,
+        title=title,
+        zlabel=zlabel,
+        xlabel=xlabel,
+        plot_colorbar=True,
+        no_elecs=elecs,
+        cbmin=vmin,
+        cbmax=vmax,
+        cmap_name='jet_r',
+    )
     return fig, ax, cnorm, cmap, cb
 
 
@@ -465,32 +465,32 @@ def plot_pha(cid, ax, plotman, title, alpha, vmin, vmax,
     cm = 'plasma'
     cm = 'jet_r'
     xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(
-            plotman,
-            cid,
-            xmin, xmax,
-            zmin, zmax,
-            vmin, vmax,
-            )
+        plotman,
+        cid,
+        xmin, xmax,
+        zmin, zmax,
+        vmin, vmax,
+    )
     # plot
     fig, ax, cnorm, cmap, cb, scalarMap = plotman.plot_elements_to_ax(
-            cid=cid,
-            ax=ax,
-            cid_alpha=alpha,
-            xmin=xmin,
-            xmax=xmax,
-            zmin=zmin,
-            zmax=zmax,
-            cblabel=cblabel,
-            cbnrticks=cbtiks,
-            title=title,
-            zlabel=zlabel,
-            xlabel=xlabel,
-            plot_colorbar=True,
-            cmap_name=cm,
-            no_elecs=elecs,
-            cbmin=vmin,
-            cbmax=vmax,
-            )
+        cid=cid,
+        ax=ax,
+        cid_alpha=alpha,
+        xmin=xmin,
+        xmax=xmax,
+        zmin=zmin,
+        zmax=zmax,
+        cblabel=cblabel,
+        cbnrticks=cbtiks,
+        title=title,
+        zlabel=zlabel,
+        xlabel=xlabel,
+        plot_colorbar=True,
+        cmap_name=cm,
+        no_elecs=elecs,
+        cbmin=vmin,
+        cbmax=vmax,
+    )
     return fig, ax, cnorm, cmap, cb
 
 
@@ -504,31 +504,31 @@ def plot_cov(cid, ax, plotman, title, vmin, vmax,
     xlabel = 'x [' + xunit + ']'
     cm = 'GnBu'
     xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(
-            plotman,
-            cid,
-            xmin, xmax,
-            zmin, zmax,
-            vmin, vmax,
-            )
+        plotman,
+        cid,
+        xmin, xmax,
+        zmin, zmax,
+        vmin, vmax,
+    )
     # plot
     fig, ax, cnorm, cmap, cb, scalarMap = plotman.plot_elements_to_ax(
-            cid=cid,
-            ax=ax,
-            xmin=xmin,
-            xmax=xmax,
-            zmin=zmin,
-            zmax=zmax,
-            cblabel=cblabel,
-            cbnrticks=cbtiks,
-            title=title,
-            zlabel=zlabel,
-            xlabel=xlabel,
-            plot_colorbar=True,
-            cmap_name=cm,
-            no_elecs=elecs,
-            cbmin=vmin,
-            cbmax=vmax,
-            )
+        cid=cid,
+        ax=ax,
+        xmin=xmin,
+        xmax=xmax,
+        zmin=zmin,
+        zmax=zmax,
+        cblabel=cblabel,
+        cbnrticks=cbtiks,
+        title=title,
+        zlabel=zlabel,
+        xlabel=xlabel,
+        plot_colorbar=True,
+        cmap_name=cm,
+        no_elecs=elecs,
+        cbmin=vmin,
+        cbmax=vmax,
+    )
     return fig, ax, cnorm, cmap, cb
 
 
@@ -543,31 +543,31 @@ def plot_ratio(cid, ax, plotman, title, alpha, vmin, vmax,
     # cm = 'brg'
     cm = 'RdYlGn'
     xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(
-            plotman,
-            cid,
-            xmin, xmax,
-            zmin, zmax,
-            vmin, vmax,
-            )
+        plotman,
+        cid,
+        xmin, xmax,
+        zmin, zmax,
+        vmin, vmax,
+    )
     # plot
     fig, ax, cnorm, cmap, cb, scalarMap = plotman.plot_elements_to_ax(
-            cid=cid,
-            ax=ax,
-            xmin=xmin,
-            xmax=xmax,
-            zmin=zmin,
-            zmax=zmax,
-            cblabel=cblabel,
-            cbnrticks=cbtiks,
-            title=title,
-            zlabel=zlabel,
-            xlabel=xlabel,
-            plot_colorbar=True,
-            cmap_name=cm,
-            no_elecs=elecs,
-            cbmin=vmin,
-            cbmax=vmax,
-            )
+        cid=cid,
+        ax=ax,
+        xmin=xmin,
+        xmax=xmax,
+        zmin=zmin,
+        zmax=zmax,
+        cblabel=cblabel,
+        cbnrticks=cbtiks,
+        title=title,
+        zlabel=zlabel,
+        xlabel=xlabel,
+        plot_colorbar=True,
+        cmap_name=cm,
+        no_elecs=elecs,
+        cbmin=vmin,
+        cbmax=vmax,
+    )
     return fig, ax, cnorm, cmap, cb
 
 
@@ -597,9 +597,9 @@ def check_minmax(plotman, cid, xmin, xmax, zmin, zmax, vmin, vmax):
     if zmax is None:
         zmax = plotman.grid.grid['z'].max()
     if isinstance(cid, int):
-            subdata = plotman.parman.parsets[cid]
+        subdata = plotman.parman.parsets[cid]
     else:
-            subdata = cid
+        subdata = cid
     if vmin is None:
         vmin = subdata.min()
     if vmax is None:
@@ -630,24 +630,27 @@ def getfigsize(plotman):
 def create_non_dcplots(plotman, ax, mag, pha, options, alpha):
     if pha != []:
         cid = plotman.parman.add_data(pha)
-        plot_pha(cid, ax[0, 1], plotman, 'Phase', alpha,
-                 options.pha_vmin, options.pha_vmax,
-                 options.xmin, options.xmax, options.zmin, options.zmax,
-                 options.unit, options.pha_cbtiks, options.no_elecs,
-                 )
+        plot_pha(
+            cid, ax[0, 1], plotman, 'Phase', alpha,
+            options.pha_vmin, options.pha_vmax,
+            options.xmin, options.xmax, options.zmin, options.zmax,
+            options.unit, options.pha_cbtiks, options.no_elecs,
+        )
         [real, imag] = calc_complex(mag, pha)
         cid_re = plotman.parman.add_data(real)
         cid_im = plotman.parman.add_data(imag)
-        plot_real(cid_re, ax[0, 2], plotman, 'Real Part', alpha,
-                  options.real_vmin, options.real_vmax,
-                  options.xmin, options.xmax, options.zmin, options.zmax,
-                  options.unit, options.real_cbtiks, options.no_elecs,
-                  )
-        plot_imag(cid_im, ax[0, 3], plotman, 'Imaginary Part', alpha,
-                  options.imag_vmin, options.imag_vmax,
-                  options.xmin, options.xmax, options.zmin, options.zmax,
-                  options.unit, options.imag_cbtiks, options.no_elecs,
-                  )
+        plot_real(
+            cid_re, ax[0, 2], plotman, 'Real Part', alpha,
+            options.real_vmin, options.real_vmax,
+            options.xmin, options.xmax, options.zmin, options.zmax,
+            options.unit, options.real_cbtiks, options.no_elecs,
+        )
+        plot_imag(
+            cid_im, ax[0, 3], plotman, 'Imaginary Part', alpha,
+            options.imag_vmin, options.imag_vmax,
+            options.xmin, options.xmax, options.zmin, options.zmax,
+            options.unit, options.imag_cbtiks, options.no_elecs,
+        )
     else:
         ax[0, 1].axis('off')
         ax[0, 2].axis('off')
