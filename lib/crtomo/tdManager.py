@@ -940,6 +940,9 @@ class tdMan(object):
                 shell=True,
                 stderr=subprocess.STDOUT,
             )
+            if not silent:
+                print(return_text)
+
             # print('Return text:', return_text)
             # restore the configuration
             self.crmod_cfg = cfg_save
@@ -964,6 +967,30 @@ class tdMan(object):
               silent=False,
               ):
         """Forward model the tomodir and read in the results
+
+        Parameters
+        ----------
+        voltages : bool, optional
+            if True, compute voltages for registered quadrupoles. Default: True
+        sensitivities : bool, optional
+            if True, compute sensitivities for registered quadrupoles. Default:
+            False
+        potentials : bool, optional
+            if True, compute potential fields for all current injections.
+            Default: False
+            TODO: check if implemented in the Python wrapper
+        output_directory : str|None, optional
+            if this is a string, treat it as an output directory in which the
+            tomodir used for the modeling is saved.
+            Will raise an exception if the output directory already exists.
+            Default: None
+        silent : bool, optional
+            if True, suppress most of the output. Default: False
+
+        Returns
+        -------
+        None
+
         """
         self._check_state()
         if self.can_model:
