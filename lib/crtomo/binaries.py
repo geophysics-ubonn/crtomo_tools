@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # *-* coding: utf-8 *-*
-"""provide a simple OS agnostic interface to various binary paths, e.g. for
+"""provide a simple OS-agnostic interface to various binary paths, e.g., for
 GMSH oder CRTomo.
 
-At the moment all paths are hardcoded, but this interface could be extended
-using a configuration file.
+At the moment all paths are hard-coded, but this interface could be extended
+to using a configuration file.
 
-At the moment the following binaries have hardcoded default paths:
+At the moment the following binaries have hard-coded default paths:
 
     * gmsh
     * CRTomo
@@ -101,4 +101,3 @@ def get(binary_name):
         valid_file = shutil.which(filename)
         if valid_file:
             return os.path.abspath(valid_file)
-
