@@ -170,7 +170,7 @@ class eitMan(object):
 
         if self.grid is None:
             raise Exception(
-                'You must provide either a grid instance or ' +
+                'You must provide either a grid instance or '
                 'elem_file/elec_file file paths'
             )
 
@@ -380,17 +380,32 @@ class eitMan(object):
             self.a['cre'][frequency_key] = pid_cre
             self.a['cim'][frequency_key] = pid_cim
 
-    def extract_polygon_area(self, label, polygon):
+    def extract_polygon_area(self, label, polygon_points):
+        """DEFUNCT
+
+        Parameters
+        ----------
+        label : str
+            the label (data type) to extract. This corresponds to a key in
+            eitMan.assignments. Possible values are rmag, rpha, cre,
+            cim
+        polygon_points : list of (x,y) floats
+            list of points that form the polygon
+
+        Returns
+        -------
+
+        """
         if isinstance(label, str):
             label = [label, ]
 
         data_list = []
         for label_key in label:
             value_list = {}
-            for key, item in sorted(self.tds.items()):
-                values = item.parman.extract_points(
-                    pid=self.a[label_key][key],
-                    points=points
+            for frequency, tdobj in sorted(self.tds.items()):
+                values = tdobj.parman.extract_polygon_area(
+                    pid=self.a[label_key][frequency],
+                    polygon_points=polygon_points
                 )
                 value_list[key] = values
             df = pd.DataFrame(value_list)
@@ -403,7 +418,7 @@ class eitMan(object):
         return df_all
 
     def extract_points(self, label, points):
-        """Extract data points along a given line
+        """Extract data points (i.e., SIP spectra) for one or more points.
 
         Parameters
         ----------
@@ -422,6 +437,8 @@ class eitMan(object):
         """
         if isinstance(label, str):
             label = [label, ]
+
+        points = np.atleast_2d(points)
 
         data_list = []
         for label_key in label:
@@ -589,4 +606,3 @@ class eitMan(object):
                     nr, frequency
                 )
             )
-
