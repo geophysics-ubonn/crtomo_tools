@@ -417,6 +417,30 @@ class eitMan(object):
 
         return df_all
 
+    def extract_all_spectra(self, label):
+        """Extract all SIP spectra, and return frequencies and a numpy array
+        Parameters
+        ----------
+        label : str
+            the label (data type) to extract. This corresponds to a key in
+            eitMan.assignments. Possible values are rmag, rpha, cre,
+            cim
+
+        """
+        if isinstance(label, str):
+            label = [label, ]
+
+        data_list = {}
+        for label_key in label:
+            frequencies = []
+            value_list = []
+            for frequency, item in sorted(self.tds.items()):
+                pid = self.a[label_key][frequency]
+                value_list.append(item.parman.parsets[pid])
+                frequencies.append(frequency)
+            data_list[label_key] = (frequencies, np.array(value_list))
+        return data_list
+
     def extract_points(self, label, points):
         """Extract data points (i.e., SIP spectra) for one or more points.
 
