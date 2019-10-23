@@ -428,8 +428,9 @@ class plotManager(object):
             cmap_name,
             kwargs.get('cbsegments', None)
         )
-        over = kwargs.get('over', 'orange')
-        under = kwargs.get('under', 'mediumblue')
+        over = kwargs.get('over', cmap(1.0))
+        under = kwargs.get('under', cmap(0.0))
+
         bad = kwargs.get('bad', 'white')
         cmap.set_over(over)
         cmap.set_under(under)
@@ -438,8 +439,8 @@ class plotManager(object):
         # normalize data
         data_min = kwargs.get('cbmin', subdata.min())
         data_max = kwargs.get('cbmax', subdata.max())
-        if(data_min is not None and data_max is not None and
-           data_min == data_max):
+        if(data_min is not None and data_max is not None
+                and data_min == data_max):
             data_min -= 1
             data_max += 1
         cnorm = mpl.colors.Normalize(vmin=data_min, vmax=data_max)
