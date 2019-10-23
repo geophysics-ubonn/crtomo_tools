@@ -20,14 +20,15 @@ def is_tomodir(directory):
         True if the supplied directory is a tomodir directory
     """
     if os.path.isdir(directory):
-        if(os.path.isdir(directory + "/exe") and
-           os.path.isdir(directory + "/config") and
-           os.path.isdir(directory + "/rho") and
-           os.path.isdir(directory + "/inv") and
-           os.path.isdir(directory + "/mod")):
-                return True
+        if(os.path.isdir(
+            directory + "/exe") and os.path.isdir(
+                directory + "/config") and os.path.isdir(
+                    directory + "/rho") and os.path.isdir(
+                        directory + "/inv") and os.path.isdir(
+                            directory + "/mod")):
+            return True
         else:
-                return False
+            return False
     else:
         return False
 
@@ -39,15 +40,15 @@ def td_is_finished(tomodir):
 
     Parameters
     ----------
-    tomodir: string
+    tomodir : string
         Directory to check
 
     Returns
     -------
-    crmod_is_finished: bool
+    crmod_is_finished : bool
         True if a successful CRMod result is contained in the tomodir
         directory.
-    crtomo_is_finished: bool
+    crtomo_is_finished : bool
         True if a successful CRTomo inversion results is contained in the
         tomodir directory.
     """
