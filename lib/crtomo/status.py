@@ -117,6 +117,10 @@ def is_sipdir(directory):
     return is_sipdir
 
 
+def seitdir_is_finished(seitdir):
+    return sipdir_is_finished(seitdir)
+
+
 def sipdir_is_finished(sipdir):
     """Return the state of modeling and inversion for a given SIP dir. The
     result does not take into account sensitivities or potentials, as
