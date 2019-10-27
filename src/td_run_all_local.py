@@ -100,6 +100,16 @@ def check_if_needs_modeling(tomodir):
 
 def check_if_needs_inversion(tomodir):
     """check of we need to run CRTomo in a given tomodir
+
+    Parameters
+    ----------
+    tomodir : str
+        Tomodir to check
+
+    Returns
+    -------
+    needs_inversion : bool
+        True if not finished yet
     """
     required_files = (
         'grid' + os.sep + 'elem.dat',
@@ -176,6 +186,9 @@ def run_CRMod(tomodirs, options):
 
 
 def _run_crtomo_in_tomodir(tomodir):
+    # check once again if the TD is not yet finished
+    if not check_if_needs_inversion(tomodir):
+        return
     pwd = os.getcwd()
     os.chdir(tomodir + os.sep + 'exe')
     subprocess.call(crtomo_binary, shell=True)
