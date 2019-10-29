@@ -47,6 +47,15 @@ def handle_cmd_options():
         type='int',
         default=None,
     )
+
+    parser.add_option(
+        "-r", "--reverse",
+        dest="reverse_lists",
+        help="Reverse directory lists before working with them"
+        type='bool',
+        default=False,
+    )
+
     (options, args) = parser.parse_args()
     return options
 
@@ -208,6 +217,10 @@ def main():
     print('modeling:', needs_modeling)
     print('inversion:', needs_inversion)
     print('-' * 20)
+
+    if options.reverse_lists:
+        needs_modeling = reversed(needs_modeling)
+        needs_inversion = reversed(needs_inversion)
 
     run_CRMod(needs_modeling, options)
     run_CRTomo(needs_inversion, options)
