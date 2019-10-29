@@ -51,9 +51,8 @@ def handle_cmd_options():
     parser.add_option(
         "-r", "--reverse",
         dest="reverse_lists",
-        help="Reverse directory lists before working with them"
-        type='bool',
-        default=False,
+        help="Reverse directory lists before working with them",
+        action='store_true',
     )
 
     (options, args) = parser.parse_args()
