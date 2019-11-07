@@ -187,7 +187,7 @@ class tdMan(object):
         self._initialize_components(kwargs)
 
     def __repr__(self):
-        """Give meaningful information on current state of the object"""
+        """Return meaningful information on current state of the object"""
         str_list = []
         str_list.append(80 * '-')
         str_list.append('tdMan instance')
@@ -308,6 +308,20 @@ class tdMan(object):
                 self.configs.load_crmod_config(config_file)
             # load inversion results
             self.read_inversion_results(tomodir)
+
+    def reset_data(self):
+        """Attempts to reset (delete) all inversion data currently stored in
+        the tdMan instance. This is mostly attempted for the impedance data
+        (magnitudes, phases, conductivity real and imaginary parts), but could
+        be extended to other data (this is currently not done due to complexity
+                and missing demand).
+        Forward models are also deleted
+        """
+        # deletes data actually stored
+        self.parman.reset()
+
+        for key in ('rmag', 'rpha', 'cre', 'cim'):
+            self.a[key] = {}
 
     def create_tomodir(self, directory):
         """Create a tomodir subdirectory structure in the given directory
