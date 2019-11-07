@@ -192,6 +192,9 @@ class eitMan(object):
         kwargs = {}
 
         for frequency in frequencies:
+            if frequency in self.tds:
+                # already present, do not generate a new tdMan instance
+                continue
             if self.crtomo_cfg is not None:
                 kwargs['crtomo_cfg'] = self.crtomo_cfg.copy()
             td = CRman.tdMan(
