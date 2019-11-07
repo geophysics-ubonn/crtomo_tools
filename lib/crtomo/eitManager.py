@@ -353,6 +353,11 @@ class eitMan(object):
             outdir = invmod_dir + os.sep + '{0:02}_{1:.6f}'.format(nr, key)
             self.tds[key].save_to_tomodir(outdir)
 
+    def reset_tds(self):
+        """Reset the data stored in all tds"""
+        for frequency, td in self.tds.items():
+            td.reset_data()
+
     def load_inversion_results(self, sipdir):
         """Given an sEIT inversion directory, load inversion results and store
         the corresponding parameter ids in self.assignments
