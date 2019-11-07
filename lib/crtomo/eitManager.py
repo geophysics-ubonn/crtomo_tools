@@ -175,6 +175,19 @@ class eitMan(object):
             )
 
     def _init_frequencies(self, frequencies, configs_abmn=None):
+        """Initialize the tdMan instances associated with each frequency
+
+        Note that existing tds will not be deleted/overwritten
+
+        Parameters
+        ----------
+        frequencies : Nx1 numpy.ndarray
+            Frequencies in ascending order
+        configs_abmn : None|numpy.ndarray (Mx4)
+            Measurement configurations to provide to the generated tdMan
+            instances
+
+        """
         self.frequencies = frequencies
         kwargs = {}
 
