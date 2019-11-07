@@ -381,8 +381,18 @@ class eitMan(object):
                 if label not in self.assigments:
                     self.a[label] = {}
 
-            tdir = sipdir + os.sep + 'invmod' + os.sep + '{:02}_{:.6f}'.format(
-                nr, frequency_key) + os.sep
+            # some old inversion directories are one-indexed, while new ones
+            # start with zero. As such, try both approaches
+            for test_nr in (nr, nr + 1):
+                tdir = ''.join((
+                    sipdir + os.sep,
+                    'invmod' + os.sep,
+                    '{:02}_{:.6f}'.format(test_nr, frequency_key) + os.sep
+                ))
+                if os.path.isdir(tdir):
+                    break
+            if not os.path.isdir(tdir):
+                raise Exception('tdir not found: {}'.format(tdir))
 
             rmag_file = sorted(glob(tdir + 'inv/*.mag'))[-1]
             rmag_data = np.loadtxt(rmag_file, skiprows=1)[:, 2]
@@ -394,10 +404,19 @@ class eitMan(object):
             pid_rpha = item.parman.add_data(rpha_data)
             self.a['rpha'][frequency_key] = pid_rpha
 
-            sigma_file = sorted(glob(tdir + 'inv/*.sig'))[-1]
-            sigma_data = np.loadtxt(sigma_file, skiprows=1)
-            pid_cre = item.parman.add_data(sigma_data[:, 0])
-            pid_cim = item.parman.add_data(sigma_data[:, 1])
+            sigma_files = sorted(glob(tdir + 'inv/*.sig'))
+            if len(sigma_files) > 0:
+                sigma_data = np.loadtxt(sigma_files[-1], skiprows=1)
+                pid_cre = item.parman.add_data(sigma_data[:, 0])
+                pid_cim = item.parman.add_data(sigma_data[:, 1])
+            else:
+                # very old CRTomo runs...
+                crho = item.parman.parsets[
+                    pid_rmag
+                ] * np.exp(1j * item.parman.parsets[pid_rpha] / 1000)
+                csigma = 1 / crho
+                pid_cre = item.parman.add_data(csigma.real)
+                pid_cim = item.parman.add_data(csigma.imag)
             self.a['cre'][frequency_key] = pid_cre
             self.a['cim'][frequency_key] = pid_cim
 
