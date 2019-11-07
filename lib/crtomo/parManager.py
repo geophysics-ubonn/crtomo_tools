@@ -29,13 +29,23 @@ class ParMan(object):
         self.metadata = {}
         # we assign indices to each data set stored in the manager. This index
         # should be unique over the life time of each instance. Therefore we
-        # increase the counter for each added data set. We also ensure
-        # conflicts when data sets are removed.
+        # increase the counter for each added data set. This way we also
+        # prevent conflicts when data sets are removed.
         self.index = -1
 
     def _get_next_index(self):
         self.index += 1
         return self.index
+
+    def reset(self):
+        """Resets the ParMan instance. This process deletes all data and
+        metadata, and resets the index variable
+        """
+        self.index = -1
+        del(self.parsets)
+        self.parsets = {}
+        del(self.metadata)
+        self.metadata = {}
 
     def add_data(self, data, metadata=None):
         """Add data to the parameter set
@@ -81,7 +91,7 @@ class ParMan(object):
                 subdata = subdata.T
             else:
                 raise Exception(
-                    'Number of values does not match the number of ' +
+                    'Number of values does not match the number of '
                     'elements in the grid'
                 )
 
@@ -89,8 +99,8 @@ class ParMan(object):
         K = subdata.shape[0]
         if metadata is not None:
             if K > 1:
-                if(not isinstance(metadata, (list, tuple)) or
-                   len(metadata) != K):
+                if(not isinstance(
+                   metadata, (list, tuple)) or len(metadata) != K):
                     raise Exception('metadata does not fit the provided data')
             else:
                 # K == 1
