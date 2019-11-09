@@ -284,7 +284,7 @@ class tdMan(object):
         if config_file is not None:
             self.configs.load_crmod_config(config_file)
 
-        # we can load data eiterh from file, or directly from a numpy array
+        # we can load data either from file, or directly from a numpy array
         voltage_file = kwargs.get('volt_file', None)
         voltage_data = kwargs.get('volt_data', voltage_file)
 

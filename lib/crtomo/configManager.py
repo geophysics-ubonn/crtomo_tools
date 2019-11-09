@@ -20,36 +20,28 @@ Literature
   GEOPHYSICS 36, no. 5 (January 1, 1971): 943–59. doi:10.1190/1.1440226.
 
 """
-import itertools
-
-import scipy.interpolate as si
 import numpy as np
 import pandas as pd
 
 import crtomo.mpl
 plt, mpl = crtomo.mpl.setup()
-import reda.utils.geometric_factors as edfK
-import reda.utils.filter_config_types as fT
 
 import reda.configs.configManager as reda_config_mgr
 
 
 class ConfigManager(reda_config_mgr.ConfigManager):
     def __init__(self, **kwargs):
+        """
+
+        nr_of_electrodes : int
+            Number of electrodes
+        """
+        # assert 'nr_of_electrodes' in kwargs
         super().__init__(**kwargs)
         # store measurements in a list of size N arrays
         self.measurements = {}
         # global counter for measurements
         self.meas_counter = - 1
-
-    def clear_measurements(self):
-        """Remove all measurements from self.measurements. Reset the
-        measurement counter. All ID are invalidated.
-        """
-        keys = list(self.measurements.keys())
-        for key in keys:
-            del(self.measurements[key])
-        self.meas_counter = -1
 
     def clear_measurements(self):
         """Remove all measurements from self.measurements. Reset the
@@ -118,10 +110,39 @@ class ConfigManager(reda_config_mgr.ConfigManager):
         else:
             return return_ids
 
-    def plot_error_pars(self, mid):
-        """ ???
+    def remove_using_nr_injections(self, min_nr_of_injections):
+        """Remove all measurements with a current injection that is not used a
+        minimum number of times.
+
+        This is useful to optimize measurement time for multi-channel systems,
+        such as the IRIS Instruments Syscal Pro. The device can theoretically
+        only facilitate the full number of channels if a corresponding number
+        of voltage measurements is requested for a given current injection. As
+        such, it can be useful to remove measurements with unique current
+        injection dipoles. Note that other factors determine if all channels
+        are actually used. Please refer to the device manual for
+        device-specific information.
+
+        Parameters
+        ----------
+        min_nr_of_injections : int
+            Minimum number a given current injection should have to keep it
 
         """
+        if min_nr_of_injections <= 0:
+            return
+
+        df = pd.DataFrame(self.configs)
+        # group over A, B
+        g = df.groupby([0, 1])
+        df_filtered = g.filter(lambda x: x.shape[0] >= min_nr_of_injections)
+        self.configs = df_filtered.values
+
+    def plot_error_pars(self, mid):
+        """ ??? DEFUNCT
+
+        """
+        R = None
         fig, axes = plt.subplots(1, 2, figsize=(10, 6))
 
         def plot_error_pars(axes, a, b, R, label=''):
@@ -199,17 +220,17 @@ class ConfigManager(reda_config_mgr.ConfigManager):
             Measurement id for phase data
         """
         if isinstance(data_source, str):
-            with open(filename, 'r') as fid:
+            with open(data_source, 'r') as fid:
                 nr_of_configs = int(fid.readline().strip())
                 measurements = np.loadtxt(fid)
                 if nr_of_configs != measurements.shape[0]:
                     raise Exception(
-                        'indicated number of measurements does not equal ' +
+                        'indicated number of measurements does not equal '
                         'to actual number of measurements'
                     )
         elif isinstance(data_source, pd.DataFrame):
             measurements = data_source[
-                ['a', 'b', 'm', 'n', 'r' , 'rpha']
+                ['a', 'b', 'm', 'n', 'r', 'rpha']
             ].values
         else:
             # assume numpy array
@@ -234,14 +255,13 @@ class ConfigManager(reda_config_mgr.ConfigManager):
             # check that configs match
             if not np.all(abmn == self.configs):
                 raise Exception(
-                    'previously stored configurations do not match new ' +
+                    'previously stored configurations do not match new '
                     'configurations'
                 )
         # add data
         cid_mag = self.add_measurements(rmag)
         cid_pha = self.add_measurements(rpha)
         return cid_mag, cid_pha
-
 
     def load_crmod_volt(self, filename):
         """Load a CRMod measurement file (commonly called volt.dat)
