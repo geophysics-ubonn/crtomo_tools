@@ -131,6 +131,34 @@ class crt_grid(object):
             zcenter = np.mean(self.zcoords)
             return (xcenter, zcenter)
 
+        def length_line(self):
+            assert len(self.xcoords) == 2
+            length = np.sqrt(
+                np.sum(
+                    np.diff(self.xcoords) ** 2 + np.diff(self.zcoords) ** 2
+                )
+            )
+            return length
+
+        def vector_line(self):
+            """Return the vector of the boundary element"""
+            assert len(self.xcoords) == 2
+            diff_x = self.xcoords[1] - self.xcoords[0]
+            diff_z = self.zcoords[1] - self.zcoords[0]
+            vec = np.hstack((diff_x, diff_z))
+            return vec
+
+        def vector_norm_line(self):
+            return self.vector_line() / self.length_line()
+
+        def outer_normal_line(self):
+            vector = self.vector_norm_line()
+            # element coords are provided counter-clockwise.
+            # for outer normal, we need to rotate by 90 degree to the left
+            vector[1] *= -1
+            # swap x and z coords
+            return vector[::-1]
+
     def add_grid_data(self, data):
         """ Return id
         """
@@ -335,13 +363,17 @@ class crt_grid(object):
         """
         # get number of boundary elements
         # types 11 and 12 are boundary elements
-        sizes = sum([len(self.element_data[key]) for key in (11, 12) if
-                     self.element_data.get(key, None) is not None])
-        self.neighbors = []
-
+        self.neighbors = {}
         try:
-            for i in range(0, sizes):
-                self.neighbors.append(int(fid.readline().strip()))
+            for key in (11, 12):
+                if key not in self.element_data.keys():
+                    continue
+                length = len(self.element_data[key])
+                self.neighbors[key] = []
+                for i in range(length):
+                    self.neighbors[key].append(
+                        int(fid.readline().strip())
+                    )
         except Exception as e:
             e
             raise Exception('Not enough neighbors in file')
