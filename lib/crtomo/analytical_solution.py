@@ -13,9 +13,9 @@ def pot_ana(r, rho):
     """Return the analytical potential in distance r over a homogeneous
     half-space
     """
-    I = 1.0
+    current = 1.0
     sigma = 1.0 / rho
-    phi = np.divide(I, (2.0 * np.pi * sigma * r))
+    phi = np.divide(current, (2.0 * np.pi * sigma * r))
     return phi
 
 
@@ -38,6 +38,7 @@ def compute_potentials_analytical_hs(grid, configs_raw, rho):
         List containing N arrays, each of size M (nr of grid nodes)
 
     """
+    assert isinstance(rho, (float, int))
     potentials = []
     nodes_sorted = grid.nodes['sorted']
     nodes_raw = grid.nodes['sorted']
