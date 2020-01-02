@@ -15,7 +15,9 @@ def pot_ana(r, rho):
     """
     current = 1.0
     sigma = 1.0 / rho
+    old_err_state = np.seterr(divide='ignore')
     phi = np.divide(current, (2.0 * np.pi * sigma * r))
+    np.seterr(**old_err_state)
     return phi
 
 
@@ -44,10 +46,8 @@ def compute_potentials_analytical_hs(grid, configs_raw, rho):
     nodes_raw = grid.nodes['sorted']
 
     for config in configs_raw:
-        print('potential configs', config)
         # determine distance of all nodes to both electrodes
         e1_node = grid.get_electrode_node(config[0])
-        print('e1_node', e1_node)
         electrode1 = nodes_sorted[e1_node][1:3]
         # electrode1 = nodes_sorted[config[0]][1:3]
         r1 = np.sqrt(
@@ -56,7 +56,6 @@ def compute_potentials_analytical_hs(grid, configs_raw, rho):
         )
         # electrode2 = nodes_sorted[config[1]][1:3]
         e2_node = grid.get_electrode_node(config[1])
-        print('e2_node', e2_node)
         electrode2 = nodes_sorted[e2_node][1:3]
         r2 = np.sqrt(
             (nodes_raw[:, 1] - electrode2[0]) ** 2 +
@@ -87,12 +86,8 @@ def compute_voltages(grid, configs_raw, potentials_raw):
     # configs = configs_raw - 1
     voltages = []
     for config, potentials in zip(configs_raw, potentials_raw):
-        print('config', config)
         e3_node = grid.get_electrode_node(config[2])
         e4_node = grid.get_electrode_node(config[3])
-        print(e3_node, e4_node)
-        print('pot1', potentials[e3_node])
-        print('pot2', potentials[e4_node])
         voltage = potentials[e3_node] - potentials[e4_node]
         voltages.append(voltage)
     return voltages
