@@ -417,7 +417,8 @@ class crt_grid(object):
             np.savetxt(fid, self.electrodes[:, 0].astype(int) + 1, fmt='%i')
 
     def _write_neighbors(self, fid):
-        np.savetxt(fid, self.neighbors, fmt='%i')
+        for key in (11, 12):
+            np.savetxt(fid, self.neighbors[key], fmt='%i')
 
     def _write_elements(self, fid):
         for dtype in self.header['element_infos'][:, 0]:
