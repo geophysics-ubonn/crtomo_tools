@@ -418,7 +418,8 @@ class crt_grid(object):
 
     def _write_neighbors(self, fid):
         for key in (11, 12):
-            np.savetxt(fid, self.neighbors[key], fmt='%i')
+            if key in self.neighbors:
+                np.savetxt(fid, self.neighbors[key], fmt='%i')
 
     def _write_elements(self, fid):
         for dtype in self.header['element_infos'][:, 0]:
