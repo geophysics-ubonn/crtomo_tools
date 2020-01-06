@@ -260,3 +260,34 @@ class crtomo_config(dict):
         }
         return_text = help_dict.get(key, 'no help available')
         return return_text
+
+    def import_from_file(self, filename):
+        """Import a CRTomo configuration from an existing crtomo.cfg file
+
+        Paramaters
+        ----------
+        filename : str
+            Path to crtomo.cfg file
+
+        Returns
+        -------
+        None ?
+        """
+        lines_raw = [x.strip() for x in open(filename, 'r').readlines()]
+        key_index = 0
+        for line in lines_raw:
+            # ignore comments
+            if line.startswith('#'):
+                continue
+            else:
+                # check if we have inline comments
+                index_inline_comment = line.find('!')
+                if index_inline_comment != -1:
+                    line = line[0:index_inline_comment].strip()
+            key = self.key_order[key_index]
+            if key == -1:
+                pass
+            else:
+                self[key] = line
+            # increment the key_index
+            key_index += 1
