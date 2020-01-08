@@ -302,6 +302,10 @@ class tdMan(object):
         # if we load from a tomodir, also load configs and inversion results
         if tomodir is not None:
             print('importing tomodir results')
+            # if present, read crtomo.cfg file
+            crtomo_cfg_file = tomodir + os.sep + 'exe' + os.sep + 'crtomo.cfg'
+            if os.path.isfile(crtomo_cfg_file):
+                self.crtomo_cfg.import_from_file(crtomo_cfg_file)
             # forward configurations
             config_file = tomodir + os.sep + 'config' + os.sep + 'config.dat'
             if os.path.isfile(config_file):
