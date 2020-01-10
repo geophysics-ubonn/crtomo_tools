@@ -64,7 +64,6 @@ import numpy as np
 import pandas as pd
 
 import crtomo.mpl
-plt, mpl = crtomo.mpl.setup()
 
 import crtomo.binaries as CRBin
 import crtomo.grid as CRGrid
@@ -73,6 +72,8 @@ import crtomo.parManager as pM
 import crtomo.configManager as cConf
 import crtomo.cfg as CRcfg
 import crtomo.plotManager as PlotManager
+
+plt, mpl = crtomo.mpl.setup()
 
 
 class noise_model(object):
@@ -124,6 +125,12 @@ class tdMan(object):
                 * grid: crtomo.grid.crt_grid instance
                 * crmod_cfg: crtomo.cfg.crmod_cfg instance
                 * crtomo_cfg: crmod.cfg.crtomo_cfg instance
+
+        .. blockdiag:
+
+            diagram A {
+                a -> b;
+            };
 
         Parameters
         ----------
@@ -312,6 +319,9 @@ class tdMan(object):
                 self.configs.load_crmod_config(config_file)
             # load inversion results
             self.read_inversion_results(tomodir)
+
+            # load data/modeling results
+            self._read_modeling_results(tomodir + os.sep + 'mod')
 
     def reset_data(self):
         """Attempts to reset (delete) all inversion data currently stored in
@@ -562,7 +572,7 @@ class tdMan(object):
         )).T
         return measurements
 
-    def _read_modeling_results(self, directory, silent=False):
+    def _read_modeling_results(self, mod_directory, silent=False):
         """Read modeling results from a given mod/ directory. Possible values
         to read in are:
 
@@ -572,32 +582,32 @@ class tdMan(object):
 
         """
 
-        voltage_file = directory + os.sep + 'volt.dat'
+        voltage_file = mod_directory + os.sep + 'volt.dat'
         if os.path.isfile(voltage_file):
             if not silent:
                 print('reading voltages')
             self.read_voltages(voltage_file)
 
         sens_files = sorted(glob(
-            directory + os.sep + 'sens' + os.sep + 'sens*.dat')
+            mod_directory + os.sep + 'sens' + os.sep + 'sens*.dat')
         )
         # check if there are sensitivity files, and that the nr corresponds to
         # the nr of configs
         if(len(sens_files) > 0 and
            len(sens_files) == self.configs.nr_of_configs):
             print('reading sensitivities')
-            self._read_sensitivities(directory + os.sep + 'sens')
+            self._read_sensitivities(mod_directory + os.sep + 'sens')
 
         # same for potentials
         pot_files = sorted(glob(
-            directory + os.sep + 'pot' + os.sep + 'pot*.dat')
+            mod_directory + os.sep + 'pot' + os.sep + 'pot*.dat')
         )
         # check if there are sensitivity files, and that the nr corresponds to
         # the nr of configs
         if(len(pot_files) > 0 and
            len(pot_files) == self.configs.nr_of_configs):
             print('reading potentials')
-            self._read_potentials(directory + os.sep + 'pot')
+            self._read_potentials(mod_directory + os.sep + 'pot')
 
     def _read_sensitivities(self, sens_dir):
         """import sensitivities from a directory
