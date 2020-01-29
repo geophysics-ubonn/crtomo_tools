@@ -1074,3 +1074,33 @@ class crt_grid(object):
             tempdir_obj.cleanup()
 
         return grid
+
+    def get_element_indices_within_rectangle(self, xmin, xmax, zmin, zmax):
+        """Return the indices of all elements whose center is located within
+        the rectangle defined by the parameters.
+
+        The indices can then be used, e.g., to select values from inversion
+        results.
+
+        Parameters
+        ----------
+        xmin : float
+            Minimum x coordinate of accepted elements
+        xmax : float
+            Maximum x coordinate of accepted elements
+        zmin : float
+            Minimum z coordinate of accepted elements
+        zmax : float
+            Maximum z coordinate of accepted elements
+
+        Returns
+        -------
+        indices : np.array
+            Array with indices (zero-indexed)
+        """
+        centroids = self.get_element_centroids()
+        indices_list = []
+        for nr, (x, z) in enumerate(centroids):
+            if x >= xmin and x <= xmax and z >= zmin and z <= zmax:
+                indices_list.append(nr)
+        return np.array(indices_list)
