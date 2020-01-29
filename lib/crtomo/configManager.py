@@ -24,9 +24,9 @@ import numpy as np
 import pandas as pd
 
 import crtomo.mpl
-plt, mpl = crtomo.mpl.setup()
 
 import reda.configs.configManager as reda_config_mgr
+plt, mpl = crtomo.mpl.setup()
 
 
 class ConfigManager(reda_config_mgr.ConfigManager):
@@ -280,3 +280,24 @@ class ConfigManager(reda_config_mgr.ConfigManager):
         """
         cid_mag, cid_pha = self.load_crmod_data(filename)
         return cid_mag, cid_pha
+
+    def delete_data_points(self, indices):
+        """Delete data points by index (0-indexed), both in configs and
+        measurements. Deletions will be done in ALL registered measurements to
+        ensure consistency.
+
+        Parameters
+        ----------
+        indices : int|iterable
+            Indices to delete
+        """
+        print('Deleting configurations:')
+        print(self.configs[indices])
+
+        # first the configurations
+        self.configs = np.delete(self.configs, indices, axis=0)
+
+        for key in sorted(self.measurements.keys()):
+            self.measurements[key] = np.delete(
+                self.measurements[key], indices, axis=0
+            )
