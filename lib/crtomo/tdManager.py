@@ -436,7 +436,8 @@ class tdMan(object):
         )
 
         # modeling
-        if self.configs.configs is not None:
+        if(self.configs.configs is not None and
+                self.assignments['forward_model'] is not None):
             self.configs.write_crmod_config(
                 directory + os.sep + 'config/config.dat'
             )
