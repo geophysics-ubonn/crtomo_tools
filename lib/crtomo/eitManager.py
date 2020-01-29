@@ -68,6 +68,9 @@ class eitMan(object):
         crt_data_dir : string, optional
             if given, then try to load data from this directory. Expect a
             'frequencies.dat' file and corresponding 'volt_*.dat' files.
+        only_frequency_ids : numpy.ndarray|None
+            Load only the frequencies associated with these indices
+            (zero-based). Only works with crt_data_dir.
         seit_data : dict
             A dictionary with frequencies as keys, and numpy arrays as items.
             Each array must have 6 columns: a,b,m,n,magnitude[Ohm],phase[mrad]
@@ -147,8 +150,11 @@ class eitMan(object):
             data_files['frequencies'] = '{}/frequencies.dat'.format(
                 crt_data_dir)
             files = sorted(glob('{}/volt_*.crt'.format(crt_data_dir)))
+            only_frequency_ids = kwargs.get('only_use_frequency_ids', None)
             data_files['crt'] = files
-            self.load_data_crt_files(data_files)
+            self.load_data_crt_files(
+                data_files, only_frequency_ids=only_frequency_ids
+            )
         elif seit_data is not None:
             frequencies = sorted(seit_data.keys())
             self._init_frequencies(frequencies)
@@ -268,7 +274,7 @@ class eitMan(object):
             self.a['forward_rmag'][freq] = pidm
             self.a['forward_rpha'][freq] = pidp
 
-    def load_data_crt_files(self, data_dict):
+    def load_data_crt_files(self, data_dict, **kwargs):
         """Load sEIT data from .ctr files (volt.dat files readable by CRTomo,
         produced by CRMod)
 
@@ -301,6 +307,12 @@ class eitMan(object):
             raise Exception(
                 'number of frequencies does not match the number of data files'
             )
+        only_frequency_ids = kwargs.get('only_frequency_ids', None)
+        if only_frequency_ids is not None:
+            frequencies = frequencies[only_frequency_ids]
+            data_dict['crt'] = [
+                data_dict['crt'][i] for i in only_frequency_ids
+            ]
         self._init_frequencies(frequencies)
 
         for frequency, filename in zip(frequencies, data_dict['crt']):
