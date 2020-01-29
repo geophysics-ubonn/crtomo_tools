@@ -555,6 +555,11 @@ def converter_pm_log10(data):
     return indices_gt_zero, indices_lt_zero, data_converted
 
 
+def converter_log10_to_lin(data):
+    """Return 10 ** data"""
+    return 10 ** data
+
+
 def converter_abs_log10(data):
     """Return log10(abs(data))
     """
