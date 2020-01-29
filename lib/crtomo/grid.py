@@ -100,6 +100,9 @@ class crt_grid(object):
         self.nr_of_nodes = None
         self.nr_of_electrodes = None
 
+        # will be used for caching by .get_element_centroids
+        self.centroids = None
+
         if elem_file is not None:
             self.load_elem_file(elem_file)
 
@@ -537,11 +540,13 @@ class crt_grid(object):
         centroids: numpy.ndarray
             Nx2 array x/z coordinates for all (N) elements
         """
-        centroids = np.vstack((
-            np.mean(self.grid['x'], axis=1), np.mean(self.grid['z'], axis=1)
-        )).T
+        if self.centroids is None:
+            self.centroids = np.vstack((
+                np.mean(self.grid['x'], axis=1),
+                np.mean(self.grid['z'], axis=1)
+            )).T
 
-        return centroids
+        return self.centroids
 
     @staticmethod
     def _get_area_polygon(points_x, points_z):
