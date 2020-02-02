@@ -14,7 +14,7 @@ install:
 
 script:
   # - make test
-  - make html
+  - make doc
   - touch doc/_build/html/.nojekyll # Deactivate Jekyll on GitHub Pages
 
 # notifications:
