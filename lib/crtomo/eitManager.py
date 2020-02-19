@@ -82,6 +82,9 @@ class eitMan(object):
             Path to elem file
         elec_file : string, optional
             Path to elec file
+        decoupling_file : str, optional
+            Path to decoupling file: For not will be copied to the exe/ subdir
+            of each tomodir written
         crmod_cfg : ?, optional
 
         crtomo_cfg : ?, optional
@@ -98,6 +101,8 @@ class eitMan(object):
         self.crtomo_cfg = kwargs.get('crtomo_cfg', CRcfg.crtomo_config())
         self.parman = kwargs.get('parman', None)
         self.noise_model = kwargs.get('noise_model', None)
+
+        self.decoupling_file = kwargs.get('decoupling_file', None)
 
         # for each frequency we have a separate tomodir object
         self.tds = {}
@@ -364,6 +369,12 @@ class eitMan(object):
         for nr, key in enumerate(sorted(self.tds.keys())):
             outdir = invmod_dir + os.sep + '{0:02}_{1:.6f}'.format(nr, key)
             self.tds[key].save_to_tomodir(outdir)
+            # HACK: if available, copy the decouplings file
+            if self.decoupling_file is not None:
+                os.path.copy(
+                    self.decoupling_file,
+                    outdir + os.sep + 'exe' + os.sep + 'decouplings.dat'
+                )
 
     def reset_tds(self):
         """Reset the data stored in all tds"""
