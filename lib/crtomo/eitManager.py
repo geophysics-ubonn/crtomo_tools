@@ -5,6 +5,7 @@ A sEIT-dir (or sipdir) has the following structure:
 """
 from numbers import Number
 import os
+import shutil
 from glob import glob
 
 import pandas as pd
@@ -82,7 +83,7 @@ class eitMan(object):
             Path to elem file
         elec_file : string, optional
             Path to elec file
-        decoupling_file : str, optional
+        decouplings_file : str, optional
             Path to decoupling file: For not will be copied to the exe/ subdir
             of each tomodir written
         crmod_cfg : ?, optional
@@ -102,7 +103,7 @@ class eitMan(object):
         self.parman = kwargs.get('parman', None)
         self.noise_model = kwargs.get('noise_model', None)
 
-        self.decoupling_file = kwargs.get('decoupling_file', None)
+        self.decoupling_file = kwargs.get('decouplings_file', None)
 
         # for each frequency we have a separate tomodir object
         self.tds = {}
@@ -371,7 +372,7 @@ class eitMan(object):
             self.tds[key].save_to_tomodir(outdir)
             # HACK: if available, copy the decouplings file
             if self.decoupling_file is not None:
-                os.path.copy(
+                shutil.copy(
                     self.decoupling_file,
                     outdir + os.sep + 'exe' + os.sep + 'decouplings.dat'
                 )
