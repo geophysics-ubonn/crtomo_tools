@@ -984,9 +984,11 @@ class crt_grid(object):
                 add_boundary_nodes_right.append(
                     (maximum_x, -line_depth, boundary_mixed)
                 )
-            # reverse direction of nodes on the right side of the grid
+            # reverse direction of nodes on the left side of the grid
             add_boundary_nodes_left = np.array(add_boundary_nodes_left)[::-1]
             add_boundary_nodes_right = np.array(add_boundary_nodes_right)
+            print(add_boundary_nodes_left)
+            print(add_boundary_nodes_right)
 
         surface_electrodes = np.hstack((
             electrodes, boundary_noflow * np.ones((electrodes.shape[0], 1))
@@ -1011,6 +1013,7 @@ class crt_grid(object):
         if len(add_boundary_nodes_left) != 0:
             boundaries = np.vstack(
                 (
+                    boundaries,
                     add_boundary_nodes_left,
                 )
             )
