@@ -317,6 +317,7 @@ class tdMan(object):
             config_file = tomodir + os.sep + 'config' + os.sep + 'config.dat'
             if os.path.isfile(config_file):
                 self.configs.load_crmod_config(config_file)
+
             # load inversion results
             self.read_inversion_results(tomodir)
 
@@ -580,6 +581,17 @@ class tdMan(object):
             * voltages
             * potentials
             * sensitivities
+
+        Parameters
+        ----------
+        mod_directory : str
+            Path to the directory containing the volt.dat file
+        silent : bool, optional
+            If True, suppress some debug output
+
+        Returns
+        -------
+        None
 
         """
 
