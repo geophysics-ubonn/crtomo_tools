@@ -3,8 +3,10 @@
 # configuration
 import crtomo.configManager as CRc
 import numpy as np
-from crtomo.mpl_setup import *
-
+# from crtomo.mpl_setup import *
+import crtomo.mpl
+plt, mpl = crtomo.mpl.setup()
+from reda.utils.geometric_factors import compute_K_analytical
 
 config = CRc.ConfigManager(nr_of_electrodes=40)
 # generate configs, by hand
@@ -15,14 +17,14 @@ for m in range(3, 40):
     quads.append((a, b, m, m + 1))
 
 config.add_to_configs(quads)
-config.compute_K_factors(spacing=1)
+# config.compute_K_factors(spacing=1)
 
 fig, ax = plt.subplots(figsize=(15 / 2.54, 10 / 2.54))
 
 for spacing in np.arange(0.5, 4, 0.5):
     dipole_separation = (config.configs[:, 2] - config.configs[:, 1]) * spacing
     print(spacing, dipole_separation)
-    K = config.compute_K_factors(spacing=spacing)
+    K = compute_K_analytical(config.configs, spacing=spacing)
     ax.plot(dipole_separation, np.abs(K), '.-', label='spacing {0}m'.format(
         spacing
     ))
