@@ -63,8 +63,9 @@ sphinx_gallery_conf = {
         # The module you locally document uses a None
         'crtomo': None,
         # External python modules use their documentation websites
-        'matplotlib': 'http://matplotlib.org',
-        'numpy': 'http://docs.scipy.org/doc/numpy',
+        'reda': 'https://matplotlib.org/',
+        'matplotlib': 'https://matplotlib.org/',
+        'numpy': 'http://docs.scipy.org/doc/numpy/',
         'pandas': 'https://pandas.pydata.org/pandas-docs/stable/'
     },
 
