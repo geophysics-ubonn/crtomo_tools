@@ -27,7 +27,6 @@ grid.plot_grid(plot_electrode_numbers=True)
 grid.save_elem_file('elem.dat')
 grid.save_elec_file('elec.dat')
 
-
 ###############################################################################
 # Grid can be read from disk:
 grid1 = crtomo.crt_grid('elem.dat', 'elec.dat')
@@ -43,6 +42,3 @@ grid = crtomo.crt_grid.create_surface_grid(
 )
 print(grid)
 grid.plot_grid()
-
-
-
