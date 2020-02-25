@@ -13,7 +13,7 @@ for CRMod/CRTomo, or modifying existing grids.
 
 Also included is the Python module *crtomo*, which aims at providing an
 interface to all functions of CRMod and CRTomo. Thus, CRMod/CRTomo can be fully
-controlled using Python. This also includes retreiving any data output produced
+controlled using Python. This also includes retrieving any data output produced
 by either of the programs.
 
 .. note::
@@ -27,6 +27,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   contributing.rst
    grid_creation.rst
    _examples/index.rst
    scripts/grid_tools/modules.rst
