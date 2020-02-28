@@ -548,11 +548,16 @@ class tdMan(object):
                 self.configs.delete_measurements(mid=mid)
             self.assignments['measurements'] = None
 
-    def measurements(self):
+    def measurements(self, silent=False):
         """Return the measurements associated with this instance.
 
-        if measurements are not present, check if we can model, and then
+        If measurements are not present, check if we can model, and then
         run CRMod to load the measurements.
+
+        Parameters
+        ----------
+        silent : bool, optional
+            If False, suppress CRMod output
         """
         # check if we have measurements
         mid = self.assignments.get('measurements', None)
@@ -561,6 +566,7 @@ class tdMan(object):
                 voltages=True,
                 sensitivities=False,
                 potentials=False,
+                silent=silent,
             )
             if return_value is None:
                 print('cannot model')
