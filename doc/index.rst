@@ -27,6 +27,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   development.rst
    contributing.rst
    grid_creation.rst
    _examples/index.rst
