@@ -42,12 +42,21 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx_gallery.gen_gallery',
     'sphinxcontrib.blockdiag',
+    'sphinx.ext.intersphinx',
 ]
 import matplotlib
 if matplotlib.__version__[0] == '2':
     extensions.append('matplotlib.sphinxext.only_directives')
 
 napoleon_include_init_with_doc = True
+
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/', None),
+    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+    'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
+    'pandas': ('https://pandas-docs.github.io/pandas-docs-travis/', None),
+    'matplotlib': ('https://matplotlib.org/', None),
+}
 
 # Gallery conf
 sphinx_gallery_conf = {

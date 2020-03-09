@@ -91,6 +91,7 @@ class noise_model(object):
     7. line: 0.00        # Absolute phase error p0 (noise) [mRad]
 
     """
+
     def __init__(
             self, seed,
             mag_rel=0, mag_abs=0,
@@ -115,6 +116,7 @@ class tdMan(object):
     """Manage tomodirs
 
     """
+
     def __init__(self, **kwargs):
         """The following initialization permutations are possible:
 
@@ -126,29 +128,50 @@ class tdMan(object):
                 * crmod_cfg: crtomo.cfg.crmod_cfg instance
                 * crtomo_cfg: crmod.cfg.crtomo_cfg instance
 
-        .. blockdiag:
+        .. blockdiag::
 
-            diagram A {
-                a -> b;
-            };
+           diagram {
+            inv_cjg -> NI;
+            cov -> NI;
+            cov_mag_fpi -> NI;
+            ata_diag -> NI;
+            ata_reg_diag -> NI;
+            cov1_m_diag -> NI;
+            cov2_m_diag -> NI;
+            res_m_diag -> tdMan_parset_resm;
+            eps -> tdMan_eps_data;
+            inv_ctr -> tdMan_inv_stats;
+            modl -> NI;
+            mag -> tdMan_inv_mag;
+            pha -> tdMan_inv_pha;
+            run_ctr -> NI;
+            volt_files -> NI;
+            cre_cim -> tdMag_inv_cre_cim;
 
-        Parameters
-        ----------
+            tdMan_inv_stats[label="tdMan.inv_stats"];
+            tdMan_eps_data[label="tdMan.eps_data"];
+            tdMan_parset_resm[label="tdMan.parman.parsets[tdMan.a['res_m']]"];
+            inv_cjg[label="conjugate gradient information"];
+            NI[label="not implemented"];
+           }
 
-        **kwargs :
-            grid: crtomo.grid.crt_grid
-                A fully initialized grid object
-            tempdir : string|None, optional
-                if set, use this directory to create all temporary directories
-                in. For example, settings this to /dev/shm can result in faster
-                generation of large Jacobians
-            volt_file : None|str|numpy.ndarray
-                if this is None, assume we didn't get any measurement data. If
-                this is a str, assume it to be the filename to a CRTomo
-                volt.dat file. If it is a numpy array, assume 6 columns:
-                a,b,m,n,rmag,rpha
-            volt_data : synonym for volt_file parameter
-                see description for volt_file
+        http://www2.geo.uni-bonn.de/~mweigand/dashboard/content/crtomo_doc/crtomo/files.html#inv
+
+        Keyword Arguments
+        -----------------
+        grid: crtomo.grid.crt_grid
+            A fully initialized grid object
+        tempdir : string|None, optional
+            if set, use this directory to create all temporary directories
+            in. For example, settings this to /dev/shm can result in faster
+            generation of large Jacobians
+        volt_file : None|str|numpy.ndarray
+            if this is None, assume we didn't get any measurement data. If
+            this is a str, assume it to be the filename to a CRTomo
+            volt.dat file. If it is a numpy array, assume 6 columns:
+            a,b,m,n,rmag,rpha
+        volt_data : synonym for volt_file parameter
+            see description for volt_file
         """
         # these variables will be filled later
         self.grid = None
@@ -235,7 +258,7 @@ class tdMan(object):
 
         Parameters
         ----------
-        kwargs: dict
+        kwargs : dict
             kwargs dict as received by __init__()
 
         """
@@ -324,19 +347,103 @@ class tdMan(object):
             # load data/modeling results
             self._read_modeling_results(tomodir + os.sep + 'mod')
 
+    def inv_get_last_pid(self, parameter):
+        """Return the pid of the parameter set corresponding to the final
+        inversion results of a given parameter. Return None if the parameter
+        type does not exist, or no inversion result was registered.
+
+        Parameters
+        ----------
+        parameter : str
+            The requested parameter type: cre, cim, rmag, rpha
+
+        Returns
+        -------
+        pid : int|None
+            The parameter id, or None
+        """
+        if('inversion' in self.a and parameter in self.a['inversion'] and
+                len(self.a['inversion'][parameter]) > 0):
+            pid = self.a['inversion'][parameter][-1]
+            return pid
+        return None
+
+    def inv_last_rmag_parset(self):
+        """Return the resistivity magnitude of the last iteration. None if no
+        inversion data exists.
+
+        Example
+        -------
+        >>> import crtomo
+        ... tdm = crtomo.tdMan('tomodir/')
+        ... tdm.inv_last_rmag_parset()
+
+        Returns
+        -------
+        inv_last_rmag : numpy.ndarray|None
+        """
+        pid = self.inv_get_last_pid('rmag')
+        if pid is None:
+            return None
+        else:
+            return self.parman.parsets[pid]
+
+    def inv_last_rpha_parset(self):
+        """Return the phase magnitude of the last inversion iteration.
+         None if no inversion data exists.
+
+        Returns
+        -------
+        inv_last_rpha : numpy.ndarray|None
+        """
+        pid = self.inv_get_last_pid('rmag')
+        if pid is None:
+            return None
+        else:
+            return self.parman.parsets[pid]
+
+    def inv_last_cre_parset(self):
+        """Return the real part of the complex resistivity of the last
+         inversion iteration. None if no inversion data exists.
+
+        Returns
+        -------
+        inv_last_cre : numpy.ndarray|None
+        """
+        pid = self.inv_get_last_pid('cre')
+        if pid is None:
+            return None
+        else:
+            return self.parman.parsets[pid]
+
+    def inv_last_cim_parset(self):
+        """Return the imaginary part of the complex resistivity of the last
+         inversion iteration.None if no inversion data exists.
+
+        Returns
+        -------
+        inv_last_cim : numpy.ndarray|None
+        """
+        pid = self.inv_get_last_pid('cim')
+        if pid is None:
+            return None
+        else:
+            return self.parman.parsets[pid]
+
     def reset_data(self):
         """Attempts to reset (delete) all inversion data currently stored in
         the tdMan instance. This is mostly attempted for the impedance data
         (magnitudes, phases, conductivity real and imaginary parts), but could
         be extended to other data (this is currently not done due to complexity
-                and missing demand).
-        Forward models are also deleted
+        and missing demand).
+        Forward models are also deleted.
         """
         # deletes data actually stored
         self.parman.reset()
 
-        for key in ('rmag', 'rpha', 'cre', 'cim'):
-            self.a[key] = {}
+        if 'inversion' in self.a:
+            for key in ('rmag', 'rpha', 'cre', 'cim', 'cre_cim'):
+                self.a['inversion'][key] = {}
 
     def create_tomodir(self, directory):
         """Create a tomodir subdirectory structure in the given directory
@@ -1163,7 +1270,15 @@ class tdMan(object):
     def read_inversion_results(self, tomodir):
         """Import inversion results from a tomodir into this instance
 
-        WARNING: Not finished!
+        .. warning::
+            This function is not finished yet and does not import ALL crtomo
+            information yet.
+
+        Parameters
+        ----------
+        tomodir : str
+            Path to tomodir
+
         """
         self._read_inversion_results(tomodir)
         self.inv_stats = self._read_inv_ctr(tomodir)
@@ -1173,9 +1288,13 @@ class tdMan(object):
     def _read_inversion_results(self, tomodir):
         """Import resistivity magnitude/phase and real/imaginary part of
         conductivity for all iterations
+
+        Parameters
+        ----------
+        tomodir : str
+            Path to tomodir
         """
         basedir = tomodir + os.sep + 'inv' + os.sep
-        print(basedir)
         inv_mag = sorted(glob(basedir + 'rho*.mag'))
         inv_pha = sorted(glob(basedir + 'rho*.pha'))
         inv_sig = sorted(glob(basedir + 'rho*.sig'))
@@ -1189,10 +1308,18 @@ class tdMan(object):
                     inv_pha]
         pids_sig = [self.parman.load_inv_result(filename, columns=[0, 1]) for
                     filename in inv_sig]
+
+        pids_cre = [x[0] for x in pids_sig]
+        pids_cim = [x[1] for x in pids_sig]
+        # print(pids_sig)
+        # import IPython
+        # IPython.embed()
         self.assignments['inversion'] = {
             'rmag': pids_mag,
             'rpha': pids_pha,
             'cre_cim': pids_sig,
+            'cre': pids_cre,
+            'cim': pids_cim,
         }
 
     def plot_eps_data_hist(self, filename=None):
