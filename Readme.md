@@ -1,7 +1,7 @@
 ## CRTomo tools
 
 [![Build Status](https://travis-ci.org/geophysics-ubonn/crtomo_tools.svg?branch=master)](https://travis-ci.org/geophysics-ubonn/crtomo_tools)
-https://img.shields.io/gitter/room/geophysics-ubonn/crtomo_tools?style=for-the-badge
+[![Join the chat at https://gitter.im/geophysics-ubonn/crtomo_tools](https://badges.gitter.im/geophysics-ubonn/crtomo_tools.svg)](https://gitter.im/geophysics-ubonn/crtomo_tools?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 CRTomo user space tools and libraries.
 
