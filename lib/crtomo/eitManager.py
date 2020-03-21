@@ -418,14 +418,20 @@ class eitMan(object):
             if not os.path.isdir(tdir):
                 raise Exception('tdir not found: {}'.format(tdir))
 
-            rmag_file = sorted(glob(tdir + 'inv/*.mag'))[-1]
-            rmag_data = np.loadtxt(rmag_file, skiprows=1)[:, 2]
-            pid_rmag = item.parman.add_data(rmag_data)
+            rmag_file = sorted(glob(tdir + 'inv/*.mag'))
+            if len(rmag_file) > 0:
+                rmag_data = np.loadtxt(rmag_file[-1], skiprows=1)[:, 2]
+                pid_rmag = item.parman.add_data(rmag_data)
+            else:
+                pid_rmag = None
             self.a['rmag'][frequency_key] = pid_rmag
 
-            rpha_file = sorted(glob(tdir + 'inv/*.pha'))[-1]
-            rpha_data = np.loadtxt(rpha_file, skiprows=1)[:, 2]
-            pid_rpha = item.parman.add_data(rpha_data)
+            rpha_file = sorted(glob(tdir + 'inv/*.pha'))
+            if len(rpha_file) > 0:
+                rpha_data = np.loadtxt(rpha_file[-1], skiprows=1)[:, 2]
+                pid_rpha = item.parman.add_data(rpha_data)
+            else:
+                pid_rpha = None
             self.a['rpha'][frequency_key] = pid_rpha
 
             sigma_files = sorted(glob(tdir + 'inv/*.sig'))
@@ -433,6 +439,9 @@ class eitMan(object):
                 sigma_data = np.loadtxt(sigma_files[-1], skiprows=1)
                 pid_cre = item.parman.add_data(sigma_data[:, 0])
                 pid_cim = item.parman.add_data(sigma_data[:, 1])
+            elif len(rmag_file) == 0 and len(rpha_file) == 0:
+                pid_cre = None
+                pid_cim = None
             else:
                 # very old CRTomo runs...
                 crho = item.parman.parsets[
