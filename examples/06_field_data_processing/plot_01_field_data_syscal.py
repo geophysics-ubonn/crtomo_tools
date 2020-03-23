@@ -1,12 +1,19 @@
 #!/usr/bin/env python3
-'''
+"""
 Example for processing field data from Sycal
 ============================================
-'''
+
+.. note::
+
+    This example is work in progress!!!
+
+"""
+import matplotlib.pyplot as plt
+
+import crtomo
 import reda.exporters.crtomo as crto
 import reda.utils.norrec as NR
 import reda
-import matplotlib.pyplot as plt
 
 ###############################################################################
 # Daten einlesen und berechnen
@@ -51,18 +58,11 @@ plt.savefig('pseudo_I.png')
 
 
 ###############################################################################
-# Filtern
-# -------
-
-ert.data.query('r > 0', inplace=True) # ert.filter
-ert.data.query('r < 1', inplace=True)
-ert.data.query('rho_a > 0', inplace=True)
-ert.data.query('rho_a < 60', inplace=True)
-ert.data.query('rdiff > 0.2', inplace=True)
-ert.query('norrec == "nor"', inplace=True)
-ert.query('rpha < 10 and rpha > -50', inplace=True)
-ert.query('norrec == "nor"', inplace=True)
-
+# apply data filters
+ert.filter('norrec == "rec"')
+ert.filter('r < 0 or r > 1')
+ert.filter('rho_a < 0 or rho_a > 60')
+ert.filter('rdiff > 0.2 or rdiff < -0.2')
 
 ###############################################################################
 # Datenfile in CRTomo Format ausgeben (volt.dat)
@@ -74,7 +74,6 @@ crto.write_files_to_directory(ert.data, '.')
 ###############################################################################
 # Arbeiten im Tomodir
 # -------------------
-import crtomo
 
 ###############################################################################
 # Gitter und Daten einlesen
@@ -91,27 +90,20 @@ td_obj.read_voltages('volt.dat')
 # -----------------------
 
 td_obj.crtomo_cfg['robust_inv'] = 'F'
-td_obj.crtomo_cfg['dc_inv'] = 'T'
+td_obj.crtomo_cfg['dc_inv'] = 'F'
 td_obj.crtomo_cfg['cells_z'] = '-1'
 td_obj.crtomo_cfg['mag_rel'] = '10'
 td_obj.crtomo_cfg['mag_abs'] = '0.5'
 td_obj.crtomo_cfg['fpi_inv'] = 'F'
-td_obj.crtomo_cfg['pha_a1'] = '10'
-td_obj.crtomo_cfg['pha_b'] = '-1.5'
-td_obj.crtomo_cfg['pha_rel'] = '10'
-td_obj.crtomo_cfg['pha_abs'] = '0'
-
-
-
+# td_obj.crtomo_cfg['pha_a1'] = '10'
+# td_obj.crtomo_cfg['pha_b'] = '-1.5'
+# td_obj.crtomo_cfg['pha_rel'] = '10'
+# td_obj.crtomo_cfg['pha_abs'] = '0'
 ###############################################################################
-# Inversion
-# ----------
-
+# invert
 td_obj.invert()
 
 
 ###############################################################################
-# Tomodir speichern
-# -----------------
-
+# save tomodir
 td_obj.save_to_tomodir('td')
