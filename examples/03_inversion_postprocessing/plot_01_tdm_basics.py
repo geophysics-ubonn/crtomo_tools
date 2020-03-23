@@ -45,22 +45,29 @@ print(tdm.parman)
 # stored in dictionary entries:
 pprint.pprint(tdm.a['inversion'])
 
-# We can see several entries in the dictionary: The resistivity magnitude (rmag),
-# the phase value (rpha), the real part of the complex conductivity (cre), the
-# imaginary part of the complex conductivity (cim) and an entry which combines
-# cre and cim (cre_cim). For each inversion, the parameter sets have an own pid
-# to make the results accessible.
+# We can see several entries in the dictionary: The resistivity magnitude
+# (rmag), the phase value (rpha), the real part of the complex conductivity
+# (cre), the imaginary part of the complex conductivity (cim) and an entry
+# which combines cre and cim (cre_cim). For each inversion, the parameter sets
+# have an own pid to make the results accessible.
 
 ###############################################################################
 # To access a given parameter set, extract the pid from the dict and then
 # access the data in the ParMan instance. If we would like to access the
-# phase values for e.g. the second inversion run, we have to choose the index 
+# phase values for e.g. the second inversion run, we have to choose the index
 # accordingly:
-
 pid_rpha_2nd = tdm.a['inversion']['rpha'][1]
 print('pid of the second phase inversion result: ', pid_rpha_2nd)
-rmag_second_inversion = tdm.parman.parsets[pid_rmag_2nd]
-print('Array of the second phase inverion result: ', rmag_second_inversion)
+
+rpha_second_inversion = tdm.parman.parsets[pid_rpha_2nd]
+print(
+    'Pixel values of the second phase inverion result: ',
+    rpha_second_inversion
+)
+
+###############################################################################
+# The last inversion result can be accessed using the index -1
+rpha_last_inversion = tdm.parman.parsets[tdm.a['inversion']['rmag'][-1]]
 
 ###############################################################################
 # Most of the time, it is of interest to get the final inversion result. This
@@ -80,4 +87,3 @@ cim_final_inversion = tdm.inv_last_cim_parset()
 
 ###############################################################################
 # TODO: Extract from point, line, polygon, rectangle
-
