@@ -437,8 +437,8 @@ class plotManager(object):
         cmap.set_bad(bad)
 
         # normalize data
-        data_min = kwargs.get('cbmin', subdata.min())
-        data_max = kwargs.get('cbmax', subdata.max())
+        data_min = kwargs.get('cbmin', np.nanmin(subdata))
+        data_max = kwargs.get('cbmax', np.nanmax(subdata))
         if(data_min is not None and data_max is not None
                 and data_min == data_max):
             data_min -= 1
