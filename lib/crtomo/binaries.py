@@ -76,14 +76,16 @@ binaries = {
 }
 
 
-def get(binary_name):
+def get(binary_name, raise_error=True):
     """return a valid path to the given binary. Return an error if no existing
     binary can be found.
 
     Parameters
     ----------
-    binary_name: string
-        a binary name used as a key in the 'binaries' dictionary above
+    binary_name : str
+        A binary name used as a key in the 'binaries' dictionary above
+    raise_error: bool, optional
+        If set to True, then raise an IOError if no binary could be found
 
     Return
     ------
@@ -101,3 +103,10 @@ def get(binary_name):
         valid_file = shutil.which(filename)
         if valid_file:
             return os.path.abspath(valid_file)
+    # If we reach this location, then no valid file could be found
+    if raise_error:
+        raise IOError(
+            'No valid binary could be found for: {}'.format(
+                binary_name
+            )
+        )
