@@ -29,6 +29,7 @@ Contents:
 
    development.rst
    contributing.rst
+   crtomo/crtomo.rst
    grid_creation.rst
    _examples/index.rst
    scripts/grid_tools/modules.rst
