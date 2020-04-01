@@ -143,16 +143,19 @@ class ParMan(object):
         cid_pha = self.add_data(data[:, 1])
         return cid_mag, cid_pha
 
-    def load_inv_result(self, filename, columns=2):
+    def load_inv_result(self, filename, columns=2, is_log10=False):
         """Load one parameter set from a rho*.mag or rho*.pha file produced by
         CRTomo.
 
         Parameters
         ----------
-        filename : string, file path
+        filename : str, file path
             Filename to loaded data from
         columns : int or iterable of ints, optional
             column(s) to add to the manager. Defaults to 2 (third column).
+        is_log10 : bool, optional
+            If set to True, assume values to be in log10 and convert the
+            imported values to linear before importing
 
         Returns
         -------
@@ -170,6 +173,8 @@ class ParMan(object):
         data = np.loadtxt(filename, skiprows=1)
         pid_list = []
         for column in iterator:
+            if is_log10:
+                data[:, column] = 10 ** data[:, column]
             pid = self.add_data(data[:, column])
             pid_list.append(pid)
 
