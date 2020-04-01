@@ -195,8 +195,6 @@ class tdMan(object):
             'sensitivities': None,
             # store potential nids here
             'potentials': None,
-            # store the ID of the resolution matrix
-            'resm': None,
             # last iteration of inversion results
             'inversion': None
         }
@@ -213,6 +211,9 @@ class tdMan(object):
 
         self.eps_data = None
         self.inv_stats = None
+        # additional information from inversion results
+        self.header_res_m = None
+        self.header_l1_dw_log10_norm = None
 
         self._initialize_components(kwargs)
 
@@ -396,7 +397,7 @@ class tdMan(object):
         -------
         inv_last_rpha : numpy.ndarray|None
         """
-        pid = self.inv_get_last_pid('rmag')
+        pid = self.inv_get_last_pid('rpha')
         if pid is None:
             return None
         else:
@@ -1179,7 +1180,7 @@ class tdMan(object):
 
         Parameters
         ----------
-        tempdir : string
+        tempdir : str
             directory which to use as a tomodir
         catch_output : bool, optional
             if True, catch all outputs of the CRTomo call (default: True)
@@ -1236,6 +1237,7 @@ class tdMan(object):
             if True, do not show CRTomo output. Default:True
         cores : int, optional
             how many cores to use for CRTomo
+        **kwargs : Are supplied to :py:meth:`crtomo.tdMan._invert`
 
         Returns
         -------
@@ -1283,6 +1285,8 @@ class tdMan(object):
         self._read_inversion_results(tomodir)
         self.inv_stats = self._read_inv_ctr(tomodir)
         self._read_resm_m(tomodir)
+        self._read_l1_coverage(tomodir)
+        self._read_l2_coverage(tomodir)
         self.eps_data = self._read_eps_ctr(tomodir)
 
     def _read_inversion_results(self, tomodir):
@@ -1302,12 +1306,17 @@ class tdMan(object):
         assert len(inv_mag) == len(inv_pha)
         assert len(inv_mag) == len(inv_sig)
 
-        pids_mag = [self.parman.load_inv_result(filename) for filename in
-                    inv_mag]
+        pids_mag = [
+            self.parman.load_inv_result(filename, is_log10=True) for filename
+            in inv_mag
+        ]
         pids_pha = [self.parman.load_inv_result(filename) for filename in
                     inv_pha]
-        pids_sig = [self.parman.load_inv_result(filename, columns=[0, 1]) for
-                    filename in inv_sig]
+        pids_sig = [
+            self.parman.load_inv_result(
+                filename, columns=[0, 1], is_log10=False
+            ) for filename in inv_sig
+        ]
 
         pids_cre = [x[0] for x in pids_sig]
         pids_cim = [x[1] for x in pids_sig]
@@ -1986,33 +1995,99 @@ i6,t105,g9.3,t117,f5.3)
         else:
             fig.savefig(filename, dpi=300)
 
-    def _read_resm_m(self, tomodir):
-        """Read in the resolution matrix of an inversion
+    def _read_l1_coverage(self, tomodir):
+        """Read in the L1 data-weighted coverage (or cumulated sensitivity)
+        of an inversion
 
         Parameters
         ----------
-        tomodir : string
+        tomodir : str
+            directory path to a tomodir
+        """
+        l1_dw_coverage_file = os.sep.join(
+            (tomodir, 'inv', 'coverage.mag')
+        )
+        if not os.path.isfile(l1_dw_coverage_file):
+            print(
+                'Info: coverage.mag not found: {0}'.format(l1_dw_coverage_file)
+            )
+            print(os.getcwd())
+            return 1
+
+        nr_cells, max_sens = np.loadtxt(l1_dw_coverage_file, max_rows=1)
+        l1_dw_log10_norm = np.loadtxt(l1_dw_coverage_file, skiprows=1)[:, 2]
+        self.header_l1_dw_log10_norm = {
+            'max_value': max_sens,
+        }
+        pid = self.parman.add_data(l1_dw_log10_norm)
+        if 'inversion' not in self.a:
+            self.a['inversion'] = {}
+
+        self.a['inversion']['l1_dw_log10_norm'] = pid
+
+    def _read_l2_coverage(self, tomodir):
+        """Read in the L2 data-weighted coverage (or cumulated sensitivity)
+        of an inversion
+
+        Parameters
+        ----------
+        tomodir : str
+            directory path to a tomodir
+        """
+        l2_dw_coverage_file = os.sep.join(
+            (tomodir, 'inv', 'ata.diag')
+        )
+        if not os.path.isfile(l2_dw_coverage_file):
+            print(
+                'Info: ata.diag not found: {0}'.format(l2_dw_coverage_file)
+            )
+            print(os.getcwd())
+            return 1
+
+        nr_cells, min_l2, max_l2 = np.loadtxt(l2_dw_coverage_file, max_rows=1)
+        l2_dw_log10_norm = np.loadtxt(l2_dw_coverage_file, skiprows=1)[:, 1]
+        self.header_l1_dw_log10_norm = {
+            'min_value': min_l2,
+            'max_value': max_l2,
+        }
+        pid = self.parman.add_data(l2_dw_log10_norm)
+        if 'inversion' not in self.a:
+            self.a['inversion'] = {}
+
+        self.a['inversion']['l2_dw_log10_norm'] = pid
+
+    def _read_resm_m(self, tomodir):
+        """Read in the diagonal entries of the resolution matrix of an
+        inversion
+
+        Parameters
+        ----------
+        tomodir : str
             directory path to a tomodir
 
         """
         resm_file = tomodir + os.sep + 'inv' + os.sep + 'res_m.diag'
         if not os.path.isfile(resm_file):
-            print('res_m.diag not found: {0}'.format(resm_file))
+            print('Info: res_m.diag not found: {0}'.format(resm_file))
             print(os.getcwd())
             return 1
 
-        # read header
         with open(resm_file, 'rb') as fid:
             first_line = fid.readline().strip()
             header_raw = np.fromstring(first_line, count=4, sep=' ')
-            header_raw
             # nr_cells = int(header_raw[0])
-            # lam = float(header_raw[1])
+            self.header_res_m = {
+                'r_lambda': float(header_raw[1]),
+                'r_min': float(header_raw[2]),
+                'r_max': float(header_raw[3]),
+            }
 
             subdata = np.genfromtxt(fid)
-            print(subdata.shape)
             pid = self.parman.add_data(subdata[:, 0])
-            self.assignments['resm'] = pid
+            if 'inversion' not in self.a:
+                self.a['inversion'] = {}
+
+            self.a['inversion']['resm'] = pid
 
     def register_measurements(self, mag, pha=None):
         """Register measurements as magnitude/phase measurements used for the
