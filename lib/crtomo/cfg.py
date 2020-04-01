@@ -177,6 +177,20 @@ class crtomo_config(dict):
             'boundaries', 'boundaries_file', 'mswitch2', 'lambda',
         )
 
+        self.mswitch_values = {
+            'l1_cov_dw': 1,
+            'lcov1': 2,
+            'res_m': 4,
+            'lcov2': 8,
+            'ols_gauss': 16,
+            'err_ellipse': 32,
+            'force_neg_phase': 128,
+            'lsytop': 256,
+            'lvario': 512,
+            'verbose': 1024,
+            'verbose_dat': 2048,
+        }
+
     def set_defaults(self):
         """Fill the dictionary with all defaults
         """
@@ -212,6 +226,35 @@ class crtomo_config(dict):
         self['boundaries_file'] = 'boundary.dat'
         self['mswitch2'] = '1'
         self['lambda'] = 'lambda'
+
+    def set_mswitch(self, key, active):
+        """The mswitch can enable/disable various functions of CRTomo, mainly
+        concerned with the computation of various resolution parameters.
+        The switch itself is implemented as a binary switch, meaning that each
+        function can be enabled/disabled by setting its corresponding bit.
+
+        This function simplifies control of these functions by providing a
+        simple boolean interface for these options.
+
+        Possible keys: {}
+
+        Parameters
+        ----------
+        key : str
+            Function to control
+        active : bool
+            Activate (True) or deactivate (False) the feature
+        """.format(
+            ['{}'.format(x) for x in self.mswitch_values.keys()]
+        )
+
+        assert key in self.mswitch_values
+        if active:
+            self['mswitch'] = (
+                self['mswitch'] % self.mswitch_values[key]
+            ) + self.mswitch_values[key]
+        else:
+            self['mswitch'] = (self['mswitch'] % self.mswitch_values[key])
 
     def write_to_file(self, filename):
         """ Write the configuration to a file. Use the correct order of values.
@@ -264,14 +307,10 @@ class crtomo_config(dict):
     def import_from_file(self, filename):
         """Import a CRTomo configuration from an existing crtomo.cfg file
 
-        Paramaters
+        Parameters
         ----------
         filename : str
             Path to crtomo.cfg file
-
-        Returns
-        -------
-        None ?
         """
         lines_raw = [x.strip() for x in open(filename, 'r').readlines()]
         key_index = 0
