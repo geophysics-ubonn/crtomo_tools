@@ -492,12 +492,12 @@ class eitMan(object):
 
     def extract_all_spectra(self, label):
         """Extract all SIP spectra, and return frequencies and a numpy array
+
         Parameters
         ----------
         label : str
             the label (data type) to extract. This corresponds to a key in
-            eitMan.assignments. Possible values are rmag, rpha, cre,
-            cim
+            eitMan.assignments. Possible values are rmag, rpha, cre, cim
 
         """
         if isinstance(label, str):
