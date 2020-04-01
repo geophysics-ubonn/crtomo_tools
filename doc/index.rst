@@ -29,6 +29,7 @@ Contents:
 
    development.rst
    contributing.rst
+   theory/basics.rst
    crtomo/crtomo.rst
    grid_creation.rst
    _examples/index.rst

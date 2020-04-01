@@ -96,15 +96,60 @@ The scaling is done then to take the artificial anisotropy regularization
 multiply by five just to make sure we start right at the upper most boundary
 for the pareto problem.
 
+.. _description_crtomo_cfg:
+
 crtomo.cfg
 """"""""""
+
+.. note::
+
+   Configurations can be created, imported, modified, and saved using
+   :py:class:`crtomo.cfg.crtomo_config`.
+   Also see example here: :ref:`example_crmod_crtomo_cfg`
 
 The ``crtomo.cfg`` file controls the inversion using ``CRTomo``. It must exist
 in the directory where ``CRTomo`` is executed. Lines starting with the
 character # are treated as comments and will be removed before parsing it. All
 other lines are line-number dependent. That is, each setting is identified by
 its line number, not a keyword, within the ``crtomo.cfg`` file. Comment lines
-do not increase the line number! The file is described by an example file:
+do not increase the line number!
+
+The first non-comment line is a multi-function binary switch called mswitch.
+This switched controls functions by setting their corresponding bit either to 0
+(inactive) or 1 (active).
+
+.. note::
+
+   Use :py:meth:`crtomo.cfg.crtomo_config.set_mswitch` to control the mswitch
+   in a Python environment
+
+The following functionality is implemented, with the corresponding bit given at
+the beginning:
+
+* \*\*\* : legacy values - treated a 0
+* bit 1 (+1): write L1 data-weighted coverage (lsens)
+* bit 2 (+2): write out main diagonal of posterior model covariance matrix:
+  :math:`MCM_1=( A^T C_d^-1 A + \lambda C_m^-1 )^-1` (lcov1). Note that
+  enabling this function also writes out :math:`diag(A^T W_d^T W_d A)`, the L2
+  data-weighted cumulative sensitivity (or coverage) into the file
+  **ata.diag**.
+* bit 3 (+4): write out main diagonal of resolution matrix: :math:`RES = MCM_1
+  * A^T C_d^-1 A` (lres)
+* bit 4 (+8): = write out main diagonal of posterior model covariance matrix 2:
+  :math:`MCM_2 = RES \cdot MCM_1` (lcov2)
+* lgauss = BTEST (mswitch,4) ! +16 solve all OLS using Gauss elimination
+* lelerr = BTEST (mswitch,5).OR.lelerr ! +32 uses error ellipses in the
+  inversion, regardless of any previous lelerr state..
+* mswitch with 2^6 is empty for now...
+* lphi0 = BTEST (mswitch,7) ! +128 force negative phase
+* lsytop = BTEST (mswitch,8) ! +256 enables sy top check of no flow boundary
+  electrodes for enhanced beta calculation (bsytop).  This is useful for
+  including topographical effects
+* lverb = BTEST (mswitch,10) ! +1024 Verbose output of CG iterations, data read
+  in, bnachbar calculations...
+
+
+The file is further described by an example file:
 
 .. code-block:: bash
     :linenos:
@@ -112,42 +157,19 @@ do not increase the line number! The file is described by an example file:
     #############################################################
     ###         NEW cfg file format::                         ###
     #############################################################
-    ### Comment lines start with (at least one) # at the first row of a
-    ### line!
-    ### they are omitted during the read in of cfg file
+    ### Comment lines start with (at least one) # at the first
+    ### row of a  line !
+    ### They are omitted during import of the cfg file
     #############################################################
     #############################################################
     ## NOTE:
-    ## NO FURTHER EMPTY LINES, EXCEPT THE ONES ALREADY PRESENT SHOULD BE
-    ## GIVEN!!!
+    ## NO FURTHER EMPTY LINES, EXCEPT THE ONES ALREADY PRESENT,
+    ## SHOULD BE ADDED. CRTomo IDENTIFIES PARAMETERS BY THEIR
+    ## LINE NUMBER
     ##############################################################
     ##############################################################
-    # the first line normally contains *** but may hold an integer number
-    # (the mega switch)
-    # which is evaluated bit wise and may control some things due to their Bit
-    # bwise setting.
-    # Currently implemented are:
-    #  lsens = BTEST(mswitch,0)  ! +1 write out coverage.dat (L1-norm of the
-    #                            ! sensitivities)
-    #       (default)
-    #  lcov1 = BTEST(mswitch,1)  ! +2 write out main diagonal of
-    #                            ! posterior model covariance matrix:
-    #                            ! MCM_1=( A^T C_d^-1 A + lamda C_m^-1 )^-1
-    #  lres  = BTEST(mswitch,2)  ! +4 write out main diagonal of
-    #   resolution matrix: RES = MCM_1 * A^T C_d^-1 A
-    #  lcov2 = BTEST(mswitch,3)  ! +8 write out main diagonal of
-    #   posterior model covariance matrix 2: MCM_2 = RES * MCM_1
-    #  lgauss = BTEST (mswitch,4) ! +16 solve all OLS using Gauss elemination
-    #  lelerr = BTEST (mswitch,5).OR.lelerr ! +32 uses error ellipses in the inversion,
-    #   regardless of any previous lelerr state..
-    #  mswitch with 2^6 is empty for now...
-    #  lphi0 = BTEST (mswitch,7) ! +128 force negative phase
-    #  lsytop = BTEST (mswitch,8) ! +256 enables sy top check of
-    #   no flow boundary electrodes for enhanced beta calculation (bsytop).
-    #   This is useful for including topographical effects
-    #  lverb = BTEST (mswitch,10) ! +1024 Verbose output of CG iterations,
-    #   data read in, bnachbar calculations...
     #############################################################
+    # mwswitch (8 == lcov2)
     8
     #############################################################
     # Path to the grid file, may contain blanks
@@ -440,6 +462,10 @@ do not increase the line number! The file is described by an example file:
     #########################################################################################
     lam/beta/seed
 
+..note ::
+
+   The crtomo.cfg file is imported in the **rall.f90** file
+
 MGS
 """
 
@@ -480,6 +506,8 @@ file in etwa so aussieht:
    Man kann diese Glättung aber auch fixen, wenn man das unbedingt will.
    Dann wird die MGS-Glättung vom Startmodell genommen, welches in der Regel ja noch keine Struktur hat.
    Realisiert wird dies in dem man das MGS-beta auf einen _negativen_ Wert setzt.
+
+.. _description_crmod_cfg:
 
 crmod.cfg
 """""""""
@@ -806,29 +834,39 @@ iteration.
 coverage.mag
 """"""""""""
 
-L1 cumulated sensitivity (normalized)
+L1 data-weighted cumulated sensitivity (normalized)
 
-:math:`S_i^{L1} = \sum_j^N \frac{|\partial V_j|}{|\partial \rho_i|}`
+:math:`S_i^{L1} = \sum_j^N \frac{|\partial V_j|}{\epsilon_i |\partial \rho_i|}`
 
 ::
 
-   2880
+   2880  874956.88680652122
    0.25000000000000000      -0.25000000000000000      -0.55853918225079879
    0.75000000000000000      -0.25000000000000000      -0.28004078693583917
    ...
    1.2500000000000000      -0.25000000000000000      -0.12203557213931025
    1.7500000000000000      -0.25000000000000000      -0.14832386170628217
-   Max:   874956.88680652122
 
 
-* First column: Central x-coordinate of cell
-* Second column: Central z-coordinate of cell
-* Third column: :math:`log_{10}\left( \frac{S_{ij}}{S_{ij}^{max}}\right)`
-  (Normalized log10 of summed sensitivities)
+* First row:
 
-The last line starting with 'Max:' holds the maximum of the cumulated
-sensitivities which was used to normalize the value. As the third column is
-`log_{10}`, only negative or zero values can be expected (0-1).
+  * First column: number of sensitivity values to follow
+  * Second column: Maximum sensitivity (linear value), used to normalize values
+    down below.
+
+* All following rows:
+
+   * First column: Central x-coordinate of cell
+   * Second column: Central z-coordinate of cell
+   * Third column: :math:`log_{10}\left( \frac{S_{ij}}{S_{ij}^{max}}\right)`
+     (Normalized log10 of summed sensitivities)
+
+As the third column is :math:`log_{10}`, only negative or zero values can be expected
+(0-1).
+
+.. note ::
+
+   Computed in bbsens.f90
 
 coverage.mag.fpi
 """"""""""""""""
@@ -842,31 +880,40 @@ The structure of the file can be found in the preceding section
 ata.diag
 """"""""
 
-L2 cumulated sensitivity (normalized)
+L2 data-weighted cumulated sensitivity (normalized), `d_i`
 
-:math:`S_i^{L2} = \sum_j^N \frac{|\partial V_j|^2}{|\partial \rho_i|^2}`
+:math:`S_i^{L2} = \sum_j^N \frac{|\partial V_j|^2}{\epsilon_i |\partial
+\rho_i|^2}`
 
 ::
 
-   2880
+   2880 27.3748341 2.93462502E+09
    397261824.     -0.868474960
    1.72104538E+09 -0.231760025
    ...
    2.93462502E+09   0.00000000
    2.03916826E+09 -0.158099174
-   Max/Min:   2.93462502E+09 /   27.3748341
 
+* First line holds three columns:
 
-* First column: Diagonal entry of :math:`A^T C_d^{-1} A`: `d_i`
-* Second column: :math:`log_{10} \left(\frac{d_i}{d_{max}}\right)`
+  * number of sensitivity values (equal to number of mesh cells)
+  * minimum of `d_i` (i.e., of the first column of all following rows)
+  * maximum of `d_i` (i.e., of the first column of all following rows)
 
-The last line starting with 'Max/Min:' holds the maximum and minimum of the
-cumulated sensitivities. The maximum was used to normalize the value. As the
-second column contains only :math:`log_{10}` values only negative or zero
-values can be expected (i.e. values in the range between zero and one).
+* All following rows:
+
+  * First column: Diagonal entry of :math:`A^T C_d^{-1} A`: `d_i`
+  * Second column: :math:`log_{10} \left(\frac{d_i}{d_{max}}\right)`
+
+As the second column contains only :math:`log_{10}` values only negative or
+zero values can be expected (i.e. values in the range between zero and one).
 
 With :math:`C_d{^-1} = W_d^T W_d`; :math:`W_d = diag
 \left(\frac{1}{\epsilon_1}, \ldots, \frac{1}{\epsilon_n} \right)`
+
+.. note ::
+
+   Computed in **bmcm_mod.f90** function **bata**
 
 ata_reg.diag
 """"""""""""
@@ -923,8 +970,10 @@ written if the value 4 is added to the mswitch. Resolution matrix:
 
 No units [1].
 
-For further information, have a look at the CRTomo source file *bmcm_mod.f90*
-in SUBROUTINE bres.
+.. note::
+
+   For further information, have a look at the CRTomo source file
+   **bmcm_mod.f90** in SUBROUTINE bres.
 
 eps.ctr
 """""""
@@ -1037,19 +1086,90 @@ mod/
 crt-files/volt.dat
 """"""""""""""""""
 
-``volt.dat`` contains the modelled resistances for all measurement
-configurations defined in ``config.dat``. The format of ``volt.dat`` is
-explained by means of an example file:
+``volt.dat`` contains the modeled or measured resistances (not resistivities) for all measurement
+configurations defined in ``config.dat``. Multiple input formats are currently
+recognized. The input formats are partially determined by external switches and
+partially by certain key structures in the files themselfs:
 
-.. todo:: Provide an example file.
+External switches:
 
-* Line 1: number of measurement configurations
+* DC or complex inversion/fpi (ldc)
+
+Key structures:
+
+* individual errors (lindiv - determined from the first line of the file
+  itself)
+* there are two basic file formats recognized, the "CRTomo standard" and the
+  "industry standard".
+
+
+The format of ``volt.dat`` is explained by means of example files:
+
+DC/Complex/FPI case, CRTomo standard: ::
+
+    3
+    10002 40003 4.3 -0.1
+    20003 50004 2.3 -0.2
+    30004 60005 9.2 -0.6
+
+* Line 1: number of measurement configurations (here: 3)
 * Line 2-End:
-   * Column 1: current injection electrode pair (CRTomo format, as defined in config.dat)
-   * Column 2: potential reading electrode pair (CRTomo format, as defined in config.dat)
+   * Column 1: current injection electrode pair (CRTomo format, as defined in
+     config.dat)
+   * Column 2: potential reading electrode pair (CRTomo format, as defined in
+     config.dat)
    * Column 3: resistance value in :math:`\Omega` (CRTomo uses a current of 1
      A, thus this value can also be interpreted as a voltage!)
    * Column 4: phase value (:math:`\varphi`) in mrad
+
+DC case individual errors: ::
+
+    3 T
+    10002 40003 4.3 0.43
+    20003 50004 2.3 0.23
+    30004 60005 9.2 0.92
+    1
+
+* Line 1 contains the number of measurements, plus the activation switch for
+  the individual errors.
+* Lines 2-(End-1):
+   * Column 1: current injection electrode pair (CRTomo format, as defined in
+     config.dat)
+   * Column 2: potential reading electrode pair (CRTomo format, as defined in
+     config.dat)
+   * Column 3: resistance value in :math:`\Omega` (CRTomo uses a current of 1
+     A, thus this value can also be interpreted as a voltage!)
+   * Column 4: Normalized individual error (see last line)
+* Last line: Square root of the normalization factor of individual errors:
+  :math:`\sqrt{\Delta R_{norm}}`
+
+Each individual error is computed using the value in column 4, multiplied with
+the square of the normalization factor: :math:`\Delta R_i = \Delta R_{norm} *
+R_i`. Also note that the input here is always linear, despite the inversion
+being formulated as log(R).
+
+Complex/FPI case: ::
+
+    3 T
+    10002 40003 4.3 -5 0.43 0.05
+    20003 50004 2.3 -10 0.23 0.1
+    30004 60005 9.2 -200 0.92 2
+    1 1
+
+* Line 1 contains the number of measurements, plus the activation switch for
+  the individual errors.
+* Lines 2-(End-1):
+   * Column 1: current injection electrode pair (CRTomo format, as defined in
+     config.dat)
+   * Column 2: potential reading electrode pair (CRTomo format, as defined in
+     config.dat)
+   * Column 3: resistance value in :math:`\Omega` (CRTomo uses a current of 1
+     A, thus this value can also be interpreted as a voltage!)
+   * Column 4: phase values [mrad]
+   * Column 5: Normalized individual magnitude error (see last line)
+   * Column 6: Normalized individual phase error (see last line)
+* Last line: Square root of the normalization factors of individual errors:
+  :math:`\sqrt{\Delta R_{norm}} \sqrt{\Delta \varphi_{norm}}`
 
 pot/pot.dat
 """""""""""
