@@ -105,6 +105,11 @@ ax.set_ylabel('depth [m]')
 
 ###############################################################################
 # Resolution assessment
+# Note that you must explicitly tell CRTomo to compute these measures. This can
+# be done using the mswitch: (note that the following line only works if you
+# actually invert -- here we load from an existing tomodir!) ::
+#
+#    tdm.crtomo_cfg.set_mswitch('res_m', True)
 from crtomo.plotManager import converter_abs_log10
 fig, axes = plt.subplots(3, 1, figsize=(20 / 2.54, 13 / 2.54))
 ax = axes[0]
@@ -117,7 +122,7 @@ tdm.plot.plot_elements_to_ax(
     xmin=-0.0,
     xmax=3.5,
     zmin=-1.0,
-    cblabel=r"log_{10}(diag(R))",
+    cblabel=r"$log_{10}(diag(R))$",
     converter=converter_abs_log10,
 )
 
