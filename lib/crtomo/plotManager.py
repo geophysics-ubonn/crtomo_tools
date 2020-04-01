@@ -564,3 +564,9 @@ def converter_abs_log10(data):
     """Return log10(abs(data))
     """
     return np.log10(np.abs(data))
+
+
+def converter_change_sign(data):
+    """Reverse the sign of the data. Useful for plotting phase values
+    """
+    return -data
