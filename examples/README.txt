@@ -1,4 +1,4 @@
-Examples for crtomo_tools
-=========================
+Examples
+========
 
 Below is a gallery of examples

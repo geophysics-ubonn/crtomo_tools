@@ -1,0 +1,3 @@
+#!/usr/bin/env python
+import crtomo
+tdm = crtomo.tdMan(tomodir='tomodir')
