@@ -306,7 +306,17 @@ def read_datafiles(files, dtype, column):
 def load_cov(name):
     '''Load a datafile with coverage file structure.
     '''
-    content = np.genfromtxt(name, skip_header=1, skip_footer=1, usecols=([2]))
+    # we need to support an older file format, therefore use the number of
+    # columns in the header to detect the format
+    header = np.loadtxt(name, max_rows=1)
+    if header.size == 2:
+        content = np.genfromtxt(
+            name, skip_header=1, usecols=([2])
+        )
+    else:
+        content = np.genfromtxt(
+            name, skip_header=1, skip_footer=1, usecols=([2])
+        )
 
     return content
 
@@ -399,6 +409,7 @@ def plot_imag(cid, ax, plotman, title, alpha, vmin, vmax,
         zmin, zmax,
         vmin, vmax,
     )
+    print('IMAG vmin/vmax', vmin, vmax)
     # plot
     fig, ax, cnorm, cmap, cb, scalarMap = plotman.plot_elements_to_ax(
         cid=cid,
@@ -644,7 +655,7 @@ def create_non_dcplots(plotman, ax, mag, pha, options, alpha):
         )
         [real, imag] = calc_complex(mag, pha)
         cid_re = plotman.parman.add_data(real)
-        cid_im = plotman.parman.add_data(imag)
+        cid_im = plotman.parman.add_data(np.log10(imag))
         plot_real(
             cid_re, ax[0, 2], plotman, 'Real Part', alpha,
             options.real_vmin, options.real_vmax,
