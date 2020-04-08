@@ -151,8 +151,8 @@ class crmod_interface(object):
         factor = - 1 / (m_rep * measurements_rep)
         sensitivities_log = factor * sensitivities_lin
 
-#         import IPython
-#         IPython.embed()
+        #         import IPython
+        #         IPython.embed()
 
         return sensitivities_log
 
@@ -182,10 +182,27 @@ class crmod_interface(object):
         measurements[:, 1] *= -1
         return measurements
 
+    def J_complex_Y_sigma(self, sigma_model_linear):
+        r"""
+        Compute the complex sensitivity matrix for :math:`\frac{\del V}{\del
+        \sigma}`.
+
+        Parameters
+        ----------
+        sigma_model_linear : numpy.ndarray
+            complex linear conductivities
+
+        Returns
+        -------
+        J_complex_lin : NxM numpy.ndarray
+            Jacobian
+        """
+
     def J_complex_logY_sigma(self, sigma):
         """Return the sensitivity matrix
 
         At this point works only with resistivities.
+
         Parameters
         ----------
         sigma : numpy.ndarray
@@ -197,6 +214,7 @@ class crmod_interface(object):
 
         tdm.model(
             sensitivities=True,
+            output_directory='tmp_td'
             # output_directory=stage_dir + 'modeling',
         )
 
