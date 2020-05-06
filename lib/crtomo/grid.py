@@ -53,6 +53,7 @@ import time
 import numpy as np
 import scipy.sparse
 from scipy.spatial.distance import pdist
+import pandas as pd
 
 import crtomo.mpl
 plt, mpl = crtomo.mpl.setup()
@@ -1107,3 +1108,38 @@ class crt_grid(object):
             if x >= xmin and x <= xmax and z >= zmin and z <= zmax:
                 indices_list.append(nr)
         return np.array(indices_list)
+    
+    @staticmethod
+    def interpolate_grid(ingrid, outgrid, data, method='nearest'):
+        """
+        Function for interpolating data from one grid to another, using the 
+        cell midpoints as datapoint locations. Standard method for
+        interpolating is set to nearest-neighbour.
+    
+        Parameters
+        ----------
+        ingrid : :class:`crtomo.grid.crt_grid` instance
+            CRT grid that matches the input data
+        outgrid : :class:`crtomo.grid.crt_grid` instance
+            CRT grid to interpolate to
+        data : pandas.dataframe
+            input data that matches the input grid (in pandas dataframe format)
+        method : interpolation method, optional
+            Standard interpolation method is nearest-neighbour ('nearest'). 
+            Other possible methods are 'linear' and 'cubic'.
+    
+        Returns
+        -------
+        interpolated data : pandas.dataframe
+            returned dataframe with interpolated data
+        """
+    
+        midpoints_in = ingrid.get_element_centroids()
+        midpoints_out = outgrid.get_element_centroids()
+
+        interpolated_data = pd.DataFrame()
+        for i in list(data):
+            interpolated_data[i] = scipy.interpolate.griddata(
+                midpoints_in, data[i], midpoints_out, method=method)
+        print(interpolated_data)
+        return interpolated_data

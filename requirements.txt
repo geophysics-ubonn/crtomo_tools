@@ -8,3 +8,4 @@ reda
 sip_models
 geccoinv
 pillow<7.0
+pandas
