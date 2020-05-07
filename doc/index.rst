@@ -27,7 +27,6 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   development.rst
    contributing.rst
    theory/basics.rst
    crtomo/crtomo.rst

@@ -66,7 +66,7 @@ class crmod_interface(object):
 
         pid_mag = tdm.parman.add_data(m[:, 0])
         tdm.register_magnitude_model(pid_mag)
-        if m.shape[0] == 2:
+        if m.shape[1] == 2:
             pid_pha = tdm.parman.add_data(m[:, 1])
         else:
             pid_pha = tdm.parman.add_data(np.zeros(m.shape[0]))
@@ -155,6 +155,73 @@ class crmod_interface(object):
         #         IPython.embed()
 
         return sensitivities_log
+
+    def fwd_complex_R_sigma(self, model_ccomplex):
+        """Compute the model response from linear complex conductivities
+
+        Parameters
+        ----------
+
+        """
+        m_rmag = 1.0 / np.abs(model_ccomplex)
+        m_rpha = - np.arctan2(
+            np.imag(model_ccomplex), np.real(model_ccomplex)
+        ) * 1000
+        model_rmag_rpha = np.vstack((m_rmag, m_rpha)).T
+        tdm = self._get_tdm(model_rmag_rpha)
+        measurements = tdm.measurements()
+        rmag = measurements[:, 0]
+        rpha = measurements[:, 1]
+
+        rcomplex = rmag * np.exp(1j * rpha / 1000)
+        return rcomplex
+
+    def fwd_complex_R_rho(self, model_rcomplex):
+        m_rmag = np.abs(model_rcomplex)
+        m_rpha = np.arctan2(
+            np.imag(model_rcomplex), np.real(model_rcomplex)
+        ) * 1000
+        model_rmag_rpha = np.vstack((m_rmag, m_rpha)).T
+        tdm = self._get_tdm(model_rmag_rpha)
+        measurements = tdm.measurements()
+        rmag = measurements[:, 0]
+        rpha = measurements[:, 1]
+
+        rcomplex = rmag * np.exp(1j * rpha / 1000)
+        return rcomplex
+
+    def J_complex_R_sigma(self, model_ccomplex):
+        m_rmag = 1.0 / np.abs(model_ccomplex)
+        m_rpha = - np.arctan2(
+            np.imag(model_ccomplex), np.real(model_ccomplex)
+        ) * 1000
+        model_rmag_rpha = np.vstack((m_rmag, m_rpha)).T
+        print(model_rmag_rpha)
+        tdm = self._get_tdm(model_rmag_rpha)
+        tdm.save_to_tomodir('tomodir')
+
+        tdm.model(
+            sensitivities=True,
+            # output_directory=stage_dir + 'modeling',
+        )
+
+        # measurements = tdm.measurements()
+
+        # build up the sensitivity matrix
+        sens_list = []
+        for config_nr, cids in sorted(
+                tdm.assignments['sensitivities'].items()):
+            print(cids)
+            sens_re = tdm.parman.parsets[cids[0]]
+            sens_im = tdm.parman.parsets[cids[1]]
+
+            sens_complex = sens_re + 1j * sens_im
+            # magnitude sensitvitiy
+            sens_list.append(sens_complex)
+
+        # [del V / del sigma]
+        sensitivities_lin = np.array(sens_list)
+        return sensitivities_lin
 
     def fwd_complex_logY_sigma(self, sigma):
         """Compute a model response from linear complex conductivities
