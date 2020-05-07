@@ -1,4 +1,3 @@
-#%%
 #!/usr/bin/env python3
 # *-* coding: utf-8 *-*
 """
@@ -22,34 +21,38 @@ tdm.show_parset(tdm.a['inversion']['rpha'][-1])
 import matplotlib.pylab as plt
 # extract parameter set ids
 pid_rmag = tdm.a['inversion']['rmag'][-1]
-pid_pha = tdm.a['inversion']['rpha'][-1]
+pid_rpha = tdm.a['inversion']['rpha'][-1]
 pid_cre = tdm.a['inversion']['cre'][-1]
 pid_cim = tdm.a['inversion']['cim'][-1]
 
 # Note that we can switch out the resistivity magnitude with the conductivity
 # magnitude by accessing the parset and taking the inverse values.
 rmag = tdm.parman.parsets[pid_rmag]
-cmag = 1/rmag
+cmag = 1 / rmag
 
-# Subsequently, we can assign a new parameter set id (cmag) for the 
+# Subsequently, we can assign a new parameter set id (cmag) for the
 # conductivity magnitude data.
 pid_cmag = tdm.parman.add_data(cmag)
 
-# Our four datasets can now be plotted using the built-in CRTomo-function 
+###############################################################################
+# We could now plot this parameter set, but commonly we look at rmag, rpha,
+# cre, cim !!!
+
+# Our four datasets can now be plotted using the built-in CRTomo-function
 # "plot_elements_to_ax". We can use the "converter-parameter" to convert
 # the conductivity data to the log10-scale:
 fig, axes = plt.subplots(4, 1, figsize=(12 / 2.54, 16 / 2.54), sharex=True)
 
 ax = axes[0]
 tdm.plot.plot_elements_to_ax(
-    cid=pid_cmag,
+    cid=pid_rmag,
     ax=ax,
     plot_colorbar=True,
     cmap_name='turbo',
     xmin=-0.0,
     xmax=3.5,
     zmin=-1.0,
-    cblabel=r'$log_{10}(|\sigma^*| [S/m])$',
+    cblabel=r'$log_{10}(|\rho| [\Omega m])$',
     converter=np.log10,
 )
 ax.get_xaxis().set_visible(False)
@@ -57,7 +60,7 @@ ax.set_ylabel('z [m]')
 
 ax = axes[1]
 tdm.plot.plot_elements_to_ax(
-    cid=pid_pha,
+    cid=pid_rpha,
     ax=ax,
     plot_colorbar=True,
     cmap_name='CMRmap',
@@ -100,10 +103,11 @@ ax.set_ylabel('z [m]')
 ax.set_xlabel('x [m]')
 
 fig.tight_layout()
+fig.savefig('crinv_cmaps.jpg', dpi=300)
 
-# For clarity reasons, it is advisable to plot the parameters in different 
+# For clarity reasons, it is advisable to plot the parameters in different
 # colors - here, we used the cmaps 'turbo' for Magnitude and Real part of
-# the conductivity, 'CMRmap' for the phase and 'gnuplot2_r' 
+# the conductivity, 'CMRmap' for the phase and 'gnuplot2_r'
 # for the imaginary part of the conductivity.
 
 ###############################################################################
@@ -132,8 +136,8 @@ tdm.plot.plot_elements_to_ax(
 # from crtomo.plotManager import converter_log10_to_lin
 
 ###############################################################################
-# Sometimes, it can also be of interest to only look at the slice or area 
-# of the data. This can be achieved with the extract_along_line or 
+# Sometimes, it can also be of interest to only look at the slice or area
+# of the data. This can be achieved with the extract_along_line or
 # extract_polygon_area functions.
 # Here, we create a depth cut at x = 4 m, down to 2 m depth.
 pid_pha = tdm.a['inversion']['rpha'][-1]
@@ -197,7 +201,3 @@ tdm.plot.plot_elements_to_ax(
     cblabel=r"$log_{10}(L2 Coverage)$",
     # converter=np.log10,
 )
-
-
-
-# %%
