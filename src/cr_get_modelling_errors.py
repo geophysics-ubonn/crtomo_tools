@@ -30,9 +30,10 @@ from optparse import OptionParser
 
 import numpy as np
 
-from crtomo.mpl_setup import *
+import crtomo.mpl
 import crtomo.grid as CRGrid
 import crtomo.tdManager as tdManager
+plt, mpl = crtomo.mpl.setup()
 
 
 def handle_cmd_options():
@@ -69,11 +70,11 @@ def handle_cmd_options():
     return options
 
 
-def compute_K_factors(options):
+def compute_K_factors(elem_file, elec_file, config_file):
     grid = CRGrid.crt_grid()
-    grid.load_grid(options.elem_file, options.elec_file)
+    grid.load_grid(elem_file, elec_file)
 
-    configs = np.loadtxt(options.config_file, skiprows=1)
+    configs = np.loadtxt(config_file, skiprows=1)
     A = np.round(configs[:, 0] / 1e4).astype(int) - 1
     B = np.mod(configs[:, 0], 1e4).astype(int) - 1
 
@@ -179,7 +180,8 @@ def main():
     # homogeneous background resistivity [Ohm m]
     rho0 = 100
     options = handle_cmd_options()
-    Kfactors, configs = compute_K_factors(options)
+    Kfactors, configs = compute_K_factors(
+        options.elem_file, options.elec_file, options.config_file)
     Rmod = get_R_mod(options, rho0)
     rho_mod = np.abs(Kfactors) * Rmod
     plot_and_save_deviations(
