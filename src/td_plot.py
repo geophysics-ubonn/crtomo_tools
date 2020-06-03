@@ -25,7 +25,6 @@ import numpy as np
 
 import crtomo.mpl
 import crtomo.mpl as mpl_style
-plt, mpl = crtomo.mpl.setup()
 import matplotlib
 import matplotlib.cm as mpl_cm
 # import matplotlib.pyplot as plt
@@ -34,6 +33,7 @@ import matplotlib.cm as mpl_cm
 import crtomo.plotManager as CRPlot
 import crtomo.grid as CRGrid
 import reda.main.units as units
+plt, mpl = crtomo.mpl.setup()
 
 
 def handle_options():
@@ -220,6 +220,13 @@ def handle_options():
                       help='Maximum of colorbar',
                       type='float',
                       )
+
+    parser.add_option(
+        "--clog",
+        action="store_true",
+        dest="c_in_log",
+        help="Plot real and imaginary part of conductivity in log10",
+    )
 
     (options, args) = parser.parse_args()
     return options
@@ -603,8 +610,9 @@ def alpha_from_cov(plotman, alpha_cov):
 
 
 def check_minmax(plotman, cid, xmin, xmax, zmin, zmax, vmin, vmax):
-    '''Get min and max values for axes and colorbar if not given
-    '''
+    """
+    Get min and max values for axes and colorbar if not given
+    """
     if xmin is None:
         xmin = plotman.grid.grid['x'].min()
     if xmax is None:
@@ -618,9 +626,9 @@ def check_minmax(plotman, cid, xmin, xmax, zmin, zmax, vmin, vmax):
     else:
         subdata = cid
     if vmin is None:
-        vmin = subdata.min()
+        vmin = np.nanmin(subdata)
     if vmax is None:
-        vmax = subdata.max()
+        vmax = np.nanmax(subdata)
 
     return xmin, xmax, zmin, zmax, vmin, vmax
 
@@ -743,24 +751,41 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
     magunit = 'log_rho'
     if not pha == []:
         [real, imag] = calc_complex(mag, pha)
+        if options.c_in_log:
+            real = np.log10(real)
+            imag = np.log10(imag)
+
         if not pha_fpi == []:
             [real_fpi, imag_fpi] = calc_complex(mag, pha_fpi)
             if options.cmaglin:
                 mag = np.power(10, mag)
                 magunit = 'rho'
-            data = np.column_stack((mag, cov, pha, real, imag,
-                                    pha_fpi, real_fpi, imag_fpi))
-            titles = ['Magnitude', 'Coverage',
-                      'Phase', 'Real Part', 'Imaginary Part',
-                      'FPI Phase', 'FPI Real Part', 'FPI Imaginary Part']
+            if options.c_in_log:
+                real_fpi = np.log10(real_fpi)
+                imag_fpi = np.log10(imag_fpi)
+            # print(imag_fpi, np.nanmin(imag_fpi), np.nanmax(imag_fpi))
+            # print(options.imag_vmin, options.imag_vmax)
+            # exit()
+
+            data = np.column_stack((
+                mag, cov, pha, real, imag,
+                pha_fpi, real_fpi, imag_fpi
+            ))
+            titles = [
+                'Magnitude', 'Coverage',
+                'Phase', 'Real Part', 'Imaginary Part',
+                'FPI Phase', 'FPI Real Part', 'FPI Imaginary Part'
+            ]
             unites = [
                 magunit, 'cov',
                 'phi', 'log_real', 'log_imag',
                 'phi', 'log_real', 'log_imag'
             ]
-            vmins = [options.mag_vmin, options.cov_vmin,
-                     options.pha_vmin, options.real_vmin, options.imag_vmin,
-                     options.pha_vmin, options.real_vmin, options.imag_vmin]
+            vmins = [
+                options.mag_vmin, options.cov_vmin,
+                options.pha_vmin, options.real_vmin, options.imag_vmin,
+                options.pha_vmin, options.real_vmin, options.imag_vmin
+            ]
             vmaxs = [options.mag_vmax, options.cov_vmax,
                      options.pha_vmax, options.real_vmax, options.imag_vmax,
                      options.pha_vmax, options.real_vmax, options.imag_vmax]
@@ -811,10 +836,14 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
         cmaps.append('plasma')
         saves.append('rhomod')
         saves.append('phamod')
-    except:
+    except Exception:
         pass
     for datum, title, unit, vmin, vmax, cm, save in zip(
             np.transpose(data), titles, unites, vmins, vmaxs, cmaps, saves):
+        # print(save)
+        # if save == 'fpi_imag':
+        #     import IPython
+        #     IPython.embed()
         sizex, sizez = getfigsize(plotman)
         f, ax = plt.subplots(1, figsize=(sizex, sizez))
         cid = plotman.parman.add_data(datum)
@@ -825,12 +854,12 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
         zlabel = 'z [' + options.unit + ']'
         xlabel = 'x [' + options.unit + ']'
         xmin, xmax, zmin, zmax, vmin, vmax = check_minmax(
-                plotman,
-                cid,
-                options.xmin, options.xmax,
-                options.zmin, options.zmax,
-                vmin, vmax
-                )
+            plotman,
+            cid,
+            options.xmin, options.xmax,
+            options.zmin, options.zmax,
+            vmin, vmax
+        )
         # plot
         cmap = mpl_cm.get_cmap(cm)
         fig, ax, cnorm, cmap, cb, scalarMap = plotman.plot_elements_to_ax(
@@ -848,7 +877,7 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
                 plot_colorbar=True,
                 cmap_name=cm,
                 over=cmap(1.0),
-            under=cmap(0.0),
+                under=cmap(0.0),
                 no_elecs=options.no_elecs,
                 cbmin=vmin,
                 cbmax=vmax,
