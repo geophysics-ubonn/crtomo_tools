@@ -1042,6 +1042,9 @@ def create_hlamphaplot(plotman, h, v, alpha, options):
 
 
 def main():
+    if os.path.basename(os.getcwd()) == 'exe':
+        os.chdir('..')
+
     options = handle_options()
     matplotlib.style.use('default')
     mpl_style.general_settings()
