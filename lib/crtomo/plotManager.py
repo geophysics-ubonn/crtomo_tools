@@ -422,6 +422,8 @@ class plotManager(object):
         if 'converter' in kwargs:
             subdata = kwargs['converter'](subdata)
 
+        # import IPython
+        # IPython.embed()
         # color map
         cmap_name = kwargs.get('cmap_name', 'viridis')
         cmap = mpl.cm.get_cmap(
@@ -527,7 +529,7 @@ class plotManager(object):
         return fig, ax, cnorm, cmap, scalarMap
 
 
-def converter_pm_log10(data):
+def converter_pm_log10(data, verbose_return=False):
     """Convert the given data to:
 
         log10(subdata) for subdata > 0
@@ -538,6 +540,9 @@ def converter_pm_log10(data):
     ----------
     data: array
         input data
+    verbose_return : bool
+        if True, then also return the indices for cells larger/smaller than
+        zero
 
     Returns
     -------
@@ -552,7 +557,12 @@ def converter_pm_log10(data):
     data_converted = np.zeros(data.shape)
     data_converted[indices_gt_zero] = np.log10(data[indices_gt_zero])
     data_converted[indices_lt_zero] = -np.log10(-data[indices_lt_zero])
-    return indices_gt_zero, indices_lt_zero, data_converted
+    # import IPython
+    # IPython.embed()
+    if verbose_return:
+        return indices_gt_zero, indices_lt_zero, data_converted
+    else:
+        return data_converted
 
 
 def converter_log10_to_lin(data):
