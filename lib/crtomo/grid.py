@@ -81,7 +81,14 @@ class crt_grid(object):
 
 
     """
-    def __init__(self, elem_file=None, elec_file=None):
+    def __init__(self, elem_file=None, elec_file=None, empty=False):
+        """
+
+        Parameters
+        ----------
+
+
+        """
         self.electrodes = None
         self.header = None
         self.nodes = None
@@ -103,6 +110,16 @@ class crt_grid(object):
 
         # will be used for caching by .get_element_centroids
         self.centroids = None
+
+        if elem_file is None and not empty:
+            # check if elem.dat is present
+            if os.path.isfile('elem.dat'):
+                elem_file = 'elem.dat'
+
+        if elec_file is None and not empty:
+            # check if elec.dat is present
+            if os.path.isfile('elec.dat'):
+                elec_file = 'elec.dat'
 
         if elem_file is not None:
             self.load_elem_file(elem_file)
@@ -1108,14 +1125,14 @@ class crt_grid(object):
             if x >= xmin and x <= xmax and z >= zmin and z <= zmax:
                 indices_list.append(nr)
         return np.array(indices_list)
-    
+
     @staticmethod
     def interpolate_grid(ingrid, outgrid, data, method='nearest'):
         """
-        Function for interpolating data from one grid to another, using the 
+        Function for interpolating data from one grid to another, using the
         cell midpoints as datapoint locations. Standard method for
         interpolating is set to nearest-neighbour.
-    
+
         Parameters
         ----------
         ingrid : :class:`crtomo.grid.crt_grid` instance
@@ -1125,15 +1142,15 @@ class crt_grid(object):
         data : pandas.dataframe
             input data that matches the input grid (in pandas dataframe format)
         method : interpolation method, optional
-            Standard interpolation method is nearest-neighbour ('nearest'). 
+            Standard interpolation method is nearest-neighbour ('nearest').
             Other possible methods are 'linear' and 'cubic'.
-    
+
         Returns
         -------
         interpolated data : pandas.dataframe
             returned dataframe with interpolated data
         """
-    
+
         midpoints_in = ingrid.get_element_centroids()
         midpoints_out = outgrid.get_element_centroids()
 
