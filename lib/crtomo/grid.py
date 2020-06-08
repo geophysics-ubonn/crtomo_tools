@@ -881,6 +881,7 @@ class crt_grid(object):
                             right=None,
                             char_lengths=None,
                             lines=None,
+                            internal_lines=None,
                             debug=False,
                             workdir=None,
                             force_neumann_only=False):
@@ -892,31 +893,35 @@ class crt_grid(object):
 
         Parameters
         ----------
-        nr_electrodes: int, optional
+        nr_electrodes : int, optional
             the number of surface electrodes
-        spacing: float, optional
+        spacing : float, optional
             the spacing between electrodes, usually in [m], required if nr of
             electrodes is given
-        electrodes_x: array, optional
+        electrodes_x : array, optional
             x-electrode positions can be provided here, e.g., for
             non-equidistant electrode distances
-        depth: float, optional
+        depth : float, optional
             the depth of the grid. If not given, this is computed as half the
             maximum distance between electrodes
-        left: float, optional
+        left : float, optional
             the space allocated left of the first electrode. If not given,
             compute as a fourth of the maximum inter-electrode distance
-        right: float, optional
+        right : float, optional
             the space allocated right of the first electrode. If not given,
             compute as a fourth of the maximum inter-electrode distance
-        char_lengths: float|list of 4 floats, optional
+        char_lengths : float|list of 4 floats, optional
             characteristic lengths, as used by cr_trig_create
         lines: list of floats, optional
             at the given depths, add horizontal lines in the grid. Note that
             all positive values will be multiplied by -1!
-        debug: bool, optional
+        internal_lines : list of 4-tuple
+            extra lines to add to the grid.  Important: These lines must NOT
+            touch the outer edge of the grid (this is not supported by this
+            function, but can be accomplished by manually building the grid)
+        debug : bool, optional
             default: False. If true, don't hide the output of cr_trig_create
-        workdir: string, optional
+        workdir : string, optional
             if set, use this directory to create the grid. Don't delete files
             afterwards.
         force_neumann_only : bool, optional
@@ -1007,6 +1012,9 @@ class crt_grid(object):
             add_boundary_nodes_right = np.array(add_boundary_nodes_right)
             print(add_boundary_nodes_left)
             print(add_boundary_nodes_right)
+
+        if internal_lines is not None:
+            extra_lines = extra_lines + internal_lines
 
         surface_electrodes = np.hstack((
             electrodes, boundary_noflow * np.ones((electrodes.shape[0], 1))

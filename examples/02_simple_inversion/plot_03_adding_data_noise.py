@@ -69,3 +69,8 @@ rpha_with_noise = rpha + noise_rpha
 # register the noise-added data as new measurements and mark them for use in a
 # subsequent inversion
 tdm.register_measurements(rmag_with_noise, rpha_with_noise)
+
+###############################################################################
+# Remove physically implausible negative magnitude values
+indices = np.where(rmag_with_noise <= 0)[0]
+tdm.configs.delete_data_points(indices)

@@ -1203,7 +1203,7 @@ class tdMan(object):
             how many cores to use. (default 2)
         """
         nr_cores = kwargs.get('cores', 2)
-        print('attempting inversion in directory: {0}'.format(tempdir))
+        print('Attempting inversion in directory: {0}'.format(tempdir))
         pwd = os.getcwd()
         os.chdir(tempdir)
 
@@ -1211,7 +1211,7 @@ class tdMan(object):
         os.chdir('exe')
         binary = CRBin.get('CRTomo')
         print('Using binary: {0}'.format(binary))
-        print('calling CRTomo')
+        print('Calling CRTomo')
         # store env variable
         env_omp = os.environ.get('OMP_NUM_THREADS', '')
         os.environ['OMP_NUM_THREADS'] = '{0}'.format(nr_cores)
@@ -2001,7 +2001,7 @@ i6,t105,g9.3,t117,f5.3)
         ax3.grid(None)
 
         # added these three lines
-        labs = [l.get_label() for l in plot_objs]
+        labs = [label.get_label() for label in plot_objs]
         ax.legend(plot_objs, labs, loc=0, fontsize=6.0)
 
         fig.tight_layout()
@@ -2336,11 +2336,19 @@ i6,t105,g9.3,t117,f5.3)
         else:
             return results
 
-    def show_parset(self, pid):
-        """Plot a given parameter set
+    def show_parset(self, pid, **kwargs):
+        """Plot a given parameter set. Thin wrapper around
+        :py:meth:`crtomo.plotManager.plotManager.plot_elements_to_ax`.
+
+        kwargs will be directly supplied to the plot function
         """
-        fig, ax = plt.subplots()
-        self.plot.plot_elements_to_ax(pid, ax=ax)
+        if 'ax' in kwargs:
+            ax = kwargs.get('ax')
+            kwargs.pop('ax')
+            fig = ax.get_figure()
+        else:
+            fig, ax = plt.subplots()
+        self.plot.plot_elements_to_ax(pid, ax=ax, **kwargs)
         return fig, ax
 
     def plot_forward_models(self):
