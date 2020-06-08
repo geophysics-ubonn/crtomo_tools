@@ -521,8 +521,22 @@ class tdMan(object):
         self.register_phase_model(pids[1])
         return pids
 
-    def save_to_tomodir(self, directory):
+    def save_to_tomodir(self, directory, only_for_inversion=False):
         """Save the tomodir instance to a directory structure.
+
+        At this point forward modeling results (voltages, potentials and
+        sensitivities) will be saved.
+
+        Inversion results will, at this stage, not be saved (TODO!!!).
+
+        Parameters
+        ----------
+        directory : str
+            Output directory (tomodir). Will be created of it does not exists,
+            but otherwise files we be overwritten in any existing directories
+        only_for_inversion : bool, optional
+            If True, save only files required for an inversion (i.e., omit any
+            forward modeling files and results not necessary). Default: False
 
         Note
         ----
@@ -545,35 +559,36 @@ class tdMan(object):
         )
 
         # modeling
-        if(self.configs.configs is not None and
-                self.assignments['forward_model'] is not None):
-            self.configs.write_crmod_config(
-                directory + os.sep + 'config/config.dat'
+        if not only_for_inversion:
+            if(self.configs.configs is not None and
+                    self.assignments['forward_model'] is not None):
+                self.configs.write_crmod_config(
+                    directory + os.sep + 'config/config.dat'
+                )
+
+            if self.assignments['forward_model'] is not None:
+                self.parman.save_to_rho_file(
+                    directory + os.sep + 'rho/rho.dat',
+                    self.assignments['forward_model'][0],
+                    self.assignments['forward_model'][1],
+                )
+
+            self.crmod_cfg.write_to_file(
+                directory + os.sep + 'exe/crmod.cfg'
             )
 
-        if self.assignments['forward_model'] is not None:
-            self.parman.save_to_rho_file(
-                directory + os.sep + 'rho/rho.dat',
-                self.assignments['forward_model'][0],
-                self.assignments['forward_model'][1],
-            )
+            if self.assignments['sensitivities'] is not None:
+                self._save_sensitivities(
+                    directory + os.sep + 'mod/sens',
+                )
 
-        self.crmod_cfg.write_to_file(
-            directory + os.sep + 'exe/crmod.cfg'
-        )
+            if self.assignments['potentials'] is not None:
+                self._save_potentials(
+                    directory + os.sep + 'mod/pot',
+                )
 
+        # we always want to save the measurements
         self.save_measurements(directory + os.sep + 'mod/volt.dat')
-
-        if self.assignments['sensitivities'] is not None:
-            self._save_sensitivities(
-                directory + os.sep + 'mod/sens',
-            )
-
-        if self.assignments['potentials'] is not None:
-            self._save_potentials(
-                directory + os.sep + 'mod/pot',
-            )
-
         # inversion
         self.crtomo_cfg.write_to_file(
             directory + os.sep + 'exe/crtomo.cfg'
