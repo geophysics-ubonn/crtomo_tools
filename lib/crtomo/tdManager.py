@@ -442,7 +442,7 @@ class tdMan(object):
         # deletes data actually stored
         self.parman.reset()
 
-        if 'inversion' in self.a:
+        if 'inversion' in self.a and self.a['inversion'] is not None:
             for key in ('rmag', 'rpha', 'cre', 'cim', 'cre_cim'):
                 self.a['inversion'][key] = {}
 
