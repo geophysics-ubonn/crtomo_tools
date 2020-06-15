@@ -381,6 +381,9 @@ class eitMan(object):
         """Reset the data stored in all tds"""
         for frequency, td in self.tds.items():
             td.reset_data()
+        for key in ('rmag', 'rpha', 'cre', 'cim'):
+            if key in self.a:
+                self.a[key] = {}
 
     def load_inversion_results(self, sipdir):
         """Given an sEIT inversion directory, load inversion results and store
