@@ -313,6 +313,8 @@ def read_datafiles(files, dtype, column):
 def load_cov(name):
     '''Load a datafile with coverage file structure.
     '''
+    if not os.path.isfile(name):
+        return None
     # we need to support an older file format, therefore use the number of
     # columns in the header to detect the format
     header = np.loadtxt(name, max_rows=1)
