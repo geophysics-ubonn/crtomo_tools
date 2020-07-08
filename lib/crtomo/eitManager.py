@@ -65,7 +65,11 @@ class eitMan(object):
         Parameters
         ----------
         seitdir : string, optional
-            Load frequencies, grid, and data from an existing sEIT directory
+            Load frequencies, grid, and data from an existing sEIT directory.
+            Honors the shallow_import parameter.
+        shallow_import : bool, optional
+            In combination with seitdir, only import the last iteration
+            inversion results (faster).
         crt_data_dir : string, optional
             if given, then try to load data from this directory. Expect a
             'frequencies.dat' file and corresponding 'volt_*.dat' files.
@@ -150,7 +154,9 @@ class eitMan(object):
             )
             self.grid = grid
 
-            self.load_inversion_results(seit_dir)
+            self.load_inversion_results(
+                seit_dir, shallow_import=kwargs.get('shallow_import', False)
+            )
         elif crt_data_dir is not None:
             data_files = {}
             data_files['frequencies'] = '{}/frequencies.dat'.format(
@@ -385,7 +391,7 @@ class eitMan(object):
             if key in self.a:
                 self.a[key] = {}
 
-    def load_inversion_results(self, sipdir):
+    def load_inversion_results(self, sipdir, shallow_import=True):
         """Given an sEIT inversion directory, load inversion results and store
         the corresponding parameter ids in self.assignments
 
@@ -396,6 +402,10 @@ class eitMan(object):
         ----------
         sipdir : string
             path to a CRTomo sip-invdir (i.e., a full sEIT inversion directory)
+
+        shallow_import : bool, optional
+            If set to True, then only import the last inversion result, nothing
+            else.
         """
         # load frequencies and initialize tomodir objects for all frequencies
         frequency_file = sipdir + os.sep + 'frequencies.dat'
@@ -421,40 +431,59 @@ class eitMan(object):
             if not os.path.isdir(tdir):
                 raise Exception('tdir not found: {}'.format(tdir))
 
-            rmag_file = sorted(glob(tdir + 'inv/*.mag'))
-            if len(rmag_file) > 0:
-                rmag_data = np.loadtxt(rmag_file[-1], skiprows=1)[:, 2]
-                pid_rmag = item.parman.add_data(rmag_data)
-            else:
-                pid_rmag = None
-            self.a['rmag'][frequency_key] = pid_rmag
+            if shallow_import:
+                rmag_file = sorted(glob(tdir + 'inv/*.mag'))
+                if len(rmag_file) > 0:
+                    rmag_data = np.loadtxt(rmag_file[-1], skiprows=1)[:, 2]
+                    pid_rmag = item.parman.add_data(rmag_data)
+                else:
+                    pid_rmag = None
+                self.a['rmag'][frequency_key] = pid_rmag
 
-            rpha_file = sorted(glob(tdir + 'inv/*.pha'))
-            if len(rpha_file) > 0:
-                rpha_data = np.loadtxt(rpha_file[-1], skiprows=1)[:, 2]
-                pid_rpha = item.parman.add_data(rpha_data)
-            else:
-                pid_rpha = None
-            self.a['rpha'][frequency_key] = pid_rpha
+                rpha_file = sorted(glob(tdir + 'inv/*.pha'))
+                if len(rpha_file) > 0:
+                    rpha_data = np.loadtxt(rpha_file[-1], skiprows=1)[:, 2]
+                    pid_rpha = item.parman.add_data(rpha_data)
+                else:
+                    pid_rpha = None
+                self.a['rpha'][frequency_key] = pid_rpha
 
-            sigma_files = sorted(glob(tdir + 'inv/*.sig'))
-            if len(sigma_files) > 0:
-                sigma_data = np.loadtxt(sigma_files[-1], skiprows=1)
-                pid_cre = item.parman.add_data(sigma_data[:, 0])
-                pid_cim = item.parman.add_data(sigma_data[:, 1])
-            elif len(rmag_file) == 0 and len(rpha_file) == 0:
-                pid_cre = None
-                pid_cim = None
+                sigma_files = sorted(glob(tdir + 'inv/*.sig'))
+                if len(sigma_files) > 0:
+                    sigma_data = np.loadtxt(sigma_files[-1], skiprows=1)
+                    pid_cre = item.parman.add_data(sigma_data[:, 0])
+                    pid_cim = item.parman.add_data(sigma_data[:, 1])
+                elif len(rmag_file) == 0 and len(rpha_file) == 0:
+                    pid_cre = None
+                    pid_cim = None
+                else:
+                    # very old CRTomo runs...
+                    crho = item.parman.parsets[
+                        pid_rmag
+                    ] * np.exp(1j * item.parman.parsets[pid_rpha] / 1000)
+                    csigma = 1 / crho
+                    pid_cre = item.parman.add_data(csigma.real)
+                    pid_cim = item.parman.add_data(csigma.imag)
+                self.a['cre'][frequency_key] = pid_cre
+                self.a['cim'][frequency_key] = pid_cim
             else:
-                # very old CRTomo runs...
-                crho = item.parman.parsets[
-                    pid_rmag
-                ] * np.exp(1j * item.parman.parsets[pid_rpha] / 1000)
-                csigma = 1 / crho
-                pid_cre = item.parman.add_data(csigma.real)
-                pid_cim = item.parman.add_data(csigma.imag)
-            self.a['cre'][frequency_key] = pid_cre
-            self.a['cim'][frequency_key] = pid_cim
+                crtomo_cfg_file = tdir + os.sep + 'exe' + os.sep + 'crtomo.cfg'
+                if os.path.isfile(crtomo_cfg_file):
+                    item.crtomo_cfg.import_from_file(crtomo_cfg_file)
+                # forward configurations
+                config_file = tdir + os.sep + 'config' + os.sep + 'config.dat'
+                if os.path.isfile(config_file):
+                    item.configs.load_crmod_config(config_file)
+
+                # load data/modeling results
+                item._read_modeling_results(tdir + os.sep + 'mod')
+
+                item.read_inversion_results(tdir)
+
+                self.a['rmag'][frequency_key] = item.a['inversion']['rmag'][-1]
+                self.a['rpha'][frequency_key] = item.a['inversion']['rpha'][-1]
+                self.a['cre'][frequency_key] = item.a['inversion']['cre'][-1]
+                self.a['cim'][frequency_key] = item.a['inversion']['cim'][-1]
 
     def extract_polygon_area(self, label, polygon_points):
         """DEFUNCT
@@ -706,3 +735,54 @@ class eitMan(object):
                     nr, frequency
                 )
             )
+
+    def plot_all_result_spectra(self, directory):
+        os.makedirs(directory, exist_ok=True)
+        N = self.tds[self.frequencies[0]].configs.configs.shape[0]
+        for i in range(N):
+            print('Plotting {}/{}'.format(i + 1, N))
+            self.plot_result_spectrum(
+                directory + '/spectrum_{:03}.jpg'.format(i), i)
+
+    def plot_result_spectrum(self, filename, nr):
+        """Plot a given data and inversion response spectrum to file.
+
+        WARNING: At this point does not take into account missing
+        configurations for certain frequencies...
+
+        Parameters
+        ----------
+        filename : str
+            Output filename
+        nr : int
+            Index of spectrum to plot. Starts at 0
+
+        """
+        rpha = np.vstack(
+            [td.configs.measurements[
+                td.a['inversion']['fwd_response_rpha'][-1]
+            ] for f, td in sorted(self.tds.items())]).T
+        rmag = np.vstack(
+            [td.configs.measurements[
+                td.a['inversion']['fwd_response_rmag'][-1]
+            ] for f, td in sorted(self.tds.items())]).T
+        spec1 = sip_response(
+            self.frequencies, rmag=rmag[nr, :], rpha=rpha[nr, :])
+        rmag_true = np.vstack(
+            [td.configs.measurements[
+                td.a['measurements'][0]
+            ] for f, td in sorted(self.tds.items())]).T
+        rpha_true = np.vstack(
+            [td.configs.measurements[
+                td.a['measurements'][1]
+            ] for f, td in sorted(self.tds.items())]).T
+        spec_true = sip_response(
+            self.frequencies, rmag=rmag_true[nr, :], rpha=rpha_true[nr, :])
+        spec_true.plot(
+            filename,
+            reciprocal=spec1,
+            title='abmn: {}-{}-{}-{}'.format(
+                *self.tds[self.frequencies[0]].configs.configs[nr]),
+            label_nor='data',
+            label_rec='inversion response',
+        )
