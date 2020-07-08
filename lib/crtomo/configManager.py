@@ -203,7 +203,8 @@ class ConfigManager(reda_config_mgr.ConfigManager):
         self.add_to_configs(configs)
         return configs
 
-    def load_crmod_data(self, data_source):
+    def load_crmod_data(self, data_source, is_forward_response=False,
+                        try_fix_signs=False):
         """Load CRMod measurement data, either from file or directly from a
         numpy array.
 
@@ -212,12 +213,24 @@ class ConfigManager(reda_config_mgr.ConfigManager):
         data_source : string|numpy.ndarray
             if this is a string, treat it as an input filename. If it is a Nx5
             or Nx3 numpy array, use this data directly
+        is_forward_response : bool, optional
+            If True this indicated volt.dat file created by CRTomo during an
+            inversion run to store forward responses of a given model
+            iteration. In this case the third data column indicates the wdfak
+            parameter, i.e., it indicates if a given data point was excluded
+            from this iteration.
+        try_fix_signs : bool, optional
+            If True, try to fix sign reversals with respect to an already
+            registered configuration set by swappend m and n entries.
         Returns
         -------
         cid_mag : int
             Measurement id for magnitude data
         cid_pha : int
             Measurement id for phase data
+        mid_wdfak : int, optional
+            Measurement id for wdfak indicators. Only returned if
+            is_forward_response is True
         """
         if isinstance(data_source, str):
             with open(data_source, 'r') as fid:
@@ -237,21 +250,50 @@ class ConfigManager(reda_config_mgr.ConfigManager):
             # data already stored in the variable
             measurements = data_source
 
-        assert measurements.shape[1] in (4, 6)
-        if measurements.shape[1] == 4:
+        if is_forward_response:
             # crmod ab-mn scheme
             abmn = self._crmod_to_abmn(measurements[:, 0:2])
             rmag = measurements[:, 2]
             rpha = measurements[:, 3]
+            wdfak = measurements[:, 4]
         else:
-            # abmn in separate columns
-            abmn = measurements[:, 0:4]
-            rmag = measurements[:, 4]
-            rpha = measurements[:, 5]
+            assert measurements.shape[1] in (4, 6)
+            if measurements.shape[1] == 4:
+                # crmod ab-mn scheme
+                abmn = self._crmod_to_abmn(measurements[:, 0:2])
+                rmag = measurements[:, 2]
+                rpha = measurements[:, 3]
+            else:
+                # abmn in separate columns
+                abmn = measurements[:, 0:4]
+                rmag = measurements[:, 4]
+                rpha = measurements[:, 5]
 
         if self.configs is None:
             self.configs = abmn
         else:
+            if try_fix_signs:
+                if not np.all(abmn[:, 0:2] == self.configs[:, 0:2]):
+                    raise Exception(
+                        'try_fix_signs failed: a and b columns do not match'
+                    )
+                # import IPython
+                # IPython.embed()
+                indices_to_switch = np.where(
+                    np.all(
+                        abmn[:, 3:1:-1] == self.configs[:, 2:4], axis=1
+                    )
+                )
+                abmn[indices_to_switch] = self.configs[indices_to_switch]
+                z_complex = rmag[
+                    indices_to_switch
+                ] * np.exp(1j * rpha[indices_to_switch] / 1000)
+                z_complex_fixed = z_complex * -1
+                rmag[indices_to_switch] = np.abs(z_complex_fixed)
+                rpha[indices_to_switch] = np.arctan2(
+                    np.imag(z_complex_fixed), np.real(z_complex_fixed)
+                )
+
             # check that configs match
             if not np.all(abmn == self.configs):
                 raise Exception(
@@ -261,6 +303,10 @@ class ConfigManager(reda_config_mgr.ConfigManager):
         # add data
         cid_mag = self.add_measurements(rmag)
         cid_pha = self.add_measurements(rpha)
+        if is_forward_response:
+            mid_wdfak = self.add_measurements(wdfak)
+            return cid_mag, cid_pha, mid_wdfak
+
         return cid_mag, cid_pha
 
     def load_crmod_volt(self, filename):
