@@ -342,11 +342,11 @@ class tdMan(object):
             if os.path.isfile(config_file):
                 self.configs.load_crmod_config(config_file)
 
-            # load inversion results
-            self.read_inversion_results(tomodir)
-
             # load data/modeling results
             self._read_modeling_results(tomodir + os.sep + 'mod')
+
+            # load inversion results
+            self.read_inversion_results(tomodir)
 
     def inv_get_last_pid(self, parameter):
         """Return the pid of the parameter set corresponding to the final
@@ -1298,11 +1298,37 @@ class tdMan(object):
 
         """
         self._read_inversion_results(tomodir)
+        self._read_inversion_fwd_responses(tomodir)
         self.inv_stats = self._read_inv_ctr(tomodir)
         self._read_resm_m(tomodir)
         self._read_l1_coverage(tomodir)
         self._read_l2_coverage(tomodir)
         self.eps_data = self._read_eps_ctr(tomodir)
+
+    def _read_inversion_fwd_responses(self, tomodir):
+        """Import the forward responses for all iterations of a given inversion
+
+        Parameters
+        ----------
+        tomodir : str
+            Path to tomodir
+        """
+        basedir = tomodir + os.sep + 'inv' + os.sep
+        volt_files = sorted(glob(basedir + 'volt*.dat'))
+        pids_rmag = []
+        pids_rpha = []
+        pids_wdfak = []
+        for filename in volt_files:
+            pids = self.configs.load_crmod_data(
+                filename, is_forward_response=True, try_fix_signs=True)
+            pids_rmag.append(pids[0])
+            pids_rpha.append(pids[1])
+            pids_wdfak.append(pids[2])
+
+        # self.a['inversions'] already created by .read_inversion_results
+        self.assignments['inversion']['fwd_response_rmag'] = pids_rmag
+        self.assignments['inversion']['fwd_response_rpha'] = pids_rpha
+        self.assignments['inversion']['fwd_response_wdfak'] = pids_wdfak
 
     def _read_inversion_results(self, tomodir):
         """Import resistivity magnitude/phase and real/imaginary part of
@@ -2029,8 +2055,12 @@ i6,t105,g9.3,t117,f5.3)
             print(os.getcwd())
             return 1
 
-        nr_cells, max_sens = np.loadtxt(l1_dw_coverage_file, max_rows=1)
-        l1_dw_log10_norm = np.loadtxt(l1_dw_coverage_file, skiprows=1)[:, 2]
+        try:
+            nr_cells, max_sens = np.loadtxt(l1_dw_coverage_file, max_rows=1)
+            l1_dw_log10_norm = np.loadtxt(l1_dw_coverage_file, skiprows=1)[:, 2]
+        except Exception:
+            # maybe old format - ignore for now
+            return
         self.header_l1_dw_log10_norm = {
             'max_value': max_sens,
         }
