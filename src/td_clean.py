@@ -52,6 +52,16 @@ def main():
             # print('Removing file {0}'.format(filename))
             os.remove(filename)
 
+    plot_files = (
+        'rho.png',
+        'imag.png',
+        'real.png',
+        'phi.png',
+    )
+    for filename in plot_files:
+        if os.path.isfile(filename):
+            os.remove(filename)
+
 
 if __name__ == '__main__':
     main()
