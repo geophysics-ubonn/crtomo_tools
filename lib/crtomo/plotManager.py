@@ -453,7 +453,6 @@ class plotManager(object):
         # if applicable, apply alpha values
         alpha_cid = kwargs.get('cid_alpha', None)
         if isinstance(alpha_cid, int):
-            print('applying alpha')
             alpha = self.parman.parsets[alpha_cid]
             # make sure this data set is normalized between 0 and 1
             if np.nanmin(alpha) < 0 or np.nanmax(alpha) > 1:

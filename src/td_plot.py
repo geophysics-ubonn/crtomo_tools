@@ -748,7 +748,9 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
         [real, imag] = calc_complex(mag, pha)
         if options.c_in_log:
             real = np.log10(real)
-            imag = np.log10(imag)
+            with np.errstate(divide='ignore'):
+                imag = np.log10(imag)
+            imag[np.isinf(imag)] = np.nan
 
         if not pha_fpi == []:
             [real_fpi, imag_fpi] = calc_complex(mag, pha_fpi)
@@ -757,7 +759,11 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
                 magunit = 'rho'
             if options.c_in_log:
                 real_fpi = np.log10(real_fpi)
-                imag_fpi = np.log10(imag_fpi)
+                with np.errstate(divide='ignore'):
+                    imag_fpi = np.log10(imag_fpi)
+                imag_fpi[np.isinf(imag_fpi)] = np.nan
+            # import IPython
+            # IPython.embed()
             # print(imag_fpi, np.nanmin(imag_fpi), np.nanmax(imag_fpi))
             # print(options.imag_vmin, options.imag_vmax)
             # exit()
