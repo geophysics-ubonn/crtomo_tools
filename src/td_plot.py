@@ -19,8 +19,6 @@ The script has to be run in a tomodir. Output file will be saved in tomodir.
 '''
 import os
 from optparse import OptionParser
-import math
-
 import numpy as np
 
 import crtomo.mpl
@@ -341,26 +339,13 @@ def load_rho(name, column):
     return content
 
 
-def calc_complex(mag, pha):
+def calc_complex(rmag, rpha):
     ''' Calculate real and imaginary part of the complex conductivity from
     magnitude and phase in log10.
     '''
-    crho = mag * np.exp(1j * pha / 1000.0)
+    crho = rmag * np.exp(1j * rpha / 1000.0)
     csigma = 1 / crho
     return csigma.real, csigma.imag
-
-    import IPython
-    IPython.embed()
-    complx = [10 ** m * math.e ** (1j * p / 1e3) for m, p in zip(mag, pha)]
-    real = [math.log10((1 / c).real) for c in complx]
-    imag = []
-    for c in complx:
-        if ((1 / c).imag) == 0:
-            imag.append(math.nan)
-        else:
-            i = math.log10(abs((1 / c).imag))
-            imag.append(i)
-    return real, imag
 
 
 def plot_real(cid, ax, plotman, title, alpha, vmin, vmax,
@@ -600,7 +585,12 @@ def plot_ratio(cid, ax, plotman, title, alpha, vmin, vmax,
 def alpha_from_cov(plotman, alpha_cov):
     '''Calculate alpha values from the coverage/2.5.
     '''
-    abscov = np.abs(load_cov('inv/coverage.mag'))
+    cov_file = 'inv/coverage.mag'
+    if not os.path.isfile(cov_file):
+        return None, plotman
+
+    abscov = np.abs(load_cov(cov_file))
+
     if alpha_cov:
         normcov = np.divide(abscov, 2.5)
         normcov[np.where(normcov > 1)] = 1
@@ -750,6 +740,9 @@ def create_tdplot(plotman, cov, mag, pha, pha_fpi, alpha, options):
 def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
     '''Plot the data of the tomodir in individual plots.
     '''
+    if cov is None:
+        cov = np.ones_like(mag) * np.nan
+
     magunit = 'log_rho'
     if not pha == []:
         [real, imag] = calc_complex(mag, pha)
@@ -793,7 +786,7 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
                      options.pha_vmax, options.real_vmax, options.imag_vmax]
             cmaps = ['jet', 'GnBu',
                      'jet_r', 'jet_r', 'plasma_r',
-                     'plasma', 'jet_r', 'plasma_r']
+                     'jet_r', 'jet_r', 'plasma_r']
             saves = ['rho', 'cov',
                      'phi', 'real', 'imag',
                      'fpi_phi', 'fpi_real', 'fpi_imag']
