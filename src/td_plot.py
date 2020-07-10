@@ -343,7 +343,7 @@ def calc_complex(rmag, rpha):
     ''' Calculate real and imaginary part of the complex conductivity from
     magnitude and phase in log10.
     '''
-    crho = rmag * np.exp(1j * rpha / 1000.0)
+    crho = 10 ** rmag * np.exp(1j * rpha / 1000.0)
     csigma = 1 / crho
     return csigma.real, csigma.imag
 
