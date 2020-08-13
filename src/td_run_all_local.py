@@ -152,6 +152,7 @@ def find_unfinished_tomodirs(directory):
     needs_modeling = []
     needs_inversion = []
     for root, dirs, files in os.walk(directory):
+        dirs.sort()
         if is_tomodir(dirs):
             print('found tomodir: ', root)
             if check_if_needs_modeling(root):
