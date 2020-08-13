@@ -16,6 +16,7 @@ import pylab as plt
 from crtomo.grid import crt_grid
 import crtomo.cfg as CRcfg
 import crtomo.tdManager as CRman
+from crtomo.status import seitdir_is_finished
 
 import sip_models.res.cc as cc_res
 from reda.eis.plots import sip_response
@@ -480,10 +481,21 @@ class eitMan(object):
 
                 item.read_inversion_results(tdir)
 
-                self.a['rmag'][frequency_key] = item.a['inversion']['rmag'][-1]
-                self.a['rpha'][frequency_key] = item.a['inversion']['rpha'][-1]
-                self.a['cre'][frequency_key] = item.a['inversion']['cre'][-1]
-                self.a['cim'][frequency_key] = item.a['inversion']['cim'][-1]
+                if len(item.a['inversion']['rmag']) > 0:
+                    self.a['rmag'][frequency_key] = item.a[
+                        'inversion']['rmag'][-1]
+                    self.a['rpha'][frequency_key] = item.a[
+                        'inversion']['rpha'][-1]
+                    self.a['cre'][frequency_key] = item.a[
+                        'inversion']['cre'][-1]
+                    self.a['cim'][frequency_key] = item.a[
+                        'inversion']['cim'][-1]
+                else:
+                    self.a['rmag'][frequency_key] = None
+                    self.a['rpha'][frequency_key] = None
+                    self.a['cre'][frequency_key] = None
+                    self.a['cim'][frequency_key] = None
+
 
     def extract_polygon_area(self, label, polygon_points):
         """DEFUNCT
