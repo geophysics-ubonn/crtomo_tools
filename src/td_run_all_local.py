@@ -12,6 +12,7 @@ and can thus be also used without installing crtomo-tools. The only requirement
 is that CRMod/CRTomo is available in the $PATH variable, i.e., that
 CRMod/CRTomo can be called.
 """
+import re
 import os
 import subprocess
 import multiprocessing
@@ -23,7 +24,7 @@ try:
     import crtomo.binaries as cBin
     crmod_binary = cBin.get('CRMod')
     crtomo_binary = cBin.get('CRTomo')
-except ImportError as e:
+except ImportError:
     crmod_binary = 'CRMod'
     crtomo_binary = 'CRTomo'
 
@@ -49,10 +50,26 @@ def handle_cmd_options():
     )
 
     parser.add_option(
+        "-f", "--filter",
+        dest="regex_filter",
+        help="Process only tomodirs whose path matches the regex",
+        type='str',
+        default=None,
+    )
+
+    parser.add_option(
         "-r", "--reverse",
         dest="reverse_lists",
         help="Reverse directory lists before working with them",
         action='store_true',
+    )
+
+    parser.add_option(
+        "-c", "--confirm",
+        dest="confirm_start",
+        help="Prompt for user input before starting",
+        action='store_true',
+        default=False,
     )
 
     (options, args) = parser.parse_args()
@@ -222,8 +239,25 @@ def main():
         needs_modeling = reversed(needs_modeling)
         needs_inversion = reversed(needs_inversion)
 
-    run_CRMod(needs_modeling, options)
-    run_CRTomo(needs_inversion, options)
+    if options.regex_filter:
+        prog = re.compile(options.regex_filter)
+        print('Applying filter:', prog)
+        needs_inversion_filtered = list(filter(prog.search, needs_inversion))
+        needs_modeling_filtered = list(filter(prog.search, needs_modeling))
+    else:
+        needs_modeling_filtered = needs_modeling
+        needs_inversion_filtered = needs_inversion
+
+    if options.confirm_start:
+        print('-' * 20)
+        print('Tomodirs to model (after filtering):')
+        print(needs_modeling_filtered)
+        print('-' * 20)
+        print('Tomodirs to invert (after filtering):')
+        print(needs_inversion_filtered)
+        input('Press any key to proceed')
+    run_CRMod(needs_modeling_filtered, options)
+    run_CRTomo(needs_inversion_filtered, options)
 
 
 if __name__ == '__main__':
