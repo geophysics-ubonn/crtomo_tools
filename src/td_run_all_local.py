@@ -183,7 +183,8 @@ def find_unfinished_tomodirs(directory):
 def _run_crmod_in_tomodir(tomodir):
     pwd = os.getcwd()
     os.chdir(tomodir + os.sep + 'exe')
-    subprocess.call(crmod_binary, shell=True)
+    subprocess.check_output(
+        crmod_binary, shell=True, stderr=subprocess.STDOUT, )
     os.chdir(pwd)
 
 
@@ -217,7 +218,8 @@ def _run_crtomo_in_tomodir(tomodir):
         return
     pwd = os.getcwd()
     os.chdir(tomodir + os.sep + 'exe')
-    subprocess.call(crtomo_binary, shell=True)
+    subprocess.check_output(
+        crtomo_binary, shell=True, stderr=subprocess.STDOUT, )
     os.chdir(pwd)
 
 
