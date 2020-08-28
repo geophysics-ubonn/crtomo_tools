@@ -64,5 +64,6 @@ if __name__ == '__main__':
             'sip_models',
             'geccoinv',
             'pillow',
+            'reda',
         ],
     )
