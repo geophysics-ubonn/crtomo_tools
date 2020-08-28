@@ -25,6 +25,7 @@ try:
     crmod_binary = cBin.get('CRMod')
     crtomo_binary = cBin.get('CRTomo')
 except ImportError:
+    print('Couldn\'t find crtomo.binaries - falling back to defaults')
     crmod_binary = 'CRMod'
     crtomo_binary = 'CRTomo'
 
@@ -183,6 +184,7 @@ def find_unfinished_tomodirs(directory):
 def _run_crmod_in_tomodir(tomodir):
     pwd = os.getcwd()
     os.chdir(tomodir + os.sep + 'exe')
+    print('Calling CRMod in {}'.format(pwd))
     subprocess.check_output(
         crmod_binary, shell=True, stderr=subprocess.STDOUT, )
     os.chdir(pwd)
@@ -218,6 +220,7 @@ def _run_crtomo_in_tomodir(tomodir):
         return
     pwd = os.getcwd()
     os.chdir(tomodir + os.sep + 'exe')
+    print('Calling CRTomo in {}'.format(pwd))
     subprocess.check_output(
         crtomo_binary, shell=True, stderr=subprocess.STDOUT, )
     os.chdir(pwd)
