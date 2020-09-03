@@ -53,6 +53,7 @@ import time
 import numpy as np
 import scipy.sparse
 from scipy.spatial.distance import pdist
+import scipy.spatial
 import pandas as pd
 
 import crtomo.mpl
@@ -1103,6 +1104,18 @@ class crt_grid(object):
             tempdir_obj.cleanup()
 
         return grid
+
+    def get_element_indices_along_line(self, p0, p1, N):
+        points = np.array(
+            [(x, y) for x, y in zip(
+                np.linspace(p0[0], p1[0], N), np.linspace(p0[1], p1[1], N)
+            )]
+        )
+        centroids = self.get_element_centroids()
+
+        tree = scipy.spatial.cKDTree(centroids)
+        element_indices = tree.query(points)[1]
+        return element_indices
 
     def get_element_indices_within_rectangle(self, xmin, xmax, zmin, zmax):
         """Return the indices of all elements whose center is located within
