@@ -513,6 +513,8 @@ class eitMan(object):
         -------
 
         """
+        raise Exception('Not implemented')
+        """
         if isinstance(label, str):
             label = [label, ]
 
@@ -533,6 +535,7 @@ class eitMan(object):
         df_all = pd.concat(data_list)
 
         return df_all
+        """
 
     def extract_all_spectra(self, label):
         """Extract all SIP spectra, and return frequencies and a numpy array
@@ -798,3 +801,8 @@ class eitMan(object):
             label_nor='data',
             label_rec='inversion response',
         )
+
+    def set_electrode_capacitances(self, capacitance):
+        """Zimmermann et al 2018"""
+        for frequency, td in self.tds.items():
+            td.electrode_admittance = 2 * np.pi * frequency * capacitance

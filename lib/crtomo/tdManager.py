@@ -196,7 +196,10 @@ class tdMan(object):
             # store potential nids here
             'potentials': None,
             # last iteration of inversion results
-            'inversion': None
+            'inversion': None,
+            # if not None, this should be a tuple (pid_rmag, pid_rpha)
+            # containing pids to the prior model
+            'prior_model': None,
         }
         # short-cut
         self.a = self.assignments
@@ -214,6 +217,13 @@ class tdMan(object):
         # additional information from inversion results
         self.header_res_m = None
         self.header_l1_dw_log10_norm = None
+
+        # if we did measure electrode capacitances, store the average electrode
+        # capacitance here
+        # See Zimmermann et al. 2018 for more information
+        # For now this is only one value [S/m] = omega * C and will be
+        # multiplied for each electrode
+        self.electrode_admittance = None
 
         self._initialize_components(kwargs)
 
@@ -589,10 +599,14 @@ class tdMan(object):
 
         # we always want to save the measurements
         self.save_measurements(directory + os.sep + 'mod/volt.dat')
+
         # inversion
         self.crtomo_cfg.write_to_file(
             directory + os.sep + 'exe/crtomo.cfg'
         )
+
+        if self.electrode_admittance is not None:
+            self._write_el_admittance(directory)
 
         if self.noise_model is not None:
             self.noise_model.write_crt_noisemod(
@@ -601,6 +615,23 @@ class tdMan(object):
 
         if not os.path.isdir(directory + os.sep + 'inv'):
             os.makedirs(directory + os.sep + 'inv')
+
+        if self.a['prior_model'] is not None:
+            self.parman.save_to_rho_file(
+                directory + os.sep + 'inv/prior.model',
+                *self.a['prior_model']
+            )
+
+    def _write_el_admittance(self, directory):
+        filename = 'electrode_capacitances.dat'
+        with open(directory + os.sep + 'exe' + os.sep + filename, 'w') as fid:
+            fid.write('{}\n'.format(self.grid.nr_of_electrodes))
+            np.savetxt(
+                fid,
+                np.ones_like(
+                    self.grid.nr_of_electrodes
+                ) * self.electrode_admittance
+            )
 
     def save_measurements(self, filename):
         """Save measurements in a file. Use the CRTomo format.
@@ -2057,7 +2088,8 @@ i6,t105,g9.3,t117,f5.3)
 
         try:
             nr_cells, max_sens = np.loadtxt(l1_dw_coverage_file, max_rows=1)
-            l1_dw_log10_norm = np.loadtxt(l1_dw_coverage_file, skiprows=1)[:, 2]
+            l1_dw_log10_norm = np.loadtxt(
+                l1_dw_coverage_file, skiprows=1)[:, 2]
         except Exception:
             # maybe old format - ignore for now
             return
@@ -2415,3 +2447,10 @@ i6,t105,g9.3,t117,f5.3)
     def extract_along_line(self, pid, xy0, xy1, N=10):
         values = self.parman.extract_along_line(pid, xy0, xy1, N)
         return values
+
+    def set_prior_model(self, pid_rmag, pid_rpha):
+        self.assignments['prior_model'] = (pid_rmag, pid_rpha)
+        self.crtomo_cfg['prior_model'] = '../inv/prior.model'
+
+    def set_starting_model(self, pid_rmag, pid_rpha):
+        self.set_prior_model(pid_rmag, pid_rpha)

@@ -169,7 +169,7 @@ class crtomo_config(dict):
         # -1 indicates an empty line
         self.key_order = (
             'mswitch', 'elem', 'elec', 'volt', 'inv_dir', 'diff_inv',
-            -1, -1, -1, 'iseed_var', 'cells_x', 'cells_z',
+            -1, 'prior_model', -1, 'iseed_var', 'cells_x', 'cells_z',
             'ani_x', 'ani_z', 'max_it', 'dc_inv', 'robust_inv',
             'fpi_inv', 'mag_rel', 'mag_abs', 'pha_a1', 'pha_b',
             'pha_rel', 'pha_abs', 'hom_bg', 'hom_mag', 'hom_pha',
@@ -199,6 +199,7 @@ class crtomo_config(dict):
         self['elec'] = '../grid/elec.dat'
         self['volt'] = '../mod/volt.dat'
         self['inv_dir'] = '../inv'
+        self['prior_model'] = ''
         self['diff_inv'] = 'F ! difference inversion?'
         self['iseed_var'] = 'iseed variance'
         self['cells_x'] = '0    ! # cells in x-direction'
