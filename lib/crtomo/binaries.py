@@ -48,6 +48,7 @@ binaries = {
         'Linux': [
             'CRTomo',
             '/usr/bin/CRTomo_dev',
+            'CRTomo_master_{}'.format(platform.node()),
         ],
         'Windows': [
             r'C:\crtomo\bin\crtomo.exe',
@@ -58,6 +59,7 @@ binaries = {
             'CRMod',
             'CRMod_dev',
             '/usr/bin/CRMod_dev',
+            'CRMod_master_{}'.format(platform.node()),
         ],
         'Windows': [
             r'C:\crtomo\bin\crmod.exe',
@@ -67,6 +69,7 @@ binaries = {
         'Linux': [
             'CutMcK',
             '/usr/bin/CutMcK_dev',
+            'CutMcK_master_{}'.format(platform.node()),
         ],
         'Windows': [
             r'C:\crtomo\bin\cutmck.exe',
