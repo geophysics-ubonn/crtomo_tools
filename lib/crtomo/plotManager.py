@@ -419,7 +419,7 @@ class plotManager(object):
         else:
             subdata = cid
 
-        if 'converter' in kwargs:
+        if kwargs.get('converter', None) is not None:
             subdata = kwargs['converter'](subdata)
 
         # import IPython
