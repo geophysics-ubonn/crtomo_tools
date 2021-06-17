@@ -191,6 +191,9 @@ class tdMan(object):
             # should contain a two-item list with ids of magnitude and phase
             # measurements (which are stored in self.configs)
             'measurements': None,
+            # should contain a two-item tuple with ids of data errors (stored
+            # in self.configs)
+            'measurement_errors': None,
             # store sensitivity cids here
             'sensitivities': None,
             # store potential nids here
@@ -645,10 +648,18 @@ class tdMan(object):
             path to output filename
         """
         if self.assignments['measurements'] is not None:
-            self.configs.write_crmod_volt(
-                filename,
-                self.assignments['measurements']
-            )
+            if self.assignments['measurement_errors'] is not None:
+                # save individual errors
+                self.configs.write_crmod_volt_with_individual_errors(
+                    filename,
+                    self.assignments['measurements'],
+                    self.assignments['measurement_errors'],
+                )
+            else:
+                self.configs.write_crmod_volt(
+                    filename,
+                    self.assignments['measurements']
+                )
 
     def _save_sensitivities(self, directory):
         """save sensitivities to a directory
@@ -2454,3 +2465,12 @@ i6,t105,g9.3,t117,f5.3)
 
     def set_starting_model(self, pid_rmag, pid_rpha):
         self.set_prior_model(pid_rmag, pid_rpha)
+
+    def register_data_errors(self, mid_rmag_error, mid_rpha_error=None):
+        """Register individual data errors.
+
+
+        """
+        self.assignments['measurement_errors'] = [
+            mid_rmag_error, mid_rpha_error
+        ]
