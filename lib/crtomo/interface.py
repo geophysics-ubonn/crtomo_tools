@@ -47,8 +47,8 @@ class crmod_interface(object):
         Parameters
         ----------
         m : Nx1|Nx2 ndarray
-            N Model parameters, first column linear magnitudes [ohm m], second
-            column phase values [mrad]
+            N Model parameters, first column linear resistivity magnitudes [ohm
+            m], second column resistivity phase values [mrad]
 
         Returns
         -------
@@ -177,6 +177,19 @@ class crmod_interface(object):
         return rcomplex
 
     def fwd_complex_R_rho(self, model_rcomplex):
+        """Compute the forward response.
+
+        Parameters
+        ----------
+        model_rcomplex : size M numpy.ndarray
+            Complex forward model, complex resistivities
+
+        Returns
+        -------
+        response : numpy.ndarray
+            Model response, complex impedances
+
+        """
         m_rmag = np.abs(model_rcomplex)
         m_rpha = np.arctan2(
             np.imag(model_rcomplex), np.real(model_rcomplex)
@@ -191,11 +204,15 @@ class crmod_interface(object):
         return rcomplex
 
     def J_complex_R_sigma(self, model_ccomplex):
+        """Compute the Jacobian
+
+        """
         m_rmag = 1.0 / np.abs(model_ccomplex)
         m_rpha = - np.arctan2(
             np.imag(model_ccomplex), np.real(model_ccomplex)
         ) * 1000
         model_rmag_rpha = np.vstack((m_rmag, m_rpha)).T
+        print('Reistivity model used to calculate Jacobian:')
         print(model_rmag_rpha)
         tdm = self._get_tdm(model_rmag_rpha)
         tdm.save_to_tomodir('tomodir')
