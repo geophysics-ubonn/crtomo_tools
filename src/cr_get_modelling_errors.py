@@ -74,12 +74,19 @@ def compute_K_factors(elem_file, elec_file, config_file):
     grid = CRGrid.crt_grid()
     grid.load_grid(elem_file, elec_file)
 
-    configs = np.loadtxt(config_file, skiprows=1)
-    A = np.round(configs[:, 0] / 1e4).astype(int) - 1
-    B = np.mod(configs[:, 0], 1e4).astype(int) - 1
+    # we support different types of config files
+    # if the first line has four columns, treat it as an a b m n file,
+    # otherwise assume its a CRMod/CRtomo volt.dat file
+    first_line = np.genfromtxt(config_file, max_rows=1)
+    if first_line.size == 1:
+        configs = np.loadtxt(config_file, skiprows=1)
+        A = np.round(configs[:, 0] / 1e4).astype(int) - 1
+        B = np.mod(configs[:, 0], 1e4).astype(int) - 1
 
-    M = np.round(configs[:, 1] / 1e4).astype(int) - 1
-    N = np.mod(configs[:, 1], 1e4).astype(int) - 1
+        M = np.round(configs[:, 1] / 1e4).astype(int) - 1
+        N = np.mod(configs[:, 1], 1e4).astype(int) - 1
+    else:
+        A, B, M, N = np.loadtxt(config_file).astype(int).T - 1
 
     # we assume that electrodes are positioned on the surface
     # therefore we only need X coordinates
