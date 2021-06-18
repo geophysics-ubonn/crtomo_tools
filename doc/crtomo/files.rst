@@ -1144,9 +1144,9 @@ DC case individual errors: ::
   :math:`\sqrt{\Delta R_{norm}}`
 
 Each individual error is computed using the value in column 4, multiplied with
-the square of the normalization factor: :math:`\Delta R_i = \Delta R_{norm} *
-R_i`. Also note that the input here is always linear, despite the inversion
-being formulated as log(R).
+the inverse square of the normalization factor: :math:`\Delta R_i = R_i /
+\Delta R_{norm}`. Also note that the input here is always linear, despite the
+inversion being formulated as log(R).
 
 Complex/FPI case: ::
 
