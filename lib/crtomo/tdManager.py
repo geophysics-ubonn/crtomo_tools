@@ -194,6 +194,9 @@ class tdMan(object):
             # should contain a two-item tuple with ids of data errors (stored
             # in self.configs)
             'measurement_errors': None,
+            # these are the normalization factors for the individual errors
+            'error_norm_factor_mag': None,
+            'error_norm_factor_pha': None,
             # store sensitivity cids here
             'sensitivities': None,
             # store potential nids here
@@ -1063,18 +1066,36 @@ class tdMan(object):
         return fig, axes
 
     def read_voltages(self, voltage_file):
-        """import voltages from a volt.dat file
+        """Import voltages from a volt.dat file
 
         Parameters
         ----------
-        voltage_file : string
+        voltage_file : str
             Path to volt.dat file
         """
+        with open(voltage_file, 'r') as fid:
+            items_first_line = fid.readline().strip().split(' ')
 
-        measurements_raw = np.loadtxt(
-            voltage_file,
-            skiprows=1,
-        )
+        individual_errors = False
+        if len(items_first_line) == 1:
+            # regular volt.dat file
+            measurements_raw = np.loadtxt(
+                voltage_file,
+                skiprows=1,
+            )
+        elif len(items_first_line) == 2 and items_first_line[1] == 'T':
+            individual_errors = True
+            # Individual data errors
+            with open(voltage_file, 'r') as fid:
+                measurements_raw = np.genfromtxt(
+                    fid,
+                    skip_header=1,
+                    max_rows=int(items_first_line[0]),
+                )
+                (norm_mag, norm_pha) = np.genfromtxt(fid, max_rows=1)
+
+                print('NORM: norm_factors', norm_mag, norm_pha)
+
         measurements = np.atleast_2d(measurements_raw)
 
         # extract measurement configurations
@@ -1120,14 +1141,16 @@ class tdMan(object):
                         )
 
         # add measurements to the config instance
-        mid_mag = self.configs.add_measurements(
-            measurements[:, 2]
-        )
-        mid_pha = self.configs.add_measurements(
-            measurements[:, 3]
-        )
-
+        mid_mag = self.configs.add_measurements(measurements[:, 2])
+        mid_pha = self.configs.add_measurements(measurements[:, 3])
         self.assignments['measurements'] = [mid_mag, mid_pha]
+
+        if individual_errors:
+            mid_mag_error = self.configs.add_measurements(measurements[:, 4])
+            mid_pha_error = self.configs.add_measurements(measurements[:, 5])
+            self.register_data_errors(
+                mid_mag_error, mid_pha_error, norm_mag, norm_pha
+            )
 
     def _model(self, voltages, sensitivities, potentials, tempdir,
                silent=False):
@@ -2466,7 +2489,8 @@ i6,t105,g9.3,t117,f5.3)
     def set_starting_model(self, pid_rmag, pid_rpha):
         self.set_prior_model(pid_rmag, pid_rpha)
 
-    def register_data_errors(self, mid_rmag_error, mid_rpha_error=None):
+    def register_data_errors(
+            self, mid_rmag_error, mid_rpha_error=None, norm_mag=1, norm_pha=1):
         """Register individual data errors.
 
 
@@ -2474,3 +2498,5 @@ i6,t105,g9.3,t117,f5.3)
         self.assignments['measurement_errors'] = [
             mid_rmag_error, mid_rpha_error
         ]
+        self.assignments['error_norm_factor_mag'] = norm_mag
+        self.assignments['error_norm_factor_pha'] = norm_pha
