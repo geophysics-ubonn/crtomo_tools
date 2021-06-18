@@ -429,7 +429,7 @@ class plotManager(object):
         cmap = mpl.cm.get_cmap(
             cmap_name,
             kwargs.get('cbsegments', None)
-        )
+        ).copy()
         over = kwargs.get('over', cmap(1.0))
         under = kwargs.get('under', cmap(0.0))
 
