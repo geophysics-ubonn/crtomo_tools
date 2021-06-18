@@ -57,6 +57,10 @@ def main():
         'imag.png',
         'real.png',
         'phi.png',
+        'cov.png',
+        'fpi_imag.png',
+        'fpi_phi.png',
+        'fpi_real.png',
     )
     for filename in plot_files:
         if os.path.isfile(filename):
