@@ -1094,8 +1094,6 @@ class tdMan(object):
                 )
                 (norm_mag, norm_pha) = np.genfromtxt(fid, max_rows=1)
 
-                print('NORM: norm_factors', norm_mag, norm_pha)
-
         measurements = np.atleast_2d(measurements_raw)
 
         # extract measurement configurations
@@ -2493,6 +2491,26 @@ i6,t105,g9.3,t117,f5.3)
             self, mid_rmag_error, mid_rpha_error=None, norm_mag=1, norm_pha=1):
         """Register individual data errors.
 
+        The normalization factors are used as follows:
+
+            mag_error -> mag_error / norm_mag ** 2
+            pha_error -> pha_error / norm_pha ** 2
+
+        That means that you need to decrease the values in order to increase
+        individual errors.
+
+        Parameters
+        ----------
+        mid_mag_error : int
+            ID to the corresponding measurement in tdMan.configs holding the
+            magnitude errors (linear)
+        mid_pha_error : int
+            ID to the corresponding measurement in tdMan.configs holding the
+            phase errors (linear)
+        norm_mag : float
+            Magnitude errors can be normalized by the square of this value.
+        norm_pha : float
+            Phase errors can be normalized by the square of this value.
 
         """
         self.assignments['measurement_errors'] = [
