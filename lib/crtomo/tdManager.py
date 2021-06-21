@@ -926,7 +926,7 @@ class tdMan(object):
             td.model(sensitivities=True)
             fig, axes = td.plot_sensitivity(0)
             fig.tight_layout()
-            fig.savefig('sens_plot.pdf', bboch_inches='tight')
+            fig.savefig('sens_plot.pdf', bbox_inches='tight')
 
         """
 
