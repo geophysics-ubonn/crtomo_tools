@@ -4,6 +4,8 @@ that correspond to the elements of the grid. Usually this is a resistivity or
 phase distribution, but can also be a cumulated sensitivity distribution.
 """
 import os
+
+from scipy.stats import multivariate_normal
 import scipy.interpolate as spi
 import numpy as np
 import shapely.geometry as shapgeo
@@ -504,3 +506,61 @@ class ParMan(object):
         elements_in_polygon_array = np.array(elements_in_polygon)
 
         return elements_in_polygon_array, values
+
+    def create_parset_with_gaussian_anomaly(
+            self, center, width, max_value, background):
+        """
+
+        Parameters
+        ----------
+        center : [float, float]
+            Center of the anomaly
+        width : float| [float, float]
+            The spatial width of the anomaly (x/z directions). Equivalent to
+            the standard deviations of the underlying distribution.
+        max_value : float
+            The maximum value that the anomaly is normalized to
+        background : float
+            Background value
+
+        Returns
+        -------
+        pid : int
+            ID of newly created parameter set
+
+        """
+        pid = self.add_empty_dataset(background)
+        self.add_gaussian_anomaly_to_parset(
+            pid, center, width, max_value
+        )
+        return pid
+
+    def add_gaussian_anomaly_to_parset(
+            self, pid, center, width, max_value):
+        """
+
+        Parameters
+        ----------
+        pid : int
+            Id of parameter set
+        center : [float, float]
+            Center of the anomaly
+        width : float| [float, float]
+            The spatial width of the anomaly (x/z directions). Equivalent to
+            the standard deviations of the underlying distribution.
+        max_value : float
+            The maximum value that the anomaly is normalized to
+
+        """
+        xy = self.grid.get_element_centroids()
+        # generates a 2D Gaussian distribution with
+        # ([mean(location)],[covariance(shape)]])
+        rv = multivariate_normal(
+            center,
+            # 0.1,
+            # parameters_gaussian['covariance']
+        )
+        grid_values = rv.pdf(xy)
+        grid_values /= np.abs(grid_values).max()
+        grid_values *= max_value
+        self.parsets[pid] = self.parsets[pid] + grid_values
