@@ -554,11 +554,9 @@ class ParMan(object):
         """
         xy = self.grid.get_element_centroids()
         # generates a 2D Gaussian distribution with
-        # ([mean(location)],[covariance(shape)]])
         rv = multivariate_normal(
             center,
-            # 0.1,
-            # parameters_gaussian['covariance']
+            width,
         )
         grid_values = rv.pdf(xy)
         grid_values /= np.abs(grid_values).max()
