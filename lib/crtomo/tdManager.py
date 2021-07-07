@@ -1140,7 +1140,10 @@ class tdMan(object):
 
         # add measurements to the config instance
         mid_mag = self.configs.add_measurements(measurements[:, 2])
-        mid_pha = self.configs.add_measurements(measurements[:, 3])
+        if measurements.shape[1] >= 4:
+            mid_pha = self.configs.add_measurements(measurements[:, 3])
+        else:
+            mid_pha = None
         self.assignments['measurements'] = [mid_mag, mid_pha]
 
         if individual_errors:
