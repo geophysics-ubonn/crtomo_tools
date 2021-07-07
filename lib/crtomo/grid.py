@@ -1181,3 +1181,39 @@ class crt_grid(object):
                 midpoints_in, data[i], midpoints_out, method=method)
         print(interpolated_data)
         return interpolated_data
+
+    def reverse_node_order(self, element_type):
+        """Reverses the order of the nodes of all elements of a given type.
+        This can be used to fix CRTomo/CRMod errors regarding the computation
+        of the determinant during FE system compilation.
+
+        Use only if you know what you are doing!
+
+        Parameters
+        ----------
+        element_type : int
+            Element type to change. Usually 3 or 4 (triangles or quads)
+
+        """
+        assert element_type in self.element_data, \
+            "element type {} not registered Available types :{}".format(
+                element_type, self.element_data.keys()
+            )
+        for i in range(len(self.element_data[element_type])):
+            self.element_data[
+                element_type
+            ][i].nodes = self.element_data[
+                element_type
+            ][i].nodes[::-1]
+
+            self.element_data[
+                element_type
+            ][i].xcoords = self.element_data[
+                element_type
+            ][i].xcoords[::-1]
+
+            self.element_data[
+                element_type
+            ][i].zcoords = self.element_data[
+                element_type
+            ][i].zcoords[::-1]
