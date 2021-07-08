@@ -1295,7 +1295,8 @@ class tdMan(object):
         # reset environment variable
         os.environ['OMP_NUM_THREADS'] = env_omp
 
-        print('finished')
+        print('Inversion finished')
+        print('Attempting to import the results')
 
         os.chdir(pwd)
         self.read_inversion_results(tempdir)
@@ -1335,7 +1336,7 @@ class tdMan(object):
                     self._invert(tempdir, catch_output, **kwargs)
                 else:
                     raise IOError(
-                        'output directory already exists: {0}'.format(
+                        'Output directory already exists: {0}'.format(
                             output_directory
                         )
                     )
@@ -1410,8 +1411,8 @@ class tdMan(object):
         inv_pha = sorted(glob(basedir + 'rho*.pha'))
         inv_sig = sorted(glob(basedir + 'rho*.sig'))
 
-        assert len(inv_mag) == len(inv_pha)
-        assert len(inv_mag) == len(inv_sig)
+        assert len(inv_pha) == 0 or len(inv_mag) == len(inv_pha)
+        assert len(inv_sig) == 0 or len(inv_mag) == len(inv_sig)
 
         pids_mag = [
             self.parman.load_inv_result(filename, is_log10=True) for filename
@@ -1425,8 +1426,13 @@ class tdMan(object):
             ) for filename in inv_sig
         ]
 
-        pids_cre = [x[0] for x in pids_sig]
-        pids_cim = [x[1] for x in pids_sig]
+        if len(pids_sig) > 0:
+            pids_cre = [x[0] for x in pids_sig]
+            pids_cim = [x[1] for x in pids_sig]
+        else:
+            pids_cre = None
+            pids_cim = None
+
         # print(pids_sig)
         # import IPython
         # IPython.embed()
