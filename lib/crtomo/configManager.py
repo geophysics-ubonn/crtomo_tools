@@ -238,7 +238,7 @@ class ConfigManager(reda_config_mgr.ConfigManager):
                 measurements = np.loadtxt(fid)
                 if nr_of_configs != measurements.shape[0]:
                     raise Exception(
-                        'indicated number of measurements does not equal '
+                        'Indicated number of measurements is not equal '
                         'to actual number of measurements'
                     )
         elif isinstance(data_source, pd.DataFrame):
@@ -254,10 +254,18 @@ class ConfigManager(reda_config_mgr.ConfigManager):
             # crmod ab-mn scheme
             abmn = self._crmod_to_abmn(measurements[:, 0:2])
             rmag = measurements[:, 2]
-            rpha = measurements[:, 3]
-            wdfak = measurements[:, 4]
+            if measurements.shape[1] == 4:
+                # assume DC inversion
+                rpha = None
+                wdfak = measurements[:, 3]
+            else:
+                rpha = measurements[:, 3]
+                wdfak = measurements[:, 4]
         else:
-            assert measurements.shape[1] in (4, 6)
+            assert measurements.shape[1] in (4, 6), \
+                "Only know how to deal with 4 or 6 columns. " + \
+                "DC probably not supported"
+
             if measurements.shape[1] == 4:
                 # crmod ab-mn scheme
                 abmn = self._crmod_to_abmn(measurements[:, 0:2])
@@ -277,22 +285,28 @@ class ConfigManager(reda_config_mgr.ConfigManager):
                     raise Exception(
                         'try_fix_signs failed: a and b columns do not match'
                     )
-                # import IPython
-                # IPython.embed()
+                # find swapped potential electrodes
                 indices_to_switch = np.where(
                     np.all(
                         abmn[:, 3:1:-1] == self.configs[:, 2:4], axis=1
                     )
                 )
+                # fix configurations
                 abmn[indices_to_switch] = self.configs[indices_to_switch]
-                z_complex = rmag[
-                    indices_to_switch
-                ] * np.exp(1j * rpha[indices_to_switch] / 1000)
-                z_complex_fixed = z_complex * -1
-                rmag[indices_to_switch] = np.abs(z_complex_fixed)
-                rpha[indices_to_switch] = np.arctan2(
-                    np.imag(z_complex_fixed), np.real(z_complex_fixed)
-                )
+                # Fix impedances
+                if rpha is not None:
+                    z_complex = rmag[
+                        indices_to_switch
+                    ] * np.exp(1j * rpha[indices_to_switch] / 1000)
+                    z_complex_fixed = z_complex * -1
+                    rmag[indices_to_switch] = np.abs(z_complex_fixed)
+                    rpha[indices_to_switch] = np.arctan2(
+                        np.imag(z_complex_fixed), np.real(z_complex_fixed)
+                    )
+                else:
+                    # DC case
+                    print('WARNING: try_fix_signs with DC not validated!')
+                    rmag[indices_to_switch] = -rmag[indices_to_switch]
 
             # check that configs match
             if not np.all(abmn == self.configs):
@@ -302,7 +316,11 @@ class ConfigManager(reda_config_mgr.ConfigManager):
                 )
         # add data
         cid_mag = self.add_measurements(rmag)
-        cid_pha = self.add_measurements(rpha)
+        if rpha is not None:
+            cid_pha = self.add_measurements(rpha)
+        else:
+            cid_pha = None
+
         if is_forward_response:
             mid_wdfak = self.add_measurements(wdfak)
             return cid_mag, cid_pha, mid_wdfak
