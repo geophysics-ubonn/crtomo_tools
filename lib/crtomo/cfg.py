@@ -203,7 +203,7 @@ class crtomo_config(dict):
         self['diff_inv'] = 'F ! difference inversion?'
         self['iseed_var'] = 'iseed variance'
         self['cells_x'] = '0    ! # cells in x-direction'
-        self['cells_z'] = '-1    ! # cells in z-direction'
+        self['cells_z'] = '0    ! # cells in z-direction'
         self['ani_x'] = '1.000  ! smoothing parameter in x-direction'
         self['ani_z'] = '1.000  ! smoothing parameter in z-direction'
         self['max_it'] = '20    ! max. nr of iterations'
