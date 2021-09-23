@@ -377,6 +377,10 @@ class plotManager(object):
             If True, plot no electrodes
         rasterize: bool, optional
             if True, rasterize the plot. Default: False
+        aspect: 'auto'|'equal', optional default: 'equal'
+            Aspect of the plot region
+        cb_pad: float, optional
+            Padding of colorbar. Defaults to 0.4
 
         Returns
         -------
@@ -492,7 +496,7 @@ class plotManager(object):
         ax.set_ylim(zmin, zmax)
         ax.set_xlabel(kwargs.get('xlabel', 'x'))
         ax.set_ylabel(kwargs.get('zlabel', 'z'))
-        ax.set_aspect('equal')
+        ax.set_aspect(kwargs.get('aspect', 'equal'))
         ax.set_title(
             kwargs.get('title', '')
         )
@@ -502,11 +506,14 @@ class plotManager(object):
             cbposition = kwargs.get('cbposition', 'vertical')
             if cbposition == 'horizontal':
                 ax_cb = divider.new_vertical(
-                    size=0.1, pad=0.4, pack_start=True
+                    size=0.1,
+                    pad=kwargs.get('cb_pad', 0.4),
+                    pack_start=True
                 )
             elif cbposition == 'vertical':
                 ax_cb = divider.new_horizontal(
-                    size=0.1, pad=0.4,
+                    size=0.1,
+                    pad=kwargs.get('cb_pad', 0.4),
                 )
             else:
                 raise Exception('cbposition not recognized')
