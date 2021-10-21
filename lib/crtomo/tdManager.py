@@ -1371,6 +1371,13 @@ class tdMan(object):
         self._read_l1_coverage(tomodir)
         self._read_l2_coverage(tomodir)
         self.eps_data = self._read_eps_ctr(tomodir)
+        # for simplicity, add configurations to psi data
+        if len(self.configs.configs) > 0 and len(self.eps_data) > 1:
+            for iteration in range(1, len(self.eps_data)):
+                for index, key in enumerate('abmn'):
+                    self.eps_data[
+                        iteration
+                    ][key] = self.configs.configs[:, index]
 
     def _read_inversion_fwd_responses(self, tomodir):
         """Import the forward responses for all iterations of a given inversion
