@@ -2534,3 +2534,14 @@ i6,t105,g9.3,t117,f5.3)
         ]
         self.assignments['error_norm_factor_mag'] = norm_mag
         self.assignments['error_norm_factor_pha'] = norm_pha
+
+    def copy(self):
+        """Provide a copy of yourself. Do not copy modeling or inversion
+        results, but copy everything that can be used for modeling or
+        inversion
+        """
+        tdm_copy = tdMan(grid=self.grid)
+        tdm_copy.crtomo_cfg = self.crtomo_cfg.copy()
+        tdm_copy.crmod_cfg = self.crmod_cfg.copy()
+
+        return tdm_copy
