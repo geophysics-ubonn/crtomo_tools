@@ -2543,5 +2543,14 @@ i6,t105,g9.3,t117,f5.3)
         tdm_copy = tdMan(grid=self.grid)
         tdm_copy.crtomo_cfg = self.crtomo_cfg.copy()
         tdm_copy.crmod_cfg = self.crmod_cfg.copy()
+        # configs
+
+        # forward model
+        if self.a['forward_model'] is not None:
+            raise Exception('not implemented yet')
+
+        # data
+        if len(self.a['measurements']) > 1:
+            raise Exception('not implemented yet')
 
         return tdm_copy
