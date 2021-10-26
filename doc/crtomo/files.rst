@@ -1145,8 +1145,16 @@ DC case individual errors: ::
 
 Each individual error is computed using the value in column 4, multiplied with
 the inverse square of the normalization factor: :math:`\Delta R_i = R_i /
-\Delta R_{norm}`. Also note that the input here is always linear, despite the
-inversion being formulated as log(R).
+\Delta R_{norm} ^ 2`.
+Also note that the input here is always linear, despite the inversion being
+formulated as log(R).
+Common values for the normalization factors, are as follows.
+To increasing error parameters by a factor of
+
+* 2, use a norm factor of 0.7
+* 3, use a norm factor of 0.577
+* 0.5, use a norm factor of 1.4
+* 0.33, use a norm factor of 1.73
 
 Complex/FPI case: ::
 
