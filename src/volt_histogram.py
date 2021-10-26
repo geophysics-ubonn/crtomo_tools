@@ -79,8 +79,14 @@ def main():
         if not os.path.isfile(filename):
             continue
 
+        # read in number of measurements
+        nr_measurements = np.genfromtxt(
+            filename,
+            usecols=[0, ], max_rows=1
+        ).take(0).astype(int)
+
         print('loading file: {0}'.format(filename))
-        volt_data = np.loadtxt(filename, skiprows=1)
+        volt_data = np.loadtxt(filename, skiprows=1, max_rows=nr_measurements)
         break
 
     if volt_data is None:
@@ -115,17 +121,17 @@ def main():
     ax = axes[0, 0]
     ax.hist(volt_data[:, 2], 100)
     ax.set_xlabel(r'$|Z|~[\Omega]$')
-    ax.set_ylabel('$\#$')
+    ax.set_ylabel(r'$\#$')
 
     ax = axes[0, 1]
     ax.hist(volt_data[:, 3], 100)
     ax.set_xlabel(r'$\phi~[mrad]$')
-    ax.set_ylabel('$\#$')
+    ax.set_ylabel(r'$\#$')
 
     ax = axes[1, 0]
     ax.hist(np.log10(volt_data[:, 2]), 100)
     ax.set_xlabel(r'$log_{10}(|Z|~[\Omega])$')
-    ax.set_ylabel('$\#$')
+    ax.set_ylabel(r'$\#$')
     ax.xaxis.set_major_locator(mpl.ticker.MaxNLocator(5))
 
     fig.tight_layout()

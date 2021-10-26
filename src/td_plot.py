@@ -224,6 +224,7 @@ def handle_options():
         action="store_true",
         dest="c_in_log",
         help="Plot real and imaginary part of conductivity in log10",
+        # default=True,
     )
 
     (options, args) = parser.parse_args()
