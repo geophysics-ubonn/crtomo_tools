@@ -257,7 +257,7 @@ class Mesh():
                 if characteristic_length[0] < 0:
                     try:
                         elec_positions = np.loadtxt(electrode_filename)
-                    except:
+                    except Exception:
                         raise IOError(
                             'The was an error opening the electrode file')
                     import scipy.spatial.distance
