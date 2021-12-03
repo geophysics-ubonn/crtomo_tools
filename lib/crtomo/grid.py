@@ -875,8 +875,10 @@ class crt_grid(object):
         return Wm
 
     @staticmethod
-    def create_surface_grid(nr_electrodes=None, spacing=None,
+    def create_surface_grid(nr_electrodes=None,
+                            spacing=None,
                             electrodes_x=None,
+                            electrodes_z=None,
                             depth=None,
                             left=None,
                             right=None,
@@ -889,8 +891,7 @@ class crt_grid(object):
         """This is a simple wrapper for cr_trig_create to create simple surface
         grids.
 
-        Automatically generated electrode positions are rounded to the third
-        digit.
+        Electrode and boundary positions are rounded to the third digit.
 
         Parameters
         ----------
@@ -902,8 +903,13 @@ class crt_grid(object):
         electrodes_x : array, optional
             x-electrode positions can be provided here, e.g., for
             non-equidistant electrode distances
+        electrodes_z : array, optional
+            z-electrode positions can be provided here, e.g., for
+            non-equidistant electrode distances. Only useful in combination
+            with electrodes_x
         depth : float, optional
-            the depth of the grid. If not given, this is computed as half the
+            the depth of the grid, relative to the minimum z-value.
+            If not given, this is computed as half the
             maximum distance between electrodes
         left : float, optional
             the space allocated left of the first electrode. If not given,
@@ -961,8 +967,13 @@ class crt_grid(object):
             electrodes[:, 0] = electrodes[:, 0] * spacing
             electrodes = np.round(electrodes, 3)
         else:
+            # we have individual electrode positions
             nr_electrodes = len(electrodes_x)
-            electrodes = np.hstack((electrodes_x, np.zeros_like(electrodes_x)))
+            electrodes = np.vstack(
+                (electrodes_x, np.zeros_like(electrodes_x))
+            ).T
+            if electrodes_z is not None:
+                electrodes[:, 1] = electrodes_z
 
         max_distance = np.abs(
             np.max(electrodes[:, 0]) - np.min(electrodes[:, 0])
@@ -975,13 +986,13 @@ class crt_grid(object):
         if right is None:
             right = max_distance / 4
         if depth is None:
-            depth = max_distance / 2
+            depth = np.abs(np.min(electrodes[:, 1]) - max_distance / 2)
 
         # min/max coordinates of final grid
         minimum_x = minx - left
         maximum_x = maxx + left
-        minimum_z = -depth
-        maximum_z = 0
+        minimum_z = np.min(electrodes[:, 1]) - depth
+        # maximum_z = 0
 
         boundary_noflow = 11
         boundary_mixed = 12
@@ -993,6 +1004,11 @@ class crt_grid(object):
         extra_lines = []
         add_boundary_nodes_left = []
         add_boundary_nodes_right = []
+
+        if electrodes_x is not None and lines is not None:
+            raise Exception(
+                'Extra lines not tested with individual electrode positions'
+            )
 
         if lines is not None:
             lines = np.array(lines)
@@ -1021,11 +1037,16 @@ class crt_grid(object):
             electrodes, boundary_noflow * np.ones((electrodes.shape[0], 1))
         ))
 
+        # start assembling the boundaries here
         boundaries = np.vstack((
-            (minimum_x, 0, boundary_noflow),
+            # left corner
+            (minimum_x, surface_electrodes[0, 1], boundary_noflow),
+            # electrodes
             surface_electrodes,
-            (maximum_x, maximum_z, boundary_mixed),
+            # right corner
+            (maximum_x, surface_electrodes[-1, 1], boundary_mixed),
         ))
+
         if len(add_boundary_nodes_right) != 0:
             boundaries = np.vstack((
                 boundaries,
@@ -1046,7 +1067,12 @@ class crt_grid(object):
             )
 
         if char_lengths is None:
+            assert spacing is not None, \
+                "you must provide a spacing parameter or the char_lengths"
             char_lengths = [spacing / 3.0, ]
+        else:
+            assert len(char_lengths) in [1, 4], \
+                "char_lengths must be either of size 1 or size 4"
 
         if workdir is None:
             tempdir_obj = tempfile.TemporaryDirectory()
@@ -1061,7 +1087,7 @@ class crt_grid(object):
             fmt='%.3f %.3f'
         )
         np.savetxt(tempdir + os.sep + 'boundaries.dat', boundaries,
-                   fmt='%.4f %.4f %i')
+                   fmt='%.3f %.3f %i')
         np.savetxt(
             tempdir + os.sep + 'char_length.dat',
             np.atleast_1d(char_lengths)
@@ -1070,7 +1096,7 @@ class crt_grid(object):
             np.savetxt(
                 tempdir + os.sep + 'extra_lines.dat',
                 np.atleast_2d(extra_lines),
-                fmt='%.4f %.4f %.4f %.4f'
+                fmt='%.3f %.3f %.3f %.3f'
             )
         pwd = os.getcwd()
         os.chdir(tempdir)
