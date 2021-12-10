@@ -621,6 +621,16 @@ class eitMan(object):
         nrx = min(N, 4)
         nrz = int(np.ceil(N / nrx))
 
+        labels = [
+            r'$\rho~[\Omega m]$',
+            r'$\phi~[mrad]$',
+        ]
+
+        cmaps = [
+            'turbo',
+            'jet',
+        ]
+
         for index, key, limits in zip(
                 (0, 1), ('rmag', 'rpha'), (maglim, phalim)):
             if limits is None:
@@ -649,7 +659,10 @@ class eitMan(object):
                     cbposition='horizontal',
                     cbmin=cbmin,
                     cbmax=cbmax,
-                    **kwargs
+                    title='{:.3f} Hz'.format(frequency),
+                    label=labels[index],
+                    cmap_name=cmaps[index],
+                    **kwargs,
                 )
             for ax in axes[0:-1, :].flat:
                 ax.set_xlabel('')
