@@ -275,6 +275,10 @@ class eitMan(object):
         frequency : float, optional
             Frequency of of the tomodir to use. If None, then apply to all
             tomodirs. Default is None.
+
+        Returns
+        -------
+        None
         """
         if frequency is None:
             frequencies = self.frequencies
@@ -495,7 +499,6 @@ class eitMan(object):
                     self.a['rpha'][frequency_key] = None
                     self.a['cre'][frequency_key] = None
                     self.a['cim'][frequency_key] = None
-
 
     def extract_polygon_area(self, label, polygon_points):
         """DEFUNCT
