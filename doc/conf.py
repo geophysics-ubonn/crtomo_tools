@@ -11,9 +11,10 @@
 #
 # All configuration values have a default; values that are commented out
 # serve to show the default.
-
 import os
 import sys
+
+from sphinx_gallery.sorting import FileNameSortKey
 # required to document scripts
 sys.path.append(
     os.path.abspath('../src/')
@@ -44,9 +45,6 @@ extensions = [
     'sphinxcontrib.blockdiag',
     'sphinx.ext.intersphinx',
 ]
-import matplotlib
-if matplotlib.__version__[0] == '2':
-    extensions.append('matplotlib.sphinxext.only_directives')
 
 napoleon_include_init_with_doc = True
 
@@ -88,6 +86,8 @@ sphinx_gallery_conf = {
     'doc_module': 'crtomo',
     # 'capture_repr': ('_repr_html_', '__repr__'),
     'capture_repr': (),
+    'download_all_examples': False,
+    'within_subsection_order': FileNameSortKey,
 }
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
