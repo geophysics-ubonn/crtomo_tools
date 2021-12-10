@@ -16,7 +16,7 @@ import pylab as plt
 from crtomo.grid import crt_grid
 import crtomo.cfg as CRcfg
 import crtomo.tdManager as CRman
-from crtomo.status import seitdir_is_finished
+# from crtomo.status import seitdir_is_finished
 
 import sip_models.res.cc as cc_res
 from reda.eis.plots import sip_response
