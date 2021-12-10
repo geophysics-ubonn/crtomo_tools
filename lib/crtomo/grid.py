@@ -1071,7 +1071,8 @@ class crt_grid(object):
                 "you must provide a spacing parameter or the char_lengths"
             char_lengths = [spacing / 3.0, ]
         else:
-            assert len(char_lengths) in [1, 4], \
+            assert isinstance(char_lengths, (float, int)) or len(
+                    char_lengths) in [1, 4], \
                 "char_lengths must be either of size 1 or size 4"
 
         if workdir is None:
