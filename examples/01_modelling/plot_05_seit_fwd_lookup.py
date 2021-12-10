@@ -12,7 +12,12 @@ import sip_models
 import crtomo
 
 ###############################################################################
-grid = crtomo.crt_grid('elem.dat', 'elec.dat')
+# set up plotting facilities - this will often generate better fitting plots
+import crtomo.mpl
+crtomo.mpl.setup()
+
+###############################################################################
+grid = crtomo.crt_grid.create_surface_grid(nr_electrodes=15, spacing=1)
 
 fig, ax = grid.plot_grid()
 fig.show()
@@ -39,8 +44,6 @@ np.savetxt('mask.dat', tdm.parman.parsets[pid_mask], '%i')
 
 mask = np.loadtxt('mask.dat').astype(int)
 
-grid = crtomo.crt_grid('elem.dat', 'elec.dat')
-
 # generate the lookup table
 lookup_table = {}
 
@@ -59,13 +62,8 @@ r = eit.plot_forward_models(
     maglim=[80, 110],
     phalim=[-30, 0],
 )
-# sphinx_gallery_defer_figures
-True
-# %%
 r['rmag']['fig'].show()
-# %%
 r['rpha']['fig'].show()
-# %%
 
 fig, _ = spectrum._plot()
 fig.show()

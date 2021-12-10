@@ -10,6 +10,8 @@ Sensitivity distributions can be easily plotted using the tdMan class:
 # imports
 import numpy as np
 import crtomo
+# is only used for reda.CreateEnterDirectory
+import reda
 
 ###############################################################################
 # create and save a FEM-grid
@@ -21,8 +23,9 @@ grid = crtomo.crt_grid.create_surface_grid(
 
 grid.plot_grid()
 
-grid.save_elem_file('elem.dat')
-grid.save_elec_file('elec.dat')
+with reda.CreateEnterDirectory('output_plot_00_sensitivity'):
+    grid.save_elem_file('elem.dat')
+    grid.save_elec_file('elec.dat')
 
 ###############################################################################
 # create the measurement configuration
@@ -40,7 +43,9 @@ for bg in (1, 10, 100, 1000):
 
     td.model(sensitivities=True)
     r = td.plot_sensitivity(0)
-    r[0].savefig('sensitivity_bg_{}.pdf'.format(bg), bbox_inches='tight')
+    with reda.CreateEnterDirectory('output_plot_00_sensitivity'):
+        r[0].savefig('sensitivity_bg_{}.pdf'.format(bg), bbox_inches='tight')
     r = td.plot_sensitivity(0, mag_only=True)
-    r[0].savefig(
-        'sensitivity_magonly_bg_{}.pdf'.format(bg), bbox_inches='tight')
+    with reda.CreateEnterDirectory('output_plot_00_sensitivity'):
+        r[0].savefig(
+            'sensitivity_magonly_bg_{}.pdf'.format(bg), bbox_inches='tight')

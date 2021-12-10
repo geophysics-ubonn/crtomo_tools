@@ -1,20 +1,24 @@
 #!/usr/bin/env python3
 # *-* coding: utf-8 *-*
 """
-Plot a potential distribution, computed with CRMod
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+Plot a potential distribution
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 """
 ###############################################################################
-# create a tomodir object
+# Imports
+import numpy as np
+import pylab as plt
+
 import crtomo
+
+###############################################################################
+# create a tomodir object
 grid = crtomo.crt_grid('grid_surface/elem.dat', 'grid_surface/elec.dat')
 td = crtomo.tdMan(grid=grid)
 
 ###############################################################################
 # define configurations
-import numpy as np
 td.configs.add_to_configs(
     np.array((
         (1, 10, 5, 7),
@@ -30,7 +34,6 @@ td.add_homogeneous_model(100, 0)
 # compute FEM solution using CRMod
 td.model(potentials=True)
 
-
 ###############################################################################
 # plot first quadrupole
 pot_mag, pot_pha = td.get_potential(0)
@@ -41,7 +44,6 @@ nid = td.nodeman.add_data(pot_mag)
 nid_pha = td.nodeman.add_data(pot_pha)
 
 # plot
-import pylab as plt
 fig, axes = plt.subplots(2, 1, figsize=(16 / 2.54, 8 / 2.54))
 
 ax = axes[0]

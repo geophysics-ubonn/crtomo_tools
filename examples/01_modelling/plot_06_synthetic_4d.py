@@ -19,7 +19,7 @@ import reda
 
 ###############################################################################
 # Generate the forward models
-frequencies = np.logspace(-3, 3, 15)
+frequencies = np.logspace(-3, 3, 5)
 grid = crtomo.crt_grid(
     'data_synthetic_4d/elem.dat', 'data_synthetic_4d/elec.dat'
 )
