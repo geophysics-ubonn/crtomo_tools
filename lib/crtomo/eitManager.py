@@ -822,3 +822,69 @@ class eitMan(object):
         """Zimmermann et al 2018"""
         for frequency, td in self.tds.items():
             td.electrode_admittance = 2 * np.pi * frequency * capacitance
+
+    def assign_sip_signatures_using_mask(self, mask_raw, lookup_table):
+        """
+
+        Parameters
+        ----------
+        lookup_table : dict
+
+        spectrum : sip_response
+            SIP spectrum to use for parameterization
+
+        """
+        assert isinstance(mask_raw, np.ndarray), "mask must be numpy array"
+        # these are indices - we need them to be integers
+        mask = mask_raw.astype(int)
+        assert len(mask.shape) == 1, "mask must be an 1D array"
+        assert (
+            mask.size == self.grid.nr_of_elements
+        ), "mask must be of the same size as number of mesh elements"
+
+        assert isinstance(
+            lookup_table, dict), "parameter lookup_table must be a dict"
+
+        # check the lookup table
+        for key, item in lookup_table.items():
+            assert isinstance(
+                item, (sip_response, sip_response2)
+            ), "the item with key {} is not a sip_response!".format(key)
+            assert np.all(self.frequencies == item.frequencies), \
+                "The frequencies in the spectrum of key " + \
+                "{} do not match".format(key)
+
+        assert len(lookup_table) == np.unique(mask).size, \
+            "Number of entries in the lookup table does not match number " + \
+            "of unique mask entries"
+
+        assert np.all(
+            np.sort(
+                np.unique(mask)
+            ) == np.sort(np.unique(list(lookup_table.keys())))
+            ), \
+            "entries in mask and lookup_table do not match"
+
+        if len(self.a['forward_rmag']) == 0:
+            print('No forward models registered yet. Creating empty ones')
+            self.add_homogeneous_model(0, 0)
+
+        # loop over assignments
+        for assignment in np.unique(mask):
+            pixel_indices = np.where(mask == assignment)[0]
+
+            spectrum = lookup_table[assignment]
+            for frequency, rmag, rpha in zip(
+                    self.frequencies, spectrum.rmag, spectrum.rpha):
+                td = self.tds[frequency]
+                pid_mag, pid_phase = td.a['forward_model']
+                td.parman.modify_pixels(
+                    pid_mag,
+                    pixel_indices,
+                    rmag
+                )
+                td.parman.modify_pixels(
+                    pid_phase,
+                    pixel_indices,
+                    rpha
+                )
