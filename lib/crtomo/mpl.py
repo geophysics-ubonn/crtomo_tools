@@ -7,7 +7,8 @@ To use this module, import * from it:
 Examples
 --------
 
-    >>> from crtomo.mpl_setup import *
+    >>> import crtomo.mpl
+    >>> crtomo.mpl.setup()
 
 """
 
