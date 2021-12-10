@@ -4,6 +4,7 @@ that correspond to the elements of the grid. Usually this is a resistivity or
 phase distribution, but can also be a cumulated sensitivity distribution.
 """
 import os
+from collections.abc import Iterable
 
 from scipy.stats import multivariate_normal
 import scipy.interpolate as spi
@@ -406,6 +407,23 @@ class ParMan(object):
         # change the values
         pid_clean = self._clean_pid(pid)
         self.parsets[pid_clean][elements_in_area] = value
+
+    def modify_pixels(self, pid, pixels, new_value):
+        """Replace the value of a given pixel by a new one.
+
+        Parameters
+        ----------
+        pid : int
+            Parset id
+        pixel : int|itearble
+            Pixel index (zero-indexed)
+        new_value : float
+            New value that is assigned to the pixel
+        """
+        if not isinstance(pixels, Iterable):
+            pixels = [pixels, ]
+        for pixel in pixels:
+            self.parsets[pid][pixel] = new_value
 
     def extract_points(self, pid, points):
         """Extract values at certain points in the grid from a given parameter
