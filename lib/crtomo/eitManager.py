@@ -291,6 +291,27 @@ class eitMan(object):
             self.a['forward_rmag'][freq] = pidm
             self.a['forward_rpha'][freq] = pidp
 
+    def register_forward_model(self, frequency, mag_model, phase_model):
+        """Register a magnitude parameter set and optionally a phase parameter
+        set as a forward model for a given frequency.
+
+        Parameters
+        ----------
+        frequency : float
+            Frequency. Must match the frequencies in eitMan.tds
+        mag_model : numpy.ndarray
+            The magnitude model (linear scale)
+        phase_model : numpy.ndarray
+            The phase model [mrad]
+        """
+        assert frequency in self.tds.keys(), "Frequency does not match any td"
+        td = self.tds[frequency]
+
+        pid_mag = td.register_magnitude_model(mag_model)
+        pid_pha = td.register_phase_model(phase_model)
+        self.a['forward_rmag'][frequency] = pid_mag
+        self.a['forward_rpha'][frequency] = pid_pha
+
     def load_data_crt_files(self, data_dict, **kwargs):
         """Load sEIT data from .ctr files (volt.dat files readable by CRTomo,
         produced by CRMod)
@@ -618,7 +639,7 @@ class eitMan(object):
         return_dict = {}
 
         N = len(self.frequencies)
-        nrx = min(N, 4)
+        nrx = min(N, 3)
         nrz = int(np.ceil(N / nrx))
 
         labels = [
@@ -631,6 +652,13 @@ class eitMan(object):
             'jet',
         ]
 
+        # try to select a suitable colorbar position
+        (xmin, xmax), (zmin, zmax) = self.grid.get_minmax()
+        if np.abs(xmax - xmin) > np.abs(zmax - zmin):
+            cbposition = 'horizontal'
+        else:
+            cbposition = 'vertical'
+
         for index, key, limits in zip(
                 (0, 1), ('rmag', 'rpha'), (maglim, phalim)):
             if limits is None:
@@ -642,7 +670,7 @@ class eitMan(object):
 
             fig, axes = plt.subplots(
                 nrz, nrx,
-                figsize=(26 / 2.54, nrz * 3 / 2.54),
+                figsize=(16 / 2.54, nrz * 3.5 / 2.54),
                 sharex=True, sharey=True,
             )
             for ax in axes.flat:
@@ -656,11 +684,11 @@ class eitMan(object):
                     pids[index],
                     ax=ax,
                     plot_colorbar=True,
-                    cbposition='horizontal',
+                    cbposition=cbposition,
                     cbmin=cbmin,
                     cbmax=cbmax,
                     title='{:.3f} Hz'.format(frequency),
-                    label=labels[index],
+                    cblabel=labels[index],
                     cmap_name=cmaps[index],
                     **kwargs,
                 )
