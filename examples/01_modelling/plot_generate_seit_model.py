@@ -30,12 +30,18 @@ eitman = crtomo.eitMan(frequencies=frequencies, grid=grid)
 eitman.add_homogeneous_model(magnitude=100, phase=0)
 
 r = eitman.plot_forward_models(maglim=[90, 110])
-print(r)
+# r['rmag']['fig'].show()
 
 # save to files
-with reda.CreateEnterDirectory('output_gen_seit_model'):
-    r['rmag']['fig'].savefig('fwd_model_hom_rmag.png', dpi=300)
-    r['rpha']['fig'].savefig('fwd_model_hom_rpha.png', dpi=300)
+# with reda.CreateEnterDirectory('output_gen_seit_model'):
+#     # magnitude
+#     r['rmag']['fig'].savefig('fwd_model_hom_rmag.png', dpi=300)
+#     r['rmag']['fig'].show()
+
+###############################################################################
+# with reda.CreateEnterDirectory('output_gen_seit_model'):
+#     # phase
+#     r['rpha']['fig'].savefig('fwd_model_hom_rpha.png', dpi=300)
 
 ###############################################################################
 # now we can start parameterizing the subsurface
