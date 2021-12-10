@@ -494,11 +494,12 @@ class plotManager(object):
 
         ax.set_xlim(xmin, xmax)
         ax.set_ylim(zmin, zmax)
-        ax.set_xlabel(kwargs.get('xlabel', 'x'))
-        ax.set_ylabel(kwargs.get('zlabel', 'z'))
+        ax.set_xlabel(kwargs.get('xlabel', 'x [m]'))
+        ax.set_ylabel(kwargs.get('zlabel', 'z [m]'))
         ax.set_aspect(kwargs.get('aspect', 'equal'))
         ax.set_title(
-            kwargs.get('title', '')
+            kwargs.get('title', ''),
+            fontsize=7,
         )
 
         if kwargs.get('plot_colorbar', False):
