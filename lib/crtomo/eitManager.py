@@ -642,7 +642,7 @@ class eitMan(object):
 
             fig, axes = plt.subplots(
                 nrz, nrx,
-                figsize=(16 / 2.54, nrz * 3 / 2.54),
+                figsize=(26 / 2.54, nrz * 3 / 2.54),
                 sharex=True, sharey=True,
             )
             for ax in axes.flat:

@@ -85,7 +85,9 @@ sphinx_gallery_conf = {
     'backreferences_dir': '_api',
 
     # Your documented modules. You can use a string or a list of strings
-    'doc_module': 'crtomo'
+    'doc_module': 'crtomo',
+    # 'capture_repr': ('_repr_html_', '__repr__'),
+    'capture_repr': (),
 }
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -101,7 +103,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'crtomo tools'
-copyright = u'2017-2020, CRTomo contributors'
+copyright = u'2017-2021, CRTomo contributors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

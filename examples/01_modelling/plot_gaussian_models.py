@@ -67,3 +67,4 @@ tdm.plot.plot_elements_to_ax(
     ax=ax,
     plot_colorbar=True,
 )
+# sphinx_gallery_thumbnail_number = 2
