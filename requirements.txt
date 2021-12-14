@@ -7,5 +7,5 @@ Shapely>=1.5.17
 reda
 sip_models
 geccoinv
-pillow<7.0
+pillow
 pandas

@@ -1,6 +1,6 @@
 Sphinx>=1.5.2
 sphinxcontrib-napoleon>=0.6.0
 sphinxcontrib-blockdiag
-alabaster>=0.7.9
 sphinx-gallery
-pillow<7.0
+pillow
+sphinx_rtd_theme
