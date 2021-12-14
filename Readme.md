@@ -1,6 +1,5 @@
 ## CRTomo tools
 
-[![Build Status](https://travis-ci.org/geophysics-ubonn/crtomo_tools.svg?branch=master)](https://travis-ci.org/geophysics-ubonn/crtomo_tools)
 [![Join the chat at https://gitter.im/geophysics-ubonn/crtomo_tools](https://badges.gitter.im/geophysics-ubonn/crtomo_tools.svg)](https://gitter.im/geophysics-ubonn/crtomo_tools?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 CRTomo user space tools and libraries.
@@ -14,5 +13,5 @@ instructions) ::
 	mkvirtualenv --python /usr/bin/python3 crtomo
 	pip install --upgrade pip
 	pip install -r requirements.txt
-	python setup.py install
+	pip install .
 
