@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cr_trig_create module &mdash; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="cr_trig_parse_gmsh module" href="cr_trig_parse_gmsh.html" />
+    <link rel="prev" title="cr_get_modelling_errors module" href="cr_get_modelling_errors.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> crtomo tools
+          </a>
+              <div class="version">
+                0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../_examples/index.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="cr_get_analytical_solutions.html">cr_get_analytical_solutions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cr_get_modelling_errors.html">cr_get_modelling_errors module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">cr_trig_create module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#examples">Examples:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cr_trig_parse_gmsh.html">cr_trig_parse_gmsh module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_extralines_gen_decouplings.html">grid_extralines_gen_decouplings module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_gen_decouplings.html">grid_gen_decouplings module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_gen_depth_decoupling.html">grid_gen_depth_decoupling module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_gen_surface_files.html">grid_gen_surface_files module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_homogenize.html">grid_homogenize module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_plot_elem_angles.html">grid_plot_elem_angles module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_plot_wireframe.html">grid_plot_wireframe module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_rotate.html">grid_rotate module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_translate.html">grid_translate module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_translate_model.html">grid_translate_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sd_plot.html">sd_plot module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sens_center_plot.html">sens_center_plot module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_clean.html">td_clean module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_correct_temperature.html">td_correct_temperature module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_init.html">td_init module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_plot.html">td_plot module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_residuals.html">td_residuals module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_run_all_local.html">td_run_all_local module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_test.html">td_test module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="volt_correct_temperature.html">volt_correct_temperature module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="volt_histogram.html">volt_histogram module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">lib</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">crtomo tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="modules.html">src</a> &raquo;</li>
+      <li>cr_trig_create module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/scripts/grid_tools/cr_trig_create.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-cr_trig_create">
+<span id="cr-trig-create-module"></span><h1>cr_trig_create module<a class="headerlink" href="#module-cr_trig_create" title="Permalink to this headline"></a></h1>
+<p>Create irregular (triangular) grids for CRMod/CRTomo from simple ascii input
+files.</p>
+<p>Create the input files “electrodes.dat”, “boundaries.dat”, “char_length.dat”
+according to the CRLab manual. An optional file “gmsh_commands.dat” file can be
+used to append GMSH commands at the end of the generated gmsh command file.
+Note that these command will be executed only after the initial meshing, but
+can be used to refine the mesh.</p>
+<p>Then run cr_trig_create.py.</p>
+<p>If an (optional) parameter is provided, use this as the output directory. This
+directory must not exist. In case no parameter is given, create a random
+directory using the uuid module.</p>
+<p>The output directory is printed in the last line of program output.</p>
+<section id="examples">
+<h2>Examples:<a class="headerlink" href="#examples" title="Permalink to this headline"></a></h2>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># note that this is a shell example, not Python!</span>
+<span class="go">    cat electrodes.dat</span>
+<span class="go">1.0 0.0</span>
+<span class="go">2.0 0.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cat</span> <span class="n">boundaries</span><span class="o">.</span><span class="n">dat</span>
+<span class="go">0.0 0.0 12</span>
+<span class="go">1.0 0.0 12</span>
+<span class="go">2.0 0.0 11</span>
+<span class="go">2.0 -2.0 11</span>
+<span class="go">0.0 -2.0 11</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cat</span> <span class="n">char_length</span><span class="o">.</span><span class="n">dat</span>
+<span class="go">0.5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cat</span> <span class="n">extra_lines</span><span class="o">.</span><span class="n">dat</span>
+<span class="go">0.5 -0.5 1.5 -1.5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cr_trig_create</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="cr_trig_create.Mesh">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cr_trig_create.</span></span><span class="sig-name descname"><span class="pre">Mesh</span></span><a class="reference internal" href="../../_modules/cr_trig_create.html#Mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cr_trig_create.Mesh" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>GMSH distinguishes three types of objects:</p>
+<ul class="simple">
+<li><p>Points on the boundary (i.e., points that create the boundary)</p></li>
+<li><p>Lines that connect Points to form the actual boundaries</p></li>
+<li><p>Points in Surface, nodes (or points) that lie IN the grid and need to
+be connected to the grid</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>TODO: I think we don’t need to add electrodes as POINTS, only as POINT IN
+SURFACE, because POINTs that do not belong to a line will not be included
+in the final mesh, or? Check.
+Possible Answer: We need to define the Points before we can add them with
+the IN SURFACe command.</p>
+<p>Check for duplicate entries in input files</p>
+<p>Can we test if all electrodes and extra-nodes lie in the boundaries?</p>
+<p>Sort boundaries</p>
+<p>Add extra-nodes (for inner-grid-structure)</p>
+<p>Add extra-lines (for inner-grid-structure)</p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="cr_trig_create.Mesh.add_boundary">
+<span class="sig-name descname"><span class="pre">add_boundary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">btype</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cr_trig_create.html#Mesh.add_boundary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cr_trig_create.Mesh.add_boundary" title="Permalink to this definition"></a></dt>
+<dd><p>Add a boundary line</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cr_trig_create.Mesh.add_line">
+<span class="sig-name descname"><span class="pre">add_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">char_length</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cr_trig_create.html#Mesh.add_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cr_trig_create.Mesh.add_line" title="Permalink to this definition"></a></dt>
+<dd><p>Add a line to the list. Check if the nodes already exist, and add them
+if not.</p>
+<p>Return the line index (1-indixed, starting with 1)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cr_trig_create.Mesh.get_point_id">
+<span class="sig-name descname"><span class="pre">get_point_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">char_length</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cr_trig_create.html#Mesh.get_point_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cr_trig_create.Mesh.get_point_id" title="Permalink to this definition"></a></dt>
+<dd><p>Return the id of the given point (x,y) tuple.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cr_trig_create.Mesh.is_in">
+<span class="sig-name descname"><span class="pre">is_in</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">search_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pair</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cr_trig_create.html#Mesh.is_in"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cr_trig_create.Mesh.is_in" title="Permalink to this definition"></a></dt>
+<dd><p>If pair is in search_list, return the index. Otherwise return -1</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cr_trig_create.Mesh.read_char_lengths">
+<span class="sig-name descname"><span class="pre">read_char_lengths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">electrode_filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cr_trig_create.html#Mesh.read_char_lengths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cr_trig_create.Mesh.read_char_lengths" title="Permalink to this definition"></a></dt>
+<dd><p>Read characteristic lengths from the given file.</p>
+<p>The file is expected to have either 1 or 4 entries/lines with
+characteristic lengths &gt; 0 (floats). If only one value is encountered,
+it is used for all four entities. If four values are encountered, they
+are assigned, in order, to:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>electrode nodes</p></li>
+<li><p>boundary nodes</p></li>
+<li><p>nodes from extra lines</p></li>
+<li><p>nodes from extra nodes</p></li>
+</ol>
+</div></blockquote>
+<p>Note that in case one node belongs to multiple entities, the smallest
+characteristic length will be used.</p>
+<p>If four values are used and the electrode length is negative, then the
+electrode positions will be read in (todo: we open the electrode.dat
+file two times here…) and the minimal distance between all electrodes
+will be multiplied by the absolute value of the imported value, and
+used as the characteristic length:</p>
+<div class="math notranslate nohighlight">
+\[l_{electrodes} = min(pdist(electrodes)) * |l_{electrodes}^{from
+file}|\]</div>
+<p>The function scipy.spatial.distance.pdist is used to compute the global
+minimal distance between any two electrodes.</p>
+<p>It is advisable to only used values in the range [-1, 0) for the
+automatic char length option.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cr_trig_create.Mesh.read_electrodes">
+<span class="sig-name descname"><span class="pre">read_electrodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">electrodes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cr_trig_create.html#Mesh.read_electrodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cr_trig_create.Mesh.read_electrodes" title="Permalink to this definition"></a></dt>
+<dd><p>Read in electrodes, check if points already exist</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cr_trig_create.Mesh.read_extra_lines">
+<span class="sig-name descname"><span class="pre">read_extra_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cr_trig_create.html#Mesh.read_extra_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cr_trig_create.Mesh.read_extra_lines" title="Permalink to this definition"></a></dt>
+<dd><p>Read extra lines from the given filename. Each line is defined in
+one line with four coordinates: x1 y1 x2 y2. (x1,y1) denotes the
+starting point, (x2, y2) the end point of the line.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cr_trig_create.Mesh.read_extra_nodes">
+<span class="sig-name descname"><span class="pre">read_extra_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cr_trig_create.html#Mesh.read_extra_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cr_trig_create.Mesh.read_extra_nodes" title="Permalink to this definition"></a></dt>
+<dd><p>Read extra nodes in. Format: x y</p>
+<p>What happens if we add nodes on the boundaries, which are not included
+in the boundaries?</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cr_trig_create.Mesh.write_boundaries">
+<span class="sig-name descname"><span class="pre">write_boundaries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cr_trig_create.html#Mesh.write_boundaries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cr_trig_create.Mesh.write_boundaries" title="Permalink to this definition"></a></dt>
+<dd><p>Write boundary lines X1 Y1 X2 Y2 TYPE to file</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cr_trig_create.Mesh.write_electrodes">
+<span class="sig-name descname"><span class="pre">write_electrodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cr_trig_create.html#Mesh.write_electrodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cr_trig_create.Mesh.write_electrodes" title="Permalink to this definition"></a></dt>
+<dd><p>Write X Y coordinates of electrodes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cr_trig_create.Mesh.write_extra_nodes">
+<span class="sig-name descname"><span class="pre">write_extra_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cr_trig_create.html#Mesh.write_extra_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cr_trig_create.Mesh.write_extra_nodes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cr_trig_create.Mesh.write_geo_file">
+<span class="sig-name descname"><span class="pre">write_geo_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cr_trig_create.html#Mesh.write_geo_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cr_trig_create.Mesh.write_geo_file" title="Permalink to this definition"></a></dt>
+<dd><p>Write the .geo file</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cr_trig_create.Mesh.write_in_plane_nodes">
+<span class="sig-name descname"><span class="pre">write_in_plane_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cr_trig_create.html#Mesh.write_in_plane_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cr_trig_create.Mesh.write_in_plane_nodes" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cr_trig_create.Mesh.write_lines">
+<span class="sig-name descname"><span class="pre">write_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cr_trig_create.html#Mesh.write_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cr_trig_create.Mesh.write_lines" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cr_trig_create.Mesh.write_points">
+<span class="sig-name descname"><span class="pre">write_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cr_trig_create.html#Mesh.write_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cr_trig_create.Mesh.write_points" title="Permalink to this definition"></a></dt>
+<dd><p>Write the grid points to the GMSH-command file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fid</strong> (<em>file object for the command file</em><em> (</em><em>geo</em><em>)</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cr_trig_create.add_stabilizer_nodes">
+<span class="sig-prename descclassname"><span class="pre">cr_trig_create.</span></span><span class="sig-name descname"><span class="pre">add_stabilizer_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">boundaries_raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">electrodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nr_nodes_between</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cr_trig_create.html#add_stabilizer_nodes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cr_trig_create.add_stabilizer_nodes" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Segmentation of nodes:</dt><dd><p>we have the existing nodes
+N.F is the ratio of required nodes and existing nodes
+first, add N nodes to each segment
+then, add one more node to the F first segments</p>
+</dd>
+</dl>
+<ul class="simple">
+<li><p>assume ordered boundaries</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cr_trig_create.check_boundaries">
+<span class="sig-prename descclassname"><span class="pre">cr_trig_create.</span></span><span class="sig-name descname"><span class="pre">check_boundaries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">boundaries</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cr_trig_create.html#check_boundaries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cr_trig_create.check_boundaries" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cr_trig_create.handle_cmd_options">
+<span class="sig-prename descclassname"><span class="pre">cr_trig_create.</span></span><span class="sig-name descname"><span class="pre">handle_cmd_options</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cr_trig_create.html#handle_cmd_options"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cr_trig_create.handle_cmd_options" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cr_trig_create.main">
+<span class="sig-prename descclassname"><span class="pre">cr_trig_create.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/cr_trig_create.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cr_trig_create.main" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cr_get_modelling_errors.html" class="btn btn-neutral float-left" title="cr_get_modelling_errors module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cr_trig_parse_gmsh.html" class="btn btn-neutral float-right" title="cr_trig_parse_gmsh module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2021, CRTomo contributors.
+      <span class="lastupdated">Last updated on Dec 14, 2021.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

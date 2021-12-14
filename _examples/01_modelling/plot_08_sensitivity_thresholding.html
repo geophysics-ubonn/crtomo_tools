@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Segmenting sensitivity distributions &mdash; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Setting modeling and inversion settings" href="../02_simple_inversion/plot_01_inversion_settings.html" />
+    <link rel="prev" title="Plot forward models" href="plot_07_fwd_model_plotting.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> crtomo tools
+          </a>
+              <div class="version">
+                0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-grid-handling">Examples: Grid handling</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#examples-modelling">Examples: Modelling</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="plot_00_sensitivity.html">Plotting sensitivities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_01_gaussian_model.html">Generate Gaussian Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_02_potentials.html">Plot a potential distribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_04_gen_seit_model.html">Generating sEIT forward models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_05_seit_fwd_lookup.html">Generating sEIT forward models using a mask and a lookup table</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_06_synthetic_4d.html">Generating a 4D synthetic data set with noise.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_07_fwd_model_plotting.html">Plot forward models</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Segmenting sensitivity distributions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-single-frequency-inversion">Examples: Single-frequency inversion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-postprocessing-of-inversion-results">Examples: Postprocessing of inversion results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-seit-import-and-inversions">Examples: sEIT import and inversions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#calculating-correction-factors">Calculating correction factors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-field-data-processing">Examples: Field data processing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">lib</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">crtomo tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Examples</a> &raquo;</li>
+      <li>Segmenting sensitivity distributions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/_examples/01_modelling/plot_08_sensitivity_thresholding.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-01-modelling-plot-08-sensitivity-thresholding-py"><span class="std std-ref">here</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="segmenting-sensitivity-distributions">
+<span id="sphx-glr-examples-01-modelling-plot-08-sensitivity-thresholding-py"></span><h1>Segmenting sensitivity distributions<a class="headerlink" href="#segmenting-sensitivity-distributions" title="Permalink to this headline"></a></h1>
+<p>Imports</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">crtomo</span>
+<span class="kn">import</span> <span class="nn">pylab</span> <span class="k">as</span> <span class="nn">plt</span>
+</pre></div>
+</div>
+<p>create and save a FEM-grid</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.crt_grid.create_surface_grid" title="crtomo.crt_grid.create_surface_grid" class="sphx-glr-backref-module-crtomo-crt_grid sphx-glr-backref-type-py-method"><span class="n">crtomo</span><span class="o">.</span><span class="n">crt_grid</span><span class="o">.</span><span class="n">create_surface_grid</span></a><span class="p">(</span>
+    <span class="n">nr_electrodes</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
+    <span class="n">spacing</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
+    <span class="n">depth</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">char_lengths</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">left</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">right</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<span class="p">)</span>
+
+<a href="../../api/crtomo.html#crtomo.crt_grid.plot_grid" title="crtomo.crt_grid.plot_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">grid</span><span class="o">.</span><span class="n">plot_grid</span></a><span class="p">()</span>
+
+<a href="../../api/crtomo.html#crtomo.crt_grid.save_elem_file" title="crtomo.crt_grid.save_elem_file" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">grid</span><span class="o">.</span><span class="n">save_elem_file</span></a><span class="p">(</span><span class="s1">&#39;elem.dat&#39;</span><span class="p">)</span>
+<a href="../../api/crtomo.html#crtomo.crt_grid.save_elec_file" title="crtomo.crt_grid.save_elec_file" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">grid</span><span class="o">.</span><span class="n">save_elec_file</span></a><span class="p">(</span><span class="s1">&#39;elec.dat&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_08_sensitivity_thresholding_001.png" srcset="../../_images/sphx_glr_plot_08_sensitivity_thresholding_001.png" alt="plot 08 sensitivity thresholding" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>This grid was sorted using CutMcK. The nodes were resorted!
+Triangular grid found
+</pre></div>
+</div>
+<p>create the measurement configuration</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">configs</span></a> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.array.html#numpy.array" title="numpy.array" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">((</span>
+    <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">18</span><span class="p">),</span>
+<span class="p">))</span>
+</pre></div>
+</div>
+<p>for different background, plot the sensitivities</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">bg</span></a> <span class="o">=</span> <span class="mi">100</span>
+<a href="../../api/crtomo.html#crtomo.tdMan" title="crtomo.tdMan" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">td</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.tdMan" title="crtomo.tdMan" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class"><span class="n">crtomo</span><span class="o">.</span><span class="n">tdMan</span></a><span class="p">(</span><a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid</span></a><span class="o">=</span><a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid</span></a><span class="p">)</span>
+<a href="../../api/crtomo.html#crtomo.ConfigManager.add_to_configs" title="crtomo.ConfigManager.add_to_configs" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">td</span><span class="o">.</span><span class="n">configs</span><span class="o">.</span><span class="n">add_to_configs</span></a><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">configs</span></a><span class="p">)</span>
+<a href="../../api/crtomo.html#crtomo.tdMan.add_homogeneous_model" title="crtomo.tdMan.add_homogeneous_model" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">td</span><span class="o">.</span><span class="n">add_homogeneous_model</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">bg</span></a><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<a href="../../api/crtomo.html#crtomo.tdMan.model" title="crtomo.tdMan.model" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">td</span><span class="o">.</span><span class="n">model</span></a><span class="p">(</span><span class="n">sensitivities</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<a href="https://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fig</span></a><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s_abs</span></a> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ufunc.html#numpy.ufunc" title="numpy.ufunc" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">np</span><span class="o">.</span><span class="n">abs</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">td</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">parsets</span></a><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+<a href="http://docs.scipy.org/doc/numpy/reference/arrays.scalars.html#numpy.float64" title="numpy.float64" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">threshold</span></a> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.quantile.html#numpy.quantile" title="numpy.quantile" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">quantile</span></a><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s_abs</span></a><span class="p">,</span> <span class="mf">0.75</span><span class="p">)</span>
+<a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s_abs</span></a><span class="p">[</span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s_abs</span></a> <span class="o">&lt;=</span> <a href="http://docs.scipy.org/doc/numpy/reference/arrays.scalars.html#numpy.float64" title="numpy.float64" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">threshold</span></a><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+<a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s_abs</span></a><span class="p">[</span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s_abs</span></a> <span class="o">&gt;</span> <a href="http://docs.scipy.org/doc/numpy/reference/arrays.scalars.html#numpy.float64" title="numpy.float64" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-attribute"><span class="n">threshold</span></a><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+<a href="../../api/crtomo.html#crtomo.plotManager.plotManager.plot_elements_to_ax" title="crtomo.plotManager.plotManager.plot_elements_to_ax" class="sphx-glr-backref-module-crtomo-plotManager sphx-glr-backref-type-py-method"><span class="n">td</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_elements_to_ax</span></a><span class="p">(</span>
+    <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">s_abs</span></a><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+    <span class="n">plot_colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">cmap_name</span><span class="o">=</span><span class="s1">&#39;binary&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+<a href="https://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure.tight_layout" title="matplotlib.figure.Figure.tight_layout" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-method"><span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span></a><span class="p">()</span>
+<a href="https://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure.show" title="matplotlib.figure.Figure.show" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-method"><span class="n">fig</span><span class="o">.</span><span class="n">show</span></a><span class="p">()</span>
+<a href="https://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure.savefig" title="matplotlib.figure.Figure.savefig" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-method"><span class="n">fig</span><span class="o">.</span><span class="n">savefig</span></a><span class="p">(</span><span class="s1">&#39;test_sens.jpg&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+<span class="c1"># sphinx_gallery_thumbnail_number = -1</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_08_sensitivity_thresholding_002.png" srcset="../../_images/sphx_glr_plot_08_sensitivity_thresholding_002.png" alt="plot 08 sensitivity thresholding" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>attempting modeling
+b&#39; ######### CMod ############\nLicence:\nCopyright \xc2\xa9 1990-2020 Andreas Kemna &lt;kemna@geo.uni-bonn.de&gt;\nCopyright \xc2\xa9 2008-2020 CRTomo development team (see AUTHORS file)\nPermission is hereby granted, free of charge, to any person obtaining a copy of\nthis software and associated documentation files (the \xe2\x80\x9cSoftware\xe2\x80\x9d), to deal in\nthe Software without restriction, including without limitation the rights to\nuse, copy, modify, merge, publish, distribute, sublicense, and/or sell copies\nof the Software, and to permit persons to whom the Software is furnished to do\nso, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \xe2\x80\x9cAS IS\xe2\x80\x9d, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n \n \n CRMod Process_ID ::       98912\n OpenMP max threads:   4\n Git-Branch  master\n Commit-ID   85c7db34c4d77d51aa595704ccccff586eff89c8\n Created     Wed-May-13-08:58:54-2020\n Compiler    \n OS          GNU/Linux\n\n Reading Input-Files\n++ check 1\r++ check 2 done!\n\rGetting voltage      1 No electrode cap file\n \n Rescheduling..\n less nodes than wavenumbers\n OpenMP threads:   3(  4)\n\n\r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          4                                                   \r Calculating Potentials : Wavenumber          5                                                   \r Calculating Potentials : Wavenumber          6                                                   \r Calculating Potentials : Wavenumber          7                                                   \r Calculating Potentials : Wavenumber          8                                                   \r Calculating Potentials : Wavenumber          9                                                   \r Calculating Potentials : Wavenumber         10                                                   \r Calculating Potentials : Wavenumber         11                                                    done, now processing\n solution time  0d/  0h/  1m/  3s/  59ms\n\n Modelling completedSTOP 0\n&#39;
+reading voltages
+reading sensitivities
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 3 minutes  17.151 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-01-modelling-plot-08-sensitivity-thresholding-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/85974da72761ecc5eed13490622be1ba/plot_08_sensitivity_thresholding.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_08_sensitivity_thresholding.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/cb9af1f6a7a0498e87d0f95a1b28c6c1/plot_08_sensitivity_thresholding.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_08_sensitivity_thresholding.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plot_07_fwd_model_plotting.html" class="btn btn-neutral float-left" title="Plot forward models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../02_simple_inversion/plot_01_inversion_settings.html" class="btn btn-neutral float-right" title="Setting modeling and inversion settings" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2021, CRTomo contributors.
+      <span class="lastupdated">Last updated on Dec 14, 2021.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

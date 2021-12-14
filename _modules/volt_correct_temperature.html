@@ -1,0 +1,237 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>volt_correct_temperature &#8212; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for volt_correct_temperature</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Tool to substract the temperature effect of given rawdata in a volt.dat file.</span>
+<span class="sd">The calculation is done after Hayley (2010):</span>
+
+<span class="sd">    d_obs^TC = d_obs + (d_est^TC - d_est)</span>
+
+<span class="sd">Necessary Input:</span>
+<span class="sd">* d_obs: measured field data to correct</span>
+<span class="sd">* d_est: synthetic data of inversion result from d_obs</span>
+<span class="sd">* d_estTC: synthetic data of temperature corrected inversion result of d_obs</span>
+
+<span class="sd">Options:</span>
+<span class="sd">* output: output file</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">optparse</span> <span class="kn">import</span> <span class="n">OptionParser</span>
+
+
+<div class="viewcode-block" id="handle_options"><a class="viewcode-back" href="../scripts/grid_tools/volt_correct_temperature.html#volt_correct_temperature.handle_options">[docs]</a><span class="k">def</span> <span class="nf">handle_options</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;Handle options.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">OptionParser</span><span class="p">()</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">aniso</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s2">&quot;--dobs&quot;</span><span class="p">,</span>
+                      <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;d_obs&quot;</span><span class="p">,</span>
+                      <span class="n">help</span><span class="o">=</span><span class="s2">&quot;field data&quot;</span><span class="p">,</span>
+                      <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;file&quot;</span><span class="p">,</span>
+                      <span class="n">default</span><span class="o">=</span><span class="s2">&quot;mod/volt.dat&quot;</span><span class="p">,</span>
+                      <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s2">&quot;--dest&quot;</span><span class="p">,</span>
+                      <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;d_est&quot;</span><span class="p">,</span>
+                      <span class="n">help</span><span class="o">=</span><span class="s2">&quot;synthetic data of inversion result&quot;</span><span class="p">,</span>
+                      <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;file&quot;</span><span class="p">,</span>
+                      <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s2">&quot;--desttc&quot;</span><span class="p">,</span>
+                      <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;d_estTC&quot;</span><span class="p">,</span>
+                      <span class="n">help</span><span class="o">=</span><span class="s2">&quot;synthetic data of corrected inversionr esult&quot;</span><span class="p">,</span>
+                      <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;file&quot;</span><span class="p">,</span>
+                      <span class="p">)</span>
+    <span class="c1"># output options</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s2">&quot;-o&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;--output&quot;</span><span class="p">,</span>
+                      <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;output&quot;</span><span class="p">,</span>
+                      <span class="n">help</span><span class="o">=</span><span class="s2">&quot;output file&quot;</span><span class="p">,</span>
+                      <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;file&quot;</span><span class="p">,</span>
+                      <span class="n">default</span><span class="o">=</span><span class="s2">&quot;temp/volt.dat&quot;</span><span class="p">,</span>
+                      <span class="p">)</span>
+
+    <span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">options</span></div>
+
+
+<div class="viewcode-block" id="readin_volt"><a class="viewcode-back" href="../scripts/grid_tools/volt_correct_temperature.html#volt_correct_temperature.readin_volt">[docs]</a><span class="k">def</span> <span class="nf">readin_volt</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Read in measurement data from a volt.dat file and return electrodes and</span>
+<span class="sd">    measured resistance.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fid</span><span class="p">:</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+        <span class="n">volt</span> <span class="o">=</span> <span class="n">content</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">elecs</span> <span class="o">=</span> <span class="n">content</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">elecs</span><span class="p">,</span> <span class="n">volt</span></div>
+
+
+<div class="viewcode-block" id="calc_correction"><a class="viewcode-back" href="../scripts/grid_tools/volt_correct_temperature.html#volt_correct_temperature.calc_correction">[docs]</a><span class="k">def</span> <span class="nf">calc_correction</span><span class="p">(</span><span class="n">volt1</span><span class="p">,</span> <span class="n">volt2</span><span class="p">,</span> <span class="n">volt3</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Remove the temperature effect from field data using inversion results of</span>
+<span class="sd">    that data:</span>
+
+<span class="sd">        print(volt[0])</span>
+<span class="sd">        d_obs^TC = d_obs + (d_est^TC - d_est)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    d_obs:</span>
+<span class="sd">        measured field data to correct (volt1)</span>
+<span class="sd">    d_est:</span>
+<span class="sd">        synthetic data of inversion result from d_obs (volt2)</span>
+<span class="sd">    d_estTC:</span>
+<span class="sd">        synthetic data of temperature corrected inversion result of d_obs</span>
+<span class="sd">        (volt3)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">volt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">a</span> <span class="o">-</span> <span class="n">b</span> <span class="o">+</span> <span class="n">c</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">volt1</span><span class="p">,</span> <span class="n">volt2</span><span class="p">,</span> <span class="n">volt3</span><span class="p">)])</span>
+    <span class="n">volt</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">volt</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)]</span> <span class="o">=</span> <span class="mf">0.000001</span>
+
+    <span class="k">return</span> <span class="n">volt</span></div>
+
+
+<div class="viewcode-block" id="save_volt"><a class="viewcode-back" href="../scripts/grid_tools/volt_correct_temperature.html#volt_correct_temperature.save_volt">[docs]</a><span class="k">def</span> <span class="nf">save_volt</span><span class="p">(</span><span class="n">elecs</span><span class="p">,</span> <span class="n">volt</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Save the values in volt-format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># bring data in shape</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">elecs</span><span class="p">,</span> <span class="n">volt</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">volt</span><span class="p">))))</span>
+
+    <span class="c1"># save datapoints</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fid</span><span class="p">:</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;ab&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fid</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">content</span><span class="p">),</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%i</span><span class="s1"> </span><span class="si">%i</span><span class="s1"> </span><span class="si">%f</span><span class="s1"> </span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../scripts/grid_tools/volt_correct_temperature.html#volt_correct_temperature.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Function to remove temperature effect from field data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">handle_options</span><span class="p">()</span>
+
+    <span class="c1"># read in observed and synthetic data</span>
+    <span class="n">elecs</span><span class="p">,</span> <span class="n">d_obs</span> <span class="o">=</span> <span class="n">readin_volt</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">d_obs</span><span class="p">)</span>
+    <span class="n">elecs</span><span class="p">,</span> <span class="n">d_est</span> <span class="o">=</span> <span class="n">readin_volt</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">d_est</span><span class="p">)</span>
+    <span class="n">elecs</span><span class="p">,</span> <span class="n">d_estTC</span> <span class="o">=</span> <span class="n">readin_volt</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">d_estTC</span><span class="p">)</span>
+    <span class="c1"># calculate corrected data</span>
+    <span class="n">volt_corr</span> <span class="o">=</span> <span class="n">calc_correction</span><span class="p">(</span><span class="n">d_obs</span><span class="p">,</span>
+                                <span class="n">d_est</span><span class="p">,</span>
+                                <span class="n">d_estTC</span><span class="p">,</span>
+                                <span class="p">)</span>
+    <span class="c1"># save data</span>
+    <span class="n">save_volt</span><span class="p">(</span><span class="n">elecs</span><span class="p">,</span>
+              <span class="n">volt_corr</span><span class="p">,</span>
+              <span class="n">options</span><span class="o">.</span><span class="n">output</span><span class="p">,</span>
+              <span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">crtomo tools</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">lib</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2021, CRTomo contributors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,199 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>crtomo.nodeManager &#8212; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for crtomo.nodeManager</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *-* coding: utf-8 *-*</span>
+<span class="sd">&quot;&quot;&quot;Manage node value sets for a given grid. Node data assigns a numeric value</span>
+<span class="sd">to each node of a grid. This could, for example, be potential distributions or</span>
+<span class="sd">sensitivities for single files.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="NodeMan"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.nodeManager.NodeMan">[docs]</a><span class="k">class</span> <span class="nc">NodeMan</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;manage one or more node value sets for a given</span>
+<span class="sd">    :class:`crtomo.grid.crt_grid` object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="NodeMan.__init__"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.nodeManager.NodeMan.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid_obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        grid_obj: crtomo.grid.crt_grid</span>
+<span class="sd">            The FE grid that the parameter sets refer to</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># check if grid is already initialized</span>
+        <span class="k">if</span> <span class="n">grid_obj</span><span class="o">.</span><span class="n">grid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Grid object is not initialized!&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="n">grid_obj</span>
+        <span class="c1"># we store the node value sets in here</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodevals</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># here we can store metadata for a node value set</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># we assign indices to each data set stored in the manager. This index</span>
+        <span class="c1"># should be unique over the life time of each instance. Therefore we</span>
+        <span class="c1"># increase the counter for each added data set. We also ensure</span>
+        <span class="c1"># conflicts when data sets are removed.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span></div>
+
+<div class="viewcode-block" id="NodeMan._get_next_index"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.nodeManager.NodeMan._get_next_index">[docs]</a>    <span class="k">def</span> <span class="nf">_get_next_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span></div>
+
+<div class="viewcode-block" id="NodeMan.add_data"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.nodeManager.NodeMan.add_data">[docs]</a>    <span class="k">def</span> <span class="nf">add_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add data to the node value sets</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data: numpy.ndarray</span>
+<span class="sd">            one or more node value sets. It must either be 1D or 2D, with the</span>
+<span class="sd">            first dimension the number of parameter sets (K), and the second</span>
+<span class="sd">            the number of elements (Z): K x Z</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">        &gt;&gt;&gt; # suppose that grid is a fully initialized grid oject with 50 nodes</span>
+<span class="sd">            nodeman = NodeMan(grid)</span>
+<span class="sd">            #</span>
+<span class="sd">            one_data_set = np.ones(50)</span>
+<span class="sd">            cid = nodeman.add_data(one_data_set)</span>
+<span class="sd">            print(nodeman.parsets[cid])</span>
+<span class="sd">            two_data_sets = np.ones((2, 50))</span>
+<span class="sd">            cids = nodeman.add_data(two_data_sets)</span>
+<span class="sd">            print(cids)</span>
+<span class="sd">        [0, ]</span>
+<span class="sd">        [1, 2]</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">subdata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="c1"># we try to accommodate transposed input</span>
+        <span class="k">if</span> <span class="n">subdata</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">nr_of_nodes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">subdata</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">nr_of_nodes</span><span class="p">:</span>
+                <span class="n">subdata</span> <span class="o">=</span> <span class="n">subdata</span><span class="o">.</span><span class="n">T</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s1">&#39;Number of values does not match the number of &#39;</span> <span class="o">+</span>
+                    <span class="s1">&#39;nodes in the grid </span><span class="si">{0}</span><span class="s1"> grid nodes vs </span><span class="si">{1}</span><span class="s1"> data&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">nr_of_nodes</span><span class="p">,</span> <span class="n">subdata</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+        <span class="n">return_ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="n">subdata</span><span class="p">:</span>
+            <span class="n">cid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_next_index</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodevals</span><span class="p">[</span><span class="n">cid</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">return_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cid</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">return_ids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">return_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">return_ids</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">crtomo tools</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">lib</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2021, CRTomo contributors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

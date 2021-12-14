@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>volt_histogram module &mdash; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="lib" href="../../api/modules.html" />
+    <link rel="prev" title="volt_correct_temperature module" href="volt_correct_temperature.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> crtomo tools
+          </a>
+              <div class="version">
+                0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../_examples/index.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="cr_get_analytical_solutions.html">cr_get_analytical_solutions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cr_get_modelling_errors.html">cr_get_modelling_errors module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cr_trig_create.html">cr_trig_create module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cr_trig_parse_gmsh.html">cr_trig_parse_gmsh module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_extralines_gen_decouplings.html">grid_extralines_gen_decouplings module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_gen_decouplings.html">grid_gen_decouplings module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_gen_depth_decoupling.html">grid_gen_depth_decoupling module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_gen_surface_files.html">grid_gen_surface_files module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_homogenize.html">grid_homogenize module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_plot_elem_angles.html">grid_plot_elem_angles module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_plot_wireframe.html">grid_plot_wireframe module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_rotate.html">grid_rotate module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_translate.html">grid_translate module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_translate_model.html">grid_translate_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sd_plot.html">sd_plot module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sens_center_plot.html">sens_center_plot module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_clean.html">td_clean module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_correct_temperature.html">td_correct_temperature module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_init.html">td_init module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_plot.html">td_plot module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_residuals.html">td_residuals module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_run_all_local.html">td_run_all_local module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_test.html">td_test module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="volt_correct_temperature.html">volt_correct_temperature module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">volt_histogram module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">lib</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">crtomo tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="modules.html">src</a> &raquo;</li>
+      <li>volt_histogram module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/scripts/grid_tools/volt_histogram.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-volt_histogram">
+<span id="volt-histogram-module"></span><h1>volt_histogram module<a class="headerlink" href="#module-volt_histogram" title="Permalink to this headline"></a></h1>
+<p>Plot a histogram of a given volt.dat file (mod/volt.dat).</p>
+<p>If a command line parameter is provided, this file we be used for plotting.</p>
+<p class="rubric">Examples</p>
+<p># volt_histogram volt_01_f_0.000.crt
+loading file: volt_01_f_0.000.crt
+minimum/maximum magnitude: 0.000399 / 4.500319 Ohm
+minimum/maximum phase: -49.41 / 18.765 mrad
+Magnitude percentile 10%: 0.0022736 (log10: -2.643285939416605)
+Magnitude percentile 20%: 0.0041868 (log10: -2.3781177845042643)
+Magnitude percentile 30%: 0.0072387 (log10: -2.1403394218581333)
+Magnitude percentile 40%: 0.012341 (log10: -1.9086496476864212)
+Magnitude percentile 50%: 0.0221025 (log10: -1.6555586007583747)
+Magnitude percentile 60%: 0.0407628 (log10: -1.3897359919182128)
+Magnitude percentile 70%: 0.089891 (log10: -1.0462837882000315)
+Magnitude percentile 80%: 0.214467 (log10: -0.6686403331535711)
+Magnitude percentile 90%: 0.6953 (log10: -0.15782764569149582)
+Phase percentile 10%: -7.8405
+Phase percentile 20%: -4.047
+Phase percentile 30%: -2.715
+Phase percentile 40%: -1.8599999999999999
+Phase percentile 50%: -1.335
+Phase percentile 60%: -0.66
+Phase percentile 70%: 0.255
+Phase percentile 80%: 1.4160000000000013
+Phase percentile 90%: 4.132500000000004</p>
+<p># volt_histogram
+loading file: mod/volt.dat
+minimum/maximum magnitude: 0.000164396115 / 9.16193485 Ohm
+minimum/maximum phase: 0.0 / 0.0 mrad
+Magnitude percentile 10%: 0.00116352 (log10: -2.9342247593548754)
+Magnitude percentile 20%: 0.00292693 (log10: -2.533587969324661)
+Magnitude percentile 30%: 0.00668467 (log10: -2.1749200553584274)
+Magnitude percentile 40%: 0.0135107 (log10: -1.869322193615539)
+Magnitude percentile 50%: 0.0261565 (log10: -1.5824204939114044)
+Magnitude percentile 60%: 0.048195 (log10: -1.3169977466790868)
+Magnitude percentile 70%: 0.0959452 (log10: -1.0179765941996923)
+Magnitude percentile 80%: 0.209225 (log10: -0.679386765549746)
+Magnitude percentile 90%: 0.592489 (log10: -0.22731998487816202)
+Phase percentile 10%: 0.0
+Phase percentile 20%: 0.0
+Phase percentile 30%: 0.0
+Phase percentile 40%: 0.0
+Phase percentile 50%: 0.0
+Phase percentile 60%: 0.0
+Phase percentile 70%: 0.0
+Phase percentile 80%: 0.0
+Phase percentile 90%: 0.0</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="volt_histogram.main">
+<span class="sig-prename descclassname"><span class="pre">volt_histogram.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/volt_histogram.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volt_histogram.main" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="volt_correct_temperature.html" class="btn btn-neutral float-left" title="volt_correct_temperature module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../api/modules.html" class="btn btn-neutral float-right" title="lib" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2021, CRTomo contributors.
+      <span class="lastupdated">Last updated on Dec 14, 2021.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

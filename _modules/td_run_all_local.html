@@ -1,0 +1,381 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>td_run_all_local &#8212; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for td_run_all_local</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># *-* coding: utf-8 *-*</span>
+<span class="sd">&quot;&quot;&quot;Look for all unfinished tomodirs in the present directory (and</span>
+<span class="sd">subdirectories), and run them subsequently by calling CRmod/CRTomo. The number</span>
+<span class="sd">of cores to use can be specified using a command line option.</span>
+
+<span class="sd">Note that this script does not allow any kind of parallel calling of CRTomo, or</span>
+<span class="sd">remote execution of inversions.</span>
+
+<span class="sd">This file is self-contained: it does not need any additional python scripts,</span>
+<span class="sd">and can thus be also used without installing crtomo-tools. The only requirement</span>
+<span class="sd">is that CRMod/CRTomo is available in the $PATH variable, i.e., that</span>
+<span class="sd">CRMod/CRTomo can be called.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">from</span> <span class="nn">optparse</span> <span class="kn">import</span> <span class="n">OptionParser</span>
+
+
+<span class="c1"># determine binary paths</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">crtomo.binaries</span> <span class="k">as</span> <span class="nn">cBin</span>
+    <span class="n">crmod_binary</span> <span class="o">=</span> <span class="n">cBin</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;CRMod&#39;</span><span class="p">)</span>
+    <span class="n">crtomo_binary</span> <span class="o">=</span> <span class="n">cBin</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;CRTomo&#39;</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Couldn</span><span class="se">\&#39;</span><span class="s1">t find crtomo.binaries - falling back to defaults&#39;</span><span class="p">)</span>
+    <span class="n">crmod_binary</span> <span class="o">=</span> <span class="s1">&#39;CRMod&#39;</span>
+    <span class="n">crtomo_binary</span> <span class="o">=</span> <span class="s1">&#39;CRTomo&#39;</span>
+
+
+<div class="viewcode-block" id="handle_cmd_options"><a class="viewcode-back" href="../scripts/grid_tools/td_run_all_local.html#td_run_all_local.handle_cmd_options">[docs]</a><span class="k">def</span> <span class="nf">handle_cmd_options</span><span class="p">():</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">OptionParser</span><span class="p">()</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span>
+        <span class="s1">&#39;-t&#39;</span><span class="p">,</span> <span class="s2">&quot;--threads&quot;</span><span class="p">,</span>
+        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;number_threads&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;number of threads EACH CRMod/CRTomo instance uses. If not &quot;</span> <span class="o">+</span>
+        <span class="s2">&quot;set, will be determined automatically&quot;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span>
+        <span class="s2">&quot;-n&quot;</span><span class="p">,</span> <span class="s2">&quot;--number&quot;</span><span class="p">,</span>
+        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;number_processes&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;How many CRMod/CRTomo instances to start in parallel. &quot;</span> <span class="o">+</span>
+        <span class="s2">&quot;Default: number of detected CPUs/2&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;int&#39;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span>
+        <span class="s2">&quot;-f&quot;</span><span class="p">,</span> <span class="s2">&quot;--filter&quot;</span><span class="p">,</span>
+        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;regex_filter&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Process only tomodirs whose path matches the regex&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;str&#39;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span>
+        <span class="s2">&quot;-r&quot;</span><span class="p">,</span> <span class="s2">&quot;--reverse&quot;</span><span class="p">,</span>
+        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;reverse_lists&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Reverse directory lists before working with them&quot;</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span>
+        <span class="s2">&quot;-c&quot;</span><span class="p">,</span> <span class="s2">&quot;--confirm&quot;</span><span class="p">,</span>
+        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;confirm_start&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Prompt for user input before starting&quot;</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">options</span></div>
+
+
+<div class="viewcode-block" id="is_tomodir"><a class="viewcode-back" href="../scripts/grid_tools/td_run_all_local.html#td_run_all_local.is_tomodir">[docs]</a><span class="k">def</span> <span class="nf">is_tomodir</span><span class="p">(</span><span class="n">subdirectories</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;provided with the subdirectories of a given directory, check if this is</span>
+<span class="sd">    a tomodir</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">required</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;exe&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;config&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;rho&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;mod&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;inv&#39;</span>
+    <span class="p">)</span>
+    <span class="n">is_tomodir</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">for</span> <span class="n">subdir</span> <span class="ow">in</span> <span class="n">required</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">subdir</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">subdirectories</span><span class="p">:</span>
+            <span class="n">is_tomodir</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">is_tomodir</span></div>
+
+
+<div class="viewcode-block" id="check_if_needs_modeling"><a class="viewcode-back" href="../scripts/grid_tools/td_run_all_local.html#td_run_all_local.check_if_needs_modeling">[docs]</a><span class="k">def</span> <span class="nf">check_if_needs_modeling</span><span class="p">(</span><span class="n">tomodir</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;check of we need to run CRMod in a given tomodir</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;check for modeling&#39;</span><span class="p">,</span> <span class="n">tomodir</span><span class="p">)</span>
+    <span class="n">required_files</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;config&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;config.dat&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;rho&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;rho.dat&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;grid&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;elem.dat&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;grid&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;elec.dat&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;exe&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;crmod.cfg&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">not_allowed</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;mod&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;volt.dat&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">needs_modeling</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">not_allowed</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">tomodir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="n">filename</span><span class="p">):</span>
+            <span class="n">needs_modeling</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">required_files</span><span class="p">:</span>
+        <span class="n">full_file</span> <span class="o">=</span> <span class="n">tomodir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="n">filename</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">full_file</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;does not exist: &#39;</span><span class="p">,</span> <span class="n">full_file</span><span class="p">)</span>
+            <span class="n">needs_modeling</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="n">needs_modeling</span></div>
+
+
+<div class="viewcode-block" id="check_if_needs_inversion"><a class="viewcode-back" href="../scripts/grid_tools/td_run_all_local.html#td_run_all_local.check_if_needs_inversion">[docs]</a><span class="k">def</span> <span class="nf">check_if_needs_inversion</span><span class="p">(</span><span class="n">tomodir</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;check of we need to run CRTomo in a given tomodir</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    tomodir : str</span>
+<span class="sd">        Tomodir to check</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    needs_inversion : bool</span>
+<span class="sd">        True if not finished yet</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">required_files</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;grid&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;elem.dat&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;grid&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;elec.dat&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;exe&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;crtomo.cfg&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">needs_inversion</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">required_files</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">tomodir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="n">filename</span><span class="p">):</span>
+            <span class="n">needs_inversion</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># check for crmod OR modeling capabilities</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">tomodir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;mod&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;volt.dat&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">check_if_needs_modeling</span><span class="p">(</span><span class="n">tomodir</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;no volt.dat and no modeling possible&#39;</span><span class="p">)</span>
+            <span class="n">needs_inversion</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># check if finished</span>
+    <span class="n">inv_ctr_file</span> <span class="o">=</span> <span class="n">tomodir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;inv&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;inv.ctr&#39;</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">inv_ctr_file</span><span class="p">):</span>
+        <span class="n">inv_lines</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">inv_ctr_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;inv_lines&#39;</span><span class="p">,</span> <span class="n">inv_lines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">inv_lines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;***finished***&#39;</span><span class="p">):</span>
+            <span class="n">needs_inversion</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="n">needs_inversion</span></div>
+
+
+<div class="viewcode-block" id="find_unfinished_tomodirs"><a class="viewcode-back" href="../scripts/grid_tools/td_run_all_local.html#td_run_all_local.find_unfinished_tomodirs">[docs]</a><span class="k">def</span> <span class="nf">find_unfinished_tomodirs</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+    <span class="n">needs_modeling</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">needs_inversion</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+        <span class="n">dirs</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">is_tomodir</span><span class="p">(</span><span class="n">dirs</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;found tomodir: &#39;</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">check_if_needs_modeling</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+                <span class="n">needs_modeling</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">check_if_needs_inversion</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+                <span class="n">needs_inversion</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">needs_modeling</span><span class="p">),</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">needs_inversion</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="_run_crmod_in_tomodir"><a class="viewcode-back" href="../scripts/grid_tools/td_run_all_local.html#td_run_all_local._run_crmod_in_tomodir">[docs]</a><span class="k">def</span> <span class="nf">_run_crmod_in_tomodir</span><span class="p">(</span><span class="n">tomodir</span><span class="p">):</span>
+    <span class="n">pwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">tomodir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;exe&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calling CRMod in </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pwd</span><span class="p">))</span>
+    <span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">(</span>
+        <span class="n">crmod_binary</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">,</span> <span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">pwd</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="_get_mp_settings"><a class="viewcode-back" href="../scripts/grid_tools/td_run_all_local.html#td_run_all_local._get_mp_settings">[docs]</a><span class="k">def</span> <span class="nf">_get_mp_settings</span><span class="p">(</span><span class="n">options</span><span class="p">):</span>
+    <span class="n">cpu_count</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">number_threads</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;OMP_NUM_THREADS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">options</span><span class="o">.</span><span class="n">number_threads</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;OMP_NUM_THREADS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">cpu_count</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">number_processes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">number_of_concurrent_processes</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">number_processes</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">number_of_concurrent_processes</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cpu_count</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">number_of_concurrent_processes</span></div>
+
+
+<div class="viewcode-block" id="run_CRMod"><a class="viewcode-back" href="../scripts/grid_tools/td_run_all_local.html#td_run_all_local.run_CRMod">[docs]</a><span class="k">def</span> <span class="nf">run_CRMod</span><span class="p">(</span><span class="n">tomodirs</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+    <span class="n">number_of_concurrent_processes</span> <span class="o">=</span> <span class="n">_get_mp_settings</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">number_of_concurrent_processes</span><span class="p">)</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">_run_crmod_in_tomodir</span><span class="p">,</span> <span class="n">tomodirs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="_run_crtomo_in_tomodir"><a class="viewcode-back" href="../scripts/grid_tools/td_run_all_local.html#td_run_all_local._run_crtomo_in_tomodir">[docs]</a><span class="k">def</span> <span class="nf">_run_crtomo_in_tomodir</span><span class="p">(</span><span class="n">tomodir</span><span class="p">):</span>
+    <span class="c1"># check once again if the TD is not yet finished</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">check_if_needs_inversion</span><span class="p">(</span><span class="n">tomodir</span><span class="p">):</span>
+        <span class="k">return</span>
+    <span class="n">pwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">tomodir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;exe&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calling CRTomo in </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pwd</span><span class="p">))</span>
+    <span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">(</span>
+        <span class="n">crtomo_binary</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">,</span> <span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">pwd</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="run_CRTomo"><a class="viewcode-back" href="../scripts/grid_tools/td_run_all_local.html#td_run_all_local.run_CRTomo">[docs]</a><span class="k">def</span> <span class="nf">run_CRTomo</span><span class="p">(</span><span class="n">tomodirs</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+    <span class="n">number_of_concurrent_processes</span> <span class="o">=</span> <span class="n">_get_mp_settings</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">number_of_concurrent_processes</span><span class="p">)</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">_run_crtomo_in_tomodir</span><span class="p">,</span> <span class="n">tomodirs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../scripts/grid_tools/td_run_all_local.html#td_run_all_local.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">handle_cmd_options</span><span class="p">()</span>
+    <span class="n">needs_modeling</span><span class="p">,</span> <span class="n">needs_inversion</span> <span class="o">=</span> <span class="n">find_unfinished_tomodirs</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-&#39;</span> <span class="o">*</span> <span class="mi">20</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;modeling:&#39;</span><span class="p">,</span> <span class="n">needs_modeling</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;inversion:&#39;</span><span class="p">,</span> <span class="n">needs_inversion</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-&#39;</span> <span class="o">*</span> <span class="mi">20</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">reverse_lists</span><span class="p">:</span>
+        <span class="n">needs_modeling</span> <span class="o">=</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">needs_modeling</span><span class="p">)</span>
+        <span class="n">needs_inversion</span> <span class="o">=</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">needs_inversion</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">regex_filter</span><span class="p">:</span>
+        <span class="n">prog</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">regex_filter</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Applying filter:&#39;</span><span class="p">,</span> <span class="n">prog</span><span class="p">)</span>
+        <span class="n">needs_inversion_filtered</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">prog</span><span class="o">.</span><span class="n">search</span><span class="p">,</span> <span class="n">needs_inversion</span><span class="p">))</span>
+        <span class="n">needs_modeling_filtered</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="n">prog</span><span class="o">.</span><span class="n">search</span><span class="p">,</span> <span class="n">needs_modeling</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">needs_modeling_filtered</span> <span class="o">=</span> <span class="n">needs_modeling</span>
+        <span class="n">needs_inversion_filtered</span> <span class="o">=</span> <span class="n">needs_inversion</span>
+
+    <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">confirm_start</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-&#39;</span> <span class="o">*</span> <span class="mi">20</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Tomodirs to model (after filtering):&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">needs_modeling_filtered</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-&#39;</span> <span class="o">*</span> <span class="mi">20</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Tomodirs to invert (after filtering):&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">needs_inversion_filtered</span><span class="p">)</span>
+        <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;Press any key to proceed&#39;</span><span class="p">)</span>
+    <span class="n">run_CRMod</span><span class="p">(</span><span class="n">needs_modeling_filtered</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+    <span class="n">run_CRTomo</span><span class="p">(</span><span class="n">needs_inversion_filtered</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">crtomo tools</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">lib</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2021, CRTomo contributors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

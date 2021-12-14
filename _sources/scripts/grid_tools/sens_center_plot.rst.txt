@@ -1,0 +1,9 @@
+sens\_center\_plot module
+=========================
+
+.. automodule:: sens_center_plot
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:

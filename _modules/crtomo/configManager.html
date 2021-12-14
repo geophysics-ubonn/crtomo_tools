@@ -1,0 +1,479 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>crtomo.configManager &#8212; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for crtomo.configManager</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *-* coding: utf-8 *-*</span>
+<span class="sd">&quot;&quot;&quot;Manage measurement configurations and corresponding measurements.</span>
+
+<span class="sd">Geometric Factors</span>
+<span class="sd">-----------------</span>
+
+<span class="sd">.. plot:: pyplots/plot_K_vs_dipol_sep.py</span>
+
+<span class="sd">Literature</span>
+<span class="sd">----------</span>
+
+<span class="sd">* Noel, Mark and Biwen Xu; Archaeological investigation by electrical</span>
+<span class="sd">    resistivity tomography: a preliminary study. Geophys J Int 1991; 107 (1):</span>
+<span class="sd">    95-102. doi: 10.1111/j.1365-246X.1991.tb01159.x</span>
+<span class="sd">* Stummer, Peter, Hansruedi Maurer, and Alan G. Green. “Experimental Design:</span>
+<span class="sd">  Electrical Resistivity Data Sets That Provide Optimum Subsurface</span>
+<span class="sd">  Information.” Geophysics 69, no. 1 (January 1, 2004): 120–120.</span>
+<span class="sd">  doi:10.1190/1.1649381.</span>
+<span class="sd">* Roy, A., and A. Apparao. “DEPTH OF INVESTIGATION IN DIRECT CURRENT METHODS.”</span>
+<span class="sd">  GEOPHYSICS 36, no. 5 (January 1, 1971): 943–59. doi:10.1190/1.1440226.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">import</span> <span class="nn">crtomo.mpl</span>
+
+<span class="kn">import</span> <span class="nn">reda.configs.configManager</span> <span class="k">as</span> <span class="nn">reda_config_mgr</span>
+<span class="n">plt</span><span class="p">,</span> <span class="n">mpl</span> <span class="o">=</span> <span class="n">crtomo</span><span class="o">.</span><span class="n">mpl</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="ConfigManager"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.configManager.ConfigManager">[docs]</a><span class="k">class</span> <span class="nc">ConfigManager</span><span class="p">(</span><span class="n">reda_config_mgr</span><span class="o">.</span><span class="n">ConfigManager</span><span class="p">):</span>
+<div class="viewcode-block" id="ConfigManager.__init__"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.configManager.ConfigManager.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        nr_of_electrodes : int</span>
+<span class="sd">            Number of electrodes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># assert &#39;nr_of_electrodes&#39; in kwargs</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1"># store measurements in a list of size N arrays</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># global counter for measurements</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meas_counter</span> <span class="o">=</span> <span class="o">-</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="ConfigManager.clear_measurements"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.configManager.ConfigManager.clear_measurements">[docs]</a>    <span class="k">def</span> <span class="nf">clear_measurements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove all measurements from self.measurements. Reset the</span>
+<span class="sd">        measurement counter. All ID are invalidated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">measurements</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="k">del</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">measurements</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meas_counter</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span></div>
+
+<div class="viewcode-block" id="ConfigManager.delete_measurements"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.configManager.ConfigManager.delete_measurements">[docs]</a>    <span class="k">def</span> <span class="nf">delete_measurements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mid</span><span class="p">):</span>
+        <span class="k">del</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">measurements</span><span class="p">[</span><span class="n">mid</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="ConfigManager.add_measurements"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.configManager.ConfigManager.add_measurements">[docs]</a>    <span class="k">def</span> <span class="nf">add_measurements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">measurements</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add new measurements to this instance</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        measurements: numpy.ndarray</span>
+<span class="sd">            one or more measurement sets. It must either be 1D or 2D, with the</span>
+<span class="sd">            first dimension the number of measurement sets (K), and the second</span>
+<span class="sd">            the number of measurements (N): K x N</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        mid: int</span>
+<span class="sd">            measurement ID used to extract the measurements later on</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">            import crtomo.configManager as CRconfig</span>
+<span class="sd">            config = CRconfig.ConfigManager(nr_of_electrodes=10)</span>
+<span class="sd">            config.gen_dipole_dipole(skipc=0)</span>
+<span class="sd">            # generate some random noise</span>
+<span class="sd">            random_measurements = np.random.random(config.nr_of_configs)</span>
+<span class="sd">            mid = config.add_measurements(random_measurements)</span>
+<span class="sd">            # retrieve using mid</span>
+<span class="sd">            print(config.measurements[mid])</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">subdata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">measurements</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s1">&#39;must read in configuration before measurements can be stored&#39;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># we try to accommodate transposed input</span>
+        <span class="k">if</span> <span class="n">subdata</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">subdata</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">configs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">subdata</span> <span class="o">=</span> <span class="n">subdata</span><span class="o">.</span><span class="n">T</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s1">&#39;Number of measurements does not match number of configs&#39;</span>
+                <span class="p">)</span>
+
+        <span class="n">return_ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="n">subdata</span><span class="p">:</span>
+            <span class="n">cid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_next_index</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span><span class="p">[</span><span class="n">cid</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">return_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cid</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">return_ids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">return_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">return_ids</span></div>
+
+<div class="viewcode-block" id="ConfigManager.remove_using_nr_injections"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.configManager.ConfigManager.remove_using_nr_injections">[docs]</a>    <span class="k">def</span> <span class="nf">remove_using_nr_injections</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_nr_of_injections</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove all measurements with a current injection that is not used a</span>
+<span class="sd">        minimum number of times.</span>
+
+<span class="sd">        This is useful to optimize measurement time for multi-channel systems,</span>
+<span class="sd">        such as the IRIS Instruments Syscal Pro. The device can theoretically</span>
+<span class="sd">        only facilitate the full number of channels if a corresponding number</span>
+<span class="sd">        of voltage measurements is requested for a given current injection. As</span>
+<span class="sd">        such, it can be useful to remove measurements with unique current</span>
+<span class="sd">        injection dipoles. Note that other factors determine if all channels</span>
+<span class="sd">        are actually used. Please refer to the device manual for</span>
+<span class="sd">        device-specific information.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        min_nr_of_injections : int</span>
+<span class="sd">            Minimum number a given current injection should have to keep it</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">min_nr_of_injections</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configs</span><span class="p">)</span>
+        <span class="c1"># group over A, B</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">df_filtered</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">min_nr_of_injections</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configs</span> <span class="o">=</span> <span class="n">df_filtered</span><span class="o">.</span><span class="n">values</span></div>
+
+<div class="viewcode-block" id="ConfigManager.plot_error_pars"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.configManager.ConfigManager.plot_error_pars">[docs]</a>    <span class="k">def</span> <span class="nf">plot_error_pars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; ??? DEFUNCT</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+        <span class="k">def</span> <span class="nf">plot_error_pars</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+            <span class="n">dR</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">R</span> <span class="o">+</span> <span class="n">b</span>
+            <span class="n">dlogR</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">/</span> <span class="n">R</span><span class="p">)</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">dR</span> <span class="o">/</span> <span class="n">R</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">dlogR</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">R</span><span class="p">))</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">R</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="mi">5</span><span class="p">):</span>
+            <span class="n">plot_error_pars</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;b=</span><span class="si">{0:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>
+        <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$R [\Omega]$&#39;</span><span class="p">)</span>
+        <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$(\Delta R/R) \cdot 100 [\%]$&#39;</span><span class="p">)</span>
+        <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$log_</span><span class="si">{10}</span><span class="s1">(R [\Omega])$&#39;</span><span class="p">)</span>
+        <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span>
+            <span class="sa">r</span><span class="s1">&#39;$log_</span><span class="si">{10}</span><span class="s1">(R) / \Delta log_</span><span class="si">{10}</span><span class="s1">(R) \cdot 100 [\%]$&#39;</span>
+        <span class="p">)</span>
+        <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+        <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">bottom</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+        <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span>
+            <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower center&quot;</span><span class="p">,</span>
+            <span class="n">ncol</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+            <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">bbox_transform</span><span class="o">=</span><span class="n">fig</span><span class="o">.</span><span class="n">transFigure</span>
+        <span class="p">)</span>
+
+        <span class="c1"># fig.savefig(&#39;out.png&#39;, dpi=300)</span>
+        <span class="k">return</span> <span class="n">fig</span></div>
+
+<div class="viewcode-block" id="ConfigManager.gen_voltage_dipoles_skip"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.configManager.ConfigManager.gen_voltage_dipoles_skip">[docs]</a>    <span class="k">def</span> <span class="nf">gen_voltage_dipoles_skip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cinj</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;For given current injections, generate all possible voltage dipoles</span>
+<span class="sd">        with skip **skip**.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        cinj : :py:class:`numpy.ndarray`</span>
+<span class="sd">            Nx2 array containing the current injection electrodes a,b</span>
+<span class="sd">        skip : int, optional</span>
+<span class="sd">            Skip used for voltage electrodes. Default: 0</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_configs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ab</span> <span class="ow">in</span> <span class="n">cinj</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_electrodes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="n">i</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">skip</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">ab</span> <span class="ow">or</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">ab</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">nr_electrodes</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">new_configs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ab</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ab</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+        <span class="n">configs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">new_configs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_to_configs</span><span class="p">(</span><span class="n">configs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">configs</span></div>
+
+<div class="viewcode-block" id="ConfigManager.load_crmod_data"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.configManager.ConfigManager.load_crmod_data">[docs]</a>    <span class="k">def</span> <span class="nf">load_crmod_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_source</span><span class="p">,</span> <span class="n">is_forward_response</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">try_fix_signs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Load CRMod measurement data, either from file or directly from a</span>
+<span class="sd">        numpy array.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data_source : string|numpy.ndarray</span>
+<span class="sd">            if this is a string, treat it as an input filename. If it is a Nx5</span>
+<span class="sd">            or Nx3 numpy array, use this data directly</span>
+<span class="sd">        is_forward_response : bool, optional</span>
+<span class="sd">            If True this indicated volt.dat file created by CRTomo during an</span>
+<span class="sd">            inversion run to store forward responses of a given model</span>
+<span class="sd">            iteration. In this case the third data column indicates the wdfak</span>
+<span class="sd">            parameter, i.e., it indicates if a given data point was excluded</span>
+<span class="sd">            from this iteration.</span>
+<span class="sd">        try_fix_signs : bool, optional</span>
+<span class="sd">            If True, try to fix sign reversals with respect to an already</span>
+<span class="sd">            registered configuration set by swappend m and n entries.</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        cid_mag : int</span>
+<span class="sd">            Measurement id for magnitude data</span>
+<span class="sd">        cid_pha : int</span>
+<span class="sd">            Measurement id for phase data</span>
+<span class="sd">        mid_wdfak : int, optional</span>
+<span class="sd">            Measurement id for wdfak indicators. Only returned if</span>
+<span class="sd">            is_forward_response is True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_source</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">data_source</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fid</span><span class="p">:</span>
+                <span class="n">nr_of_configs</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fid</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+                <span class="n">measurements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">nr_of_configs</span> <span class="o">!=</span> <span class="n">measurements</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                        <span class="s1">&#39;Indicated number of measurements is not equal &#39;</span>
+                        <span class="s1">&#39;to actual number of measurements&#39;</span>
+                    <span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_source</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+            <span class="n">measurements</span> <span class="o">=</span> <span class="n">data_source</span><span class="p">[</span>
+                <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;rpha&#39;</span><span class="p">]</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># assume numpy array</span>
+            <span class="c1"># data already stored in the variable</span>
+            <span class="n">measurements</span> <span class="o">=</span> <span class="n">data_source</span>
+
+        <span class="k">if</span> <span class="n">is_forward_response</span><span class="p">:</span>
+            <span class="c1"># crmod ab-mn scheme</span>
+            <span class="n">abmn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crmod_to_abmn</span><span class="p">(</span><span class="n">measurements</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">rmag</span> <span class="o">=</span> <span class="n">measurements</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">measurements</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="c1"># assume DC inversion</span>
+                <span class="n">rpha</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">wdfak</span> <span class="o">=</span> <span class="n">measurements</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rpha</span> <span class="o">=</span> <span class="n">measurements</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
+                <span class="n">wdfak</span> <span class="o">=</span> <span class="n">measurements</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">measurements</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> \
+                <span class="s2">&quot;Only know how to deal with 4 or 6 columns. &quot;</span> <span class="o">+</span> \
+                <span class="s2">&quot;DC probably not supported&quot;</span>
+
+            <span class="k">if</span> <span class="n">measurements</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="c1"># crmod ab-mn scheme</span>
+                <span class="n">abmn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_crmod_to_abmn</span><span class="p">(</span><span class="n">measurements</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span>
+                <span class="n">rmag</span> <span class="o">=</span> <span class="n">measurements</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+                <span class="n">rpha</span> <span class="o">=</span> <span class="n">measurements</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># abmn in separate columns</span>
+                <span class="n">abmn</span> <span class="o">=</span> <span class="n">measurements</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+                <span class="n">rmag</span> <span class="o">=</span> <span class="n">measurements</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span>
+                <span class="n">rpha</span> <span class="o">=</span> <span class="n">measurements</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">configs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">configs</span> <span class="o">=</span> <span class="n">abmn</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">try_fix_signs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">abmn</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">configs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]):</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                        <span class="s1">&#39;try_fix_signs failed: a and b columns do not match&#39;</span>
+                    <span class="p">)</span>
+                <span class="c1"># find swapped potential electrodes</span>
+                <span class="n">indices_to_switch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span>
+                        <span class="n">abmn</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">:</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">configs</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="c1"># fix configurations</span>
+                <span class="n">abmn</span><span class="p">[</span><span class="n">indices_to_switch</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configs</span><span class="p">[</span><span class="n">indices_to_switch</span><span class="p">]</span>
+                <span class="c1"># Fix impedances</span>
+                <span class="k">if</span> <span class="n">rpha</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">z_complex</span> <span class="o">=</span> <span class="n">rmag</span><span class="p">[</span>
+                        <span class="n">indices_to_switch</span>
+                    <span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">rpha</span><span class="p">[</span><span class="n">indices_to_switch</span><span class="p">]</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+                    <span class="n">z_complex_fixed</span> <span class="o">=</span> <span class="n">z_complex</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>
+                    <span class="n">rmag</span><span class="p">[</span><span class="n">indices_to_switch</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">z_complex_fixed</span><span class="p">)</span>
+                    <span class="n">rpha</span><span class="p">[</span><span class="n">indices_to_switch</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">z_complex_fixed</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">z_complex_fixed</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># DC case</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARNING: try_fix_signs with DC not validated!&#39;</span><span class="p">)</span>
+                    <span class="n">rmag</span><span class="p">[</span><span class="n">indices_to_switch</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">rmag</span><span class="p">[</span><span class="n">indices_to_switch</span><span class="p">]</span>
+
+            <span class="c1"># check that configs match</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">abmn</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">configs</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s1">&#39;previously stored configurations do not match new &#39;</span>
+                    <span class="s1">&#39;configurations&#39;</span>
+                <span class="p">)</span>
+        <span class="c1"># add data</span>
+        <span class="n">cid_mag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_measurements</span><span class="p">(</span><span class="n">rmag</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rpha</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cid_pha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_measurements</span><span class="p">(</span><span class="n">rpha</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cid_pha</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">is_forward_response</span><span class="p">:</span>
+            <span class="n">mid_wdfak</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_measurements</span><span class="p">(</span><span class="n">wdfak</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">cid_mag</span><span class="p">,</span> <span class="n">cid_pha</span><span class="p">,</span> <span class="n">mid_wdfak</span>
+
+        <span class="k">return</span> <span class="n">cid_mag</span><span class="p">,</span> <span class="n">cid_pha</span></div>
+
+<div class="viewcode-block" id="ConfigManager.load_crmod_volt"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.configManager.ConfigManager.load_crmod_volt">[docs]</a>    <span class="k">def</span> <span class="nf">load_crmod_volt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Load a CRMod measurement file (commonly called volt.dat)</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename : string</span>
+<span class="sd">            path to input filename</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        cid_mag : int</span>
+<span class="sd">            Measurement id for magnitude data</span>
+<span class="sd">        cid_pha : int</span>
+<span class="sd">            Measurement id for phase data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cid_mag</span><span class="p">,</span> <span class="n">cid_pha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_crmod_data</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cid_mag</span><span class="p">,</span> <span class="n">cid_pha</span></div>
+
+<div class="viewcode-block" id="ConfigManager.delete_data_points"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.configManager.ConfigManager.delete_data_points">[docs]</a>    <span class="k">def</span> <span class="nf">delete_data_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete data points by index (0-indexed), both in configs and</span>
+<span class="sd">        measurements. Deletions will be done in ALL registered measurements to</span>
+<span class="sd">        ensure consistency.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        indices : int|iterable</span>
+<span class="sd">            Indices to delete</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Deleting configurations:&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configs</span><span class="p">[</span><span class="n">indices</span><span class="p">])</span>
+
+        <span class="c1"># first the configurations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configs</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">measurements</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">indices</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+            <span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">crtomo tools</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">lib</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2021, CRTomo contributors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

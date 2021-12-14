@@ -1,0 +1,165 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>crtomo.debug &#8212; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for crtomo.debug</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;This file contains certain functionality used for testing purposes.</span>
+
+<span class="sd">One example is the interface to return grid objects based on CRTomo grids that</span>
+<span class="sd">are distributed with crtomo_tools.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">pkg_resources</span> <span class="k">as</span> <span class="nn">pk</span>
+
+<span class="kn">import</span> <span class="nn">crtomo.grid</span> <span class="k">as</span> <span class="nn">CRGrid</span>
+
+<span class="c1"># if pk.resource_exists(module, rfile):</span>
+<span class="c1"># sys.stdout.write(pk.resource_filename(module, rfile))</span>
+
+
+<span class="n">grid_files</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mi">20</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;elem&#39;</span><span class="p">:</span> <span class="s1">&#39;debug_data/elem_20elecs.dat&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;elec&#39;</span><span class="p">:</span> <span class="s1">&#39;debug_data/elec_20elecs.dat&#39;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="mi">40</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;elem&#39;</span><span class="p">:</span> <span class="s1">&#39;debug_data/elem_40elecs.dat&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;elec&#39;</span><span class="p">:</span> <span class="s1">&#39;debug_data/elec_40elecs.dat&#39;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="get_grid"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.debug.get_grid">[docs]</a><span class="k">def</span> <span class="nf">get_grid</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return a :class:`crtomo.grid.crt_grid` instance, with a debug grid that</span>
+<span class="sd">    is distributed with the crtomo package. Multiple grids are available:</span>
+
+<span class="sd">        * key=20 - a 20 electrode grid with 1m spacing, 4 elements between</span>
+<span class="sd">          electrodes, rectangular elements.</span>
+<span class="sd">        * key=40 - a 40 electrode grid with 1m spacing, 4 elements between</span>
+<span class="sd">          electrodes, rectangular elements.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    key: string</span>
+<span class="sd">        key that identifies the grid</span>
+
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    grid: :class:`crtomo.grid.crt_grid` instance</span>
+<span class="sd">        loaded grid object</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rbase</span> <span class="o">=</span> <span class="n">grid_files</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+    <span class="n">elem_file</span> <span class="o">=</span> <span class="n">pk</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span><span class="s1">&#39;crtomo&#39;</span><span class="p">,</span> <span class="n">rbase</span><span class="p">[</span><span class="s1">&#39;elem&#39;</span><span class="p">])</span>
+    <span class="n">elec_file</span> <span class="o">=</span> <span class="n">pk</span><span class="o">.</span><span class="n">resource_filename</span><span class="p">(</span><span class="s1">&#39;crtomo&#39;</span><span class="p">,</span> <span class="n">rbase</span><span class="p">[</span><span class="s1">&#39;elec&#39;</span><span class="p">])</span>
+
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">CRGrid</span><span class="o">.</span><span class="n">crt_grid</span><span class="p">(</span><span class="n">elem_file</span><span class="o">=</span><span class="n">elem_file</span><span class="p">,</span> <span class="n">elec_file</span><span class="o">=</span><span class="n">elec_file</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">grid</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">crtomo tools</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">lib</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2021, CRTomo contributors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

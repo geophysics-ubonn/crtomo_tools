@@ -1,0 +1,227 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>crtomo.binaries &#8212; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for crtomo.binaries</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># *-* coding: utf-8 *-*</span>
+<span class="sd">&quot;&quot;&quot;provide a simple OS-agnostic interface to various binary paths, e.g., for</span>
+<span class="sd">GMSH oder CRTomo.</span>
+
+<span class="sd">At the moment all paths are hard-coded, but this interface could be extended</span>
+<span class="sd">to using a configuration file.</span>
+
+<span class="sd">At the moment the following binaries have hard-coded default paths:</span>
+
+<span class="sd">    * gmsh</span>
+<span class="sd">    * CRTomo</span>
+<span class="sd">    * CRMod</span>
+<span class="sd">    * CutMcK</span>
+
+<span class="sd">Examples</span>
+<span class="sd">--------</span>
+
+<span class="sd">&gt;&gt;&gt; import crtomo.binaries as cBin</span>
+<span class="sd">    gmsh_binary = cBin.get(&#39;gmsh&#39;)</span>
+<span class="sd">    print(gmsh_binary)</span>
+<span class="sd">/usr/bin/gmsh&#39;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">platform</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+
+<span class="c1"># this dictionary contains the hard-coded paths to our binaries for both</span>
+<span class="c1"># Windows and Linux. Note that we could easily add lambda functions to the</span>
+<span class="c1"># lists and check for the later in the &#39;get&#39; function. This would allow us to</span>
+<span class="c1"># actively search for the binaries, i.e., using shutil.which or some other</span>
+<span class="c1"># means.</span>
+<span class="n">binaries</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># binary key</span>
+    <span class="s1">&#39;gmsh&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="c1"># platform</span>
+        <span class="s1">&#39;Linux&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="c1"># list of possible locations</span>
+            <span class="s1">&#39;gmsh&#39;</span><span class="p">,</span>
+        <span class="p">],</span>
+        <span class="s1">&#39;Windows&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="sa">r</span><span class="s1">&#39;C:\crtomo\bin\gmsh.exe&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;gmsh.exe&#39;</span><span class="p">,</span>
+        <span class="p">],</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;CRTomo&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;Linux&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s1">&#39;CRTomo&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;/usr/bin/CRTomo_dev&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;CRTomo_master_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">platform</span><span class="o">.</span><span class="n">node</span><span class="p">()),</span>
+        <span class="p">],</span>
+        <span class="s1">&#39;Windows&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="sa">r</span><span class="s1">&#39;C:\crtomo\bin\crtomo.exe&#39;</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;CRMod&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;Linux&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s1">&#39;CRMod&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;CRMod_dev&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;/usr/bin/CRMod_dev&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;CRMod_master_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">platform</span><span class="o">.</span><span class="n">node</span><span class="p">()),</span>
+        <span class="p">],</span>
+        <span class="s1">&#39;Windows&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="sa">r</span><span class="s1">&#39;C:\crtomo\bin\crmod.exe&#39;</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;CutMcK&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;Linux&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s1">&#39;CutMcK&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;/usr/bin/CutMcK_dev&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;CutMcK_master_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">platform</span><span class="o">.</span><span class="n">node</span><span class="p">()),</span>
+        <span class="p">],</span>
+        <span class="s1">&#39;Windows&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="sa">r</span><span class="s1">&#39;C:\crtomo\bin\cutmck.exe&#39;</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">},</span>
+
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="get"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.binaries.get">[docs]</a><span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">binary_name</span><span class="p">,</span> <span class="n">raise_error</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;return a valid path to the given binary. Return an error if no existing</span>
+<span class="sd">    binary can be found.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    binary_name : str</span>
+<span class="sd">        A binary name used as a key in the &#39;binaries&#39; dictionary above</span>
+<span class="sd">    raise_error: bool, optional</span>
+<span class="sd">        If set to True, then raise an IOError if no binary could be found</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    string</span>
+<span class="sd">        full path to binary</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">binary_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">binaries</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;binary_name: </span><span class="si">{0}</span><span class="s1"> not found&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">binary_name</span><span class="p">))</span>
+
+    <span class="n">system</span> <span class="o">=</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span>
+    <span class="n">binary_list</span> <span class="o">=</span> <span class="n">binaries</span><span class="p">[</span><span class="n">binary_name</span><span class="p">][</span><span class="n">system</span><span class="p">]</span>
+
+    <span class="c1"># check list for a valid entry</span>
+    <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">binary_list</span><span class="p">:</span>
+        <span class="n">valid_file</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">valid_file</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">valid_file</span><span class="p">)</span>
+    <span class="c1"># If we reach this location, then no valid file could be found</span>
+    <span class="k">if</span> <span class="n">raise_error</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span>
+            <span class="s1">&#39;No valid binary could be found for: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">binary_name</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">crtomo tools</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">lib</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2021, CRTomo contributors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,688 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>cr_trig_create &#8212; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for cr_trig_create</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Create irregular (triangular) grids for CRMod/CRTomo from simple ascii input</span>
+<span class="sd">files.</span>
+
+<span class="sd">Create the input files &quot;electrodes.dat&quot;, &quot;boundaries.dat&quot;, &quot;char_length.dat&quot;</span>
+<span class="sd">according to the CRLab manual. An optional file &quot;gmsh_commands.dat&quot; file can be</span>
+<span class="sd">used to append GMSH commands at the end of the generated gmsh command file.</span>
+<span class="sd">Note that these command will be executed only after the initial meshing, but</span>
+<span class="sd">can be used to refine the mesh.</span>
+
+<span class="sd">Then run cr_trig_create.py.</span>
+
+<span class="sd">If an (optional) parameter is provided, use this as the output directory. This</span>
+<span class="sd">directory must not exist. In case no parameter is given, create a random</span>
+<span class="sd">directory using the uuid module.</span>
+
+<span class="sd">The output directory is printed in the last line of program output.</span>
+
+<span class="sd">Examples:</span>
+<span class="sd">---------</span>
+
+<span class="sd">&gt;&gt;&gt; # note that this is a shell example, not Python!</span>
+<span class="sd">    cat electrodes.dat</span>
+<span class="sd">1.0 0.0</span>
+<span class="sd">2.0 0.0</span>
+<span class="sd">&gt;&gt;&gt; cat boundaries.dat</span>
+<span class="sd">0.0 0.0 12</span>
+<span class="sd">1.0 0.0 12</span>
+<span class="sd">2.0 0.0 11</span>
+<span class="sd">2.0 -2.0 11</span>
+<span class="sd">0.0 -2.0 11</span>
+<span class="sd">&gt;&gt;&gt; cat char_length.dat</span>
+<span class="sd">0.5</span>
+<span class="sd">&gt;&gt;&gt; cat extra_lines.dat</span>
+<span class="sd">0.5 -0.5 1.5 -1.5</span>
+<span class="sd">&gt;&gt;&gt; cr_trig_create.py</span>
+
+
+<span class="sd">TODO</span>
+<span class="sd">----</span>
+
+<span class="sd">* this file needs to be restructured. The complexity has outgrown the initial</span>
+<span class="sd">  structure.</span>
+<span class="sd">* investigate the &#39; attractor field&#39; to set characteristic lengths (see notes</span>
+<span class="sd">  below) http://gmsh.info/doc/texinfo/gmsh.html</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">from</span> <span class="nn">optparse</span> <span class="kn">import</span> <span class="n">OptionParser</span>
+
+<span class="kn">import</span> <span class="nn">crtomo.binaries</span> <span class="k">as</span> <span class="nn">cBin</span>
+
+
+<div class="viewcode-block" id="handle_cmd_options"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_create.html#cr_trig_create.handle_cmd_options">[docs]</a><span class="k">def</span> <span class="nf">handle_cmd_options</span><span class="p">():</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">OptionParser</span><span class="p">()</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s2">&quot;-m&quot;</span><span class="p">,</span> <span class="s2">&quot;--add_stabilizer_nodes&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;add_stab_nodes&quot;</span><span class="p">,</span>
+                      <span class="n">help</span><span class="o">=</span><span class="s2">&quot;(for surface electrodes only!) How many nodes &quot;</span> <span class="o">+</span>
+                      <span class="s2">&quot;to put between electrodes&quot;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;NR&quot;</span><span class="p">,</span>
+                      <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                      <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">options</span><span class="p">,</span> <span class="n">args</span></div>
+
+
+<div class="viewcode-block" id="Mesh"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_create.html#cr_trig_create.Mesh">[docs]</a><span class="k">class</span> <span class="nc">Mesh</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    GMSH distinguishes three types of objects:</span>
+
+<span class="sd">    * Points on the boundary (i.e., points that create the boundary)</span>
+<span class="sd">    * Lines that connect Points to form the actual boundaries</span>
+<span class="sd">    * Points in Surface, nodes (or points) that lie IN the grid and need to</span>
+<span class="sd">      be connected to the grid</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ----</span>
+
+<span class="sd">    TODO: I think we don&#39;t need to add electrodes as POINTS, only as POINT IN</span>
+<span class="sd">    SURFACE, because POINTs that do not belong to a line will not be included</span>
+<span class="sd">    in the final mesh, or? Check.</span>
+<span class="sd">    Possible Answer: We need to define the Points before we can add them with</span>
+<span class="sd">    the IN SURFACe command.</span>
+
+<span class="sd">    Check for duplicate entries in input files</span>
+
+<span class="sd">    Can we test if all electrodes and extra-nodes lie in the boundaries?</span>
+
+<span class="sd">    Sort boundaries</span>
+
+<span class="sd">    Add extra-nodes (for inner-grid-structure)</span>
+
+<span class="sd">    Add extra-lines (for inner-grid-structure)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Points</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Charlengths</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Electrodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Boundaries</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">BoundaryIndices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ExtraNodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ExtraLineIndices</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="Mesh.get_point_id"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_create.html#cr_trig_create.Mesh.get_point_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_point_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">char_length</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the id of the given point (x,y) tuple.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Checking point&#39;</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="c1"># TODO: This search loop NEEDS to be replaced with something sane</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">for</span> <span class="n">nr</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Points</span><span class="p">):</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="n">p</span><span class="p">)):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Point already in list at index </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nr</span><span class="p">))</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Charlengths</span><span class="p">[</span><span class="n">nr</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">char_length</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Updating characteristic length&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">Charlengths</span><span class="p">[</span><span class="n">nr</span><span class="p">]</span> <span class="o">=</span> <span class="n">char_length</span>
+                <span class="k">return</span> <span class="n">nr</span>
+
+        <span class="k">if</span><span class="p">(</span><span class="n">index</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;adding point:&#39;</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Charlengths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">char_length</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Points</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="Mesh.add_boundary"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_create.html#cr_trig_create.Mesh.add_boundary">[docs]</a>    <span class="k">def</span> <span class="nf">add_boundary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">btype</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a boundary line</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_line</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">char_lengths</span><span class="p">[</span><span class="s1">&#39;boundary&#39;</span><span class="p">])</span>
+        <span class="c1"># self.Boundaries.append((p1_id,p2_id,btype))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">BoundaryIndices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Boundaries</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">btype</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Mesh.add_line"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_create.html#cr_trig_create.Mesh.add_line">[docs]</a>    <span class="k">def</span> <span class="nf">add_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">char_length</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a line to the list. Check if the nodes already exist, and add them</span>
+<span class="sd">        if not.</span>
+
+<span class="sd">        Return the line index (1-indixed, starting with 1)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">p1_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_point_id</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">char_length</span><span class="p">)</span>
+        <span class="n">p2_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_point_id</span><span class="p">(</span><span class="n">p2</span><span class="p">,</span> <span class="n">char_length</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Lines</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">p1_id</span><span class="p">,</span> <span class="n">p2_id</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Lines</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Mesh.is_in"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_create.html#cr_trig_create.Mesh.is_in">[docs]</a>    <span class="k">def</span> <span class="nf">is_in</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search_list</span><span class="p">,</span> <span class="n">pair</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        If pair is in search_list, return the index. Otherwise return -1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">for</span> <span class="n">nr</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">search_list</span><span class="p">):</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="n">pair</span><span class="p">)):</span>
+                <span class="k">return</span> <span class="n">nr</span>
+        <span class="k">return</span> <span class="n">index</span></div>
+
+<div class="viewcode-block" id="Mesh.read_electrodes"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_create.html#cr_trig_create.Mesh.read_electrodes">[docs]</a>    <span class="k">def</span> <span class="nf">read_electrodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">electrodes</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read in electrodes, check if points already exist</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">nr</span><span class="p">,</span> <span class="n">electrode</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">electrodes</span><span class="p">):</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_point_id</span><span class="p">(</span>
+                <span class="n">electrode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">char_lengths</span><span class="p">[</span><span class="s1">&#39;electrode&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Electrodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Mesh.read_extra_nodes"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_create.html#cr_trig_create.Mesh.read_extra_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">read_extra_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read extra nodes in. Format: x y</span>
+
+<span class="sd">        What happens if we add nodes on the boundaries, which are not included</span>
+<span class="sd">        in the boundaries?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">nr</span><span class="p">,</span> <span class="n">pair</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_point_id</span><span class="p">(</span><span class="n">pair</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">char_lengths</span><span class="p">[</span><span class="s1">&#39;extra_node&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ExtraNodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Mesh.read_extra_lines"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_create.html#cr_trig_create.Mesh.read_extra_lines">[docs]</a>    <span class="k">def</span> <span class="nf">read_extra_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read extra lines from the given filename. Each line is defined in</span>
+<span class="sd">        one line with four coordinates: x1 y1 x2 y2. (x1,y1) denotes the</span>
+<span class="sd">        starting point, (x2, y2) the end point of the line.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">nr</span><span class="p">,</span> <span class="n">coords</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+            <span class="n">p1</span> <span class="o">=</span> <span class="p">[</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="n">p2</span> <span class="o">=</span> <span class="p">[</span><span class="n">coords</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">coords</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_line</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">char_lengths</span><span class="p">[</span><span class="s1">&#39;extra_line&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ExtraLineIndices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Mesh.write_electrodes"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_create.html#cr_trig_create.Mesh.write_electrodes">[docs]</a>    <span class="k">def</span> <span class="nf">write_electrodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write X Y coordinates of electrodes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Electrodes</span><span class="p">:</span>
+            <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> </span><span class="si">{1}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Points</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">Points</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Mesh.write_boundaries"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_create.html#cr_trig_create.Mesh.write_boundaries">[docs]</a>    <span class="k">def</span> <span class="nf">write_boundaries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write boundary lines X1 Y1 X2 Y2 TYPE to file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Boundaries</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="c1"># fid.write(&#39;{0} {1} {2}\n&#39;.format(i[0], i[1], i[2]))</span>
+            <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> </span><span class="si">{1}</span><span class="s1"> </span><span class="si">{2}</span><span class="s1"> </span><span class="si">{3}</span><span class="s1"> </span><span class="si">{4}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">i</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Mesh.read_char_lengths"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_create.html#cr_trig_create.Mesh.read_char_lengths">[docs]</a>    <span class="k">def</span> <span class="nf">read_char_lengths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">electrode_filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read characteristic lengths from the given file.</span>
+
+<span class="sd">        The file is expected to have either 1 or 4 entries/lines with</span>
+<span class="sd">        characteristic lengths &gt; 0 (floats). If only one value is encountered,</span>
+<span class="sd">        it is used for all four entities. If four values are encountered, they</span>
+<span class="sd">        are assigned, in order, to:</span>
+
+<span class="sd">            1) electrode nodes</span>
+<span class="sd">            2) boundary nodes</span>
+<span class="sd">            3) nodes from extra lines</span>
+<span class="sd">            4) nodes from extra nodes</span>
+
+<span class="sd">        Note that in case one node belongs to multiple entities, the smallest</span>
+<span class="sd">        characteristic length will be used.</span>
+
+<span class="sd">        If four values are used and the electrode length is negative, then the</span>
+<span class="sd">        electrode positions will be read in (todo: we open the electrode.dat</span>
+<span class="sd">        file two times here...) and the minimal distance between all electrodes</span>
+<span class="sd">        will be multiplied by the absolute value of the imported value, and</span>
+<span class="sd">        used as the characteristic length:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            l_{electrodes} = min(pdist(electrodes)) * |l_{electrodes}^{from</span>
+<span class="sd">            file}|</span>
+
+<span class="sd">        The function scipy.spatial.distance.pdist is used to compute the global</span>
+<span class="sd">        minimal distance between any two electrodes.</span>
+
+<span class="sd">        It is advisable to only used values in the range [-1, 0) for the</span>
+<span class="sd">        automatic char length option.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">characteristic_length</span> <span class="o">=</span> <span class="n">data</span>
+                <span class="c1"># check sign of first (electrode) length value</span>
+                <span class="k">if</span> <span class="n">characteristic_length</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">elec_positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">electrode_filename</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span>
+                            <span class="s1">&#39;The was an error opening the electrode file&#39;</span><span class="p">)</span>
+                    <span class="kn">import</span> <span class="nn">scipy.spatial.distance</span>
+                    <span class="n">distances</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">spatial</span><span class="o">.</span><span class="n">distance</span><span class="o">.</span><span class="n">pdist</span><span class="p">(</span><span class="n">elec_positions</span><span class="p">)</span>
+                    <span class="n">characteristic_length</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span>
+                        <span class="n">characteristic_length</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">characteristic_length</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                            <span class="s1">&#39;Error computing electrode &#39;</span> <span class="o">+</span>
+                            <span class="s1">&#39;distances (got a minimal distance of zero&#39;</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">characteristic_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">characteristic_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">characteristic_length</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;No negative characteristic lengths allowed &#39;</span> <span class="o">+</span>
+                            <span class="s1">&#39;(except for electrode length&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">char_lengths</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">((</span><span class="s1">&#39;electrode&#39;</span><span class="p">,</span>
+                              <span class="s1">&#39;boundary&#39;</span><span class="p">,</span>
+                              <span class="s1">&#39;extra_line&#39;</span><span class="p">,</span>
+                              <span class="s1">&#39;extra_node&#39;</span><span class="p">),</span>
+                             <span class="n">characteristic_length</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">char_lengths</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">item</span></div>
+
+<div class="viewcode-block" id="Mesh.write_points"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_create.html#cr_trig_create.Mesh.write_points">[docs]</a>    <span class="k">def</span> <span class="nf">write_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write the grid points to the GMSH-command file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        fid: file object for the command file (.geo)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">nr</span><span class="p">,</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Points</span><span class="p">):</span>
+            <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                <span class="s1">&#39;Point(</span><span class="si">{0}</span><span class="s1">) = {{</span><span class="si">{1}</span><span class="s1">, </span><span class="si">{2}</span><span class="s1">, 0, </span><span class="si">{3}</span><span class="s1">}};</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">nr</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">Charlengths</span><span class="p">[</span><span class="n">nr</span><span class="p">]))</span></div>
+
+<div class="viewcode-block" id="Mesh.write_lines"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_create.html#cr_trig_create.Mesh.write_lines">[docs]</a>    <span class="k">def</span> <span class="nf">write_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fid</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">nr</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Lines</span><span class="p">):</span>
+            <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                <span class="s1">&#39;Line(</span><span class="si">{0}</span><span class="s1">) = {{</span><span class="si">{1}</span><span class="s1">,</span><span class="si">{2}</span><span class="s1">}};</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">nr</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Mesh.write_in_plane_nodes"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_create.html#cr_trig_create.Mesh.write_in_plane_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">write_in_plane_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fid</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">nr</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Electrodes</span><span class="p">):</span>
+            <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Point {{</span><span class="si">{0}</span><span class="s1">}} In Surface {{7}};</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">line</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Mesh.write_extra_nodes"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_create.html#cr_trig_create.Mesh.write_extra_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">write_extra_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fid</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">nr</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ExtraNodes</span><span class="p">):</span>
+            <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Point {{</span><span class="si">{0}</span><span class="s1">}} In Surface {{7}};</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">line</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Mesh.write_geo_file"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_create.html#cr_trig_create.Mesh.write_geo_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_geo_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write the .geo file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="c1"># 2D mesh algorithm (1=MeshAdapt, 2=Automatic, 5=Delaunay, 6=Frontal,</span>
+        <span class="c1"># 7=bamg, 8=delquad)</span>
+        <span class="c1"># according to the GMSH-mailing list the frontal algorithm should be</span>
+        <span class="c1"># one of the best in terms of grid quality</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Mesh.Algorithm = 6;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_points</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_lines</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
+
+        <span class="c1"># fid.write(&#39;Coherence;\n&#39;)</span>
+        <span class="c1"># write line loop</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Line Loop(1) = {&#39;</span><span class="p">)</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">BoundaryIndices</span><span class="p">]))</span>
+        <span class="c1"># for i in self.BoundaryIndices:</span>
+        <span class="c1">#     fid.write(&#39;{0},&#39;.format(i))</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;};</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="c1"># # fid.write(&#39;{0}}};\n&#39;.format(len(self.Lines)))</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Plane Surface(7) = </span><span class="si">{1}</span><span class="s1">;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_in_plane_nodes</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
+        <span class="c1"># fid.write(&#39;Coherence;\n&#39;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_extra_nodes</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
+        <span class="c1"># fid.write(&#39;Coherence;\n&#39;)</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ExtraLineIndices</span><span class="p">:</span>
+            <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Line {&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;} In Surface </span><span class="si">{7}</span><span class="s1">;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Lloyd mesh optimisation crashes</span>
+        <span class="c1"># fid.write(&#39;Mesh.Lloyd = 1;\n&#39;)</span>
+
+        <span class="c1"># run the mesher</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Mesh 7;&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="s1">&#39;../gmsh_commands.dat&#39;</span><span class="p">):</span>
+            <span class="n">fid2</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;../gmsh_commands.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+            <span class="n">additional_commands</span> <span class="o">=</span> <span class="n">fid2</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="n">fid2</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+            <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">additional_commands</span><span class="p">)</span>
+
+        <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="check_boundaries"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_create.html#cr_trig_create.check_boundaries">[docs]</a><span class="k">def</span> <span class="nf">check_boundaries</span><span class="p">(</span><span class="n">boundaries</span><span class="p">):</span>
+    <span class="c1"># generate a complex number for each (x,y) pair</span>
+    <span class="n">xy</span> <span class="o">=</span> <span class="n">boundaries</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">boundaries</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    # for numpy &gt; 1.9 , use:</span>
+<span class="sd">    unique_values, indices, indices_rev, counts = np.unique(</span>
+<span class="sd">        xy,</span>
+<span class="sd">        return_index=True,</span>
+<span class="sd">        return_inverse=True,</span>
+<span class="sd">        return_counts=True)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># numpy 1.8 --&gt;</span>
+    <span class="n">unique_values</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">indices_rev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span>
+        <span class="n">xy</span><span class="p">,</span>
+        <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">return_inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># now bin the indices we use to reconstruct the original array. Each index</span>
+    <span class="c1"># that is present more than once will manifest in a bin with a number</span>
+    <span class="c1"># larger than one. Use as many bins as there are indices.</span>
+    <span class="n">nr_bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">indices_rev</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="n">indices_rev</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">counts</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">indices_rev</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">nr_bins</span><span class="p">)</span>
+    <span class="c1"># &lt;!-- numpy 1.8</span>
+
+    <span class="n">doublets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">counts</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">doublets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ERROR: Duplicate boundary coordinates found!&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ERROR: Debug information&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">doublet</span> <span class="ow">in</span> <span class="n">doublets</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;================&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;x y type:&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">boundaries</span><span class="p">[</span><span class="n">doublet</span><span class="p">,</span> <span class="p">:])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;lines: &#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">indices_rev</span> <span class="o">==</span> <span class="n">doublet</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Duplicate boundary coordinates found!&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="add_stabilizer_nodes"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_create.html#cr_trig_create.add_stabilizer_nodes">[docs]</a><span class="k">def</span> <span class="nf">add_stabilizer_nodes</span><span class="p">(</span><span class="n">boundaries_raw</span><span class="p">,</span> <span class="n">electrodes</span><span class="p">,</span> <span class="n">nr_nodes_between</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Segmentation of nodes:</span>
+<span class="sd">        we have the existing nodes</span>
+<span class="sd">        N.F is the ratio of required nodes and existing nodes</span>
+<span class="sd">        first, add N nodes to each segment</span>
+<span class="sd">        then, add one more node to the F first segments</span>
+
+<span class="sd">    * assume ordered boundaries</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">boundaries</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">boundaries</span> <span class="o">=</span> <span class="n">boundaries_raw</span>
+    <span class="c1"># find first electrode in boundary</span>
+    <span class="k">for</span> <span class="n">nr</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">electrodes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">index0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">boundaries</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">electrodes</span><span class="p">[</span><span class="n">nr</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span>
+            <span class="p">(</span><span class="n">boundaries</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">electrodes</span><span class="p">[</span><span class="n">nr</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">index1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">boundaries</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">electrodes</span><span class="p">[</span><span class="n">nr</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span>
+            <span class="p">(</span><span class="n">boundaries</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">electrodes</span><span class="p">[</span><span class="n">nr</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">index0</span> <span class="o">=</span> <span class="n">index0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">index1</span> <span class="o">=</span> <span class="n">index1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">index1</span> <span class="o">-</span> <span class="n">index0</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">index0</span><span class="p">,</span> <span class="n">index1</span> <span class="o">=</span> <span class="n">index1</span><span class="p">,</span> <span class="n">index0</span>
+        <span class="n">running_index</span> <span class="o">=</span> <span class="n">index0</span>
+        <span class="n">nr_nodes</span> <span class="o">=</span> <span class="n">index1</span> <span class="o">-</span> <span class="n">index0</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="n">nr_nodes</span> <span class="o">&lt;</span> <span class="n">nr_nodes_between</span><span class="p">:</span>
+            <span class="c1"># determine line equation</span>
+            <span class="n">xy0</span> <span class="o">=</span> <span class="n">boundaries</span><span class="p">[</span><span class="n">running_index</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">xy1</span> <span class="o">=</span> <span class="n">boundaries</span><span class="p">[</span><span class="n">running_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+
+            <span class="n">direction</span> <span class="o">=</span> <span class="n">xy1</span> <span class="o">-</span> <span class="n">xy0</span>
+            <span class="n">heading</span> <span class="o">=</span> <span class="n">direction</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">direction</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+
+            <span class="c1"># new node</span>
+            <span class="n">xy_new</span> <span class="o">=</span> <span class="n">xy0</span> <span class="o">+</span> <span class="n">heading</span> <span class="o">*</span> <span class="n">direction</span> <span class="o">/</span> <span class="mf">2.0</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">boundaries</span><span class="p">[</span><span class="n">running_index</span><span class="p">,</span> <span class="mi">2</span><span class="p">][</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+            <span class="n">xyb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">xy_new</span><span class="p">,</span> <span class="n">a</span><span class="p">))</span>
+            <span class="n">boundaries</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">boundaries</span><span class="p">,</span> <span class="n">running_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">xyb</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="c1"># 2, because we have to count the new one</span>
+            <span class="n">running_index</span> <span class="o">+=</span> <span class="mi">2</span>
+            <span class="n">index1</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">nr_nodes</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="n">running_index</span> <span class="o">==</span> <span class="n">index1</span><span class="p">:</span>
+                <span class="n">running_index</span> <span class="o">=</span> <span class="n">index0</span>
+
+    <span class="k">return</span> <span class="n">boundaries</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_create.html#cr_trig_create.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">options</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">handle_cmd_options</span><span class="p">()</span>
+
+    <span class="c1"># determine a unique directory name</span>
+    <span class="n">pwdx</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+
+    <span class="n">electrodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;electrodes.dat&#39;</span><span class="p">)</span>
+    <span class="n">boundaries_raw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;boundaries.dat&#39;</span><span class="p">)</span>
+
+    <span class="n">check_boundaries</span><span class="p">(</span><span class="n">boundaries_raw</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">add_stab_nodes</span><span class="p">:</span>
+        <span class="n">boundaries</span> <span class="o">=</span> <span class="n">add_stabilizer_nodes</span><span class="p">(</span><span class="n">boundaries_raw</span><span class="p">,</span>
+                                          <span class="n">electrodes</span><span class="p">,</span>
+                                          <span class="n">options</span><span class="o">.</span><span class="n">add_stab_nodes</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">boundaries</span> <span class="o">=</span> <span class="n">boundaries_raw</span>
+
+    <span class="c1"># create output directory</span>
+    <span class="n">directory</span> <span class="o">=</span> <span class="s1">&#39;tmp_grid_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Using directory: &#39;</span> <span class="o">+</span> <span class="n">directory</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="s1">&#39;electrodes.dat&#39;</span><span class="p">,</span> <span class="n">directory</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;electrodes.dat&#39;</span><span class="p">)</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="s1">&#39;boundaries.dat&#39;</span><span class="p">,</span> <span class="n">directory</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;boundaries.dat&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="s1">&#39;extra_nodes.dat&#39;</span><span class="p">):</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="s1">&#39;extra_nodes.dat&#39;</span><span class="p">,</span> <span class="n">directory</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;extra_nodes.dat&#39;</span><span class="p">)</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="s1">&#39;char_length.dat&#39;</span><span class="p">)):</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="s1">&#39;char_length.dat&#39;</span><span class="p">,</span> <span class="n">directory</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;char_length.dat&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="s1">&#39;extra_lines.dat&#39;</span><span class="p">):</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="s1">&#39;extra_lines.dat&#39;</span><span class="p">,</span>
+                    <span class="n">directory</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;extra_lines.dat&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="s1">&#39;gmsh_commands.dat&#39;</span><span class="p">):</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="s1">&#39;gmsh_commands.dat&#39;</span><span class="p">,</span>
+                    <span class="n">directory</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;gmsh_commands.dat&#39;</span><span class="p">)</span>
+
+    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+
+    <span class="n">mesh</span> <span class="o">=</span> <span class="n">Mesh</span><span class="p">()</span>
+    <span class="n">mesh</span><span class="o">.</span><span class="n">read_char_lengths</span><span class="p">(</span><span class="s1">&#39;char_length.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;electrodes.dat&#39;</span><span class="p">)</span>
+
+    <span class="c1"># create boundary lines from boundary nodes</span>
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">boundaries</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">boundaries</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">index</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">boundaries</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">mesh</span><span class="o">.</span><span class="n">add_boundary</span><span class="p">(</span>
+            <span class="n">boundaries</span><span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="n">boundaries</span><span class="p">[</span><span class="n">b</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="n">boundaries</span><span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="s1">&#39;step1&#39;</span><span class="p">)</span>
+
+    <span class="n">mesh</span><span class="o">.</span><span class="n">read_electrodes</span><span class="p">(</span><span class="n">electrodes</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="s1">&#39;extra_nodes.dat&#39;</span><span class="p">):</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">read_extra_nodes</span><span class="p">(</span><span class="s1">&#39;extra_nodes.dat&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="s1">&#39;extra_lines.dat&#39;</span><span class="p">):</span>
+        <span class="n">mesh</span><span class="o">.</span><span class="n">read_extra_lines</span><span class="p">(</span><span class="s1">&#39;extra_lines.dat&#39;</span><span class="p">)</span>
+
+    <span class="n">mesh</span><span class="o">.</span><span class="n">write_geo_file</span><span class="p">(</span><span class="s1">&#39;step1/commands.geo&#39;</span><span class="p">)</span>
+    <span class="n">mesh</span><span class="o">.</span><span class="n">write_electrodes</span><span class="p">(</span><span class="s1">&#39;step1/electrode_positions.dat&#39;</span><span class="p">)</span>
+    <span class="n">mesh</span><span class="o">.</span><span class="n">write_boundaries</span><span class="p">(</span><span class="s1">&#39;step1/boundary_lines.dat&#39;</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s1">&#39;step1&#39;</span><span class="p">)</span>
+
+    <span class="n">gmsh_binary</span> <span class="o">=</span> <span class="n">cBin</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;gmsh&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calling binary: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">gmsh_binary</span><span class="p">))</span>
+    <span class="n">return_code</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span>
+        <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> -format msh2 -2 commands.geo&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">gmsh_binary</span><span class="p">),</span>
+        <span class="n">shell</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">return_code</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;There was an error during execution of GMSH&#39;</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="s1">&#39;step2&#39;</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s1">&#39;step2&#39;</span><span class="p">)</span>
+    <span class="kn">import</span> <span class="nn">cr_trig_parse_gmsh</span>
+    <span class="n">cr_trig_parse_gmsh</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+    <span class="c1"># return_code = subprocess.call(&#39;cr_trig_parse_gmsh.py&#39;, shell=True)</span>
+    <span class="c1"># if return_code != 0:</span>
+    <span class="c1">#     raise Exception(</span>
+    <span class="c1">#         &#39;There was an error during execution of cr_trig_parse_gmsh.sh&#39;</span>
+    <span class="c1">#     )</span>
+
+    <span class="c1">#</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="s1">&#39;grid&#39;</span><span class="p">)</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="s1">&#39;elec.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;grid/elec.dat&#39;</span><span class="p">)</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="s1">&#39;../elem.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;grid/elem.dat&#39;</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s1">&#39;grid&#39;</span><span class="p">)</span>
+    <span class="n">cutmck_binary</span> <span class="o">=</span> <span class="n">cBin</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;CutMcK&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calling binary: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cutmck_binary</span><span class="p">))</span>
+    <span class="n">return_code</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">cutmck_binary</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">return_code</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="s1">&#39;There was an error during execution of CutMcK&#39;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># for convenience, copy the final grid files to the top level</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="s1">&#39;elem.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;../../../elem.dat&#39;</span><span class="p">)</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="s1">&#39;elec.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;../../../elec.dat&#39;</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">pwdx</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The final grid can be found in:&#39;</span><span class="p">)</span>
+
+    <span class="c1"># if we have one parameter, use this as the output directory</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">output_dir</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">output_dir</span><span class="p">):</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;temporary directory:&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;output directory already exists!&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">crtomo tools</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">lib</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2021, CRTomo contributors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

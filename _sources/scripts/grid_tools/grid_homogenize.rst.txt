@@ -1,0 +1,9 @@
+grid\_homogenize module
+=======================
+
+.. automodule:: grid_homogenize
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:

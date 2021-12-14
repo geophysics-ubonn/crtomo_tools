@@ -1,0 +1,9 @@
+cr\_get\_analytical\_solutions module
+=====================================
+
+.. automodule:: cr_get_analytical_solutions
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:

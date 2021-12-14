@@ -1,0 +1,12 @@
+
+:orphan:
+
+.. _sphx_glr__examples_04_full_dataprocessing_sg_execution_times:
+
+Computation times
+=================
+**00:51.682** total execution time for **_examples_04_full_dataprocessing** files:
+
++--------------------------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr__examples_04_full_dataprocessing_plot_sEIT_import_inversion.py` (``plot_sEIT_import_inversion.py``) | 00:51.682 | 0.0 MB |
++--------------------------------------------------------------------------------------------------------------------+-----------+--------+

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>grid_extralines_gen_decouplings module &mdash; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="grid_gen_decouplings module" href="grid_gen_decouplings.html" />
+    <link rel="prev" title="cr_trig_parse_gmsh module" href="cr_trig_parse_gmsh.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> crtomo tools
+          </a>
+              <div class="version">
+                0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../_examples/index.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="cr_get_analytical_solutions.html">cr_get_analytical_solutions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cr_get_modelling_errors.html">cr_get_modelling_errors module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cr_trig_create.html">cr_trig_create module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cr_trig_parse_gmsh.html">cr_trig_parse_gmsh module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">grid_extralines_gen_decouplings module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_gen_decouplings.html">grid_gen_decouplings module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_gen_depth_decoupling.html">grid_gen_depth_decoupling module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_gen_surface_files.html">grid_gen_surface_files module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_homogenize.html">grid_homogenize module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_plot_elem_angles.html">grid_plot_elem_angles module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_plot_wireframe.html">grid_plot_wireframe module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_rotate.html">grid_rotate module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_translate.html">grid_translate module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_translate_model.html">grid_translate_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sd_plot.html">sd_plot module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sens_center_plot.html">sens_center_plot module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_clean.html">td_clean module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_correct_temperature.html">td_correct_temperature module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_init.html">td_init module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_plot.html">td_plot module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_residuals.html">td_residuals module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_run_all_local.html">td_run_all_local module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_test.html">td_test module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="volt_correct_temperature.html">volt_correct_temperature module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="volt_histogram.html">volt_histogram module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">lib</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">crtomo tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="modules.html">src</a> &raquo;</li>
+      <li>grid_extralines_gen_decouplings module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/scripts/grid_tools/grid_extralines_gen_decouplings.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-grid_extralines_gen_decouplings">
+<span id="grid-extralines-gen-decouplings-module"></span><h1>grid_extralines_gen_decouplings module<a class="headerlink" href="#module-grid_extralines_gen_decouplings" title="Permalink to this headline"></a></h1>
+<p>Generate a decouplings.dat for CRTomo</p>
+<p>From a given extra_lines.dat file (see triangular grid generation in manual),
+generate a decouplings.dat for the decoupling of cell interfaces from the
+regularisation.</p>
+<p>As only the start and end points are given, the algorithm must find all nodes
+generated by GMSH along those lines. This is done by comparing the orthogonal
+distance of each node to the line. All nodes within a certain threshold
+distance are assumed to lie on the line. The threshold is computed by taking
+the minimal node distance of the grid (pdist function) and then multiplying
+with 0.75. This probably is a little bit overkill and we could also use some
+measure of machine precision.</p>
+<p>For convenience this threshold can be overwritten using the –eps option.</p>
+<p>Some of the for-loops can probably be optimized or replaced by some numpy
+broadcasting rules.</p>
+<p class="rubric">Examples</p>
+<p># enter the output directory of cr_trig_create.py
+grid_extralines_gen_decouplings.py
+# this create the file decouplings.dat</p>
+<p>grid_extralines_gen_decouplings.py –plot_node_nrs –plot_elm_nrs</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="grid_extralines_gen_decouplings.check_options">
+<span class="sig-prename descclassname"><span class="pre">grid_extralines_gen_decouplings.</span></span><span class="sig-name descname"><span class="pre">check_options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/grid_extralines_gen_decouplings.html#check_options"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grid_extralines_gen_decouplings.check_options" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="grid_extralines_gen_decouplings.debug_plot">
+<span class="sig-prename descclassname"><span class="pre">grid_extralines_gen_decouplings.</span></span><span class="sig-name descname"><span class="pre">debug_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_lines</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decoupling_elements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/grid_extralines_gen_decouplings.html#debug_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grid_extralines_gen_decouplings.debug_plot" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="grid_extralines_gen_decouplings.distances">
+<span class="sig-prename descclassname"><span class="pre">grid_extralines_gen_decouplings.</span></span><span class="sig-name descname"><span class="pre">distances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">px</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">py</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/grid_extralines_gen_decouplings.html#distances"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grid_extralines_gen_decouplings.distances" title="Permalink to this definition"></a></dt>
+<dd><p>Compute shortest distance of points (px, py) to the line described by the
+end points in (x, y).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong><strong>,</strong><strong>y</strong> (<em>x and y coordinates of line</em>) – </p></li>
+<li><p><strong>px</strong> (<em>x coordinates of data points</em>) – </p></li>
+<li><p><strong>py</strong> (<em>y coordiante of data points</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>distances</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of distances</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="grid_extralines_gen_decouplings.get_decouplings_for_line">
+<span class="sig-prename descclassname"><span class="pre">grid_extralines_gen_decouplings.</span></span><span class="sig-name descname"><span class="pre">get_decouplings_for_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/grid_extralines_gen_decouplings.html#get_decouplings_for_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grid_extralines_gen_decouplings.get_decouplings_for_line" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the element pairs for regulazisation decoupling, given a grid
+object and a line, denoted by start and end coordinates, in the grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grid</strong> (<em>a crtomo.grid.crt_grid object</em>) – </p></li>
+<li><p><strong>line</strong> (<em>np.array/list with 4 entries: x1</em><em>, </em><em>y1</em><em>, </em><em>x2</em><em>, </em><em>x2</em><em>, </em><em>denoting start and end</em>) – point</p></li>
+<li><p><strong>fids</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><em>None</em></a><em>, </em><em>or: list with file ids for</em>) – debug_nodes</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>neighbors</strong> – line</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Mx2 array with the numbers of adjoining elements along the given</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="grid_extralines_gen_decouplings.handle_cmd_options">
+<span class="sig-prename descclassname"><span class="pre">grid_extralines_gen_decouplings.</span></span><span class="sig-name descname"><span class="pre">handle_cmd_options</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/grid_extralines_gen_decouplings.html#handle_cmd_options"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grid_extralines_gen_decouplings.handle_cmd_options" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="grid_extralines_gen_decouplings.line_line_intersect">
+<span class="sig-prename descclassname"><span class="pre">grid_extralines_gen_decouplings.</span></span><span class="sig-name descname"><span class="pre">line_line_intersect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/grid_extralines_gen_decouplings.html#line_line_intersect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grid_extralines_gen_decouplings.line_line_intersect" title="Permalink to this definition"></a></dt>
+<dd><p>Compute the intersection point of two lines</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array</strong> (<em>y = x4</em>) – </p></li>
+<li><p><strong>array</strong> – </p></li>
+<li><p><strong>p1</strong><strong>,</strong><strong>p2</strong> (<em>line 1 is defined by</em>) – </p></li>
+<li><p><strong>p3</strong><strong>,</strong><strong>p4</strong> (<em>line 2 is defined by</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>Ix</strong> (<em>x-coordinate of intersection</em>)</p></li>
+<li><p><strong>Iy</strong> (<em>y-coordinate of intersection</em>)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="grid_extralines_gen_decouplings.main">
+<span class="sig-prename descclassname"><span class="pre">grid_extralines_gen_decouplings.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/grid_extralines_gen_decouplings.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#grid_extralines_gen_decouplings.main" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cr_trig_parse_gmsh.html" class="btn btn-neutral float-left" title="cr_trig_parse_gmsh module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="grid_gen_decouplings.html" class="btn btn-neutral float-right" title="grid_gen_decouplings module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2021, CRTomo contributors.
+      <span class="lastupdated">Last updated on Dec 14, 2021.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

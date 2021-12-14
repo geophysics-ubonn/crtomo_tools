@@ -1,0 +1,9 @@
+cr\_get\_modelling\_errors module
+=================================
+
+.. automodule:: cr_get_modelling_errors
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:

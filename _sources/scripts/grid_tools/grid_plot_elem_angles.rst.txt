@@ -1,0 +1,9 @@
+grid\_plot\_elem\_angles module
+===============================
+
+.. automodule:: grid_plot_elem_angles
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:

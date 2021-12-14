@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A single-frequency inversion (CR container) &mdash; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="A single-frequency inversion (sEIT container)" href="plot_06_single_freq_inversion_sEIT.html" />
+    <link rel="prev" title="Adding data noise to measurements" href="plot_03_adding_data_noise.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> crtomo tools
+          </a>
+              <div class="version">
+                0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-grid-handling">Examples: Grid handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-modelling">Examples: Modelling</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#examples-single-frequency-inversion">Examples: Single-frequency inversion</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="plot_01_inversion_settings.html">Setting modeling and inversion settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_02_data_errors.html">Data error handling in CRTomo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_03_adding_data_noise.html">Adding data noise to measurements</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">A single-frequency inversion (CR container)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_06_single_freq_inversion_sEIT.html">A single-frequency inversion (sEIT container)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_07_synthetic_modinv_study.html">Single frequency synthetic study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_08_study_mgs.html">Using alternative regularization approaches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_09_individual_errors.html">Using individual data errors in CRTomo</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-postprocessing-of-inversion-results">Examples: Postprocessing of inversion results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-seit-import-and-inversions">Examples: sEIT import and inversions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#calculating-correction-factors">Calculating correction factors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-field-data-processing">Examples: Field data processing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">lib</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">crtomo tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Examples</a> &raquo;</li>
+      <li>A single-frequency inversion (CR container)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/_examples/02_simple_inversion/plot_05_single_freq_inversion_CR.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-02-simple-inversion-plot-05-single-freq-inversion-cr-py"><span class="std std-ref">here</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="a-single-frequency-inversion-cr-container">
+<span id="sphx-glr-examples-02-simple-inversion-plot-05-single-freq-inversion-cr-py"></span><h1>A single-frequency inversion (CR container)<a class="headerlink" href="#a-single-frequency-inversion-cr-container" title="Permalink to this headline"></a></h1>
+<p>Full processing of one frequency of one timestep of the data from Weigand and
+Kemna 2017 (Biogeosciences).</p>
+<p>This example uses the CR container to load single-frequency data from a
+CRTomo-style volt.dat file.</p>
+<p>imports</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">reda</span>
+<span class="kn">import</span> <span class="nn">reda.utils.geometric_factors</span> <span class="k">as</span> <span class="nn">geom_facs</span>
+<span class="kn">from</span> <span class="nn">reda.utils.fix_sign_with_K</span> <span class="kn">import</span> <span class="n">fix_sign_with_K</span>
+<span class="kn">import</span> <span class="nn">reda.importers.eit_fzj</span> <span class="k">as</span> <span class="nn">eit_fzj</span>
+</pre></div>
+</div>
+<p>define an output directory for all files</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">output_directory</span></a> <span class="o">=</span> <span class="s1">&#39;output_single_freq_inversion_CR&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cr</span> <span class="o">=</span> <span class="n">reda</span><span class="o">.</span><span class="n">CR</span><span class="p">()</span>
+<span class="n">cr</span><span class="o">.</span><span class="n">import_crtomo_data</span><span class="p">(</span><span class="s1">&#39;data/volt.dat&#39;</span><span class="p">)</span>
+<span class="c1"># this is a container measurement, we need to compute geometric factors using</span>
+
+<span class="c1"># numerical modeling</span>
+<span class="c1"># Note that this only work if CRMod is available</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">settings</span></a> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;rho&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="s1">&#39;elem&#39;</span><span class="p">:</span> <span class="s1">&#39;data/elem.dat&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;elec&#39;</span><span class="p">:</span> <span class="s1">&#39;data/elec.dat&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;sink_node&#39;</span><span class="p">:</span> <span class="s1">&#39;6467&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;2D&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">}</span>
+<a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">k</span></a> <span class="o">=</span> <span class="n">geom_facs</span><span class="o">.</span><span class="n">compute_K_numerical</span><span class="p">(</span><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">cr</span><span class="o">.</span><span class="n">data</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">settings</span></a><span class="p">)</span>
+<a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">cr</span><span class="o">.</span><span class="n">data</span></a> <span class="o">=</span> <span class="n">geom_facs</span><span class="o">.</span><span class="n">apply_K</span><span class="p">(</span><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">cr</span><span class="o">.</span><span class="n">data</span></a><span class="p">,</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">k</span></a><span class="p">)</span>
+<span class="n">fix_sign_with_K</span><span class="p">(</span><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">cr</span><span class="o">.</span><span class="n">data</span></a><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.iloc.html#pandas.DataFrame.iloc" title="pandas.DataFrame.iloc" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-property"><span class="n">cr</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">iloc</span></a><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">])</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>SETTINGS
+{&#39;rho&#39;: 100, &#39;elem&#39;: &#39;data/elem.dat&#39;, &#39;elec&#39;: &#39;data/elec.dat&#39;, &#39;sink_node&#39;: &#39;6467&#39;, &#39;2D&#39;: True}
+2D modeling
+   a   b   m   n            r        rpha                     Zt  id norrec  rdiff  rphadiff            k        rho_a   sigma_a          rho_a_complex
+0  1   2  21  20     0.005095  510.933846   0.0044440+0.0024910j  17    nor    NaN       NaN  9061.232484    46.166980  0.021661   40.270914+22.575286j
+1  1  27  30  28   838.923062   -0.183704   838.923048-0.154114j  47    nor    NaN       NaN     1.529047  1282.753055  0.000780  1282.753033-0.235647j
+2  1  27  31  29   813.420209   -0.438831   813.420131-0.356954j  48    nor    NaN       NaN     1.596560  1298.674366  0.000770  1298.674241-0.569899j
+3  1  27  32  28  1937.378617   -0.287325  1937.378537-0.556657j  49    nor    NaN       NaN     0.689674  1336.160025  0.000748  1336.159970-0.383912j
+4  1  27  32  30  1098.455563   -0.366464  1098.455489-0.402544j  50    nor    NaN       NaN     1.256348  1380.042077  0.000725  1380.041984-0.505736j
+</pre></div>
+</div>
+<p>apply correction factors, as described in Weigand and Kemna, 2017 BG</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">corr_facs_nor</span></a> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.loadtxt.html#numpy.loadtxt" title="numpy.loadtxt" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span></a><span class="p">(</span><span class="s1">&#39;data/corr_fac_avg_nor.dat&#39;</span><span class="p">)</span>
+<a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">corr_facs_rec</span></a> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.loadtxt.html#numpy.loadtxt" title="numpy.loadtxt" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span></a><span class="p">(</span><span class="s1">&#39;data/corr_fac_avg_rec.dat&#39;</span><span class="p">)</span>
+<a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">corr_facs</span></a> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.vstack.html#numpy.vstack" title="numpy.vstack" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">vstack</span></a><span class="p">((</span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">corr_facs_nor</span></a><span class="p">,</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">corr_facs_rec</span></a><span class="p">))</span>
+<a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">cr</span><span class="o">.</span><span class="n">data</span></a><span class="p">,</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">cfacs</span></a> <span class="o">=</span> <span class="n">eit_fzj</span><span class="o">.</span><span class="n">apply_correction_factors</span><span class="p">(</span><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">cr</span><span class="o">.</span><span class="n">data</span></a><span class="p">,</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">corr_facs</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<p>apply some filters
+import IPython
+IPython.embed()</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cr</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;r &lt; 0&#39;</span><span class="p">)</span>
+<span class="n">cr</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;rho_a &lt; 15 or rho_a &gt; 35&#39;</span><span class="p">)</span>
+<span class="n">cr</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;rpha &lt; - 40 or rpha &gt; 3&#39;</span><span class="p">)</span>
+<span class="n">cr</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;rphadiff &lt; -5 or rphadiff &gt; 5&#39;</span><span class="p">)</span>
+<span class="n">cr</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;k &gt; 400&#39;</span><span class="p">)</span>
+<span class="n">cr</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;rho_a &lt; 0&#39;</span><span class="p">)</span>
+<span class="n">cr</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;a == 12 or b == 12 or m == 12 or n == 12&#39;</span><span class="p">)</span>
+<span class="n">cr</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;a == 13 or b == 13 or m == 13 or n == 13&#39;</span><span class="p">)</span>
+
+<span class="c1"># NOTE: this is also a single-frequency filtering,</span>
+
+<span class="n">cr</span><span class="o">.</span><span class="n">print_data_journal</span><span class="p">()</span>
+<span class="n">cr</span><span class="o">.</span><span class="n">print_log</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>--- Data Journal Start ---
+2021-12-10 15:47:09.386416
+A filter was applied with query &quot;r &lt; 0&quot;. In total 15 records were removed
+A filter was applied with query &quot;rho_a &lt; 15 or rho_a &gt; 35&quot;. In total 394 records were removed
+A filter was applied with query &quot;rpha &lt; - 40 or rpha &gt; 3&quot;. In total 159 records were removed
+A filter was applied with query &quot;rphadiff &lt; -5 or rphadiff &gt; 5&quot;. In total 425 records were removed
+A filter was applied with query &quot;k &gt; 400&quot;. In total 118 records were removed
+A filter was applied with query &quot;rho_a &lt; 0&quot;. In total 0 records were removed
+A filter was applied with query &quot;a == 12 or b == 12 or m == 12 or n == 12&quot;. In total 31 records were removed
+A filter was applied with query &quot;a == 13 or b == 13 or m == 13 or n == 13&quot;. In total 29 records were removed
+--- Data Journal End ---
+
+2021-12-10 15:47:09,369 - reda.main.logger - INFO - Data sized changed from 1925 to 1910
+2021-12-10 15:47:09,371 - reda.main.logger - INFO - Data sized changed from 1910 to 1516
+2021-12-10 15:47:09,373 - reda.main.logger - INFO - Data sized changed from 1516 to 1357
+2021-12-10 15:47:09,376 - reda.main.logger - INFO - Data sized changed from 1357 to 932
+2021-12-10 15:47:09,378 - reda.main.logger - INFO - Data sized changed from 932 to 814
+2021-12-10 15:47:09,380 - reda.main.logger - INFO - Data sized changed from 814 to 814
+2021-12-10 15:47:09,383 - reda.main.logger - INFO - Data sized changed from 814 to 783
+2021-12-10 15:47:09,386 - reda.main.logger - INFO - Data sized changed from 783 to 754
+</pre></div>
+</div>
+<p>export to volt.dat file
+note that this is not required for the subsequent code</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">reda</span><span class="o">.</span><span class="n">CreateEnterDirectory</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">output_directory</span></a><span class="p">):</span>
+    <span class="n">cr</span><span class="o">.</span><span class="n">export_crtomo</span><span class="p">(</span><span class="s1">&#39;volt.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;nor&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>alternatively: directly create a tdman object that represents a
+single-frequency inversion with CRTomo</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">crtomo</span>
+<a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class"><span class="n">crtomo</span><span class="o">.</span><span class="n">crt_grid</span></a><span class="p">(</span><span class="s1">&#39;data/elem.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;data/elec.dat&#39;</span><span class="p">)</span>
+<a href="../../api/crtomo.html#crtomo.tdMan" title="crtomo.tdMan" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdman</span></a> <span class="o">=</span> <span class="n">cr</span><span class="o">.</span><span class="n">export_to_crtomo_td_manager</span><span class="p">(</span><a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid</span></a><span class="p">,</span> <span class="n">norrec</span><span class="o">=</span><span class="s1">&#39;nor&#39;</span><span class="p">)</span>
+
+<span class="c1"># set inversion settings</span>
+<a href="../../api/crtomo.html#crtomo.cfg.crtomo_config" title="crtomo.cfg.crtomo_config" class="sphx-glr-backref-module-crtomo-cfg sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdman</span><span class="o">.</span><span class="n">crtomo_cfg</span></a><span class="p">[</span><span class="s1">&#39;robust_inv&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;F&#39;</span>
+<a href="../../api/crtomo.html#crtomo.cfg.crtomo_config" title="crtomo.cfg.crtomo_config" class="sphx-glr-backref-module-crtomo-cfg sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdman</span><span class="o">.</span><span class="n">crtomo_cfg</span></a><span class="p">[</span><span class="s1">&#39;mag_abs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.012</span>
+<a href="../../api/crtomo.html#crtomo.cfg.crtomo_config" title="crtomo.cfg.crtomo_config" class="sphx-glr-backref-module-crtomo-cfg sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdman</span><span class="o">.</span><span class="n">crtomo_cfg</span></a><span class="p">[</span><span class="s1">&#39;mag_rel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
+<a href="../../api/crtomo.html#crtomo.cfg.crtomo_config" title="crtomo.cfg.crtomo_config" class="sphx-glr-backref-module-crtomo-cfg sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdman</span><span class="o">.</span><span class="n">crtomo_cfg</span></a><span class="p">[</span><span class="s1">&#39;hom_bg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;T&#39;</span>
+<a href="../../api/crtomo.html#crtomo.cfg.crtomo_config" title="crtomo.cfg.crtomo_config" class="sphx-glr-backref-module-crtomo-cfg sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdman</span><span class="o">.</span><span class="n">crtomo_cfg</span></a><span class="p">[</span><span class="s1">&#39;d2_5&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+<a href="../../api/crtomo.html#crtomo.cfg.crtomo_config" title="crtomo.cfg.crtomo_config" class="sphx-glr-backref-module-crtomo-cfg sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdman</span><span class="o">.</span><span class="n">crtomo_cfg</span></a><span class="p">[</span><span class="s1">&#39;fic_sink&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;T&#39;</span>
+<a href="../../api/crtomo.html#crtomo.cfg.crtomo_config" title="crtomo.cfg.crtomo_config" class="sphx-glr-backref-module-crtomo-cfg sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdman</span><span class="o">.</span><span class="n">crtomo_cfg</span></a><span class="p">[</span><span class="s1">&#39;fic_sink_node&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">6467</span>
+
+<span class="c1"># run the inversion, use the given output directory to store the CRTomo</span>
+<span class="c1"># directory structure for later use</span>
+<span class="c1"># only invert if the output directory does not exists</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">outdir</span></a> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/tomodir_inversion&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">output_directory</span></a><span class="p">)</span>
+<span class="k">if</span> <span class="ow">not</span> <a href="https://docs.python.org/3/library/os.path.html#os.path.isdir" title="os.path.isdir" class="sphx-glr-backref-module-os-path sphx-glr-backref-type-py-function"><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">outdir</span></a><span class="p">):</span>
+    <a href="../../api/crtomo.html#crtomo.tdMan.invert" title="crtomo.tdMan.invert" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">tdman</span><span class="o">.</span><span class="n">invert</span></a><span class="p">(</span>
+        <span class="n">catch_output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">output_directory</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">outdir</span></a><span class="p">,</span>
+    <span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <a href="../../api/crtomo.html#crtomo.tdMan.read_inversion_results" title="crtomo.tdMan.read_inversion_results" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">tdman</span><span class="o">.</span><span class="n">read_inversion_results</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">outdir</span></a><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Statistics of last iteration:&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.iloc.html#pandas.DataFrame.iloc" title="pandas.DataFrame.iloc" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-property"><span class="n">tdman</span><span class="o">.</span><span class="n">inv_stats</span><span class="o">.</span><span class="n">iloc</span></a><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>This grid was sorted using CutMcK. The nodes were resorted!
+Rectangular grid found
+is robust False
+Info: res_m.diag not found: output_single_freq_inversion_CR/tomodir_inversion/inv/res_m.diag
+/home/mweigand/Programme/crtomo_tools/examples/02_simple_inversion
+Info: ata.diag not found: output_single_freq_inversion_CR/tomodir_inversion/inv/ata.diag
+/home/mweigand/Programme/crtomo_tools/examples/02_simple_inversion
+Statistics of last iteration:
+iteration               3
+main_iteration          3
+it_type             DC/IP
+type                 main
+dataRMS             1.001
+magRMS                1.0
+phaRMS                0.0
+lambda              611.7
+roughness          0.3201
+cgsteps              74.0
+nrdata              361.0
+steplength            1.0
+stepsize          0.00518
+l1ratio               NaN
+Name: 20, dtype: object
+</pre></div>
+</div>
+<p>evolution of the inversion</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="https://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fig</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.tdMan.plot_inversion_evolution" title="crtomo.tdMan.plot_inversion_evolution" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">tdman</span><span class="o">.</span><span class="n">plot_inversion_evolution</span></a><span class="p">()</span>
+<span class="k">with</span> <span class="n">reda</span><span class="o">.</span><span class="n">CreateEnterDirectory</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">output_directory</span></a><span class="p">):</span>
+    <a href="https://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure.savefig" title="matplotlib.figure.Figure.savefig" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-method"><span class="n">fig</span><span class="o">.</span><span class="n">savefig</span></a><span class="p">(</span><span class="s1">&#39;inversion_evolution.png&#39;</span><span class="p">)</span>
+
+<span class="c1"># the statistics are stored in a data frame</span>
+<span class="nb">print</span><span class="p">(</span><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdman</span><span class="o">.</span><span class="n">inv_stats</span></a><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Index.html#pandas.Index" title="pandas.Index" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdman</span><span class="o">.</span><span class="n">inv_stats</span><span class="o">.</span><span class="n">columns</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_05_single_freq_inversion_CR_001.png" srcset="../../_images/sphx_glr_plot_05_single_freq_inversion_CR_001.png" alt="plot 05 single freq inversion CR" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>#############################
+0
+Empty DataFrame
+Columns: [iteration, main_iteration, it_type, type, dataRMS, magRMS, phaRMS, lambda, roughness, cgsteps, nrdata, steplength, stepsize, l1ratio]
+Index: []
+#############################
+1
+   iteration  main_iteration it_type    type  dataRMS  magRMS  phaRMS  lambda  roughness  cgsteps  nrdata  steplength  stepsize  l1ratio
+1          1               1   DC/IP  update    1.614     NaN     NaN  9360.0    0.06463    100.0     NaN         1.0    7520.0      NaN
+2          2               1   DC/IP  update    1.412     NaN     NaN  4680.0    0.11070     78.0     NaN         1.0    7490.0      NaN
+3          3               1   DC/IP  update    1.286     NaN     NaN  2758.0    0.16990     64.0     NaN         1.0    7470.0      NaN
+4          4               1   DC/IP  update    1.186     NaN     NaN  1822.0    0.26770     54.0     NaN         1.0    7440.0      NaN
+5          5               1   DC/IP  update    1.126     NaN     NaN  1330.0    0.39070     47.0     NaN         1.0    7420.0      NaN
+6          6               1   DC/IP  update    1.101     NaN     NaN  1034.0    0.51690     42.0     NaN         1.0    7390.0      NaN
+7          7               1   DC/IP  update    1.143     NaN     NaN   827.0    0.74460     35.0     NaN         1.0    7350.0      NaN
+8          8               1   DC/IP  update   36.710     NaN     NaN  1034.0    0.12920     42.0     NaN         0.5    3700.0      NaN
+#############################
+2
+    iteration  main_iteration it_type    type  dataRMS  magRMS  phaRMS  lambda  roughness  cgsteps  nrdata  steplength  stepsize  l1ratio
+10          0               2   DC/IP  update   1.0950     NaN     NaN  1034.0     0.2309     76.0     NaN         1.0     19.80      NaN
+11          1               2   DC/IP  update   1.0560     NaN     NaN   832.6     0.2639     75.0     NaN         1.0     19.00      NaN
+12          2               2   DC/IP  update   1.0260     NaN     NaN   701.2     0.2930     75.0     NaN         1.0     18.50      NaN
+13          3               2   DC/IP  update   1.0030     NaN     NaN   611.7     0.3183     74.0     NaN         1.0     18.10      NaN
+14          4               2   DC/IP  update   0.9853     NaN     NaN   548.6     0.3399     74.0     NaN         1.0     17.80      NaN
+15          5               2   DC/IP  update   1.0350     NaN     NaN   611.7     0.3587     74.0     NaN         0.5      9.04      NaN
+#############################
+3
+    iteration  main_iteration it_type    type  dataRMS  magRMS  phaRMS  lambda  roughness  cgsteps  nrdata  steplength  stepsize  l1ratio
+17          0               3   DC/IP  update    1.001     NaN     NaN   611.7     0.3201     74.0     NaN         1.0   0.00518      NaN
+18          1               3   DC/IP  update    0.984     NaN     NaN   549.7     0.3414     62.0     NaN         1.0   0.02230      NaN
+19          2               3   DC/IP  update    1.002     NaN     NaN   611.7     0.3192     74.0     NaN         0.5   0.00259      NaN
+    iteration  main_iteration it_type    type  dataRMS  magRMS  phaRMS  lambda  roughness  cgsteps  nrdata  steplength    stepsize  l1ratio
+0           0               0   DC/IP    main  73.3700    73.0     3.0     NaN        NaN      NaN   354.0         NaN         NaN      NaN
+1           1               1   DC/IP  update   1.6140     NaN     NaN  9360.0    0.06463    100.0     NaN         1.0  7520.00000      NaN
+2           2               1   DC/IP  update   1.4120     NaN     NaN  4680.0    0.11070     78.0     NaN         1.0  7490.00000      NaN
+3           3               1   DC/IP  update   1.2860     NaN     NaN  2758.0    0.16990     64.0     NaN         1.0  7470.00000      NaN
+4           4               1   DC/IP  update   1.1860     NaN     NaN  1822.0    0.26770     54.0     NaN         1.0  7440.00000      NaN
+5           5               1   DC/IP  update   1.1260     NaN     NaN  1330.0    0.39070     47.0     NaN         1.0  7420.00000      NaN
+6           6               1   DC/IP  update   1.1010     NaN     NaN  1034.0    0.51690     42.0     NaN         1.0  7390.00000      NaN
+7           7               1   DC/IP  update   1.1430     NaN     NaN   827.0    0.74460     35.0     NaN         1.0  7350.00000      NaN
+8           8               1   DC/IP  update  36.7100     NaN     NaN  1034.0    0.12920     42.0     NaN         0.5  3700.00000      NaN
+9           1               1   DC/IP    main   1.1010     1.0     1.0  1034.0    0.51690     42.0   361.0         1.0  7392.00000      NaN
+10          0               2   DC/IP  update   1.0950     NaN     NaN  1034.0    0.23090     76.0     NaN         1.0    19.80000      NaN
+11          1               2   DC/IP  update   1.0560     NaN     NaN   832.6    0.26390     75.0     NaN         1.0    19.00000      NaN
+12          2               2   DC/IP  update   1.0260     NaN     NaN   701.2    0.29300     75.0     NaN         1.0    18.50000      NaN
+13          3               2   DC/IP  update   1.0030     NaN     NaN   611.7    0.31830     74.0     NaN         1.0    18.10000      NaN
+14          4               2   DC/IP  update   0.9853     NaN     NaN   548.6    0.33990     74.0     NaN         1.0    17.80000      NaN
+15          5               2   DC/IP  update   1.0350     NaN     NaN   611.7    0.35870     74.0     NaN         0.5     9.04000      NaN
+16          2               2   DC/IP    main   1.0030     1.0     0.0   611.7    0.31830     74.0   361.0         3.0    18.08000      NaN
+17          0               3   DC/IP  update   1.0010     NaN     NaN   611.7    0.32010     74.0     NaN         1.0     0.00518      NaN
+18          1               3   DC/IP  update   0.9840     NaN     NaN   549.7    0.34140     62.0     NaN         1.0     0.02230      NaN
+19          2               3   DC/IP  update   1.0020     NaN     NaN   611.7    0.31920     74.0     NaN         0.5     0.00259      NaN
+20          3               3   DC/IP    main   1.0010     1.0     0.0   611.7    0.32010     74.0   361.0         1.0     0.00518      NaN
+Index([&#39;iteration&#39;, &#39;main_iteration&#39;, &#39;it_type&#39;, &#39;type&#39;, &#39;dataRMS&#39;, &#39;magRMS&#39;,
+       &#39;phaRMS&#39;, &#39;lambda&#39;, &#39;roughness&#39;, &#39;cgsteps&#39;, &#39;nrdata&#39;, &#39;steplength&#39;,
+       &#39;stepsize&#39;, &#39;l1ratio&#39;],
+      dtype=&#39;object&#39;)
+</pre></div>
+</div>
+<p>evolution of data misfits</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="https://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fig</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.tdMan.plot_eps_data" title="crtomo.tdMan.plot_eps_data" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">tdman</span><span class="o">.</span><span class="n">plot_eps_data</span></a><span class="p">()</span>
+<a href="https://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fig</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.tdMan.plot_eps_data_hist" title="crtomo.tdMan.plot_eps_data_hist" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">tdman</span><span class="o">.</span><span class="n">plot_eps_data_hist</span></a><span class="p">()</span>
+
+<span class="c1"># eps data is found here:</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdman</span><span class="o">.</span><span class="n">eps_data</span></a>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_05_single_freq_inversion_CR_002.png" srcset="../../_images/sphx_glr_plot_05_single_freq_inversion_CR_002.png" alt="iteration: 0, iteration: 1, iteration: 2, iteration: 3" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_05_single_freq_inversion_CR_003.png" srcset="../../_images/sphx_glr_plot_05_single_freq_inversion_CR_003.png" alt="iteration: 0, iteration: 1, iteration: 2, iteration: 3" class = "sphx-glr-single-img"/><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">r</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.plotManager.plotManager.plot_elements_to_ax" title="crtomo.plotManager.plotManager.plot_elements_to_ax" class="sphx-glr-backref-module-crtomo-plotManager sphx-glr-backref-type-py-method"><span class="n">tdman</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_elements_to_ax</span></a><span class="p">(</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdman</span><span class="o">.</span><span class="n">a</span></a><span class="p">[</span><span class="s1">&#39;inversion&#39;</span><span class="p">][</span><span class="s1">&#39;rmag&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+    <span class="n">plot_colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">cmap_name</span><span class="o">=</span><span class="s1">&#39;jet_r&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="k">with</span> <span class="n">reda</span><span class="o">.</span><span class="n">CreateEnterDirectory</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">output_directory</span></a><span class="p">):</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">r</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;rmag.png&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+
+<a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">r</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.plotManager.plotManager.plot_elements_to_ax" title="crtomo.plotManager.plotManager.plot_elements_to_ax" class="sphx-glr-backref-module-crtomo-plotManager sphx-glr-backref-type-py-method"><span class="n">tdman</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_elements_to_ax</span></a><span class="p">(</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdman</span><span class="o">.</span><span class="n">a</span></a><span class="p">[</span><span class="s1">&#39;inversion&#39;</span><span class="p">][</span><span class="s1">&#39;rpha&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+    <span class="n">plot_colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">cmap_name</span><span class="o">=</span><span class="s1">&#39;jet_r&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="k">with</span> <span class="n">reda</span><span class="o">.</span><span class="n">CreateEnterDirectory</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">output_directory</span></a><span class="p">):</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">r</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;rpha_last_it.png&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_05_single_freq_inversion_CR_004.png" srcset="../../_images/sphx_glr_plot_05_single_freq_inversion_CR_004.png" alt="plot 05 single freq inversion CR" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_05_single_freq_inversion_CR_005.png" srcset="../../_images/sphx_glr_plot_05_single_freq_inversion_CR_005.png" alt="plot 05 single freq inversion CR" class = "sphx-glr-single-img"/><div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-02-simple-inversion-plot-05-single-freq-inversion-cr-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/bbee234a1702175a6015456a75ac642e/plot_05_single_freq_inversion_CR.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_05_single_freq_inversion_CR.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/59cdba07376fc79b6ee3da5ae355f0c5/plot_05_single_freq_inversion_CR.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_05_single_freq_inversion_CR.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plot_03_adding_data_noise.html" class="btn btn-neutral float-left" title="Adding data noise to measurements" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_06_single_freq_inversion_sEIT.html" class="btn btn-neutral float-right" title="A single-frequency inversion (sEIT container)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2021, CRTomo contributors.
+      <span class="lastupdated">Last updated on Dec 14, 2021.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

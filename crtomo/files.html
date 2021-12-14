@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Files and directories &mdash; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Configuration checklist" href="best_practices.html" />
+    <link rel="prev" title="Basics" href="basics.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> crtomo tools
+          </a>
+              <div class="version">
+                0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">lib</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">crtomo tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="crtomo.html">The original CRTomo code</a> &raquo;</li>
+      <li>Files and directories</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/crtomo/files.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="files-and-directories">
+<h1>Files and directories<a class="headerlink" href="#files-and-directories" title="Permalink to this headline"></a></h1>
+<section id="config">
+<h2>config/<a class="headerlink" href="#config" title="Permalink to this headline"></a></h2>
+<section id="config-dat">
+<h3>config.dat<a class="headerlink" href="#config-dat" title="Permalink to this headline"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">config.dat</span></code> contains the measurement configurations to be modelled. A
+measurement configuration is defined by one or two electrodes used for current
+injection and one or two electrodes used for voltage (i.e. potential
+difference) measurement. By this, pole-pole, pole-dipole, and dipole-dipole,
+(multiple)-gradient configurations can be realized. The format of
+<code class="docutils literal notranslate"><span class="pre">config.dat</span></code> is explained by means of an example file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">1</span> <span class="mi">2064</span>
+<span class="mi">2</span> <span class="mi">10002</span> <span class="mi">40003</span>
+<span class="mi">3</span> <span class="mi">10002</span> <span class="mi">50004</span>
+<span class="mi">4</span> <span class="mi">10002</span> <span class="mi">60005</span>
+<span class="o">...</span>
+<span class="o">...</span>
+<span class="o">...</span>
+<span class="mi">2063</span> <span class="mi">300036</span> <span class="mi">220016</span>
+<span class="mi">2064</span> <span class="mi">300036</span> <span class="mi">230017</span>
+<span class="mi">2065</span> <span class="mi">300036</span> <span class="mi">240018</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Line 1: Number of measurement configurations</p></li>
+<li><p>Line 2-End: Dipole configuration. The first number describes the current
+injection dipole using the formula <span class="math notranslate nohighlight">\(A \cdot 10000 + B\)</span>. The second
+number describes the voltage dipole using the formula <span class="math notranslate nohighlight">\(M \cdot 10000 +
+N\)</span>.</p></li>
+</ul>
+<p>Pole-pole or pole-dipole configurations are realized by assigning a fictitious
+electrode ‘’0’’ (representing infinity) to the corresponding position in
+<code class="docutils literal notranslate"><span class="pre">config.dat</span></code>. For example, the line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">10000</span> <span class="mi">20000</span>
+</pre></div>
+</div>
+<p>would define a pole-pole measurement, the line</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">10000</span> <span class="mi">20003</span>
+</pre></div>
+</div>
+<p>a pole-dipole measurement.</p>
+</section>
+</section>
+<section id="exe">
+<h2>exe/<a class="headerlink" href="#exe" title="Permalink to this headline"></a></h2>
+<section id="crt-lamnull">
+<h3>crt.lamnull<a class="headerlink" href="#crt-lamnull" title="Permalink to this headline"></a></h3>
+<p>In order to have the option to preselect a starting value for our pareto
+problem (lambda search), we introduce the <em>lamnull_cri</em> and <em>lamnull_fpi</em>
+variables which can be set by the user via the file <code class="docutils literal notranslate"><span class="pre">crt.lamnull</span></code>.</p>
+<p>This can contain two variables:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">lamnull_cri</span><span class="o">&gt;</span> <span class="p">(</span><span class="n">double</span><span class="p">)</span>
+<span class="o">&lt;</span><span class="n">lamnull_fpi</span><span class="o">&gt;</span> <span class="p">(</span><span class="n">double</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The last one may be left empty (defaults to zero then). They are used in the
+subroutine <code class="docutils literal notranslate"><span class="pre">blam0</span></code> to set the lammax value.</p>
+<p>If a complex (CRI) or DC inversion is done, the variable <em>lamnull_cri</em> is used.</p>
+<p>For FPI we can use the variable <em>lamnull_fpi</em>, which is a NEW option.</p>
+<p>Introduction of a separate value for the FPI is done because of two reasons:</p>
+<ul class="simple">
+<li><p>lam0 for the FPI changes usually dramatically if the model is changed, thus,
+the preselected values of lam0 for FPI may totally differ to the value for
+the CRI/DC.</p></li>
+<li><p>practical reasons for synthetic study</p></li>
+</ul>
+<p>DEFAULT Value:</p>
+<p>If a value of zero is choosen for each one of the <code class="docutils literal notranslate"><span class="pre">lamnull_*</span></code>, the program chooses:</p>
+<p><span class="math notranslate nohighlight">\(\sum(diag{J^TJ})/&lt;\text{number of parameters}&gt; \cdot 2 /(\alpha_x +
+\alpha_y) * 5\)</span></p>
+<p>The first is obvious, because we like to scale upon the ‘’mean’’ entries of our
+sensitivity matrix.</p>
+<p>The scaling is done then to take the artificial anisotropy regularization
+(<span class="math notranslate nohighlight">\(\alpha_x\)</span> and <span class="math notranslate nohighlight">\(\alpha_y\)</span>) into account and last but not least
+multiply by five just to make sure we start right at the upper most boundary
+for the pareto problem.</p>
+</section>
+<section id="crtomo-cfg">
+<span id="description-crtomo-cfg"></span><h3>crtomo.cfg<a class="headerlink" href="#crtomo-cfg" title="Permalink to this headline"></a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Configurations can be created, imported, modified, and saved using
+<a class="reference internal" href="../api/crtomo.html#crtomo.cfg.crtomo_config" title="crtomo.cfg.crtomo_config"><code class="xref py py-class docutils literal notranslate"><span class="pre">crtomo.cfg.crtomo_config</span></code></a>.
+Also see example here: <a class="reference internal" href="../_examples/02_simple_inversion/plot_01_inversion_settings.html#example-crmod-crtomo-cfg"><span class="std std-ref">Setting modeling and inversion settings</span></a></p>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">crtomo.cfg</span></code> file controls the inversion using <code class="docutils literal notranslate"><span class="pre">CRTomo</span></code>. It must exist
+in the directory where <code class="docutils literal notranslate"><span class="pre">CRTomo</span></code> is executed. Lines starting with the
+character # are treated as comments and will be removed before parsing it. All
+other lines are line-number dependent. That is, each setting is identified by
+its line number, not a keyword, within the <code class="docutils literal notranslate"><span class="pre">crtomo.cfg</span></code> file. Comment lines
+do not increase the line number!</p>
+<p>The first non-comment line is a multi-function binary switch called mswitch.
+This switched controls functions by setting their corresponding bit either to 0
+(inactive) or 1 (active).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Use <a class="reference internal" href="../api/crtomo.html#crtomo.cfg.crtomo_config.set_mswitch" title="crtomo.cfg.crtomo_config.set_mswitch"><code class="xref py py-meth docutils literal notranslate"><span class="pre">crtomo.cfg.crtomo_config.set_mswitch()</span></code></a> to control the mswitch
+in a Python environment</p>
+</div>
+<p>The following functionality is implemented, with the corresponding bit given at
+the beginning:</p>
+<ul class="simple">
+<li><p>*** : legacy values - treated a 0</p></li>
+<li><p>bit 1 (+1): write L1 data-weighted coverage (lsens)</p></li>
+<li><p>bit 2 (+2): write out main diagonal of posterior model covariance matrix:
+<span class="math notranslate nohighlight">\(MCM_1=( A^T C_d^-1 A + \lambda C_m^-1 )^-1\)</span> (lcov1). Note that
+enabling this function also writes out <span class="math notranslate nohighlight">\(diag(A^T W_d^T W_d A)\)</span>, the L2
+data-weighted cumulative sensitivity (or coverage) into the file
+<strong>ata.diag</strong>.</p></li>
+<li><p>bit 3 (+4): write out main diagonal of resolution matrix: <span class="math notranslate nohighlight">\(RES = MCM_1
+* A^T C_d^-1 A\)</span> (lres)</p></li>
+<li><p>bit 4 (+8): = write out main diagonal of posterior model covariance matrix 2:
+<span class="math notranslate nohighlight">\(MCM_2 = RES \cdot MCM_1\)</span> (lcov2)</p></li>
+<li><p>lgauss = BTEST (mswitch,4) ! +16 solve all OLS using Gauss elimination</p></li>
+<li><p>lelerr = BTEST (mswitch,5).OR.lelerr ! +32 uses error ellipses in the
+inversion, regardless of any previous lelerr state..</p></li>
+<li><p>mswitch with 2^6 is empty for now…</p></li>
+<li><p>lphi0 = BTEST (mswitch,7) ! +128 force negative phase</p></li>
+<li><p>lsytop = BTEST (mswitch,8) ! +256 enables sy top check of no flow boundary
+electrodes for enhanced beta calculation (bsytop).  This is useful for
+including topographical effects</p></li>
+<li><p>lverb = BTEST (mswitch,10) ! +1024 Verbose output of CG iterations, data read
+in, bnachbar calculations…</p></li>
+</ul>
+<p>The file is further described by an example file:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="c1">#############################################################</span>
+<span class="linenos">  2</span><span class="c1">###         NEW cfg file format::                         ###</span>
+<span class="linenos">  3</span><span class="c1">#############################################################</span>
+<span class="linenos">  4</span><span class="c1">### Comment lines start with (at least one) # at the first</span>
+<span class="linenos">  5</span><span class="c1">### row of a  line !</span>
+<span class="linenos">  6</span><span class="c1">### They are omitted during import of the cfg file</span>
+<span class="linenos">  7</span><span class="c1">#############################################################</span>
+<span class="linenos">  8</span><span class="c1">#############################################################</span>
+<span class="linenos">  9</span><span class="c1">## NOTE:</span>
+<span class="linenos"> 10</span><span class="c1">## NO FURTHER EMPTY LINES, EXCEPT THE ONES ALREADY PRESENT,</span>
+<span class="linenos"> 11</span><span class="c1">## SHOULD BE ADDED. CRTomo IDENTIFIES PARAMETERS BY THEIR</span>
+<span class="linenos"> 12</span><span class="c1">## LINE NUMBER</span>
+<span class="linenos"> 13</span><span class="c1">##############################################################</span>
+<span class="linenos"> 14</span><span class="c1">##############################################################</span>
+<span class="linenos"> 15</span><span class="c1">#############################################################</span>
+<span class="linenos"> 16</span><span class="c1"># mwswitch (8 == lcov2)</span>
+<span class="linenos"> 17</span><span class="m">8</span>
+<span class="linenos"> 18</span><span class="c1">#############################################################</span>
+<span class="linenos"> 19</span><span class="c1"># Path to the grid file, may contain blanks</span>
+<span class="linenos"> 20</span><span class="c1">#############################################################</span>
+<span class="linenos"> 21</span>../grid/elem.dat
+<span class="linenos"> 22</span><span class="c1">#############################################################</span>
+<span class="linenos"> 23</span><span class="c1"># Path to the file containing electrode positions, may contain blanks</span>
+<span class="linenos"> 24</span><span class="c1">#############################################################</span>
+<span class="linenos"> 25</span>../grid/elec.dat
+<span class="linenos"> 26</span><span class="c1">#############################################################</span>
+<span class="linenos"> 27</span><span class="c1"># Path to the measurement readings (Volts!), may contain blanks</span>
+<span class="linenos"> 28</span><span class="c1">#############################################################</span>
+<span class="linenos"> 29</span>../mod/volt.dat
+<span class="linenos"> 30</span><span class="c1">#############################################################</span>
+<span class="linenos"> 31</span><span class="c1"># Directory name to store the inversion results.., may contain blanks</span>
+<span class="linenos"> 32</span><span class="c1">#############################################################</span>
+<span class="linenos"> 33</span>../inv
+<span class="linenos"> 34</span><span class="c1">############################################################</span>
+<span class="linenos"> 35</span><span class="c1"># Logical switch for difference inversion (ldiff) and, if a prior model (m0) is used,</span>
+<span class="linenos"> 36</span><span class="c1">#   this switch also controls whether or not to regularize against the prior..</span>
+<span class="linenos"> 37</span><span class="c1">#   (internal variable lprior=T)</span>
+<span class="linenos"> 38</span><span class="c1">#   leading to (m-m0)R^TR(m-m0) constraint, if no difference data are given</span>
+<span class="linenos"> 39</span><span class="c1">#########################################################################################</span>
+<span class="linenos"> 40</span>F
+<span class="linenos"> 41</span><span class="c1">#########################################################################################</span>
+<span class="linenos"> 42</span><span class="c1"># Path to the measurement file for difference inversion, may contain blanks.</span>
+<span class="linenos"> 43</span><span class="c1"># If left empty, no data is assumed</span>
+<span class="linenos"> 44</span><span class="c1">#########################################################################################</span>
+<span class="linenos"> 45</span>../diff/dvolt.dat
+<span class="linenos"> 46</span><span class="c1">#########################################################################################</span>
+<span class="linenos"> 47</span><span class="c1"># Path to the prior model (m0), which is also the model of the difference</span>
+<span class="linenos"> 48</span><span class="c1">#   inversion which is obtained by a previous CRTomo run (dm0).</span>
+<span class="linenos"> 49</span><span class="c1"># If ldiff is false, and a valid path to a prior is given,</span>
+<span class="linenos"> 50</span><span class="c1">#   the prior is copied into the starting model!!</span>
+<span class="linenos"> 51</span><span class="c1">#########################################################################################</span>
+<span class="linenos"> 52</span>../rho/prior.modl
+<span class="linenos"> 53</span><span class="c1">#########################################################################################</span>
+<span class="linenos"> 54</span><span class="c1"># Path to the model response of m0 in case of difference inversion (ldiff=T)</span>
+<span class="linenos"> 55</span><span class="c1">#   this should be empty if you have none</span>
+<span class="linenos"> 56</span><span class="c1">#########################################################################################</span>
+<span class="linenos"> 57</span>../diff/dvolt2.dat
+<span class="linenos"> 58</span><span class="c1">#########################################################################################</span>
+<span class="linenos"> 59</span><span class="c1"># The next line usually contains nothing but *** ....</span>
+<span class="linenos"> 60</span><span class="c1"># YET, if you have a prior (or starting) model and like to add noise to it.</span>
+<span class="linenos"> 61</span><span class="c1">#   You can then give a seed (integer) and a variance (float) for this.</span>
+<span class="linenos"> 62</span><span class="c1"># These numbers are useless if no prior is given..</span>
+<span class="linenos"> 63</span><span class="c1">#########################################################################################</span>
+<span class="linenos"> 64</span>iseed variance
+<span class="linenos"> 65</span><span class="c1">#########################################################################################</span>
+<span class="linenos"> 66</span><span class="c1"># For regular grids and the old regularization you have to define the Nx (number of</span>
+<span class="linenos"> 67</span><span class="c1">#   elements in x-direction)</span>
+<span class="linenos"> 68</span><span class="c1"># THIS IS NOW OBSOLETE (but can be used, though..) because the triangulation</span>
+<span class="linenos"> 69</span><span class="c1">#   regularization is proofed equivalent to the old regularization for regular grids!</span>
+<span class="linenos"> 70</span><span class="c1">#</span>
+<span class="linenos"> 71</span><span class="c1"># To give it a new purpose, you can now control variogram models with it!</span>
+<span class="linenos"> 72</span><span class="c1"># The integer is read in as decimal leaving two digits (XY) with a control function</span>
+<span class="linenos"> 73</span><span class="c1">#</span>
+<span class="linenos"> 74</span><span class="c1"># _X_ Controls the covariance function and _Y_ the variogram model</span>
+<span class="linenos"> 75</span><span class="c1">#</span>
+<span class="linenos"> 76</span><span class="c1"># The variogram model has 4 modes:</span>
+<span class="linenos"> 77</span><span class="c1">#    CASE (X=1) !Gaussian variogram = (1-EXP(-(3h/a)^2))</span>
+<span class="linenos"> 78</span><span class="c1">#   (Ix_v = Ix_v/3 ; Iy_v = Iy_v/3: scale length are changed to match GSlib standard)</span>
+<span class="linenos"> 79</span><span class="c1">#    CASE (X=2) ! Spherical variogram = ((1.5(h/a)-.5(h/a)^3),1)</span>
+<span class="linenos"> 80</span><span class="c1">#    CASE (X=3) ! Power model variogram = (h/a)^omev</span>
+<span class="linenos"> 81</span><span class="c1"># in this case you can change the power model exponent, which is set to 2 as default</span>
+<span class="linenos"> 82</span><span class="c1">#    CASE DEFAULT! exponential variogram = (1-EXP(-(3h/a)))</span>
+<span class="linenos"> 83</span><span class="c1">#   (Ix_v = Ix_v/3 ; Iy_v = Iy_v/3)</span>
+<span class="linenos"> 84</span><span class="c1"># The default case is used if left at zero or otherwise</span>
+<span class="linenos"> 85</span><span class="c1">#</span>
+<span class="linenos"> 86</span><span class="c1"># For the covariance function there are also 4 modes implemented:</span>
+<span class="linenos"> 87</span><span class="c1">#    CASE (Y=1) !Gaussian covariance = EXP(-(3h/a)^2)</span>
+<span class="linenos"> 88</span><span class="c1">#   (Ix_c = Ix_c/3 ; Iy_c = Iy_c/3: scale length are changed to match GSlib standard)</span>
+<span class="linenos"> 89</span><span class="c1">#    CASE (Y=2) !Spherical covariance = ((1-1.5(h/a)+.5(h/a)^3),0)</span>
+<span class="linenos"> 90</span><span class="c1">#    CASE (Y=3) !Power model covariance = EXP(-va*(h/a)^omec)</span>
+<span class="linenos"> 91</span><span class="c1">#    CASE (Y=4) !Lemma (still to proof!) covariance = EXP(-tfac*variogram(h))</span>
+<span class="linenos"> 92</span><span class="c1">#    CASE DEFAULT!Exponential covariance = EXP(-3h/a)</span>
+<span class="linenos"> 93</span><span class="c1">#   (Ix_c = Ix_c/3 ; Iy_c = Iy_c/3)</span>
+<span class="linenos"> 94</span><span class="c1">#</span>
+<span class="linenos"> 95</span><span class="c1"># The covariance model does only makes sense with a stochastical regularization!!!</span>
+<span class="linenos"> 96</span><span class="c1">#</span>
+<span class="linenos"> 97</span><span class="c1"># EXAMPLE:</span>
+<span class="linenos"> 98</span><span class="c1">#   - You like to have spherical variogram but gaussian covariance set the number</span>
+<span class="linenos"> 99</span><span class="c1">#   to 12</span>
+<span class="linenos">100</span><span class="c1">#   - If you like to have a spherical variogram and a exponential covariance</span>
+<span class="linenos">101</span><span class="c1"># NOTE:</span>
+<span class="linenos">102</span><span class="c1">#   The experimental variogram can be calculated (and this is default if any value</span>
+<span class="linenos">103</span><span class="c1">#   is given) no matter which model function you state here..</span>
+<span class="linenos">104</span><span class="c1">#########################################################################################</span>
+<span class="linenos">105</span><span class="m">0</span>
+<span class="linenos">106</span><span class="c1">#########################################################################################</span>
+<span class="linenos">107</span><span class="c1"># Previously, the next integer number was the number of cells in z- (or y)-direction</span>
+<span class="linenos">108</span><span class="c1"># However, the same argumentation for this number holds as for Nx.</span>
+<span class="linenos">109</span><span class="c1"># The new meaning for Nz is now to give a starting value for lambda:</span>
+<span class="linenos">110</span><span class="c1">#   -value given here sets lam_0 = value</span>
+<span class="linenos">111</span><span class="c1"># This may be further exploited (in case you do not know and do not like the whole A^TA</span>
+<span class="linenos">112</span><span class="c1">#   diagonal maximum to be calculated (blam0), you can leave it as -1 which will take</span>
+<span class="linenos">113</span><span class="c1">#   lam_0 = MAX(number of data points,number of model parameters)</span>
+<span class="linenos">114</span><span class="c1">#########################################################################################</span>
+<span class="linenos">115</span>-1
+<span class="linenos">116</span><span class="c1">#########################################################################################</span>
+<span class="linenos">117</span><span class="c1"># Now, the anisotropic regularization parameters (float) can be specified:</span>
+<span class="linenos">118</span><span class="c1"># alpha_x</span>
+<span class="linenos">119</span><span class="c1">#########################################################################################</span>
+<span class="linenos">120</span><span class="m">1</span>.0000
+<span class="linenos">121</span><span class="c1">#########################################################################################</span>
+<span class="linenos">122</span><span class="c1"># alpha_z (y)</span>
+<span class="linenos">123</span><span class="c1">#########################################################################################</span>
+<span class="linenos">124</span><span class="m">1</span>.0000
+<span class="linenos">125</span><span class="c1">#########################################################################################</span>
+<span class="linenos">126</span><span class="c1"># Next, you have to give a upper boundary for the number of iterations (int)</span>
+<span class="linenos">127</span><span class="c1"># NOTE:</span>
+<span class="linenos">128</span><span class="c1"># If it is set to zero, no inverse modelling is done, but coverages</span>
+<span class="linenos">129</span><span class="c1">#   (resolution, variogram, etc..) may be calculated.</span>
+<span class="linenos">130</span><span class="c1"># This is especially useful in conjunction with a valid prior/starting model!</span>
+<span class="linenos">131</span><span class="c1">#########################################################################################</span>
+<span class="linenos">132</span><span class="m">20</span>
+<span class="linenos">133</span><span class="c1">#########################################################################################</span>
+<span class="linenos">134</span><span class="c1"># The next (logical) switch (ldc) controls whether we invert for COMPLEX (EIT, ldc = F)</span>
+<span class="linenos">135</span><span class="c1">#   or REAL values (ERT) (ldc = T)</span>
+<span class="linenos">136</span><span class="c1">#########################################################################################</span>
+<span class="linenos">137</span>F
+<span class="linenos">138</span><span class="c1">#########################################################################################</span>
+<span class="linenos">139</span><span class="c1"># (logical) switch (lrobust) for robust inversion (e.g. La Breque et al 1996)</span>
+<span class="linenos">140</span><span class="c1">#########################################################################################</span>
+<span class="linenos">141</span>F
+<span class="linenos">142</span><span class="c1">#########################################################################################</span>
+<span class="linenos">143</span><span class="c1"># Do you want a Final phase improvement (FPI) ? set (lfphai) the next logical to T</span>
+<span class="linenos">144</span><span class="c1"># NOTE:</span>
+<span class="linenos">145</span><span class="c1">#   If (ldc == .FALSE. .and. lfphai == .TRUE.) lelerr = .FALSE. (error ellipses)</span>
+<span class="linenos">146</span><span class="c1"># This has the impact, that no error ellipses are used in FPI.</span>
+<span class="linenos">147</span><span class="c1">##</span>
+<span class="linenos">148</span><span class="c1"># However, this may be overwritten by setting mswitch = mswitch + 32 in the first line !!</span>
+<span class="linenos">149</span><span class="c1">#########################################################################################</span>
+<span class="linenos">150</span>T
+<span class="linenos">151</span><span class="c1">#########################################################################################</span>
+<span class="linenos">152</span><span class="c1"># The next two floats determine the error model for resistance/voltage</span>
+<span class="linenos">153</span><span class="c1"># which is currently implemented as  \delta R = A * abs(R) + B</span>
+<span class="linenos">154</span><span class="c1"># Thus, A gives the relative error estimate [%] and B gives the absolute error estimate.</span>
+<span class="linenos">155</span><span class="c1">#</span>
+<span class="linenos">156</span><span class="c1"># NOTE:</span>
+<span class="linenos">157</span><span class="c1"># The first (A) Parameter also controls whether or not to couple the (maybe COMPLEX)</span>
+<span class="linenos">158</span><span class="c1">#   error model to any noise additions (Yes, voltages in CRTomo can be noised...)</span>
+<span class="linenos">159</span><span class="c1"># If A is set to -A , the whole error model is taken as noise model.</span>
+<span class="linenos">160</span><span class="c1"># Giving this, you may want to add an ensemble seed number, which may be crucial for</span>
+<span class="linenos">161</span><span class="c1">#   any kind of monte carlo study, at the end of this crt-file..</span>
+<span class="linenos">162</span><span class="c1"># The noise is also written to the file &#39;crt.noisemod&#39; which may be changed afterwards if</span>
+<span class="linenos">163</span><span class="c1">#   you like to decouple error and noise model.</span>
+<span class="linenos">164</span><span class="c1"># NOTE:</span>
+<span class="linenos">165</span><span class="c1"># CRTomo is looking for crt.noisemod in the current directory as default.</span>
+<span class="linenos">166</span><span class="c1"># If it is existing or a valid file, it gives a note about this and</span>
+<span class="linenos">167</span><span class="c1">#   trys to get a noise model from the data contained</span>
+<span class="linenos">168</span><span class="c1">#########################################################################################</span>
+<span class="linenos">169</span>-1.0
+<span class="linenos">170</span><span class="c1">#########################################################################################</span>
+<span class="linenos">171</span><span class="c1"># Error model parameter B [Ohm]</span>
+<span class="linenos">172</span><span class="c1">#########################################################################################</span>
+<span class="linenos">173</span>1e-3
+<span class="linenos">174</span><span class="c1">#########################################################################################</span>
+<span class="linenos">175</span><span class="c1"># Next 4 (float) numbers control the phase error model as can be found in</span>
+<span class="linenos">176</span><span class="c1"># Flores-Orozsco et al, 2011</span>
+<span class="linenos">177</span><span class="c1"># \delta \phi = A1*abs(R)^B1 + A2*abs(pha) + p0</span>
+<span class="linenos">178</span><span class="c1">###</span>
+<span class="linenos">179</span><span class="c1"># A1 [mrad/Ohm/m]</span>
+<span class="linenos">180</span><span class="c1">#########################################################################################</span>
+<span class="linenos">181</span><span class="m">0</span>.0
+<span class="linenos">182</span><span class="c1">#########################################################################################</span>
+<span class="linenos">183</span><span class="c1"># B1 []</span>
+<span class="linenos">184</span><span class="c1">#########################################################################################</span>
+<span class="linenos">185</span><span class="m">0</span>.0
+<span class="linenos">186</span><span class="c1">#########################################################################################</span>
+<span class="linenos">187</span><span class="c1"># A2 [%]</span>
+<span class="linenos">188</span><span class="c1">#########################################################################################</span>
+<span class="linenos">189</span><span class="m">0</span>.0
+<span class="linenos">190</span><span class="c1">#########################################################################################</span>
+<span class="linenos">191</span><span class="c1"># p0 [mrad]</span>
+<span class="linenos">192</span><span class="c1">#########################################################################################</span>
+<span class="linenos">193</span><span class="c1">#########################################################################################</span>
+<span class="linenos">194</span><span class="c1"># If you use FPI, note that if P0 is set to a negative value, the phase model is set</span>
+<span class="linenos">195</span><span class="c1"># to a homogenous model if FPI starts, this was used by AK as default...</span>
+<span class="linenos">196</span><span class="c1"># the p0 is set to its positive value for error calc, if this is used (of course..)</span>
+<span class="linenos">197</span><span class="c1">#########################################################################################</span>
+<span class="linenos">198</span><span class="c1">#########################################################################################</span>
+<span class="linenos">199</span>1e-1
+<span class="linenos">200</span><span class="c1">#########################################################################################</span>
+<span class="linenos">201</span><span class="c1"># Here you can decide if you want a homogenous starting model (overwritten with prior)</span>
+<span class="linenos">202</span><span class="c1"># logical (lrho0) for both, magnitude and phase</span>
+<span class="linenos">203</span><span class="c1">#########################################################################################</span>
+<span class="linenos">204</span>T
+<span class="linenos">205</span><span class="c1">#########################################################################################</span>
+<span class="linenos">206</span><span class="c1"># homogenous background resistivity value for magnitude [Ohm m]</span>
+<span class="linenos">207</span><span class="c1">#########################################################################################</span>
+<span class="linenos">208</span><span class="m">100</span>.00
+<span class="linenos">209</span><span class="c1">#########################################################################################</span>
+<span class="linenos">210</span><span class="c1"># homogenous background value for the phase [mrad]</span>
+<span class="linenos">211</span><span class="c1">#########################################################################################</span>
+<span class="linenos">212</span><span class="m">0</span>.000
+<span class="linenos">213</span><span class="c1">#########################################################################################</span>
+<span class="linenos">214</span><span class="c1"># Some people prefer having one crt-file for many inversions.</span>
+<span class="linenos">215</span><span class="c1"># If you set this logical T, CRTomo tries to read in another crt-style file after</span>
+<span class="linenos">216</span><span class="c1">#   the first inversion was done.</span>
+<span class="linenos">217</span><span class="c1"># This also means, that any data arrays (memory model!!) are reallocated and thus</span>
+<span class="linenos">218</span><span class="c1">#   different grids/electrodes/measurements can be given to CRTomo...</span>
+<span class="linenos">219</span><span class="c1">#########################################################################################</span>
+<span class="linenos">220</span>F
+<span class="linenos">221</span><span class="c1">#########################################################################################</span>
+<span class="linenos">222</span><span class="c1"># Dimensionality switch (integer) to control whether or not to have a _real_ 2D (=0)</span>
+<span class="linenos">223</span><span class="c1">#   or a 2.5D (=1) forward solution. 2.5D assumes a 3D model space with a resistivity</span>
+<span class="linenos">224</span><span class="c1">#   distribution that is homogeneous in the y direction.</span>
+<span class="linenos">225</span><span class="c1"># NOTE:</span>
+<span class="linenos">226</span><span class="c1"># If you like to have a true 2D (i.e. setting to 0) you have to keep in mind that</span>
+<span class="linenos">227</span><span class="c1">#   the sink node setting (down below) has to be set.</span>
+<span class="linenos">228</span><span class="c1"># Also note that if 2D mode is selected the singularity removal switch may be helpful to</span>
+<span class="linenos">229</span><span class="c1"># reduce numerical issues.</span>
+<span class="linenos">230</span><span class="c1">#########################################################################################</span>
+<span class="linenos">231</span><span class="m">1</span>
+<span class="linenos">232</span><span class="c1">#########################################################################################</span>
+<span class="linenos">233</span><span class="c1"># (logical) switch whether to introduce a fictitious sink node (sink is here in the sense</span>
+<span class="linenos">234</span><span class="c1">#   of a -I electrode at some place in b by solving Ax=b with Cholesky</span>
+<span class="linenos">235</span><span class="c1">#########################################################################################</span>
+<span class="linenos">236</span>F
+<span class="linenos">237</span><span class="c1">#########################################################################################</span>
+<span class="linenos">238</span><span class="c1"># Node number (int) of the sink node</span>
+<span class="linenos">239</span><span class="c1"># The chosen node should conform to the following properties:</span>
+<span class="linenos">240</span><span class="c1"># - not a boundary node</span>
+<span class="linenos">241</span><span class="c1"># - not an electrode</span>
+<span class="linenos">242</span><span class="c1"># - should be positioned at the center of the grid with a preferably large distance to</span>
+<span class="linenos">243</span><span class="c1">#   all electrodes</span>
+<span class="linenos">244</span><span class="c1">#########################################################################################</span>
+<span class="linenos">245</span><span class="m">0</span>
+<span class="linenos">246</span><span class="c1">#########################################################################################</span>
+<span class="linenos">247</span><span class="c1"># Do you like to read in some boundary potential values ? (logical)</span>
+<span class="linenos">248</span><span class="c1"># The boundary values are helpful for tank experiments at known voltages (i.e.</span>
+<span class="linenos">249</span><span class="c1">#   inhomogenous Dirichlet boundaries)</span>
+<span class="linenos">250</span><span class="c1">#########################################################################################</span>
+<span class="linenos">251</span>F
+<span class="linenos">252</span><span class="c1">#########################################################################################</span>
+<span class="linenos">253</span><span class="c1"># Path to the boundary values, blanks can be included</span>
+<span class="linenos">254</span><span class="c1">#########################################################################################</span>
+<span class="linenos">255</span>empty
+<span class="linenos">256</span><span class="c1">#########################################################################################</span>
+<span class="linenos">257</span><span class="c1"># In some older cfg files, this would be the end of the cfg-file.</span>
+<span class="linenos">258</span><span class="c1"># Yet, to control regularization you can give in the next line an integer (ltri) to</span>
+<span class="linenos">259</span><span class="c1">#   manage it:</span>
+<span class="linenos">260</span><span class="c1">#  (=0) - Smooth regularization for regular grids only (Nx and Nz have to be correct!!)</span>
+<span class="linenos">261</span><span class="c1">#  (=1) - Smooth triangular regularization (should be used as default and the method</span>
+<span class="linenos">262</span><span class="c1">#   of choice</span>
+<span class="linenos">263</span><span class="c1">#  (=2) - Smooth triangular regularization, second order (not yet implemented..)</span>
+<span class="linenos">264</span><span class="c1">#  (=3) - Levenberg damping (i.e. C_m^-1 = lambda * I)</span>
+<span class="linenos">265</span><span class="c1">#  (=4) - Marquardt-Levenberg damping (i.e. C_m^-1 = lambda * diag{A^T C_d^-1 A} )</span>
+<span class="linenos">266</span><span class="c1">#  (=5) - MGS regularization (pure MGS after Zhdanov &amp; Portniaguine):</span>
+<span class="linenos">267</span><span class="c1">#   C_m^-1 \approx \int \frac{(\nabla m_{ij})^2}{(\nabla m_{ij})^2+\beta^2}\;dA</span>
+<span class="linenos">268</span><span class="c1">#  (=6) - MGS with sensitivity weighted beta: = beta / f_{ij} (from Blaschek 2008)</span>
+<span class="linenos">269</span><span class="c1">#   where f_{ij} = (1 + g(i) + g(k))^2 and g(i,k) = log_{10} coverage (m_{i,k})</span>
+<span class="linenos">270</span><span class="c1">#  (=7) - MGS with sensitivity weighted beta (as with 6) but normalized:</span>
+<span class="linenos">271</span><span class="c1">#   f_{ij} = ((1 + g(i) + g(k))/mean{coverage})^2</span>
+<span class="linenos">272</span><span class="c1">#  (=8) - MGS as in 6, but here a modified version of Roland Blaschek (which I apparently</span>
+<span class="linenos">273</span><span class="c1">#   didn&#39;t understood, but was given to me from Fred...).</span>
+<span class="linenos">274</span><span class="c1"># For more details please have a look into bsmatm_mod.f90 -&gt; SUBROUTINE bsmamtmmgs</span>
+<span class="linenos">275</span><span class="c1">#  (=9) - Same as 8, but with mean coverage normalization</span>
+<span class="linenos">276</span><span class="c1"># (=10) - Total variance (TV) regularization (not well tested, but I think it is BETA)</span>
+<span class="linenos">277</span><span class="c1">#</span>
+<span class="linenos">278</span><span class="c1"># NOTE:</span>
+<span class="linenos">279</span><span class="c1"># For MGS and TV you can specify a beta-value (0&lt;beta&lt;1) in this cfg!</span>
+<span class="linenos">280</span><span class="c1">#</span>
+<span class="linenos">281</span><span class="c1"># (=15) - Stochastic regularization. Here, C_m is a full matrix which needs to be</span>
+<span class="linenos">282</span><span class="c1">#   inverted at the beginning of the inverse process. For this regu you have to</span>
+<span class="linenos">283</span><span class="c1">#   specify a proper integral scale and covariance function (see Nx-switch).</span>
+<span class="linenos">284</span><span class="c1"># (&gt;15) - not allowed</span>
+<span class="linenos">285</span><span class="c1"># (+32) - Fix lambda value to a given value (1 as default)</span>
+<span class="linenos">286</span><span class="c1">#   The switch is binary tested so it is as cumulative as mswitch.</span>
+<span class="linenos">287</span><span class="c1">#   Also it is removed after a internal logical was set true (llamf).</span>
+<span class="linenos">288</span><span class="c1">#   The lambda value can be given in a additional line after the ltri value.</span>
+<span class="linenos">289</span><span class="c1">#</span>
+<span class="linenos">290</span><span class="c1"># NOTE:</span>
+<span class="linenos">291</span><span class="c1"># The order of the additional switches (fixed lambda, beta, seed) is treated like:</span>
+<span class="linenos">292</span><span class="c1">#   - fixed lambda</span>
+<span class="linenos">293</span><span class="c1">#   - MGS/TV beta</span>
+<span class="linenos">294</span><span class="c1">#   - Random seed</span>
+<span class="linenos">295</span><span class="c1"># Each in a seperate line!</span>
+<span class="linenos">296</span><span class="c1">#########################################################################################</span>
+<span class="linenos">297</span><span class="m">1</span>
+<span class="linenos">298</span><span class="c1">#########################################################################################</span>
+<span class="linenos">299</span><span class="c1"># The following line depends on the previous choice you made, so it may be the Random</span>
+<span class="linenos">300</span><span class="c1">#   seed, the fixed lambda value or the MGS/TV beta.</span>
+<span class="linenos">301</span><span class="c1"># In case of an error (fixed format integer read!) this line is just omitted.</span>
+<span class="linenos">302</span><span class="c1">#</span>
+<span class="linenos">303</span><span class="c1"># NOTE:</span>
+<span class="linenos">304</span><span class="c1"># For people with cfg-files with more than one inversion run (another data set = T), the</span>
+<span class="linenos">305</span><span class="c1">#   next line should contain the beginning of the next cfg.</span>
+<span class="linenos">306</span><span class="c1">#########################################################################################</span>
+<span class="linenos">307</span>lam/beta/seed
+</pre></div>
+</div>
+<p>..note</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">crtomo</span><span class="o">.</span><span class="n">cfg</span> <span class="n">file</span> <span class="ow">is</span> <span class="n">imported</span> <span class="ow">in</span> <span class="n">the</span> <span class="o">**</span><span class="n">rall</span><span class="o">.</span><span class="n">f90</span><span class="o">**</span> <span class="n">file</span>
+</pre></div>
+</div>
+</section>
+<section id="mgs">
+<h3>MGS<a class="headerlink" href="#mgs" title="Permalink to this headline"></a></h3>
+<p>Allerdings könnte die beta Bestimmung etwas zeitaufwendig sein, daher sollte
+MGS mehr oder weniger als post-alpha Stadium bezeichnet werden.</p>
+<p>Unterstützt werden für diesen Integer am Ende vom crtomo.cfg-file die Zahlen
+5,6 &amp; 7.  Daran anschließend kann man noch ein beta angeben, sodass das cfg
+file in etwa so aussieht:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>------ schnip ------------
+F                ! fictitious sink ?
+1660             ! fictitious sink node number
+F                ! boundary values ?
+boundary.dat
+6               ! regularization switch
+0.01             ! MGS beta
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>5 ist identisch zu dem Ansatz von Zhdanov [2002], Geophysical Inverse Theory
+and Regularization Problems, Elsevier.</p></li>
+<li><p>6 &amp; 7 sind im Grunde die von Blaschek et al. 2008, wobei hier ein Bug von
+Roland gefixt wurde der mit dem update der Sensitivität und des Modells nach
+jedem update zu tun hatte (im Grunde wurde die Glättung nicht wieder neu
+berechnet was nicht ganz korrekt ist).</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>!!! Important !!!
+Man kann diese Glättung aber auch fixen, wenn man das unbedingt will.
+Dann wird die MGS-Glättung vom Startmodell genommen, welches in der Regel ja noch keine Struktur hat.
+Realisiert wird dies in dem man das MGS-beta auf einen _negativen_ Wert setzt.</p>
+</div>
+</section>
+<section id="crmod-cfg">
+<span id="description-crmod-cfg"></span><h3>crmod.cfg<a class="headerlink" href="#crmod-cfg" title="Permalink to this headline"></a></h3>
+<p>The file is structured as follows. It is the configuration file of <code class="docutils literal notranslate"><span class="pre">CRMod</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>1 ***FILES***
+2 ../grid/elem.dat
+3 ../grid/elec.dat
+4 ../rho/rho.dat
+5 ../config/config.dat
+6 F
+! potentials ?
+7 ../mod/pot/pot.dat
+8 T
+! measurements ?
+9 ../mod/volt.dat
+10 F
+! sensitivities ?
+11 ../mod/sens/sens.dat
+12 F ! another dataset ?
+13 1 ! 2D (=0) or 2.5D (=1)
+14 F ! fictitious sink ?
+15 1660 ! fictitious sink node number
+16 F ! boundary values ?
+17 boundary.dat
+18 ! optional integer switch
+</pre></div>
+</div>
+<ul>
+<li><p>Line 1: Not used</p></li>
+<li><p>Line 2: Absolute or relative path to grid (<code class="docutils literal notranslate"><span class="pre">elem.dat</span></code>) file</p></li>
+<li><p>Line 3: Absolute or relative path to electrode (<code class="docutils literal notranslate"><span class="pre">elec.dat</span></code>) file</p></li>
+<li><p>Line 4: Absolute or relative path to parameter (<code class="docutils literal notranslate"><span class="pre">rho.dat</span></code>) file</p></li>
+<li><p>Line 5: Absolute or relative path to electrode configuration (<code class="docutils literal notranslate"><span class="pre">config.dat</span></code>) file</p></li>
+<li><p>Line 6: Switch enabling (T) or disabling (F) output of potentials for the measurement configurations.</p></li>
+<li><p>Line 7: Filename prefix for potentials. A four digit number will be appended.</p></li>
+<li><p>Line 8: Switch to enable (T) or disable (F) output of voltages.</p></li>
+<li><p>Line 9: Filename of voltages for all measurement configurations.</p></li>
+<li><p>Line 10: Switch to enable (T) or disable (F) output of sensitivities.</p></li>
+<li><p>Line 11: Filename prefix for sensitivity files.</p></li>
+<li><p>Line 12: Set either to T in case another configuration file (Lines 1 - 18) is appended to this file (Lines 19+), or F if the configuration file consist only of 18 lines.</p></li>
+<li><p>Line 13: Assume a 2D (0) or a 2.5D (1) subsurface</p></li>
+<li><p>Line 14: Use a fictitious sink (T/F)</p></li>
+<li><p>Line 15: Node number of fictitious sink</p></li>
+<li><p>Line 16: Use user supplied boundary values (T/F)</p></li>
+<li><p>Line 17: Filename of the boundary values</p></li>
+<li><p>Line 18: Optional integer switch:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>+1: Enable analytical solution (lana)</p></li>
+<li><p>+2: Modelling with K-factor (wkfak)</p></li>
+<li><p>+4: Singularity removal (lsr). Please note that this option can’t be used in conjunction with the analytical solution.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</section>
+<section id="crmod-pid">
+<h3>crmod.pid<a class="headerlink" href="#crmod-pid" title="Permalink to this headline"></a></h3>
+<p>The file contains the process ID number, like in</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ps</span> <span class="o">-</span><span class="n">a</span>
+<span class="n">pidof</span> <span class="n">CRTomo</span>
+</pre></div>
+</div>
+</section>
+<section id="decouplings-dat">
+<h3>decouplings.dat<a class="headerlink" href="#decouplings-dat" title="Permalink to this headline"></a></h3>
+<p>Decoupling for triangular smooth cell interfaces can be done using this file.
+The first line contains the number of decouplings, and the subsequent lines
+contain one decoupling each. One decoupling consists of two integer numbers of
+the adjoining element cells, and one floating point value which determines the
+decoupling factor to be multiplied to the original regularisation. A value of 0
+completely decouples the regularisation of a given interface, while a value of
+one does not change anything. Values larger than 1 increase the regularisation
+above the norm.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">3</span>
+<span class="mi">3</span>   <span class="mi">4</span>   <span class="mf">0.0</span>
+<span class="mi">5</span>   <span class="mi">8</span>   <span class="mf">0.5</span>
+<span class="mi">8</span>   <span class="mi">10</span>  <span class="mf">0.0</span>
+</pre></div>
+</div>
+<p>The numbering is independent of the application of the CutMcK algorithm to a
+given grid. Use the order of appearance in the <cite>elem.dat</cite> file for the
+numbering.</p>
+</section>
+<section id="sens-dat">
+<h3>sens.dat<a class="headerlink" href="#sens-dat" title="Permalink to this headline"></a></h3>
+<p>Each <code class="docutils literal notranslate"><span class="pre">sens.dat</span></code> contains the modelled sensitivity distribution for the
+corresponding measurement configuration defined in <code class="docutils literal notranslate"><span class="pre">config.dat</span></code>, i.e. the
+(consecutive) number in the file name corresponds to the line number in
+<code class="docutils literal notranslate"><span class="pre">config.dat</span></code>.</p>
+<p>The modelled sensitivity is given by <span class="math notranslate nohighlight">\(\frac{\partial V_i}{\partial
+\sigma_j} \left[\frac{V\ m}{S}\right]\)</span>, where <span class="math notranslate nohighlight">\(V_i\)</span> is the voltage (in
+<span class="math notranslate nohighlight">\(V\)</span>) of the <span class="math notranslate nohighlight">\(i\)</span>-th measurement (assuming a unit current of 1
+<span class="math notranslate nohighlight">\(A\)</span>), and #:math:<cite>j</cite> is the conductivity (inverse of resistivity) (in
+<span class="math notranslate nohighlight">\(S/m\)</span>) of the <span class="math notranslate nohighlight">\(j\)</span>-th element (of type 8). The first line in
+<code class="docutils literal notranslate"><span class="pre">sens.dat</span></code> contains the integrated sensitivity value <span class="math notranslate nohighlight">\(\sum_j
+\frac{\partial V_i}{\partial \sigma_j}\)</span>.</p>
+<p>The format of <code class="docutils literal notranslate"><span class="pre">sens.dat</span></code> is explained by means of an example file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>   <span class="mf">1.3385538</span>       <span class="mf">3140.5132</span>    
+  <span class="o">-</span><span class="mf">13.399500</span>     <span class="o">-</span><span class="mf">0.25000000</span>      <span class="mf">7.50053499E-04</span> <span class="o">-</span><span class="mf">8.15268550E-07</span>
+  <span class="o">-</span><span class="mf">7.1114998</span>     <span class="o">-</span><span class="mf">0.25000000</span>      <span class="mf">1.99041306E-03</span> <span class="o">-</span><span class="mf">1.93495089E-06</span>
+  <span class="o">-</span><span class="mf">3.6995001</span>     <span class="o">-</span><span class="mf">0.25000000</span>      <span class="mf">3.69597459E-03</span> <span class="o">-</span><span class="mf">3.32863351E-06</span>
+		<span class="o">...</span>
+		<span class="o">...</span>
+		<span class="o">...</span>
+   <span class="mf">38.699501</span>      <span class="o">-</span><span class="mf">20.442499</span>      <span class="mf">1.44582140E-04</span>  <span class="mf">5.84734394E-08</span>
+   <span class="mf">42.111500</span>      <span class="o">-</span><span class="mf">20.442499</span>      <span class="mf">1.98332040E-04</span> <span class="o">-</span><span class="mf">8.41067092E-08</span>
+   <span class="mf">48.399502</span>      <span class="o">-</span><span class="mf">20.442499</span>      <span class="mf">2.44848023E-04</span> <span class="o">-</span><span class="mf">4.05481018E-07</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Line 1:</dt><dd><ul>
+<li><p>The first number denotes the absolute value of the sum of sensitivities
+(<span class="math notranslate nohighlight">\(abs(\sum s_{ij}\)</span>).</p></li>
+<li><p>The second number denotes the phase value of the sum of sensitivities in
+mrad (<span class="math notranslate nohighlight">\(1000 \cdot atan(Im(\sum(s_{ij})) / Re(\sum s_{ij})))\)</span>).</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Line 2:</dt><dd><ul>
+<li><p>Column 1 and 2: Centered (x,z) coordinates for the element</p></li>
+<li><p>Column 3 and 4: Real and Imaginary parts of sensitivity</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p><strong>Plotting</strong></p>
+<p>Plotting of sensitivity files can be accomplished using the <code class="docutils literal notranslate"><span class="pre">crlab_py</span></code> python
+library:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">crlab_py.mpl</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">crlab_py.elem</span> <span class="k">as</span> <span class="nn">elem</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+
+<span class="n">elem</span><span class="o">.</span><span class="n">load_elem_file</span><span class="p">(</span><span class="s1">&#39;elem.dat&#39;</span><span class="p">)</span>
+<span class="n">elem</span><span class="o">.</span><span class="n">load_elec_file</span><span class="p">(</span><span class="s1">&#39;elec.dat&#39;</span><span class="p">)</span>
+<span class="n">indices</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">load_column_file_to_elements_advanced</span><span class="p">(</span><span class="s1">&#39;sens0009.dat&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+<span class="n">elem</span><span class="o">.</span><span class="n">plt_opt</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="n">elem</span><span class="o">.</span><span class="n">plt_opt</span><span class="o">.</span><span class="n">cblabel</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;fill&#39;</span>
+<span class="n">elem</span><span class="o">.</span><span class="n">plt_opt</span><span class="o">.</span><span class="n">reverse</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="n">elem</span><span class="o">.</span><span class="n">plt_opt</span><span class="o">.</span><span class="n">cbmin</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+<span class="n">elem</span><span class="o">.</span><span class="n">plt_opt</span><span class="o">.</span><span class="n">cbmax</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="n">elem</span><span class="o">.</span><span class="n">plot_elements_to_file</span><span class="p">(</span><span class="s1">&#39;sensitivity_1.png&#39;</span><span class="p">,</span> <span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;asinh&#39;</span><span class="p">)</span>
+<span class="n">elem</span><span class="o">.</span><span class="n">plot_elements_to_file</span><span class="p">(</span><span class="s1">&#39;sensitivity_2.png&#39;</span><span class="p">,</span> <span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;asinh&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <strong>scale</strong>-setting enables a special data transformation to plot positive
+and negative values over a large value range. The inverse sinus hyperbolicus
+shows a nearly linear behaviour between -1 and 1. Outside of this interval it
+shows behaviour roughly similar to the logarithm (but not the same!):</p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../_images/asinh.png"><img alt="../_images/asinh.png" src="../_images/asinh.png" style="width: 900.0px; height: 675.0px;" /></a>
+</figure>
+<p>The sensitivities <span class="math notranslate nohighlight">\(s_{ij}\)</span> are transformed according to the formula:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}s_{ij}^{transformed} = \frac{arcsinh(10^\text{dyn} \cdot s_{ij} \cdot \frac{1}{\text{norm}})}{arcsinh(10^\text{dyn})}\\
+\text{with}\\
+\text{dyn} = abs(min(log10(abs(s_{ij}))))\\
+\text{norm} = max(abs(s_{ij}))\end{split}\]</div>
+<p>The factor <cite>dyn</cite> ensures that all sensitivity values are transformed to the
+value interval <span class="math notranslate nohighlight">\(]-1,1[\)</span>. Therefore, all of them lie in the <cite>logarithmic’
+range of the asinh function. All `s_{ij}</cite> values are normed to within the range
+<span class="math notranslate nohighlight">\([0,1]\)</span> using the factor <code class="docutils literal notranslate"><span class="pre">norm</span></code>. The term in the arcsin-function can
+thus not get larger than <span class="math notranslate nohighlight">\(10^{\text{dyn}}\)</span> and can be normed using the
+arcsinh term in the denominator.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Always provide, or at least mention, the asinh transformation when
+presenting sensitivity plots. Also the normalization factor <cite>norm</cite> should
+be provided.</p>
+</div>
+</section>
+<section id="inv-elecpositions">
+<h3>inv.elecpositions<a class="headerlink" href="#inv-elecpositions" title="Permalink to this headline"></a></h3>
+<p>When <code class="docutils literal notranslate"><span class="pre">CRTomo</span></code> is called it writes the electrode positions (as read from <code class="docutils literal notranslate"><span class="pre">elem.dat</span></code>
+and <code class="docutils literal notranslate"><span class="pre">elec.dat</span></code>) to this file. The first line contains the number of (recognized)
+electrodes, and each of the following lines contains two numbers: The x and z
+coordinate of the corresponding electrode.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">38</span>
+<span class="mf">2.0000000000000000</span>       <span class="o">-</span><span class="mf">3.0000000000000000</span>
+<span class="mf">6.0000000000000000</span>       <span class="o">-</span><span class="mf">3.0000000000000000</span>
+<span class="mf">10.000000000000000</span>       <span class="o">-</span><span class="mf">3.0000000000000000</span>
+<span class="o">...</span>
+<span class="o">...</span>
+<span class="o">...</span>
+<span class="mf">18.000000000000000</span>       <span class="o">-</span><span class="mf">37.000000000000000</span>
+<span class="mf">22.000000000000000</span>       <span class="o">-</span><span class="mf">37.000000000000000</span>
+<span class="mf">26.000000000000000</span>       <span class="o">-</span><span class="mf">37.000000000000000</span>
+</pre></div>
+</div>
+</section>
+<section id="inv-gstat">
+<h3>inv.gstat<a class="headerlink" href="#inv-gstat" title="Permalink to this headline"></a></h3>
+<p>Created when <code class="docutils literal notranslate"><span class="pre">CRTomo</span></code> is called. Contains various grid statistics.</p>
+<p>Regular grid:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Grid</span> <span class="n">statistics</span><span class="p">:</span>
+
+<span class="n">Gridcells</span><span class="p">:</span>        <span class="mi">9360</span>
+<span class="n">ESP</span> <span class="n">Min</span><span class="o">/</span><span class="n">Max</span><span class="p">:</span>        <span class="mf">0.5000</span>    <span class="mf">0.5000</span>
+<span class="n">GRID</span> <span class="n">Min</span><span class="o">/</span><span class="n">Max</span><span class="p">:</span>       <span class="mf">0.5000</span>   <span class="mf">82.9247</span>
+<span class="n">GRID</span><span class="o">-</span><span class="n">x</span> <span class="n">Min</span><span class="o">/</span><span class="n">Max</span><span class="p">:</span>     <span class="mf">0.5000</span>   <span class="mf">29.5000</span>
+<span class="n">GRID</span><span class="o">-</span><span class="n">y</span> <span class="n">Min</span><span class="o">/</span><span class="n">Max</span><span class="p">:</span>     <span class="mf">0.5000</span>   <span class="mf">77.5000</span>
+<span class="n">Mean</span><span class="o">/</span><span class="n">Median</span><span class="o">/</span><span class="n">Var</span><span class="p">:</span>        <span class="mf">0.5000</span>    <span class="mf">0.5000</span>    <span class="mf">0.0000</span>
+</pre></div>
+</div>
+</section>
+<section id="inv-lastmod">
+<h3>inv.lastmod<a class="headerlink" href="#inv-lastmod" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>For DC/complex inversion: Holds the (relative) path to the final iteration’s .mag file</p></li>
+<li><p>For FPI: Holds the (relative) path to the FPI final iteration’s .mag file</p></li>
+</ul>
+</section>
+<section id="inv-lastmod-rho">
+<h3>inv.lastmod_rho<a class="headerlink" href="#inv-lastmod-rho" title="Permalink to this headline"></a></h3>
+<p>Only created if FPI is used: Holds the (relative) path to the final iteration’s
+.mag file of the complex inversion.</p>
+</section>
+</section>
+<section id="grid">
+<h2>grid/<a class="headerlink" href="#grid" title="Permalink to this headline"></a></h2>
+<section id="elec-dat">
+<h3>elec.dat<a class="headerlink" href="#elec-dat" title="Permalink to this headline"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">elec.dat</span></code> contains the electrode information, i.e. the numbers of nodes
+where electrodes are located (the node position is determined in elec.dat). The
+format of <code class="docutils literal notranslate"><span class="pre">elec.dat</span></code> is explained by means of an example file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">36</span>
+<span class="mi">962</span>
+<span class="mi">964</span>
+<span class="o">...</span>
+<span class="mi">2788</span>
+<span class="mi">2870</span>
+<span class="mi">2952</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Line 1: Number of electrodes.</p></li>
+<li><p>Line 2-End: Node numbers (as defined in <code class="docutils literal notranslate"><span class="pre">elem.dat</span></code>) where electrodes are located.</p></li>
+</ul>
+</section>
+<section id="elem-dat">
+<h3>elem.dat<a class="headerlink" href="#elem-dat" title="Permalink to this headline"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">elem.dat</span></code> contains all necessary information on the finite-element
+discretization to be used, including the position and numbering of nodes which
+constitute individual elements. The format of <code class="docutils literal notranslate"><span class="pre">elem.dat</span></code> is explained in the
+following by means of an example file <strong>(Line numbers are prefixed in each
+line)</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>\<span class="n">tiny</span>
+\<span class="n">begin</span><span class="p">{</span><span class="n">verbatim</span><span class="p">}</span>
+
+     <span class="mi">1</span>	<span class="mi">861</span> <span class="mi">3</span> <span class="mi">42</span>
+     <span class="mi">2</span>	<span class="mi">8</span> <span class="mi">800</span> <span class="mi">4</span>
+     <span class="mi">3</span>	<span class="mi">12</span> <span class="mi">40</span> <span class="mi">2</span>
+     <span class="mi">4</span>	<span class="mi">11</span> <span class="mi">80</span> <span class="mi">2</span>
+     <span class="mi">5</span>	<span class="mi">1</span> <span class="o">-</span><span class="mf">7.5</span> <span class="mi">0</span>
+         <span class="o">...</span>
+         <span class="o">...</span>
+         <span class="o">...</span>
+   <span class="mi">865</span>	<span class="mi">861</span> <span class="mf">22.5</span> <span class="o">-</span><span class="mf">12.5</span>
+   <span class="mi">866</span>	<span class="mi">42</span> <span class="mi">43</span> <span class="mi">2</span> <span class="mi">1</span> 
+         <span class="o">...</span>
+         <span class="o">...</span>
+         <span class="o">...</span>
+  <span class="mi">1665</span>	<span class="mi">860</span> <span class="mi">861</span> <span class="mi">820</span> <span class="mi">819</span> 
+  <span class="mi">1666</span>	<span class="mi">1</span> <span class="mi">2</span> 
+         <span class="o">...</span>
+         <span class="o">...</span>
+         <span class="o">...</span>
+  <span class="mi">1705</span>	<span class="mi">40</span> <span class="mi">41</span> 
+  <span class="mi">1706</span>	<span class="mi">41</span> <span class="mi">82</span> 
+         <span class="o">...</span>
+         <span class="o">...</span>
+         <span class="o">...</span>
+  <span class="mi">1785</span>	<span class="mi">42</span> <span class="mi">1</span> 
+  <span class="mi">1786</span>	<span class="mi">1</span>
+         <span class="o">...</span>
+         <span class="o">...</span>
+         <span class="o">...</span>
+  <span class="mi">1905</span>	<span class="mi">1</span>
+\<span class="n">end</span><span class="p">{</span><span class="n">verbatim</span><span class="p">}</span>
+<span class="p">}</span>
+
+</pre></div>
+</div>
+<ul>
+<li><dl class="simple">
+<dt>Line 1:</dt><dd><ul class="simple">
+<li><p>First column: Number of nodes</p></li>
+<li><p>Second column: Number of element types</p></li>
+<li><p>Third column: Bandwidth of the resulting finite-element matrix</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Line 2-4: For each element type (in this example there are three: 8
+(rectangles), 11 (Mixed), 12 (Neumann)), list the following:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>First column: Element type</p></li>
+<li><p>Second column: Number of elements for this type</p></li>
+<li><p>Third column: Numnber of element this type has. Elements with 2 nodes are
+called degenerated</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><dl class="simple">
+<dt>Lines 5 - 865: Node coordinates. 3 Columns:</dt><dd><p>1 Node number: Internal Finite-Element number for this node.
+2 X-coordinate
+3 Z-coordinate (positive direction: upwards)</p>
+</dd>
+</dl>
+</li>
+<li><p>Lines 866 - 1665: Nodes of the first element type. In this case four nodes define one rectangular cell.</p></li>
+<li><p>Lines 1666 - 1705: Nodes of second element type. In this case two nodes define a boundary condition of type 12 (Neumann).</p></li>
+<li><p>Lines 1706 - 1785: Nodes of second element type. In this case two nodes define a boundary condition of type 11 (Mixed).</p></li>
+<li><p>Lines 1786 - 1905: Number of the element of type 8 adjacent to the boundary elements (in the order of previous appearance).</p></li>
+</ul>
+<p><strong>Notes:</strong></p>
+<ul class="simple">
+<li><p>Elements need to be defined counter-clockwise</p></li>
+<li><p>Boundary elements are defined from left to right (clockwise!)</p></li>
+</ul>
+<p>The <strong>bandwith</strong> of the resulting finite-element matrix, the last entry in line
+1 of elem.dat, is given by one plus the occurring maximal difference between
+the numbers of any two nodes belonging to the same element. It is thus
+dependent on the employed numbering of nodes.</p>
+<p>In the present CRMod version, only elements of type 8 (quadrangular element
+composed of four triangular elements) and boundary elements of type 12
+(homogeneous Neumann boundary condition; to be used at the Earth’s surface or
+at boundaries of a confined tank) or type 12 (mixed, or absorbing, boundary
+condition; to be used at boundaries within a half or full space) are supported.</p>
+<p>In <code class="docutils literal notranslate"><span class="pre">elem.dat</span></code>, boundary elements must be listed after the normal (areal)
+elements. Along the edges of elements, a linear behaviour of the electric
+potential is assumed.  Although elements may exhibit an irregular shape,
+elements with acute angles should be avoided.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>New regular grids (<code class="docutils literal notranslate"><span class="pre">elem.dat</span></code> and <code class="docutils literal notranslate"><span class="pre">elec.dat</span></code>) can be created using Griev!</p>
+</div>
+</section>
+</section>
+<section id="inv">
+<h2>inv/<a class="headerlink" href="#inv" title="Permalink to this headline"></a></h2>
+<section id="cjg-ctr">
+<h3>cjg.ctr<a class="headerlink" href="#cjg-ctr" title="Permalink to this headline"></a></h3>
+<p>For each iteration, save the residuum of each Conjugate Gradient step. The
+number of CG-steps can also be found in the <code class="docutils literal notranslate"><span class="pre">inv.ctr</span></code> file for each
+iteration.</p>
+</section>
+<section id="coverage-mag">
+<h3>coverage.mag<a class="headerlink" href="#coverage-mag" title="Permalink to this headline"></a></h3>
+<p>L1 data-weighted cumulated sensitivity (normalized)</p>
+<p><span class="math notranslate nohighlight">\(S_i^{L1} = \sum_j^N \frac{|\partial V_j|}{\epsilon_i |\partial \rho_i|}\)</span></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2880</span>  <span class="mf">874956.88680652122</span>
+<span class="mf">0.25000000000000000</span>      <span class="o">-</span><span class="mf">0.25000000000000000</span>      <span class="o">-</span><span class="mf">0.55853918225079879</span>
+<span class="mf">0.75000000000000000</span>      <span class="o">-</span><span class="mf">0.25000000000000000</span>      <span class="o">-</span><span class="mf">0.28004078693583917</span>
+<span class="o">...</span>
+<span class="mf">1.2500000000000000</span>      <span class="o">-</span><span class="mf">0.25000000000000000</span>      <span class="o">-</span><span class="mf">0.12203557213931025</span>
+<span class="mf">1.7500000000000000</span>      <span class="o">-</span><span class="mf">0.25000000000000000</span>      <span class="o">-</span><span class="mf">0.14832386170628217</span>
+</pre></div>
+</div>
+<ul>
+<li><p>First row:</p>
+<ul class="simple">
+<li><p>First column: number of sensitivity values to follow</p></li>
+<li><p>Second column: Maximum sensitivity (linear value), used to normalize values
+down below.</p></li>
+</ul>
+</li>
+<li><p>All following rows:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>First column: Central x-coordinate of cell</p></li>
+<li><p>Second column: Central z-coordinate of cell</p></li>
+<li><p>Third column: <span class="math notranslate nohighlight">\(log_{10}\left( \frac{S_{ij}}{S_{ij}^{max}}\right)\)</span>
+(Normalized log10 of summed sensitivities)</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p>As the third column is <span class="math notranslate nohighlight">\(log_{10}\)</span>, only negative or zero values can be expected
+(0-1).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Computed in bbsens.f90</p>
+</div>
+</section>
+<section id="coverage-mag-fpi">
+<h3>coverage.mag.fpi<a class="headerlink" href="#coverage-mag-fpi" title="Permalink to this headline"></a></h3>
+<p>Contains the coverage (L1) of the sensitivties used in the FPI (thus only
+updating the phase component of the complex resistivity) for the final model.</p>
+<p>The structure of the file can be found in the preceding section
+(<code class="docutils literal notranslate"><span class="pre">coverage.mag</span></code>).</p>
+</section>
+<section id="ata-diag">
+<h3>ata.diag<a class="headerlink" href="#ata-diag" title="Permalink to this headline"></a></h3>
+<p>L2 data-weighted cumulated sensitivity (normalized), <cite>d_i</cite></p>
+<p><span class="math notranslate nohighlight">\(S_i^{L2} = \sum_j^N \frac{|\partial V_j|^2}{\epsilon_i |\partial
+\rho_i|^2}\)</span></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2880</span> <span class="mf">27.3748341</span> <span class="mf">2.93462502E+09</span>
+<span class="mf">397261824.</span>     <span class="o">-</span><span class="mf">0.868474960</span>
+<span class="mf">1.72104538E+09</span> <span class="o">-</span><span class="mf">0.231760025</span>
+<span class="o">...</span>
+<span class="mf">2.93462502E+09</span>   <span class="mf">0.00000000</span>
+<span class="mf">2.03916826E+09</span> <span class="o">-</span><span class="mf">0.158099174</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>First line holds three columns:</p>
+<ul>
+<li><p>number of sensitivity values (equal to number of mesh cells)</p></li>
+<li><p>minimum of <cite>d_i</cite> (i.e., of the first column of all following rows)</p></li>
+<li><p>maximum of <cite>d_i</cite> (i.e., of the first column of all following rows)</p></li>
+</ul>
+</li>
+<li><p>All following rows:</p>
+<ul>
+<li><p>First column: Diagonal entry of <span class="math notranslate nohighlight">\(A^T C_d^{-1} A\)</span>: <cite>d_i</cite></p></li>
+<li><p>Second column: <span class="math notranslate nohighlight">\(log_{10} \left(\frac{d_i}{d_{max}}\right)\)</span></p></li>
+</ul>
+</li>
+</ul>
+<p>As the second column contains only <span class="math notranslate nohighlight">\(log_{10}\)</span> values only negative or
+zero values can be expected (i.e. values in the range between zero and one).</p>
+<p>With <span class="math notranslate nohighlight">\(C_d{^-1} = W_d^T W_d\)</span>; <span class="math notranslate nohighlight">\(W_d = diag
+\left(\frac{1}{\epsilon_1}, \ldots, \frac{1}{\epsilon_n} \right)\)</span></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Computed in <strong>bmcm_mod.f90</strong> function <strong>bata</strong></p>
+</div>
+</section>
+<section id="ata-reg-diag">
+<h3>ata_reg.diag<a class="headerlink" href="#ata-reg-diag" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>First column: Diagonal entry of <span class="math notranslate nohighlight">\(A^T C_d^{-1} A + C_m^{-1}(\lambda)\)</span>:
+<span class="math notranslate nohighlight">\(d_i\)</span></p></li>
+<li><p>Second column: <span class="math notranslate nohighlight">\(log_{10} \left(\frac{d_i}{d_{max}}\right)\)</span></p></li>
+</ul>
+<p><strong>Question: In what way are these values normalized?</strong></p>
+</section>
+<section id="cov1-m-diag-and-cov2-m-diag">
+<h3>cov1_m.diag and cov2_m.diag<a class="headerlink" href="#cov1-m-diag-and-cov2-m-diag" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>Cov1: <span class="math notranslate nohighlight">\(\left[A^T C_d^{-1} A + C_m^{-1}(\lambda) \right]^{-1}\)</span></p></li>
+<li><p>Cov2: <span class="math notranslate nohighlight">\(\left[A^T C_d^{-1} A + C_m^{-1}(\lambda) \right]^{-1} A^T
+C_d^{-1} A \left[A^T C_d^{-1} A + C_m^{-1}(\lambda) \right]^{-1}\)</span></p></li>
+</ul>
+<p><strong>What can I do with these files?</strong></p>
+<p>Both files have the format:</p>
+<p>std err (%) |   <span class="math notranslate nohighlight">\(\delta(\sigma')\)</span>  | <span class="math notranslate nohighlight">\(\delta(\sigma'')\)</span></p>
+<p>In order to get an absolute uncertainty for a given paramter (magnitude AND
+phase), use the formula:</p>
+<p><span class="math notranslate nohighlight">\(\delta Parameter = Parameter \cdot \frac{std err}{100}\)</span></p>
+<p>For more information have a look at the ModelProbe documents <em>D2.1.2_UBO.pdf</em>
+and <em>M2.2_UBO.pdf</em>, which can be found in the CRTomo repository.</p>
+<p>Examples can also be found in the <em>examples/</em> subdirectory of the
+CRTomo repository.</p>
+</section>
+<section id="res-m-diag">
+<h3>res_m.diag<a class="headerlink" href="#res-m-diag" title="Permalink to this headline"></a></h3>
+<p>Stores the resolution matrix, computed from the last iteration. This file is
+written if the value 4 is added to the mswitch. Resolution matrix:</p>
+<p><span class="math notranslate nohighlight">\(\left[A^T C_d^{-1} A + C_m^{-1}(\lambda) \right]^{-1} A^T C_d^{-1} A\)</span></p>
+<ul class="simple">
+<li><p>the first row has four columns:</p>
+<ul>
+<li><p>number of values (cells)</p></li>
+<li><p>lambda that R was computed for</p></li>
+<li><p>min R value</p></li>
+<li><p>max R value. This is the value used to normalize the data</p></li>
+</ul>
+</li>
+<li><p>second to last row:</p>
+<ul>
+<li><p>first column linear value, NOT normalized</p></li>
+<li><p>second column: <span class="math notranslate nohighlight">\(log_{10}\)</span> value, normalized to [0, 1].</p></li>
+</ul>
+</li>
+</ul>
+<p>No units [1].</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For further information, have a look at the CRTomo source file
+<strong>bmcm_mod.f90</strong> in SUBROUTINE bres.</p>
+</div>
+</section>
+<section id="eps-ctr">
+<h3>eps.ctr<a class="headerlink" href="#eps-ctr" title="Permalink to this headline"></a></h3>
+<p>This file consists of two parts: The first part describes the errors in
+relation to the measurements (<code class="docutils literal notranslate"><span class="pre">volt.dat</span></code>). The second one describes the
+errors for each iteration in relation to the forward solution of the current
+model space.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>\<span class="n">tiny</span>
+\<span class="n">begin</span><span class="p">{</span><span class="n">verbatim</span><span class="p">}</span>
+
+     <span class="mi">1</span>	    <span class="mi">1</span><span class="o">/</span><span class="n">eps_r</span>  <span class="mi">1</span><span class="o">/</span><span class="n">eps_p</span>      <span class="mi">1</span><span class="o">/</span><span class="n">eps</span>      <span class="n">eps_r</span>       <span class="n">eps_p</span>       <span class="n">eps</span>      <span class="o">-</span><span class="n">log</span><span class="p">(</span><span class="o">|</span><span class="n">R</span><span class="o">|</span><span class="p">)</span>       <span class="o">-</span><span class="n">Phase</span> <span class="p">(</span><span class="n">rad</span><span class="p">)</span>
+     <span class="mi">2</span>	      <span class="mf">14.2</span>   <span class="mf">20000.0</span>      <span class="mf">14.2</span>     <span class="mf">0.703E-01</span>   <span class="mf">0.500E-04</span>   <span class="mf">0.703E-01</span>  <span class="o">-</span><span class="mf">3.553902</span>      <span class="mf">0.1322917E-02</span>
+		<span class="o">...</span>
+		<span class="o">...</span>
+		<span class="o">...</span>
+   <span class="mi">527</span>	       <span class="mf">6.0</span>   <span class="mf">20000.0</span>       <span class="mf">6.0</span>     <span class="mf">0.167</span>       <span class="mf">0.500E-04</span>   <span class="mf">0.167</span>       <span class="mf">2.276732</span>      <span class="mf">0.3437240E-03</span>
+   <span class="mi">528</span>	
+   <span class="mi">529</span>	<span class="n">IT</span><span class="c1">#      0</span>
+   <span class="mi">530</span>	       <span class="n">eps</span>       <span class="n">psi</span>      <span class="n">pol</span>     <span class="n">Re</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>       <span class="n">Im</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+   <span class="mi">531</span>	   <span class="mf">0.395</span>        <span class="mf">2.342500</span>    <span class="mi">1</span>    <span class="mf">0.2532884</span>       <span class="mf">0.000000</span>    
+		<span class="o">...</span>
+		<span class="o">...</span>
+		<span class="o">...</span>
+  <span class="mi">1056</span>	   <span class="mf">0.718E-01</span>    <span class="mf">5.259448</span>    <span class="mi">1</span>    <span class="o">-</span><span class="mf">3.666626</span>       <span class="mf">0.000000</span>    
+  <span class="mi">1057</span>	
+  <span class="mi">1058</span>	<span class="n">IT</span><span class="c1">#      1</span>
+  <span class="mi">1059</span>	       <span class="n">eps</span>       <span class="n">psi</span>      <span class="n">pol</span>     <span class="n">Re</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>       <span class="n">Im</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+  <span class="mi">1060</span>	   <span class="mf">0.395</span>        <span class="mf">1.881460</span>    <span class="mi">1</span>    <span class="mf">0.4353101</span>      <span class="mf">0.8566426E-02</span>
+		<span class="o">...</span>
+		<span class="o">...</span>
+		<span class="o">...</span>
+  <span class="mi">1585</span>	   <span class="mf">0.718E-01</span>    <span class="mf">0.509647</span>    <span class="mi">1</span>    <span class="o">-</span><span class="mf">4.007404</span>      <span class="mf">0.5183748E-02</span>
+  <span class="mi">1586</span>	
+  <span class="mi">1587</span>	<span class="n">IT</span><span class="c1">#      2</span>
+  <span class="mi">1588</span>	       <span class="n">eps</span>       <span class="n">psi</span>      <span class="n">pol</span>     <span class="n">Re</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>       <span class="n">Im</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+  <span class="mi">1589</span>	   <span class="mf">0.395</span>        <span class="mf">1.898024</span>    <span class="mi">1</span>    <span class="mf">0.4287698</span>      <span class="mf">0.8681247E-02</span>
+		<span class="o">...</span>
+		<span class="o">...</span>
+		<span class="o">...</span>
+  <span class="mi">2114</span>	   <span class="mf">0.718E-01</span>    <span class="mf">0.418030</span>    <span class="mi">1</span>    <span class="o">-</span><span class="mf">4.013978</span>      <span class="mf">0.5163230E-02</span>
+  <span class="mi">2115</span>	
+  <span class="mi">2116</span>	<span class="n">PIT</span><span class="c1">#     2</span>
+  <span class="mi">2117</span>	       <span class="n">eps</span>       <span class="n">psi</span>      <span class="n">pol</span>     <span class="n">Re</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>       <span class="n">Im</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+  <span class="mi">2118</span>	   <span class="mf">0.371E-02</span>    <span class="mf">0.491851</span>    <span class="mi">1</span>    <span class="mf">0.4287698</span>      <span class="mf">0.8681247E-02</span>
+		<span class="o">...</span>
+		<span class="o">...</span>
+		<span class="o">...</span>
+  <span class="mi">2643</span>	   <span class="mf">0.305E-02</span>    <span class="mf">0.050550</span>    <span class="mi">1</span>    <span class="o">-</span><span class="mf">4.013978</span>      <span class="mf">0.5163230E-02</span>
+  <span class="mi">2644</span>	
+  <span class="mi">2645</span>	<span class="n">PIT</span><span class="c1">#     3</span>
+  <span class="mi">2646</span>	       <span class="n">eps</span>       <span class="n">psi</span>      <span class="n">pol</span>     <span class="n">Re</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>       <span class="n">Im</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+  <span class="mi">2647</span>	   <span class="mf">0.371E-02</span>    <span class="mf">0.159764</span>    <span class="mi">1</span>    <span class="mf">0.4287700</span>      <span class="mf">0.6262148E-02</span>
+		<span class="o">...</span>
+		<span class="o">...</span>
+		<span class="o">...</span>
+  <span class="mi">3172</span>	   <span class="mf">0.305E-02</span>    <span class="mf">0.409256</span>    <span class="mi">1</span>    <span class="o">-</span><span class="mf">4.013978</span>      <span class="mf">0.6258056E-02</span>
+  <span class="mi">3173</span>	
+  <span class="mi">3174</span>	<span class="n">PIT</span><span class="c1">#     4</span>
+  <span class="mi">3175</span>	       <span class="n">eps</span>       <span class="n">psi</span>      <span class="n">pol</span>     <span class="n">Re</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>       <span class="n">Im</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+  <span class="mi">3176</span>	   <span class="mf">0.371E-02</span>    <span class="mf">0.160427</span>    <span class="mi">1</span>    <span class="mf">0.4287700</span>      <span class="mf">0.6259686E-02</span>
+		<span class="o">...</span>
+		<span class="o">...</span>
+		<span class="o">...</span>
+  <span class="mi">3701</span>	   <span class="mf">0.305E-02</span>    <span class="mf">0.409742</span>    <span class="mi">1</span>    <span class="o">-</span><span class="mf">4.013978</span>      <span class="mf">0.6259539E-02</span>
+\<span class="n">end</span><span class="p">{</span><span class="n">verbatim</span><span class="p">}</span>
+<span class="p">}</span>
+
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Line 1: Header for the raw data description. <span class="math notranslate nohighlight">\(eps\)</span> is the complex error
+which, depending on the use of the error ellipsis, is based on both magnitude
+and phase errors (Error ellipsis, <span class="math notranslate nohighlight">\(eps = \sqrt{(eps_r)^2 +
+(eps_p)^2}\)</span>), or only the magnitude error (no error ellipsis, <span class="math notranslate nohighlight">\(eps =
+eps_r\)</span>). datum(Re, Im) denotes the real and imaginary parts of the
+measurements as stored internally in CRTomo:</p></li>
+</ul>
+<p><span class="math notranslate nohighlight">\(Re(datum) = -log_e(|R|)\)</span> (Note the natural logarithm!) and
+<span class="math notranslate nohighlight">\(Im(datum) = - Phase (rad)\)</span>. <span class="math notranslate nohighlight">\(eps_r\)</span> is the magnitue error
+(logarithm) and <cite>eps_p</cite> is the phase error (rad). <span class="math notranslate nohighlight">\(eps\)</span> is used in the
+complex inversion while <span class="math notranslate nohighlight">\(eps_p\)</span> is used in the final phase improvement.</p>
+<p><span class="math notranslate nohighlight">\(eps_r\)</span> and <span class="math notranslate nohighlight">\(eps\)</span> can directly be compared to <span class="math notranslate nohighlight">\(log_e(|R|)\)</span>
+and <span class="math notranslate nohighlight">\(eps_p\)</span> can be compared to <span class="math notranslate nohighlight">\(Phase (rad)\)</span>.</p>
+<ul class="simple">
+<li><p>Lines 2 - 527: Error descriptions for each measurement.</p></li>
+<li><p>Line 529: Indicates the Iteration the following data describes.</p></li>
+<li><p>Line 530: Header for the iteration descriptions. <span class="math notranslate nohighlight">\(eps\)</span> is the complex
+error. <span class="math notranslate nohighlight">\(psi = \frac{d_i - f_i}{\epsilon_i}\)</span> is the error weighted
+residuum of the data <span class="math notranslate nohighlight">\(d_i\)</span> and the forward response of the current
+iteration <span class="math notranslate nohighlight">\(d_i\)</span>. <span class="math notranslate nohighlight">\(pol\)</span> gives the polarity of the measurements,
+<span class="math notranslate nohighlight">\(d\)</span> is the forward solution, and <span class="math notranslate nohighlight">\(f\)</span> is the measurement.</p></li>
+</ul>
+</section>
+<section id="inv-ctr">
+<h3>inv.ctr<a class="headerlink" href="#inv-ctr" title="Permalink to this headline"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">inv.ctr</span></code> file contains all information related to the inversion results.
+As such it is the most important file to assess and improve inversion results.
+In the following certain parts of the file will be explained:</p>
+<ul class="simple">
+<li><p>Lines 1 to 10 hold information regarding the specific CRTomo version that was
+used in the inversion.</p></li>
+<li><p>Lines 11 to 44 repeat the legacy parameters of the crtomo.cfg file.</p></li>
+<li><p>Lines 46 to 55 contain information of the grid used and the artificial noise
+applied to the data.</p></li>
+<li><p>Lines 57 to 73 show information regarding all regularization options that can
+be controlled.</p></li>
+<li><p>Lines 75 to 87 hold various options.</p></li>
+<li><p>Lines 89 to 101 contain fixed constants that are hardwired into the CRTomo code.</p></li>
+<li><p>Line 103 separates information available before the inversion from inversion regarding the inversion process.</p></li>
+<li><p>Line 105 contains a header which describes all columns to follow.</p></li>
+<li><p>Lines 107 to 174 contain information of the complex inversion.</p></li>
+<li><p>Lines 178 to 195 contain information of the final phase improvement.</p></li>
+<li><p>Line 196 indicates that the inversion finished gracefully.</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>{\tiny
+\begin{verbatim}
+
+     1	##
+     2	## Complex Resistivity Tomography (CRTomo)
+     3	##
+     4	## Git-Branch master
+     5	## Git-ID 334c078edcdc3b010a9cd68c07880ae845795c2f
+     6	## Compiler ifort
+     7	##
+     8	## Created Tue-Oct-18-14:36:17-2011
+     9	##
+    10	
+    11	       1           #  mswitch
+    12	../grid/elem.dat
+    13	../grid/elec.dat
+    14	../mod/volt.dat
+    15	../inv
+    16	F                  ! difference inversion or (m - m_{prior})
+    17	
+    18	
+    19	
+    20	***PARAMETERS***
+    21	       0           ! nx-switch or # cells in x-direction
+    22	      -1           ! nz-switch or # cells in z-direction
+    23	 1.0000            ! smoothing parameter in x-direction
+    24	 1.0000            ! smoothing parameter in z-direction
+    25	      20           ! max. # inversion iterations
+    26	F                  ! DC inversion ?
+    27	T                  ! robust inversion ?
+    28	T                  ! final phase improvement ?
+    29	 5.0000            ! rel. resistance error level (%)  (parameter A1 in err(R) = A1*abs(R) + A2)
+    30	0.10000E-03        ! min. abs. resistance error (ohm) (parameter A2 in err(R) = A1*abs(R) + A2)
+    31	 0.0000            ! phase error model parameter A1 (mrad/ohm^B) (in err(pha) = A1*abs(R)**B + A2*abs(pha) + A3)
+    32	 0.0000            ! phase error model parameter B  (-)          (in err(pha) = A1*abs(R)**B + A2*abs(pha) + A3)
+    33	 0.0000            ! phase error model parameter A2 (%)          (in err(pha) = A1*abs(R)**B + A2*abs(pha) + A3)
+    34	 2.5000            ! phase error model parameter A3 (mrad)       (in err(pha) = A1*abs(R)**B + A2*abs(pha) + A3)
+    35	T                  ! homogeneous background resistivity ?
+    36	 40.000            ! background magnitude (ohm*m)
+    37	 0.0000            ! background phase (mrad)
+    38	F                  ! Another dataset?
+    39	       0           ! 2D (=0) or 2.5D (=1)
+    40	T                  ! fictitious sink ?
+    41	    4647           ! fictitious sink node number
+    42	F                  ! boundary values ?
+    43	boundary.dat
+    44	 1
+    45	
+    46	***Model stats***
+    47	# Model parameters               9360
+    48	# Data points                     535
+    49	Add data noise ?                      F
+    50	Couple to Err. Modl?                  T
+    51	    seed                            1
+    52	    Variance                 0.0000    
+    53	Add model noise ?                     F
+    54	    seed                            0
+    55	    Variance                 0.0000    
+    56	
+    57	******** Regularization Part *********
+    58	Prior regualrization                  F
+    59	Regularization-switch                 1
+    60	Regular grid smooth                   F
+    61	Triangular regu                       T
+    62	Triangular regu2                      F
+    63	Levenberg damping                     F
+    64	Marquardt damping                     F
+    65	Minimum grad supp                     F
+    66	MGS beta/sns1 (RM)                    F
+    67	MGS beta/sns2 (RM)                    F
+    68	MGS beta/sns1 (RB)                    F
+    69	MGS beta/sns2 (RB)                    F
+    70	TV (Huber)                            F
+    71	Stochastic regu                       F
+    72	Fixed lambda?                         F
+    73	Taking easy lam_0 :    9360.000    
+    74	
+    75	******** Additional output *********
+    76	mswitch                               1
+    77	Read start model?                     F
+    78	Write coverage?                       T
+    79	Write MCM 1?                          F
+    80	Write resolution?                     F
+    81	Write MCM 2?                          F
+    82	Using Gauss ols?                      F
+    83	Forcing negative phase?               F
+    84	Calculate sytop?                      T
+    85	Verbose?                              F
+    86	Error Ellipses?                       F
+    87	Restart FPI with homogenous phase?    F
+    88	
+    89	***FIXED***
+    90	 -- Sytop [m] :                                  -39.000    
+    91	 Force negative phase ?                          F
+    92	 Ratio dataset ?                                 F
+    93	 Min. L1 norm                                     1.0000    
+    94	 Min. rel. decrease of data RMS :                0.20000E-01
+    95	 Min. steplength              :                  0.10000E-02
+    96	 Min. stepsize (||\delta m||) :                   0.0000    
+    97	 Min. error in relaxation :                      0.10000E-03
+    98	 Max. # relaxation iterations :                    936
+    99	 Max. # regularization steps :                    30
+   100	 Initial step factor :                           0.50000    
+   101	 Final   step factor :                           0.90000    
+   102	 
+   103	-------------------------------------------------------------------------------------------------------------
+   104	 
+   105	 ID it.   data RMS    stepsize    lambda      roughn.    CG-steps    mag RMS     pha RMS    - # data    L1-ratio    steplength
+   106	 
+   107	************************************************************************************************************* 
+   108	 IT   0    7.632                                                     7.630       3.887         0         1.13    
+   109	************************************************************************************************************* 
+   110	 UP   1    2.874       736.       9360.      0.1551       226                                           1.000
+   111	 UP   2    2.429       731.       4680.      0.3507       179                                           1.000
+   112	 UP   3    2.044       726.       2569.      0.6208       143                                           1.000
+   113	 UP   4    1.762       723.       1553.      0.9112       117                                           1.000
+   114	 UP   5    1.573       723.       1020.       1.183       100                                           1.000
+   115	 UP   6    1.448       725.       713.1       1.424        89                                           1.000
+   116	 UP   7    1.363       726.       522.3       1.637        80                                           1.000
+   117	 UP   8    1.302       728.       395.7       1.833        73                                           1.000
+   118	 UP   9    1.258       730.       307.4       2.016        67                                           1.000
+   119	 UP  10    1.223       731.       243.5       2.194        60                                           1.000
+   120	 UP  11    1.196       733.       195.9       2.368        55                                           1.000
+   121	 UP  12    1.174       735.       159.6       2.543        51                                           1.000
+   122	 UP  13    1.155       735.       131.3       2.732        45                                           1.000
+   123	 UP  14    1.139       734.       109.1       2.932        39                                           1.000
+   124	 UP  15    1.126       735.       91.30       3.123        36                                           1.000
+   125	 UP  16    1.115       736.       76.90       3.321        33                                           1.000
+   126	 UP  17    1.105       737.       65.12       3.543        30                                           1.000
+   127	 UP  18    1.095       738.       55.43       3.786        28                                           1.000
+   128	 UP  19    1.087       737.       47.42       4.049        25                                           1.000
+   129	 UP  20    1.078       737.       40.74       4.324        23                                           1.000
+   130	 UP  21    1.071       736.       35.15       4.639        21                                           1.000
+   131	 UP  22    1.064       736.       30.45       4.973        20                                           1.000
+   132	 UP  23    1.058       736.       26.48       5.331        19                                           1.000
+   133	 UP  24    1.052       734.       23.10       5.715        18                                           1.000
+   134	 UP  25    1.047       736.       20.21       6.091        18                                           1.000
+   135	 UP  26    1.042       737.       17.73       6.491        18                                           1.000
+   136	 UP  27    1.037       737.       15.59       6.913        18                                           1.000
+   137	 UP  28    1.030       735.       13.76       7.422        17                                           1.000
+   138	 UP  29    1.026       736.       12.18       7.897        17                                           1.000
+   139	 UP  30    1.023       737.       10.80       8.405        17                                           1.000
+   140	 UP  31    3.409       368.       12.18       1.974        17                                           0.500
+   141	************************************************************************************************************* 
+   142	 IT   1    1.026       736.3      12.18       7.897        17        1.235      0.9566         0         1.23       1.000
+   143	************************************************************************************************************* 
+   144	 UP   0   0.5746       22.2       12.18       6.673        43                                           1.000
+   145	 UP   1   0.5989       22.8       18.42       5.641        46                                           1.000
+   146	 UP   2   0.6257       24.6       27.23       4.841        46                                           1.000
+   147	 UP   3   0.6546       27.7       39.28       4.211        51                                           1.000
+   148	 UP   4   0.6850       31.5       55.25       3.718        54                                           1.000
+   149	 UP   5   0.7160       35.8       75.79       3.333        56                                           1.000
+   150	 UP   6   0.7479       40.5       101.4       3.023        57                                           1.000
+   151	 UP   7   0.7807       45.3       132.5       2.771        58                                           1.000
+   152	 UP   8   0.8144       50.2       169.0       2.560        59                                           1.000
+   153	 UP   9   0.8494       55.2       210.5       2.379        61                                           1.000
+   154	 UP  10   0.8853       60.1       256.1       2.222        63                                           1.000
+   155	 UP  11   0.9212       64.9       304.5       2.087        66                                           1.000
+   156	 UP  12   0.9564       69.4       354.2       1.970        67                                           1.000
+   157	 UP  13   0.9899       73.5       403.4       1.871        68                                           1.000
+   158	 UP  14    1.021       77.3       450.8       1.787        69                                           1.000
+   159	 UP  15   0.7534       36.8       403.4       3.787        68                                           0.500
+   160	************************************************************************************************************* 
+   161	 IT   2   0.6577       3.546      403.4       7.405        68        1.238      0.9554         0        0.048
+   162	************************************************************************************************************* 
+   163	 UP   0   0.9914       66.8       403.4       1.866        68                                           1.000
+   164	 UP   1    1.022       70.3       450.4       1.783        69                                           1.000
+   165	 UP   2   0.7629       33.4       403.4       3.640        68                                           0.500
+   166	************************************************************************************************************* 
+   167	 IT   3   0.9914       66.77      403.4       1.866        68        1.528      0.9726         0        1.000
+   168	************************************************************************************************************* 
+   169	 UP   0    1.008      0.152       403.4       1.812        69                                           1.000
+   170	 UP   1   0.9788      0.201       361.5       1.893        78                                           1.000
+   171	 UP   2   0.9994      0.761E-01   403.4       1.837        69                                           0.500
+   172	************************************************************************************************************* 
+   173	 IT   4    1.000      0.8132E-01  403.4       1.835        69        1.536      0.9723         0        0.534
+   174	************************************************************************************************************* 
+   175	
+   176	-----------------------------------------------------------------------------------------------------------------
+   177	
+   178	************************************************************************************************************* 
+   179	PIT   4   0.9723                                                     1.536      0.9723         0
+   180	************************************************************************************************************* 
+   181	PUP   1   0.9305      0.798E-02   9360.      0.1051E-02    26                                           1.000
+   182	PUP   2   0.9263      0.144E-01   4680.      0.1684E-02    30                                           1.000
+   183	PUP   3   0.9305      0.798E-02   9360.      0.1051E-02    26                                           1.000
+   184	PUP   4   0.9348      0.438E-02  0.1808E+05  0.7200E-03    25                                           1.000
+   185	PUP   5   0.9391      0.241E-02  0.3373E+05  0.5406E-03    28                                           1.000
+   186	PUP   6   0.9437      0.134E-02  0.6071E+05  0.4388E-03    32                                           1.000
+   187	PUP   7   0.9489      0.774E-03  0.1053E+06  0.3719E-03    42                                           1.000
+   188	PUP   8   0.9560      0.526E-03  0.1749E+06  0.3192E-03    50                                           1.000
+   189	PUP   9   0.9656      0.587E-03  0.2746E+06  0.2747E-03    62                                           1.000
+   190	PUP  10   0.9772      0.952E-03  0.3992E+06  0.2385E-03    70                                           1.000
+   191	PUP  11   0.9888      0.151E-02  0.5297E+06  0.2118E-03    74                                           1.000
+   192	PUP  12   0.9985      0.207E-02  0.6415E+06  0.1943E-03    83                                           1.000
+   193	************************************************************************************************************* 
+   194	PIT   5   0.9888      0.1509E-02 0.5297E+06  0.2118E-03    74        1.536      0.9888         0        1.000
+   195	************************************************************************************************************* 
+   196	***finished***
+\end{verbatim}
+}
+
+</pre></div>
+</div>
+</section>
+<section id="modl-files">
+<h3>.modl files<a class="headerlink" href="#modl-files" title="Permalink to this headline"></a></h3>
+<p>The first row contains the number of grid cells (conductivities). Starting with
+the second row, the magnitude (in <span class="math notranslate nohighlight">\(\Omega m\)</span>) and the phase (in <span class="math notranslate nohighlight">\(mrad\)</span>)
+are displayed for each grid cell.</p>
+</section>
+<section id="mag-files">
+<h3>.mag files<a class="headerlink" href="#mag-files" title="Permalink to this headline"></a></h3>
+<p>The first row again contains the number of grid cells along with the normalized
+magnitude or phase misfit for the current inversion iteration. The following
+rows contain the x and z centroid coordinates and the magnitude (in <span class="math notranslate nohighlight">\(\Omega m\)</span>)
+or phase (in <span class="math notranslate nohighlight">\(mrad\)</span>) value for the corresponding cell.</p>
+<p><span class="math notranslate nohighlight">\(log_{10}(\rho) (\Omega m)\)</span>    <span class="math notranslate nohighlight">\(\phi (mrad)\)</span></p>
+</section>
+<section id="pha-files">
+<h3>.pha files<a class="headerlink" href="#pha-files" title="Permalink to this headline"></a></h3>
+<p>Structure is similar to the .mag files, except that the third columns contains
+the element phase values in mrad.</p>
+</section>
+<section id="run-ctr">
+<h3>run.ctr<a class="headerlink" href="#run-ctr" title="Permalink to this headline"></a></h3>
+<p>Provides an overview of the inversion process. Due to the adaption to screen
+output, this file look somewhat garbled when viewed in a text editor.</p>
+<p>If the inversion finished sucessfully, the used CPU time will be saved to the file (<code class="docutils literal notranslate"><span class="pre">grep</span> <span class="pre">&quot;\^CPU&quot;</span> <span class="pre">run.ctr</span></code>)</p>
+</section>
+<section id="voltxx-dat">
+<h3>voltXX.dat<a class="headerlink" href="#voltxx-dat" title="Permalink to this headline"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">voltXX.dat</span></code> contains the modelled resistances and phases for all measurement configurations for iteration XX.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Line</span> <span class="mi">1</span><span class="p">:</span> <span class="n">number</span> <span class="n">of</span> <span class="n">measurement</span> <span class="n">configurations</span>
+<span class="n">Line</span> <span class="mi">2</span><span class="o">-</span><span class="n">End</span><span class="p">:</span> <span class="n">Column</span> <span class="mi">1</span><span class="p">:</span> <span class="n">current</span> <span class="n">injection</span> <span class="n">electrode</span> <span class="n">pair</span>
+<span class="p">(</span><span class="n">CRTomo</span> <span class="nb">format</span><span class="p">,</span> <span class="k">as</span> <span class="n">defined</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">dat</span><span class="p">)</span>
+<span class="n">Column</span> <span class="mi">2</span><span class="p">:</span> <span class="n">potential</span> <span class="n">reading</span> <span class="n">electrode</span> <span class="n">pair</span>
+<span class="p">(</span><span class="n">CRTomo</span> <span class="nb">format</span><span class="p">,</span> <span class="k">as</span> <span class="n">defined</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">dat</span><span class="p">)</span>
+<span class="n">Column</span> <span class="mi">3</span><span class="p">:</span> <span class="n">resistance</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">Ohm</span>
+<span class="n">Column</span> <span class="mi">4</span><span class="p">:</span> <span class="n">phase</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">mrad</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="mod">
+<h2>mod/<a class="headerlink" href="#mod" title="Permalink to this headline"></a></h2>
+<section id="crt-files-volt-dat">
+<h3>crt-files/volt.dat<a class="headerlink" href="#crt-files-volt-dat" title="Permalink to this headline"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">volt.dat</span></code> contains the modeled or measured resistances (not resistivities) for all measurement
+configurations defined in <code class="docutils literal notranslate"><span class="pre">config.dat</span></code>. Multiple input formats are currently
+recognized. The input formats are partially determined by external switches and
+partially by certain key structures in the files themselfs:</p>
+<p>External switches:</p>
+<ul class="simple">
+<li><p>DC or complex inversion/fpi (ldc)</p></li>
+</ul>
+<p>Key structures:</p>
+<ul class="simple">
+<li><p>individual errors (lindiv - determined from the first line of the file
+itself)</p></li>
+<li><p>there are two basic file formats recognized, the “CRTomo standard” and the
+“industry standard”.</p></li>
+</ul>
+<p>The format of <code class="docutils literal notranslate"><span class="pre">volt.dat</span></code> is explained by means of example files:</p>
+<p>DC/Complex/FPI case, CRTomo standard:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">3</span>
+<span class="mi">10002</span> <span class="mi">40003</span> <span class="mf">4.3</span> <span class="o">-</span><span class="mf">0.1</span>
+<span class="mi">20003</span> <span class="mi">50004</span> <span class="mf">2.3</span> <span class="o">-</span><span class="mf">0.2</span>
+<span class="mi">30004</span> <span class="mi">60005</span> <span class="mf">9.2</span> <span class="o">-</span><span class="mf">0.6</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Line 1: number of measurement configurations (here: 3)</p></li>
+<li><dl class="simple">
+<dt>Line 2-End:</dt><dd><ul>
+<li><p>Column 1: current injection electrode pair (CRTomo format, as defined in
+config.dat)</p></li>
+<li><p>Column 2: potential reading electrode pair (CRTomo format, as defined in
+config.dat)</p></li>
+<li><p>Column 3: resistance value in <span class="math notranslate nohighlight">\(\Omega\)</span> (CRTomo uses a current of 1
+A, thus this value can also be interpreted as a voltage!)</p></li>
+<li><p>Column 4: phase value (<span class="math notranslate nohighlight">\(\varphi\)</span>) in mrad</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>DC case individual errors:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">3</span> <span class="n">T</span>
+<span class="mi">10002</span> <span class="mi">40003</span> <span class="mf">4.3</span> <span class="mf">0.43</span>
+<span class="mi">20003</span> <span class="mi">50004</span> <span class="mf">2.3</span> <span class="mf">0.23</span>
+<span class="mi">30004</span> <span class="mi">60005</span> <span class="mf">9.2</span> <span class="mf">0.92</span>
+<span class="mi">1</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Line 1 contains the number of measurements, plus the activation switch for
+the individual errors.</p></li>
+<li><dl class="simple">
+<dt>Lines 2-(End-1):</dt><dd><ul>
+<li><p>Column 1: current injection electrode pair (CRTomo format, as defined in
+config.dat)</p></li>
+<li><p>Column 2: potential reading electrode pair (CRTomo format, as defined in
+config.dat)</p></li>
+<li><p>Column 3: resistance value in <span class="math notranslate nohighlight">\(\Omega\)</span> (CRTomo uses a current of 1
+A, thus this value can also be interpreted as a voltage!)</p></li>
+<li><p>Column 4: Normalized individual error (see last line)</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Last line: Square root of the normalization factor of individual errors:
+<span class="math notranslate nohighlight">\(\sqrt{\Delta R_{norm}}\)</span></p></li>
+</ul>
+<p>Each individual error is computed using the value in column 4, multiplied with
+the inverse square of the normalization factor: <span class="math notranslate nohighlight">\(\Delta R_i = R_i /
+\Delta R_{norm} ^ 2\)</span>.
+Also note that the input here is always linear, despite the inversion being
+formulated as log(R).
+Common values for the normalization factors, are as follows.
+To increasing error parameters by a factor of</p>
+<ul class="simple">
+<li><p>2, use a norm factor of 0.7</p></li>
+<li><p>3, use a norm factor of 0.577</p></li>
+<li><p>0.5, use a norm factor of 1.4</p></li>
+<li><p>0.33, use a norm factor of 1.73</p></li>
+</ul>
+<p>Complex/FPI case:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">3</span> <span class="n">T</span>
+<span class="mi">10002</span> <span class="mi">40003</span> <span class="mf">4.3</span> <span class="o">-</span><span class="mi">5</span> <span class="mf">0.43</span> <span class="mf">0.05</span>
+<span class="mi">20003</span> <span class="mi">50004</span> <span class="mf">2.3</span> <span class="o">-</span><span class="mi">10</span> <span class="mf">0.23</span> <span class="mf">0.1</span>
+<span class="mi">30004</span> <span class="mi">60005</span> <span class="mf">9.2</span> <span class="o">-</span><span class="mi">200</span> <span class="mf">0.92</span> <span class="mi">2</span>
+<span class="mi">1</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Line 1 contains the number of measurements, plus the activation switch for
+the individual errors.</p></li>
+<li><dl class="simple">
+<dt>Lines 2-(End-1):</dt><dd><ul>
+<li><p>Column 1: current injection electrode pair (CRTomo format, as defined in
+config.dat)</p></li>
+<li><p>Column 2: potential reading electrode pair (CRTomo format, as defined in
+config.dat)</p></li>
+<li><p>Column 3: resistance value in <span class="math notranslate nohighlight">\(\Omega\)</span> (CRTomo uses a current of 1
+A, thus this value can also be interpreted as a voltage!)</p></li>
+<li><p>Column 4: phase values [mrad]</p></li>
+<li><p>Column 5: Normalized individual magnitude error (see last line)</p></li>
+<li><p>Column 6: Normalized individual phase error (see last line)</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Last line: Square root of the normalization factors of individual errors:
+<span class="math notranslate nohighlight">\(\sqrt{\Delta R_{norm}} \sqrt{\Delta \varphi_{norm}}\)</span></p></li>
+</ul>
+</section>
+<section id="pot-pot-dat">
+<h3>pot/pot.dat<a class="headerlink" href="#pot-pot-dat" title="Permalink to this headline"></a></h3>
+<p>Each <code class="docutils literal notranslate"><span class="pre">pot.dat</span></code> contains the modelled potential distribution for the corresponding
+current injection configuration defined in config.dat (assuming a unit current
+of 1 <span class="math notranslate nohighlight">\(A\)</span>), i.e., the (consecutive) number in the file name corresponds to
+the line number (+1) in <code class="docutils literal notranslate"><span class="pre">config.dat</span></code>. The potential values of the individual
+elements are listed as determined in <code class="docutils literal notranslate"><span class="pre">elem.dat</span></code>.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Line 1-End:</dt><dd><ul>
+<li><p>Column 1: x coordinate in m</p></li>
+<li><p>Column 2: z coordinate in m</p></li>
+<li><p>Column 3: potential in V</p></li>
+<li><p>column 4: phase in mrad</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+</section>
+<section id="rho">
+<h2>rho/<a class="headerlink" href="#rho" title="Permalink to this headline"></a></h2>
+<section id="rho-dat">
+<h3>rho.dat<a class="headerlink" href="#rho-dat" title="Permalink to this headline"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">rho.dat</span></code> contains the resistivity distribution, i.e. the resistivity values
+of the individual elements determined in elem.dat. The format of <code class="docutils literal notranslate"><span class="pre">rho.dat</span></code> is
+explained by means of an example file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2296</span>                   <span class="mi">2296</span> <span class="n">elements</span> <span class="p">(</span><span class="n">of</span> <span class="nb">type</span> <span class="mi">8</span><span class="p">)</span>
+<span class="mf">100.000000</span>    <span class="o">-</span><span class="mi">5</span>       <span class="n">resistivity</span> <span class="ow">and</span> <span class="n">phase</span> <span class="n">of</span> <span class="mi">1</span><span class="n">st</span> <span class="n">element</span> <span class="p">(</span><span class="ow">in</span> <span class="n">m</span><span class="p">)</span>
+<span class="mf">100.000000</span>    <span class="o">-</span><span class="mi">10</span>      <span class="o">.</span>
+<span class="mf">100.000000</span>    <span class="o">-</span><span class="mf">13.4</span>    <span class="o">.</span>
+<span class="o">.</span>             <span class="o">.</span>
+<span class="o">.</span>             <span class="o">.</span>
+<span class="o">.</span>             <span class="o">.</span>
+<span class="mf">99.999756</span>    <span class="mi">0</span>        <span class="o">.</span>
+<span class="mf">99.999893</span>    <span class="mi">0</span>        <span class="o">.</span>
+<span class="mf">99.999954</span>    <span class="mi">0</span>        <span class="n">resistivity</span> <span class="ow">and</span> <span class="n">phase</span> <span class="n">of</span> <span class="mi">2296</span><span class="n">th</span> <span class="n">element</span> <span class="p">(</span><span class="ow">in</span> <span class="n">m</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Line 1: number of elements (of type 8)</p></li>
+<li><dl class="simple">
+<dt>Line 2-End:</dt><dd><ul>
+<li><p>Column 1: resistivity in Ohmm</p></li>
+<li><p>Column 2: phase in mrad</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="basics.html" class="btn btn-neutral float-left" title="Basics" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="best_practices.html" class="btn btn-neutral float-right" title="Configuration checklist" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2021, CRTomo contributors.
+      <span class="lastupdated">Last updated on Dec 14, 2021.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

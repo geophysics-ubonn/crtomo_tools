@@ -1,0 +1,316 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>cr_get_modelling_errors &#8212; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for cr_get_modelling_errors</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Plot deviation between CRMod-derived apparent resistivities and analytical</span>
+<span class="sd">resistivity vs K-factors. Also save the relative deviations to a .dat file.</span>
+
+<span class="sd">dev = (R_mod * K - rho0) / rho0</span>
+
+<span class="sd">* R_mod - modelled resistance value (using CRMod)</span>
+<span class="sd">* K - geometric factor over a homogeneous half-space, computed using the</span>
+<span class="sd">  analytical formula</span>
+<span class="sd">* rho0: resistivity of homogeneous half-space</span>
+
+<span class="sd">Output files</span>
+<span class="sd">------------</span>
+
+<span class="sd">OUTPUT.png: plot K vs. rel. modelling errors</span>
+
+<span class="sd">OUTPUT.dat: Nx2 array, first column: analytical K factors,</span>
+<span class="sd">                       second column: rel. modelling errors</span>
+
+<span class="sd">Usage example</span>
+<span class="sd">-------------</span>
+
+<span class="sd">cr_get_modelling_errors.py --elem grid1/elem.dat --elec grid1/elec.dat\</span>
+<span class="sd">        --config grid1/config.dat -o grid1_modelling_error.png</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">optparse</span> <span class="kn">import</span> <span class="n">OptionParser</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">crtomo.mpl</span>
+<span class="kn">import</span> <span class="nn">crtomo.grid</span> <span class="k">as</span> <span class="nn">CRGrid</span>
+<span class="kn">import</span> <span class="nn">crtomo.tdManager</span> <span class="k">as</span> <span class="nn">tdManager</span>
+<span class="n">plt</span><span class="p">,</span> <span class="n">mpl</span> <span class="o">=</span> <span class="n">crtomo</span><span class="o">.</span><span class="n">mpl</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="handle_cmd_options"><a class="viewcode-back" href="../scripts/grid_tools/cr_get_modelling_errors.html#cr_get_modelling_errors.handle_cmd_options">[docs]</a><span class="k">def</span> <span class="nf">handle_cmd_options</span><span class="p">():</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">OptionParser</span><span class="p">()</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span>
+        <span class="s2">&quot;-e&quot;</span><span class="p">,</span> <span class="s2">&quot;--elem&quot;</span><span class="p">,</span>
+        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;elem_file&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;elem.dat file (default: elem.dat)&quot;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;elem.dat&quot;</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span>
+        <span class="s2">&quot;-t&quot;</span><span class="p">,</span> <span class="s2">&quot;--elec&quot;</span><span class="p">,</span>
+        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;elec_file&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;elec.dat file (default: elec.dat)&quot;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;elec.dat&quot;</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span>
+        <span class="s2">&quot;--config&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;config_file&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;config.dat file (default: config.dat)&quot;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;config.dat&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span>
+        <span class="s2">&quot;-o&quot;</span><span class="p">,</span> <span class="s2">&quot;--output&quot;</span><span class="p">,</span>
+        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;output_file&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Output file (plot) (default: modelling_error.png)&quot;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;modelling_error.png&#39;</span>
+    <span class="p">)</span>
+
+    <span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">options</span></div>
+
+
+<div class="viewcode-block" id="compute_K_factors"><a class="viewcode-back" href="../scripts/grid_tools/cr_get_modelling_errors.html#cr_get_modelling_errors.compute_K_factors">[docs]</a><span class="k">def</span> <span class="nf">compute_K_factors</span><span class="p">(</span><span class="n">elem_file</span><span class="p">,</span> <span class="n">elec_file</span><span class="p">,</span> <span class="n">config_file</span><span class="p">):</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">CRGrid</span><span class="o">.</span><span class="n">crt_grid</span><span class="p">()</span>
+    <span class="n">grid</span><span class="o">.</span><span class="n">load_grid</span><span class="p">(</span><span class="n">elem_file</span><span class="p">,</span> <span class="n">elec_file</span><span class="p">)</span>
+
+    <span class="c1"># we support different types of config files</span>
+    <span class="c1"># if the first line has four columns, treat it as an a b m n file,</span>
+    <span class="c1"># otherwise assume its a CRMod/CRtomo volt.dat file</span>
+    <span class="n">first_line</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="n">max_rows</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">first_line</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">configs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">configs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1e4</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">configs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="mf">1e4</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+        <span class="n">M</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">configs</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1e4</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">configs</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="mf">1e4</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="c1"># we assume that electrodes are positioned on the surface</span>
+    <span class="c1"># therefore we only need X coordinates</span>
+    <span class="n">Exz</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">get_electrode_positions</span><span class="p">()</span>
+    <span class="n">Ex</span> <span class="o">=</span> <span class="n">Exz</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># make sure Ez are all the same</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">Exz</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">Exz</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Are you sure that the grid approximates a halfspace?&#39;</span><span class="p">)</span>
+        <span class="n">exit</span><span class="p">()</span>
+
+    <span class="c1"># get coordinates</span>
+    <span class="n">Xa</span> <span class="o">=</span> <span class="n">Ex</span><span class="p">[</span><span class="n">A</span><span class="p">]</span>
+    <span class="n">Xb</span> <span class="o">=</span> <span class="n">Ex</span><span class="p">[</span><span class="n">B</span><span class="p">]</span>
+    <span class="n">Xm</span> <span class="o">=</span> <span class="n">Ex</span><span class="p">[</span><span class="n">M</span><span class="p">]</span>
+    <span class="n">Xn</span> <span class="o">=</span> <span class="n">Ex</span><span class="p">[</span><span class="n">N</span><span class="p">]</span>
+
+    <span class="n">r_am</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Xa</span> <span class="o">-</span> <span class="n">Xm</span><span class="p">)</span>
+    <span class="n">r_bm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Xb</span> <span class="o">-</span> <span class="n">Xm</span><span class="p">)</span>
+    <span class="n">r_an</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Xa</span> <span class="o">-</span> <span class="n">Xn</span><span class="p">)</span>
+    <span class="n">r_bn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Xb</span> <span class="o">-</span> <span class="n">Xn</span><span class="p">)</span>
+
+    <span class="n">geom</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">r_am</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">r_bm</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">r_an</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">r_bn</span><span class="p">)</span>
+    <span class="n">K</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">geom</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">K</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">A</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">B</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">M</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">T</span></div>
+
+
+<div class="viewcode-block" id="get_R_mod"><a class="viewcode-back" href="../scripts/grid_tools/cr_get_modelling_errors.html#cr_get_modelling_errors.get_R_mod">[docs]</a><span class="k">def</span> <span class="nf">get_R_mod</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">rho0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute synthetic measurements over a homogeneous half-space</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tomodir</span> <span class="o">=</span> <span class="n">tdManager</span><span class="o">.</span><span class="n">tdMan</span><span class="p">(</span>
+        <span class="n">elem_file</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">elem_file</span><span class="p">,</span>
+        <span class="n">elec_file</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">elec_file</span><span class="p">,</span>
+        <span class="n">config_file</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">config_file</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># set model</span>
+    <span class="n">tomodir</span><span class="o">.</span><span class="n">add_homogeneous_model</span><span class="p">(</span><span class="n">magnitude</span><span class="o">=</span><span class="n">rho0</span><span class="p">)</span>
+
+    <span class="c1"># only interested in magnitudes</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="n">tomodir</span><span class="o">.</span><span class="n">measurements</span><span class="p">()[:,</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">Z</span></div>
+
+
+<div class="viewcode-block" id="plot_and_save_deviations"><a class="viewcode-back" href="../scripts/grid_tools/cr_get_modelling_errors.html#cr_get_modelling_errors.plot_and_save_deviations">[docs]</a><span class="k">def</span> <span class="nf">plot_and_save_deviations</span><span class="p">(</span><span class="n">rho0</span><span class="p">,</span> <span class="n">rho_mod</span><span class="p">,</span> <span class="n">Kfactors</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">configs</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;plotting&#39;</span><span class="p">)</span>
+    <span class="c1"># multiply by 100 to get percentage</span>
+    <span class="n">deviation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="n">rho_mod</span> <span class="o">-</span> <span class="n">rho0</span><span class="p">)</span> <span class="o">/</span> <span class="n">rho0</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+
+    <span class="c1"># plot</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">loglog</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Kfactors</span><span class="p">),</span> <span class="n">deviation</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;K [m]&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\frac{K \cdot R^</span><span class="si">{mod}</span><span class="s1"> - \rho_0}{\rho_0}~[\%]$&#39;</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+
+    <span class="c1"># save</span>
+    <span class="n">filename_plot</span> <span class="o">=</span> <span class="n">filename</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;dat&#39;</span>
+
+    <span class="n">Kfactors</span> <span class="o">=</span> <span class="n">Kfactors</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+    <span class="n">deviation</span> <span class="o">=</span> <span class="n">deviation</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+
+    <span class="n">K_dev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span>
+        <span class="n">configs</span><span class="p">,</span>
+        <span class="n">Kfactors</span><span class="p">,</span>
+        <span class="n">deviation</span>
+    <span class="p">))</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename_plot</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fid</span><span class="p">:</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="s1">&#39;#A   B   M   N    K       Dev[%]</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span>
+            <span class="n">fid</span><span class="p">,</span>
+            <span class="n">K_dev</span><span class="p">,</span>
+            <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.3i</span><span class="s1"> </span><span class="si">%.3i</span><span class="s1"> </span><span class="si">%.3i</span><span class="s1"> </span><span class="si">%.3i</span><span class="s1"> </span><span class="si">%.4f</span><span class="s1"> </span><span class="si">%.6f</span><span class="s1">&#39;</span>
+        <span class="p">)</span>
+
+    <span class="n">indices_sorted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">deviation</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">K_dev_sorted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span>
+        <span class="p">(</span>
+            <span class="n">configs</span><span class="p">[</span><span class="n">indices_sorted</span><span class="p">,</span> <span class="p">:],</span>
+            <span class="n">Kfactors</span><span class="p">[</span><span class="n">indices_sorted</span><span class="p">,</span> <span class="p">:],</span>
+            <span class="n">deviation</span><span class="p">[</span><span class="n">indices_sorted</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename_plot</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_sorted.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fid</span><span class="p">:</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="s1">&#39;#A   B   M   N    K       Dev[%]</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span>
+            <span class="n">fid</span><span class="p">,</span>
+            <span class="n">K_dev_sorted</span><span class="p">,</span>
+            <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.3i</span><span class="s1"> </span><span class="si">%.3i</span><span class="s1"> </span><span class="si">%.3i</span><span class="s1"> </span><span class="si">%.3i</span><span class="s1"> </span><span class="si">%.4f</span><span class="s1"> </span><span class="si">%.6f</span><span class="s1">&#39;</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../scripts/grid_tools/cr_get_modelling_errors.html#cr_get_modelling_errors.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># homogeneous background resistivity [Ohm m]</span>
+    <span class="n">rho0</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">handle_cmd_options</span><span class="p">()</span>
+    <span class="n">Kfactors</span><span class="p">,</span> <span class="n">configs</span> <span class="o">=</span> <span class="n">compute_K_factors</span><span class="p">(</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">elem_file</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">elec_file</span><span class="p">,</span> <span class="n">options</span><span class="o">.</span><span class="n">config_file</span><span class="p">)</span>
+    <span class="n">Rmod</span> <span class="o">=</span> <span class="n">get_R_mod</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">rho0</span><span class="p">)</span>
+    <span class="n">rho_mod</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Kfactors</span><span class="p">)</span> <span class="o">*</span> <span class="n">Rmod</span>
+    <span class="n">plot_and_save_deviations</span><span class="p">(</span>
+        <span class="n">rho0</span><span class="p">,</span>
+        <span class="n">rho_mod</span><span class="p">,</span>
+        <span class="n">Kfactors</span><span class="p">,</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">output_file</span><span class="p">,</span>
+        <span class="n">configs</span>
+    <span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">crtomo tools</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">lib</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2021, CRTomo contributors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

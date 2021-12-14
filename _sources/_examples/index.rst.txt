@@ -1,0 +1,639 @@
+:orphan:
+
+
+
+.. _sphx_glr__examples:
+
+Examples
+========
+
+Below is a gallery of examples
+
+
+.. raw:: html
+
+    <div class="sphx-glr-clear"></div>
+
+
+
+.. _sphx_glr__examples_00_grids:
+
+Examples: Grid handling
+-----------------------
+
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Grids for CRTomo can be created in multiple ways. We now support two ways:">
+
+.. only:: html
+
+ .. figure:: /_examples/00_grids/images/thumb/sphx_glr_plot_grid1_thumb.png
+     :alt: Creating and handling grids
+
+     :ref:`sphx_glr__examples_00_grids_plot_grid1.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /_examples/00_grids/plot_grid1
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates how to import a local module and how images are stacked when two plot...">
+
+.. only:: html
+
+ .. figure:: /_examples/00_grids/images/thumb/sphx_glr_plot_test_thumb.png
+     :alt: Plotting the exponential function
+
+     :ref:`sphx_glr__examples_00_grids_plot_test.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /_examples/00_grids/plot_test
+.. raw:: html
+
+    <div class="sphx-glr-clear"></div>
+
+
+
+.. _sphx_glr__examples_01_modelling:
+
+Examples: Modelling
+-------------------
+
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Sensitivity distributions can be easily plotted using the tdMan class:">
+
+.. only:: html
+
+ .. figure:: /_examples/01_modelling/images/thumb/sphx_glr_plot_00_sensitivity_thumb.png
+     :alt: Plotting sensitivities
+
+     :ref:`sphx_glr__examples_01_modelling_plot_00_sensitivity.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /_examples/01_modelling/plot_00_sensitivity
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Generate Gaussian Models">
+
+.. only:: html
+
+ .. figure:: /_examples/01_modelling/images/thumb/sphx_glr_plot_01_gaussian_model_thumb.png
+     :alt: Generate Gaussian Models
+
+     :ref:`sphx_glr__examples_01_modelling_plot_01_gaussian_model.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /_examples/01_modelling/plot_01_gaussian_model
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Plot a potential distribution">
+
+.. only:: html
+
+ .. figure:: /_examples/01_modelling/images/thumb/sphx_glr_plot_02_potentials_thumb.png
+     :alt: Plot a potential distribution
+
+     :ref:`sphx_glr__examples_01_modelling_plot_02_potentials.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /_examples/01_modelling/plot_02_potentials
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The eit manager can be used to easily create forward models using different parameterizations.">
+
+.. only:: html
+
+ .. figure:: /_examples/01_modelling/images/thumb/sphx_glr_plot_04_gen_seit_model_thumb.png
+     :alt: Generating sEIT forward models
+
+     :ref:`sphx_glr__examples_01_modelling_plot_04_gen_seit_model.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /_examples/01_modelling/plot_04_gen_seit_model
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Generating sEIT forward models using a mask and a lookup table">
+
+.. only:: html
+
+ .. figure:: /_examples/01_modelling/images/thumb/sphx_glr_plot_05_seit_fwd_lookup_thumb.png
+     :alt: Generating sEIT forward models using a mask and a lookup table
+
+     :ref:`sphx_glr__examples_01_modelling_plot_05_seit_fwd_lookup.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /_examples/01_modelling/plot_05_seit_fwd_lookup
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A 2D space, time and frequency data set is generated for testing purposes in reda.">
+
+.. only:: html
+
+ .. figure:: /_examples/01_modelling/images/thumb/sphx_glr_plot_06_synthetic_4d_thumb.png
+     :alt: Generating a 4D synthetic data set with noise.
+
+     :ref:`sphx_glr__examples_01_modelling_plot_06_synthetic_4d.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /_examples/01_modelling/plot_06_synthetic_4d
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Test plotting forward models for different mesh boundaries.">
+
+.. only:: html
+
+ .. figure:: /_examples/01_modelling/images/thumb/sphx_glr_plot_07_fwd_model_plotting_thumb.png
+     :alt: Plot forward models
+
+     :ref:`sphx_glr__examples_01_modelling_plot_07_fwd_model_plotting.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /_examples/01_modelling/plot_07_fwd_model_plotting
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Segmenting sensitivity distributions">
+
+.. only:: html
+
+ .. figure:: /_examples/01_modelling/images/thumb/sphx_glr_plot_08_sensitivity_thresholding_thumb.png
+     :alt: Segmenting sensitivity distributions
+
+     :ref:`sphx_glr__examples_01_modelling_plot_08_sensitivity_thresholding.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /_examples/01_modelling/plot_08_sensitivity_thresholding
+.. raw:: html
+
+    <div class="sphx-glr-clear"></div>
+
+
+
+.. _sphx_glr__examples_02_simple_inversion:
+
+Examples: Single-frequency inversion
+------------------------------------
+
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example discusses details of settings various settings for modeling or inversion using the...">
+
+.. only:: html
+
+ .. figure:: /_examples/02_simple_inversion/images/thumb/sphx_glr_plot_01_inversion_settings_thumb.png
+     :alt: Setting modeling and inversion settings
+
+     :ref:`sphx_glr__examples_02_simple_inversion_plot_01_inversion_settings.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /_examples/02_simple_inversion/plot_01_inversion_settings
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="CRTomo implements a last-square inversion with regularization based on the Thikonov appraoch. H...">
+
+.. only:: html
+
+ .. figure:: /_examples/02_simple_inversion/images/thumb/sphx_glr_plot_02_data_errors_thumb.png
+     :alt: Data error handling in CRTomo
+
+     :ref:`sphx_glr__examples_02_simple_inversion_plot_02_data_errors.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /_examples/02_simple_inversion/plot_02_data_errors
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Especially for synthetic modeling/inversion studies it is important to add data noise to the da...">
+
+.. only:: html
+
+ .. figure:: /_examples/02_simple_inversion/images/thumb/sphx_glr_plot_03_adding_data_noise_thumb.png
+     :alt: Adding data noise to measurements
+
+     :ref:`sphx_glr__examples_02_simple_inversion_plot_03_adding_data_noise.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /_examples/02_simple_inversion/plot_03_adding_data_noise
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Full processing of one frequency of one timestep of the data from Weigand and Kemna 2017 (Bioge...">
+
+.. only:: html
+
+ .. figure:: /_examples/02_simple_inversion/images/thumb/sphx_glr_plot_05_single_freq_inversion_CR_thumb.png
+     :alt: A single-frequency inversion (CR container)
+
+     :ref:`sphx_glr__examples_02_simple_inversion_plot_05_single_freq_inversion_CR.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /_examples/02_simple_inversion/plot_05_single_freq_inversion_CR
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Full processing of one frequency of one timestep of the data from Weigand and Kemna 2017 (Bioge...">
+
+.. only:: html
+
+ .. figure:: /_examples/02_simple_inversion/images/thumb/sphx_glr_plot_06_single_freq_inversion_sEIT_thumb.png
+     :alt: A single-frequency inversion (sEIT container)
+
+     :ref:`sphx_glr__examples_02_simple_inversion_plot_06_single_freq_inversion_sEIT.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /_examples/02_simple_inversion/plot_06_single_freq_inversion_sEIT
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Single frequency synthetic study">
+
+.. only:: html
+
+ .. figure:: /_examples/02_simple_inversion/images/thumb/sphx_glr_plot_07_synthetic_modinv_study_thumb.png
+     :alt: Single frequency synthetic study
+
+     :ref:`sphx_glr__examples_02_simple_inversion_plot_07_synthetic_modinv_study.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /_examples/02_simple_inversion/plot_07_synthetic_modinv_study
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shortly shows how to use the MGS regularization">
+
+.. only:: html
+
+ .. figure:: /_examples/02_simple_inversion/images/thumb/sphx_glr_plot_08_study_mgs_thumb.png
+     :alt: Using alternative regularization approaches
+
+     :ref:`sphx_glr__examples_02_simple_inversion_plot_08_study_mgs.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /_examples/02_simple_inversion/plot_08_study_mgs
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In principle an individual data error can be assigned to each data point. However, since data e...">
+
+.. only:: html
+
+ .. figure:: /_examples/02_simple_inversion/images/thumb/sphx_glr_plot_09_individual_errors_thumb.png
+     :alt: Using individual data errors in CRTomo
+
+     :ref:`sphx_glr__examples_02_simple_inversion_plot_09_individual_errors.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /_examples/02_simple_inversion/plot_09_individual_errors
+.. raw:: html
+
+    <div class="sphx-glr-clear"></div>
+
+
+
+.. _sphx_glr__examples_03_inversion_postprocessing:
+
+Examples: Postprocessing of inversion results
+---------------------------------------------
+
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="One of the purposes of the tdManager is to provide an easy interface to analyze inversion resul...">
+
+.. only:: html
+
+ .. figure:: /_examples/03_inversion_postprocessing/images/thumb/sphx_glr_plot_01_tdm_basics_thumb.png
+     :alt: Using the tdManager to investigate inversion results
+
+     :ref:`sphx_glr__examples_03_inversion_postprocessing_plot_01_tdm_basics.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /_examples/03_inversion_postprocessing/plot_01_tdm_basics
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Plot inversion results from a tomodir">
+
+.. only:: html
+
+ .. figure:: /_examples/03_inversion_postprocessing/images/thumb/sphx_glr_plot_02_inversion_results_thumb.png
+     :alt: Plot inversion results from a tomodir
+
+     :ref:`sphx_glr__examples_03_inversion_postprocessing_plot_02_inversion_results.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /_examples/03_inversion_postprocessing/plot_02_inversion_results
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Analyzing data response of inversion result">
+
+.. only:: html
+
+ .. figure:: /_examples/03_inversion_postprocessing/images/thumb/sphx_glr_plot_03_seit_forward_responses_thumb.png
+     :alt: Analyzing data response of inversion result
+
+     :ref:`sphx_glr__examples_03_inversion_postprocessing_plot_03_seit_forward_responses.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /_examples/03_inversion_postprocessing/plot_03_seit_forward_responses
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="bla">
+
+.. only:: html
+
+ .. figure:: /_examples/03_inversion_postprocessing/images/thumb/sphx_glr_test_seit_thumb.png
+     :alt: bla
+
+     :ref:`sphx_glr__examples_03_inversion_postprocessing_test_seit.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /_examples/03_inversion_postprocessing/test_seit
+.. raw:: html
+
+    <div class="sphx-glr-clear"></div>
+
+
+
+.. _sphx_glr__examples_04_full_dataprocessing:
+
+Examples: sEIT import and inversions
+------------------------------------
+
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Full processing of one timestep of the data from Weigand and Kemna 2017 (Biogeosciences).">
+
+.. only:: html
+
+ .. figure:: /_examples/04_full_dataprocessing/images/thumb/sphx_glr_plot_sEIT_import_inversion_thumb.png
+     :alt: Full sEIT data processing example
+
+     :ref:`sphx_glr__examples_04_full_dataprocessing_plot_sEIT_import_inversion.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /_examples/04_full_dataprocessing/plot_sEIT_import_inversion
+.. raw:: html
+
+    <div class="sphx-glr-clear"></div>
+
+
+
+.. _sphx_glr__examples_05_correction_factors:
+
+Calculating correction factors
+------------------------------
+
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Calculation factors used to correct rhizotron tank measurements for analysis with the 2D CRTomo...">
+
+.. only:: html
+
+ .. figure:: /_examples/05_correction_factors/images/thumb/sphx_glr_plot_calculate_correction_factors_thumb.png
+     :alt: Calculating 2D correction factors
+
+     :ref:`sphx_glr__examples_05_correction_factors_plot_calculate_correction_factors.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /_examples/05_correction_factors/plot_calculate_correction_factors
+.. raw:: html
+
+    <div class="sphx-glr-clear"></div>
+
+
+
+.. _sphx_glr__examples_06_field_data_processing:
+
+Examples: Field data processing
+-------------------------------
+
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="    This example is work in progress!!!">
+
+.. only:: html
+
+ .. figure:: /_examples/06_field_data_processing/images/thumb/sphx_glr_plot_01_field_data_syscal_thumb.png
+     :alt: Example for processing field data from Sycal
+
+     :ref:`sphx_glr__examples_06_field_data_processing_plot_01_field_data_syscal.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /_examples/06_field_data_processing/plot_01_field_data_syscal
+.. raw:: html
+
+    <div class="sphx-glr-clear"></div>
+
+
+
+.. only:: html
+
+ .. rst-class:: sphx-glr-signature
+
+    `Gallery generated by Sphinx-Gallery <https://sphinx-gallery.github.io>`_

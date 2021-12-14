@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contributing to the crtomo-tools &mdash; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Complex impedances" href="theory/basics.html" />
+    <link rel="prev" title="Welcome to crtomo tools’s documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> crtomo tools
+          </a>
+              <div class="version">
+                0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing to the crtomo-tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#a-submit-a-bug-report">A. Submit a bug report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#b-send-us-your-example">B. Send us your example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c-contribute-to-the-code">C. Contribute to the code</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fork-the-repository">1. Fork the repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#create-a-feature-branch">2. Create a feature branch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#start-making-your-changes">3. Start making your changes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-your-code">4. Test your code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#submit-a-pull-request">5. Submit a pull request</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#updating-your-work-with-changes-from-upstream">6. Updating your work with changes from upstream</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#d-extendxing-the-documentation">D. Extendxing the documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/modules.html">lib</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">crtomo tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Contributing to the crtomo-tools</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/contributing.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="contributing-to-the-crtomo-tools">
+<h1>Contributing to the crtomo-tools<a class="headerlink" href="#contributing-to-the-crtomo-tools" title="Permalink to this headline"></a></h1>
+<p>As an open-source project, crtomo_tools always welcomes contributions from the
+community. Here, we offer guidance for 3 different ways of contributing with
+increasing levels of required coding proficiency.</p>
+<section id="a-submit-a-bug-report">
+<h2>A. Submit a bug report<a class="headerlink" href="#a-submit-a-bug-report" title="Permalink to this headline"></a></h2>
+<p>If you experience issues with the crtomo_tools, or miss a certain feature,
+please <a class="reference external" href="https://github.com/geophysics-ubonn/crtomo_tools/issues">open a new issue on GitHub</a>. To do so, you
+need to <a class="reference external" href="https://github.com/join">create a GitHub account</a>.</p>
+</section>
+<section id="b-send-us-your-example">
+<h2>B. Send us your example<a class="headerlink" href="#b-send-us-your-example" title="Permalink to this headline"></a></h2>
+<p>We are constantly looking for interesting usage examples of crtomo_tools. If
+you have used the package and would like to contribute your work to the
+examples, please attach your script to a new github issue. Make sure that the
+individual steps in your Python script are documented according
+to the <a class="reference external" href="http://sphinx-gallery.readthedocs.io/en/latest/tutorials/plot_notebook.html">sphinx-gallery syntax</a>.</p>
+</section>
+<section id="c-contribute-to-the-code">
+<h2>C. Contribute to the code<a class="headerlink" href="#c-contribute-to-the-code" title="Permalink to this headline"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To avoid redundant work, please contact us before you start working on a
+non-trivial feature.</p>
+</div>
+<p>The preferred way to contribute to the crtomo_tools code base is via the <em>fork
+and pull</em> collaborative model pull request (PR) on GitHub, described <a class="reference external" href="https://help.github.com/en/articles/about-collaborative-development-models">here</a>.
+The general concept of working with pull requests is explained <a class="reference external" href="https://guides.github.com/introduction/flow">here</a> and involves the following
+steps:</p>
+<section id="fork-the-repository">
+<h3>1. Fork the repository<a class="headerlink" href="#fork-the-repository" title="Permalink to this headline"></a></h3>
+<p>If you are a first-time contributor, you need <a class="reference external" href="https://github.com/join">a GitHub account</a> and your own copy (“fork”) of the code.
+To do so, go to <a class="reference external" href="https://github.com/geophysics-ubonn/crtomo_tools">https://github.com/geophysics-ubonn/crtomo_tools</a> and click the
+“Fork button” in the upper right corner.
+This will create an identical copy of the complete code base under your
+username on the GitHub server.
+Clone this repository to your local disk:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/YOUR_USERNAME/crtomo_tools
+</pre></div>
+</div>
+<p>After that you can install the software as usual.</p>
+</section>
+<section id="create-a-feature-branch">
+<h3>2. Create a feature branch<a class="headerlink" href="#create-a-feature-branch" title="Permalink to this headline"></a></h3>
+<p>Go to the source folder and create a feature branch to hold your changes. It is
+advisable to give it a sensible name describing the overall topic of the
+proposed changes, such as <code class="docutils literal notranslate"><span class="pre">new_plot_script</span></code>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> crtomo_tools
+git checkout -b new_plot_script
+</pre></div>
+</div>
+</section>
+<section id="start-making-your-changes">
+<h3>3. Start making your changes<a class="headerlink" href="#start-making-your-changes" title="Permalink to this headline"></a></h3>
+<p>Go nuts! Add and modify files and regularly commit your changes with meaningful
+commit messages.
+Remember that you are working in your own personal copy and in case you break
+something, you can always go back.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git add new_file1 new_file2 modified_file1
+git commit -m <span class="s2">&quot;implement new plot method method after Authors et al 2019&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="test-your-code">
+<h3>4. Test your code<a class="headerlink" href="#test-your-code" title="Permalink to this headline"></a></h3>
+<p>Make sure that everything works as expected. New functions should always contain
+a docstring with a test:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">sum</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the sum of `a` and `b`.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; a = 1</span>
+<span class="sd">    &gt;&gt;&gt; b = 2</span>
+<span class="sd">    &gt;&gt;&gt; sum(a,b)</span>
+<span class="sd">    3</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+</pre></div>
+</div>
+<p>Docstrings are not yet run automatically, but will be in the future.</p>
+</section>
+<section id="submit-a-pull-request">
+<h3>5. Submit a pull request<a class="headerlink" href="#submit-a-pull-request" title="Permalink to this headline"></a></h3>
+<p>Once you implemented a functioning new feature, make sure your GitHub repository
+contains all your commits:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git push origin new_plot_script
+</pre></div>
+</div>
+<p>After pushing, you can go to GitHub and you will see a green PR button.
+Describe your changes in more detail.
+Once reviewed by the core developers, your PR will be merged to the main
+repository.</p>
+</section>
+<section id="updating-your-work-with-changes-from-upstream">
+<h3>6. Updating your work with changes from upstream<a class="headerlink" href="#updating-your-work-with-changes-from-upstream" title="Permalink to this headline"></a></h3>
+<p>While you work on your forked repository, sometimes changes are commited to the
+main repository (usually called <strong>upstream</strong>).
+You do NOT need to delete your forked repository and refork to apply these
+changes to your own fork.
+Follow the procedure described <a class="reference external" href="https://help.github.com/en/articles/syncing-a-fork">here</a></p>
+<p>Only the first time, add the main repository as a remote to your local (cloned)
+git repository:</p>
+<blockquote>
+<div><p>git remote add upstream <a class="reference external" href="https://github.com/geophysics-ubonn/crtomo_tools.git">https://github.com/geophysics-ubonn/crtomo_tools.git</a></p>
+</div></blockquote>
+<p>Then, to update the local branch <strong>new_plot_script</strong> with the newest changes
+of the upstream branch <strong>master</strong>, execute the following  commands:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git fetch upstream
+git checkout new_plot_script
+git merge upstream/master
+</pre></div>
+</div>
+<p>Update your forked repository branch <strong>new_plot_script</strong> on github:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git push
+</pre></div>
+</div>
+</section>
+</section>
+<section id="d-extendxing-the-documentation">
+<h2>D. Extendxing the documentation<a class="headerlink" href="#d-extendxing-the-documentation" title="Permalink to this headline"></a></h2>
+<p>For documentation purposes we use the sphinx documentation system
+(<a class="reference external" href="https://www.sphinx-doc.org">https://www.sphinx-doc.org</a>) and various plugins. Most notable we use the
+sphinx-gallery (<a class="reference external" href="https://sphinx-gallery.github.io/">https://sphinx-gallery.github.io/</a>) to present examples (located
+in the <strong>examples/</strong> subdirectory of the repository.</p>
+<p>In order to build the documentation it should suffice to install the required
+packages listed in the files <strong>requirements.txt</strong> and <strong>requirements_doc.txt</strong>.
+If you use virtualenvs, a helper script <strong>recreate_venv.sh</strong> creates a
+virtualenv <em>crtomo</em> that should be readily usable.</p>
+<p>Build the documentation by entering the <strong>doc</strong> directory and call:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">html</span>
+</pre></div>
+</div>
+<p>The initial build will take some time, as the examples include some modeling
+and inversion runs.
+However, results will be cached unless the specific example scripts are
+changed, and subsequent calls to <code class="docutils literal notranslate"><span class="pre">`make</span> <span class="pre">html`</span></code> should be significantly
+faster.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is advisable to rebuild the entire documentation before opening a merge
+request. Sometimes errors only show after a complete rebuild.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to crtomo tools’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="theory/basics.html" class="btn btn-neutral float-right" title="Complex impedances" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2021, CRTomo contributors.
+      <span class="lastupdated">Last updated on Dec 14, 2021.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

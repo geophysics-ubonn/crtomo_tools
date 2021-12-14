@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plot inversion results from a tomodir &mdash; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Analyzing data response of inversion result" href="plot_03_seit_forward_responses.html" />
+    <link rel="prev" title="Using the tdManager to investigate inversion results" href="plot_01_tdm_basics.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> crtomo tools
+          </a>
+              <div class="version">
+                0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-grid-handling">Examples: Grid handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-modelling">Examples: Modelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-single-frequency-inversion">Examples: Single-frequency inversion</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#examples-postprocessing-of-inversion-results">Examples: Postprocessing of inversion results</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="plot_01_tdm_basics.html">Using the tdManager to investigate inversion results</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Plot inversion results from a tomodir</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_03_seit_forward_responses.html">Analyzing data response of inversion result</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_seit.html">bla</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-seit-import-and-inversions">Examples: sEIT import and inversions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#calculating-correction-factors">Calculating correction factors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-field-data-processing">Examples: Field data processing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">lib</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">crtomo tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Examples</a> &raquo;</li>
+      <li>Plot inversion results from a tomodir</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/_examples/03_inversion_postprocessing/plot_02_inversion_results.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-03-inversion-postprocessing-plot-02-inversion-results-py"><span class="std std-ref">here</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="plot-inversion-results-from-a-tomodir">
+<span id="sphx-glr-examples-03-inversion-postprocessing-plot-02-inversion-results-py"></span><h1>Plot inversion results from a tomodir<a class="headerlink" href="#plot-inversion-results-from-a-tomodir" title="Permalink to this headline"></a></h1>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">crtomo</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<a href="../../api/crtomo.html#crtomo.tdMan" title="crtomo.tdMan" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.tdMan" title="crtomo.tdMan" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class"><span class="n">crtomo</span><span class="o">.</span><span class="n">tdMan</span></a><span class="p">(</span><span class="n">tomodir</span><span class="o">=</span><span class="s1">&#39;tomodir&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>importing tomodir tomodir
+This grid was sorted using CutMcK. The nodes were resorted!
+Triangular grid found
+importing tomodir results
+loaded configs: (220, 2)
+reading voltages
+is robust True
+</pre></div>
+</div>
+<p>Plot the last magnitude and phase iteration the quick and dirty way.
+Note that all iterations are stored in the tdm.a[‘inversion’][KEY] list</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../api/crtomo.html#crtomo.tdMan.show_parset" title="crtomo.tdMan.show_parset" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">tdm</span><span class="o">.</span><span class="n">show_parset</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span><span class="o">.</span><span class="n">a</span></a><span class="p">[</span><span class="s1">&#39;inversion&#39;</span><span class="p">][</span><span class="s1">&#39;rmag&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<a href="../../api/crtomo.html#crtomo.tdMan.show_parset" title="crtomo.tdMan.show_parset" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">tdm</span><span class="o">.</span><span class="n">show_parset</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span><span class="o">.</span><span class="n">a</span></a><span class="p">[</span><span class="s1">&#39;inversion&#39;</span><span class="p">][</span><span class="s1">&#39;rpha&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_02_inversion_results_001.png" srcset="../../_images/sphx_glr_plot_02_inversion_results_001.png" alt="plot 02 inversion results" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_02_inversion_results_002.png" srcset="../../_images/sphx_glr_plot_02_inversion_results_002.png" alt="plot 02 inversion results" class = "sphx-glr-single-img"/><p>Let’s do this the nice way: We want to plot the magnitude, real and imaginary
+part of the complex conductivity as well as the phase into one plot result.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pylab</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="c1"># extract parameter set ids</span>
+<a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pid_rmag</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span><span class="o">.</span><span class="n">a</span></a><span class="p">[</span><span class="s1">&#39;inversion&#39;</span><span class="p">][</span><span class="s1">&#39;rmag&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pid_rpha</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span><span class="o">.</span><span class="n">a</span></a><span class="p">[</span><span class="s1">&#39;inversion&#39;</span><span class="p">][</span><span class="s1">&#39;rpha&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pid_cre</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span><span class="o">.</span><span class="n">a</span></a><span class="p">[</span><span class="s1">&#39;inversion&#39;</span><span class="p">][</span><span class="s1">&#39;cre&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pid_cim</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span><span class="o">.</span><span class="n">a</span></a><span class="p">[</span><span class="s1">&#39;inversion&#39;</span><span class="p">][</span><span class="s1">&#39;cim&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="c1"># Note that we can switch out the resistivity magnitude with the conductivity</span>
+<span class="c1"># magnitude by accessing the parset and taking the inverse values.</span>
+<a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">rmag</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">parsets</span></a><span class="p">[</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pid_rmag</span></a><span class="p">]</span>
+<a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">cmag</span></a> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">rmag</span></a>
+
+<span class="c1"># Subsequently, we can assign a new parameter set id (cmag) for the</span>
+<span class="c1"># conductivity magnitude data.</span>
+<a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pid_cmag</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.parManager.ParMan.add_data" title="crtomo.parManager.ParMan.add_data" class="sphx-glr-backref-module-crtomo-parManager sphx-glr-backref-type-py-method"><span class="n">tdm</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">add_data</span></a><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">cmag</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<p>We could now plot this parameter set, but commonly we look at rmag, rpha,
+cre, cim !!!</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Our four datasets can now be plotted using the built-in CRTomo-function</span>
+<span class="c1"># &quot;plot_elements_to_ax&quot;. We can use the &quot;converter-parameter&quot; to convert</span>
+<span class="c1"># the conductivity data to the log10-scale:</span>
+<a href="https://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fig</span></a><span class="p">,</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">axes</span></a> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span> <span class="o">/</span> <span class="mf">2.54</span><span class="p">,</span> <span class="mi">16</span> <span class="o">/</span> <span class="mf">2.54</span><span class="p">),</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">axes</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<a href="../../api/crtomo.html#crtomo.plotManager.plotManager.plot_elements_to_ax" title="crtomo.plotManager.plotManager.plot_elements_to_ax" class="sphx-glr-backref-module-crtomo-plotManager sphx-glr-backref-type-py-method"><span class="n">tdm</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_elements_to_ax</span></a><span class="p">(</span>
+    <span class="n">cid</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pid_rmag</span></a><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+    <span class="n">plot_colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">cmap_name</span><span class="o">=</span><span class="s1">&#39;turbo&#39;</span><span class="p">,</span>
+    <span class="n">xmin</span><span class="o">=-</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">xmax</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span>
+    <span class="n">zmin</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">cblabel</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$log_</span><span class="si">{10}</span><span class="s1">(|\rho| [\Omega m])$&#39;</span><span class="p">,</span>
+    <span class="n">converter</span><span class="o">=</span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ufunc.html#numpy.ufunc" title="numpy.ufunc" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">np</span><span class="o">.</span><span class="n">log10</span></a><span class="p">,</span>
+<span class="p">)</span>
+<a href="https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.get_xaxis.html#matplotlib.axes.Axes.get_xaxis" title="matplotlib.axes.Axes.get_xaxis" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">get_xaxis</span></a><span class="p">()</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+<a href="https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.set_ylabel.html#matplotlib.axes.Axes.set_ylabel" title="matplotlib.axes.Axes.set_ylabel" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span></a><span class="p">(</span><span class="s1">&#39;z [m]&#39;</span><span class="p">)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">axes</span></a><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<a href="../../api/crtomo.html#crtomo.plotManager.plotManager.plot_elements_to_ax" title="crtomo.plotManager.plotManager.plot_elements_to_ax" class="sphx-glr-backref-module-crtomo-plotManager sphx-glr-backref-type-py-method"><span class="n">tdm</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_elements_to_ax</span></a><span class="p">(</span>
+    <span class="n">cid</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pid_rpha</span></a><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+    <span class="n">plot_colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">cmap_name</span><span class="o">=</span><span class="s1">&#39;CMRmap&#39;</span><span class="p">,</span>
+    <span class="n">xmin</span><span class="o">=-</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">xmax</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span>
+    <span class="n">zmin</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">cblabel</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$\phi [mrad]$&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+<a href="https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.get_xaxis.html#matplotlib.axes.Axes.get_xaxis" title="matplotlib.axes.Axes.get_xaxis" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">get_xaxis</span></a><span class="p">()</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+<a href="https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.set_ylabel.html#matplotlib.axes.Axes.set_ylabel" title="matplotlib.axes.Axes.set_ylabel" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span></a><span class="p">(</span><span class="s1">&#39;z [m]&#39;</span><span class="p">)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">axes</span></a><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+<a href="../../api/crtomo.html#crtomo.plotManager.plotManager.plot_elements_to_ax" title="crtomo.plotManager.plotManager.plot_elements_to_ax" class="sphx-glr-backref-module-crtomo-plotManager sphx-glr-backref-type-py-method"><span class="n">tdm</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_elements_to_ax</span></a><span class="p">(</span>
+    <span class="n">cid</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pid_cre</span></a><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+    <span class="n">plot_colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">cmap_name</span><span class="o">=</span><span class="s1">&#39;turbo&#39;</span><span class="p">,</span>
+    <span class="n">xmin</span><span class="o">=-</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">xmax</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span>
+    <span class="n">zmin</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">cblabel</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$log_</span><span class="si">{10}</span><span class="s2">(\sigma&#39;~ [S/m])$&quot;</span><span class="p">,</span>
+    <span class="n">converter</span><span class="o">=</span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ufunc.html#numpy.ufunc" title="numpy.ufunc" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">np</span><span class="o">.</span><span class="n">log10</span></a><span class="p">,</span>
+<span class="p">)</span>
+<a href="https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.get_xaxis.html#matplotlib.axes.Axes.get_xaxis" title="matplotlib.axes.Axes.get_xaxis" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">get_xaxis</span></a><span class="p">()</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+<a href="https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.set_ylabel.html#matplotlib.axes.Axes.set_ylabel" title="matplotlib.axes.Axes.set_ylabel" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span></a><span class="p">(</span><span class="s1">&#39;z [m]&#39;</span><span class="p">)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">axes</span></a><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+<a href="../../api/crtomo.html#crtomo.plotManager.plotManager.plot_elements_to_ax" title="crtomo.plotManager.plotManager.plot_elements_to_ax" class="sphx-glr-backref-module-crtomo-plotManager sphx-glr-backref-type-py-method"><span class="n">tdm</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_elements_to_ax</span></a><span class="p">(</span>
+    <span class="n">cid</span><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pid_cim</span></a><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+    <span class="n">plot_colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">cmap_name</span><span class="o">=</span><span class="s1">&#39;gnuplot2_r&#39;</span><span class="p">,</span>
+    <span class="n">xmin</span><span class="o">=-</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">xmax</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span>
+    <span class="n">zmin</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">cblabel</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$log_</span><span class="si">{10}</span><span class="s2">(\sigma&#39;&#39;~ [S/m])$&quot;</span><span class="p">,</span>
+    <span class="n">converter</span><span class="o">=</span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ufunc.html#numpy.ufunc" title="numpy.ufunc" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">np</span><span class="o">.</span><span class="n">log10</span></a><span class="p">,</span>
+<span class="p">)</span>
+<a href="https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.set_ylabel.html#matplotlib.axes.Axes.set_ylabel" title="matplotlib.axes.Axes.set_ylabel" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span></a><span class="p">(</span><span class="s1">&#39;z [m]&#39;</span><span class="p">)</span>
+<a href="https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.set_xlabel.html#matplotlib.axes.Axes.set_xlabel" title="matplotlib.axes.Axes.set_xlabel" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span></a><span class="p">(</span><span class="s1">&#39;x [m]&#39;</span><span class="p">)</span>
+
+<a href="https://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure.tight_layout" title="matplotlib.figure.Figure.tight_layout" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-method"><span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span></a><span class="p">()</span>
+<a href="https://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure.savefig" title="matplotlib.figure.Figure.savefig" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-method"><span class="n">fig</span><span class="o">.</span><span class="n">savefig</span></a><span class="p">(</span><span class="s1">&#39;crinv_cmaps.jpg&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+
+<span class="c1"># For clarity reasons, it is advisable to plot the parameters in different</span>
+<span class="c1"># colors - here, we used the cmaps &#39;turbo&#39; for Magnitude and Real part of</span>
+<span class="c1"># the conductivity, &#39;CMRmap&#39; for the phase and &#39;gnuplot2_r&#39;</span>
+<span class="c1"># for the imaginary part of the conductivity.</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_02_inversion_results_003.png" srcset="../../_images/sphx_glr_plot_02_inversion_results_003.png" alt="plot 02 inversion results" class = "sphx-glr-single-img"/><p>With the converter parameter, measurement data can be changed on the fly with
+any given function.
+As an example, lets change the sign of the phase values with the function
+“converter_change_sign” (note that we also swap the colormap).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">crtomo.plotManager</span> <span class="kn">import</span> <a href="../../api/crtomo.html#crtomo.plotManager.converter_change_sign" title="crtomo.plotManager.converter_change_sign" class="sphx-glr-backref-module-crtomo-plotManager sphx-glr-backref-type-py-function"><span class="n">converter_change_sign</span></a>
+
+<a href="https://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fig</span></a><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span> <span class="o">/</span> <span class="mf">2.54</span><span class="p">,</span> <span class="mi">7</span> <span class="o">/</span> <span class="mf">2.54</span><span class="p">))</span>
+<a href="../../api/crtomo.html#crtomo.plotManager.plotManager.plot_elements_to_ax" title="crtomo.plotManager.plotManager.plot_elements_to_ax" class="sphx-glr-backref-module-crtomo-plotManager sphx-glr-backref-type-py-method"><span class="n">tdm</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_elements_to_ax</span></a><span class="p">(</span>
+    <span class="n">cid</span><span class="o">=</span><a href="../../api/crtomo.html#crtomo.tdMan.inv_last_rpha_parset" title="crtomo.tdMan.inv_last_rpha_parset" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">tdm</span><span class="o">.</span><span class="n">inv_last_rpha_parset</span></a><span class="p">(),</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+    <span class="n">cmap_name</span><span class="o">=</span><span class="s1">&#39;CMRmap_r&#39;</span><span class="p">,</span>
+    <span class="n">plot_colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">xmin</span><span class="o">=-</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">xmax</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span>
+    <span class="n">zmin</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">cblabel</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$-\phi [mrad]$&#39;</span><span class="p">,</span>
+    <span class="n">converter</span><span class="o">=</span><a href="../../api/crtomo.html#crtomo.plotManager.converter_change_sign" title="crtomo.plotManager.converter_change_sign" class="sphx-glr-backref-module-crtomo-plotManager sphx-glr-backref-type-py-function"><span class="n">converter_change_sign</span></a><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Other converters:</span>
+
+<span class="c1"># from crtomo.plotManager import converter_pm_log10</span>
+<span class="c1"># from crtomo.plotManager import converter_log10_to_lin</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_02_inversion_results_004.png" srcset="../../_images/sphx_glr_plot_02_inversion_results_004.png" alt="plot 02 inversion results" class = "sphx-glr-single-img"/><p>Sometimes, it can also be of interest to only look at the slice or area
+of the data. This can be achieved with the extract_along_line or
+extract_polygon_area functions.
+Here, we create a depth cut at x = 4 m, down to 2 m depth.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pid_pha</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span><span class="o">.</span><span class="n">a</span></a><span class="p">[</span><span class="s1">&#39;inversion&#39;</span><span class="p">][</span><span class="s1">&#39;rpha&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">results</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.parManager.ParMan.extract_along_line" title="crtomo.parManager.ParMan.extract_along_line" class="sphx-glr-backref-module-crtomo-parManager sphx-glr-backref-type-py-method"><span class="n">tdm</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">extract_along_line</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pid_pha</span></a><span class="p">,</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="c1"># x y value</span>
+<span class="nb">print</span><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">results</span></a><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">pylab</span> <span class="k">as</span> <span class="nn">plt</span>
+<a href="https://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fig</span></a><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span> <span class="o">/</span> <span class="mf">2.54</span><span class="p">,</span> <span class="mi">8</span> <span class="o">/</span> <span class="mf">2.54</span><span class="p">))</span>
+<a href="https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.plot.html#matplotlib.axes.Axes.plot" title="matplotlib.axes.Axes.plot" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="o">-</span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">results</span></a><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">results</span></a><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;.-&#39;</span><span class="p">)</span>
+<a href="https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.set_xlabel.html#matplotlib.axes.Axes.set_xlabel" title="matplotlib.axes.Axes.set_xlabel" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$-\phi [mrad]$&#39;</span><span class="p">)</span>
+<a href="https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.set_ylabel.html#matplotlib.axes.Axes.set_ylabel" title="matplotlib.axes.Axes.set_ylabel" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span></a><span class="p">(</span><span class="s1">&#39;depth [m]&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_02_inversion_results_005.png" srcset="../../_images/sphx_glr_plot_02_inversion_results_005.png" alt="plot 02 inversion results" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[[ 4.         -2.         -3.35670114]
+ [ 4.         -1.77777778 -3.4210186 ]
+ [ 4.         -1.55555556 -3.37871909]
+ [ 4.         -1.33333333 -3.28278995]
+ [ 4.         -1.11111111 -3.35931659]
+ [ 4.         -0.88888889 -3.55058503]
+ [ 4.         -0.66666667 -3.8834424 ]
+ [ 4.         -0.44444444 -4.29864407]
+ [ 4.         -0.22222222 -4.98983669]
+ [ 4.          0.         -5.24516344]]
+</pre></div>
+</div>
+<p>Resolution assessment:
+Note that you must explicitly tell CRTomo to compute these measures. This can
+be done using the mswitch: (note that the following line only works if you
+actually invert – here we load from an existing tomodir!)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../api/crtomo.html#crtomo.tdMan" title="crtomo.tdMan" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span></a><span class="o">.</span><span class="n">crtomo_cfg</span><span class="o">.</span><span class="n">set_mswitch</span><span class="p">(</span><span class="s1">&#39;res_m&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">crtomo.plotManager</span> <span class="kn">import</span> <a href="../../api/crtomo.html#crtomo.plotManager.converter_abs_log10" title="crtomo.plotManager.converter_abs_log10" class="sphx-glr-backref-module-crtomo-plotManager sphx-glr-backref-type-py-function"><span class="n">converter_abs_log10</span></a>
+<a href="https://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fig</span></a><span class="p">,</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">axes</span></a> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span> <span class="o">/</span> <span class="mf">2.54</span><span class="p">,</span> <span class="mi">13</span> <span class="o">/</span> <span class="mf">2.54</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">axes</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<a href="../../api/crtomo.html#crtomo.plotManager.plotManager.plot_elements_to_ax" title="crtomo.plotManager.plotManager.plot_elements_to_ax" class="sphx-glr-backref-module-crtomo-plotManager sphx-glr-backref-type-py-method"><span class="n">tdm</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_elements_to_ax</span></a><span class="p">(</span>
+    <span class="n">cid</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span><span class="o">.</span><span class="n">a</span></a><span class="p">[</span><span class="s1">&#39;inversion&#39;</span><span class="p">][</span><span class="s1">&#39;resm&#39;</span><span class="p">],</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+    <span class="n">cmap_name</span><span class="o">=</span><span class="s2">&quot;turbo&quot;</span><span class="p">,</span>
+    <span class="n">plot_colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">xmin</span><span class="o">=-</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">xmax</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span>
+    <span class="n">zmin</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">cblabel</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$log_</span><span class="si">{10}</span><span class="s2">(diag(R))$&quot;</span><span class="p">,</span>
+    <span class="n">converter</span><span class="o">=</span><a href="../../api/crtomo.html#crtomo.plotManager.converter_abs_log10" title="crtomo.plotManager.converter_abs_log10" class="sphx-glr-backref-module-crtomo-plotManager sphx-glr-backref-type-py-function"><span class="n">converter_abs_log10</span></a><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">axes</span></a><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+<a href="../../api/crtomo.html#crtomo.plotManager.plotManager.plot_elements_to_ax" title="crtomo.plotManager.plotManager.plot_elements_to_ax" class="sphx-glr-backref-module-crtomo-plotManager sphx-glr-backref-type-py-method"><span class="n">tdm</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_elements_to_ax</span></a><span class="p">(</span>
+    <span class="n">cid</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span><span class="o">.</span><span class="n">a</span></a><span class="p">[</span><span class="s1">&#39;inversion&#39;</span><span class="p">][</span><span class="s1">&#39;l1_dw_log10_norm&#39;</span><span class="p">],</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+    <span class="n">cmap_name</span><span class="o">=</span><span class="s2">&quot;turbo&quot;</span><span class="p">,</span>
+    <span class="n">plot_colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">xmin</span><span class="o">=-</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">xmax</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span>
+    <span class="n">zmin</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">cblabel</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$log_</span><span class="si">{10}</span><span class="s2">(L1 Coverage)$&quot;</span><span class="p">,</span>
+    <span class="c1"># converter=np.log10,</span>
+<span class="p">)</span>
+
+<span class="n">ax</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">axes</span></a><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+<a href="../../api/crtomo.html#crtomo.plotManager.plotManager.plot_elements_to_ax" title="crtomo.plotManager.plotManager.plot_elements_to_ax" class="sphx-glr-backref-module-crtomo-plotManager sphx-glr-backref-type-py-method"><span class="n">tdm</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_elements_to_ax</span></a><span class="p">(</span>
+    <span class="n">cid</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span><span class="o">.</span><span class="n">a</span></a><span class="p">[</span><span class="s1">&#39;inversion&#39;</span><span class="p">][</span><span class="s1">&#39;l2_dw_log10_norm&#39;</span><span class="p">],</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+    <span class="n">cmap_name</span><span class="o">=</span><span class="s2">&quot;turbo&quot;</span><span class="p">,</span>
+    <span class="n">plot_colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">xmin</span><span class="o">=-</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">xmax</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span>
+    <span class="n">zmin</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">cblabel</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;$log_</span><span class="si">{10}</span><span class="s2">(L2 Coverage)$&quot;</span><span class="p">,</span>
+    <span class="c1"># converter=np.log10,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_02_inversion_results_006.png" srcset="../../_images/sphx_glr_plot_02_inversion_results_006.png" alt="plot 02 inversion results" class = "sphx-glr-single-img"/><div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-03-inversion-postprocessing-plot-02-inversion-results-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/bda2cf7e9a4975d09cdca096874a3264/plot_02_inversion_results.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_02_inversion_results.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/8604de7253a96543cb580e7dce83bceb/plot_02_inversion_results.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_02_inversion_results.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plot_01_tdm_basics.html" class="btn btn-neutral float-left" title="Using the tdManager to investigate inversion results" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_03_seit_forward_responses.html" class="btn btn-neutral float-right" title="Analyzing data response of inversion result" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2021, CRTomo contributors.
+      <span class="lastupdated">Last updated on Dec 14, 2021.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

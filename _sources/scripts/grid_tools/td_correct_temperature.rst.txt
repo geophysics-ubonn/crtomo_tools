@@ -1,0 +1,9 @@
+td\_correct\_temperature module
+===============================
+
+.. automodule:: td_correct_temperature
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:

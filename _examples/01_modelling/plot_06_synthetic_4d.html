@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generating a 4D synthetic data set with noise. &mdash; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Plot forward models" href="plot_07_fwd_model_plotting.html" />
+    <link rel="prev" title="Generating sEIT forward models using a mask and a lookup table" href="plot_05_seit_fwd_lookup.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> crtomo tools
+          </a>
+              <div class="version">
+                0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-grid-handling">Examples: Grid handling</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#examples-modelling">Examples: Modelling</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="plot_00_sensitivity.html">Plotting sensitivities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_01_gaussian_model.html">Generate Gaussian Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_02_potentials.html">Plot a potential distribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_04_gen_seit_model.html">Generating sEIT forward models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_05_seit_fwd_lookup.html">Generating sEIT forward models using a mask and a lookup table</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Generating a 4D synthetic data set with noise.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_07_fwd_model_plotting.html">Plot forward models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_08_sensitivity_thresholding.html">Segmenting sensitivity distributions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-single-frequency-inversion">Examples: Single-frequency inversion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-postprocessing-of-inversion-results">Examples: Postprocessing of inversion results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-seit-import-and-inversions">Examples: sEIT import and inversions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#calculating-correction-factors">Calculating correction factors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-field-data-processing">Examples: Field data processing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">lib</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">crtomo tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Examples</a> &raquo;</li>
+      <li>Generating a 4D synthetic data set with noise.</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/_examples/01_modelling/plot_06_synthetic_4d.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-01-modelling-plot-06-synthetic-4d-py"><span class="std std-ref">here</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="generating-a-4d-synthetic-data-set-with-noise">
+<span id="sphx-glr-examples-01-modelling-plot-06-synthetic-4d-py"></span><h1>Generating a 4D synthetic data set with noise.<a class="headerlink" href="#generating-a-4d-synthetic-data-set-with-noise" title="Permalink to this headline"></a></h1>
+<p>A 2D space, time and frequency data set is generated for testing purposes in
+reda.</p>
+<p>imports</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">glob</span> <span class="kn">import</span> <a href="https://docs.python.org/3/library/glob.html#glob.glob" title="glob.glob" class="sphx-glr-backref-module-glob sphx-glr-backref-type-py-function"><span class="n">glob</span></a>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">crtomo</span>
+<span class="kn">import</span> <span class="nn">reda</span>
+</pre></div>
+</div>
+<p>Generate the forward models</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">frequencies</span></a> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.logspace.html#numpy.logspace" title="numpy.logspace" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">logspace</span></a><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class"><span class="n">crtomo</span><span class="o">.</span><span class="n">crt_grid</span></a><span class="p">(</span>
+    <span class="s1">&#39;data_synthetic_4d/elem.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;data_synthetic_4d/elec.dat&#39;</span>
+<span class="p">)</span>
+
+<span class="c1"># this context manager makes sure that all output is relative to the given</span>
+<span class="c1"># directory</span>
+<span class="k">with</span> <span class="n">reda</span><span class="o">.</span><span class="n">CreateEnterDirectory</span><span class="p">(</span><span class="s1">&#39;output_synthetic_4d&#39;</span><span class="p">):</span>
+    <span class="k">for</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nr</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">anomaly_z_pos</span></a> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">)):</span>
+        <a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">outdir</span></a> <span class="o">=</span> <span class="s1">&#39;modV_</span><span class="si">{:02}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nr</span></a><span class="p">)</span>
+        <span class="k">if</span> <a href="https://docs.python.org/3/library/os.path.html#os.path.isdir" title="os.path.isdir" class="sphx-glr-backref-module-os-path sphx-glr-backref-type-py-function"><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">outdir</span></a><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="n">sinv</span> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.eitMan" title="crtomo.eitMan" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class"><span class="n">crtomo</span><span class="o">.</span><span class="n">eitMan</span></a><span class="p">(</span><a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid</span></a><span class="o">=</span><a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid</span></a><span class="p">,</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">frequencies</span></a><span class="o">=</span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">frequencies</span></a><span class="p">)</span>
+        <span class="n">sinv</span><span class="o">.</span><span class="n">add_homogeneous_model</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">sinv</span><span class="o">.</span><span class="n">set_area_to_single_colecole</span><span class="p">(</span>
+            <span class="mi">18</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">anomaly_z_pos</span></a> <span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">anomaly_z_pos</span></a><span class="p">,</span>
+            <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.04</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">sinv</span><span class="o">.</span><span class="n">plot_forward_models</span><span class="p">()</span>
+        <span class="n">r</span><span class="p">[</span><span class="s1">&#39;rmag&#39;</span><span class="p">][</span><span class="s1">&#39;fig&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;forward_rmag_</span><span class="si">{:02}</span><span class="s1">.pdf&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nr</span></a><span class="p">))</span>
+        <span class="n">r</span><span class="p">[</span><span class="s1">&#39;rpha&#39;</span><span class="p">][</span><span class="s1">&#39;fig&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;forward_rpha_</span><span class="si">{:02}</span><span class="s1">.pdf&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nr</span></a><span class="p">))</span>
+        <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">td</span> <span class="ow">in</span> <span class="n">sinv</span><span class="o">.</span><span class="n">tds</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">td</span><span class="o">.</span><span class="n">configs</span><span class="o">.</span><span class="n">gen_dipole_dipole</span><span class="p">(</span><span class="n">skipc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">nr_voltage_dipoles</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+            <span class="n">td</span><span class="o">.</span><span class="n">configs</span><span class="o">.</span><span class="n">gen_reciprocals</span><span class="p">(</span><span class="n">append</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">sinv</span><span class="o">.</span><span class="n">measurements</span><span class="p">()</span>
+
+        <span class="n">sinv</span><span class="o">.</span><span class="n">save_measurements_to_directory</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">outdir</span></a><span class="p">)</span>
+
+    <span class="c1"># plot pseudosections</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Vdirs</span></a> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><a href="https://docs.python.org/3/library/glob.html#glob.glob" title="glob.glob" class="sphx-glr-backref-module-glob sphx-glr-backref-type-py-function"><span class="n">glob</span></a><span class="p">(</span><span class="s1">&#39;modV*&#39;</span><span class="p">))</span>
+    <span class="k">for</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nr</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Vdir</span></a> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Vdirs</span></a><span class="p">):</span>
+        <span class="n">seit</span> <span class="o">=</span> <span class="n">reda</span><span class="o">.</span><span class="n">sEIT</span><span class="p">()</span>
+        <span class="n">seit</span><span class="o">.</span><span class="n">import_crtomo</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Vdir</span></a><span class="p">)</span>
+        <span class="n">seit</span><span class="o">.</span><span class="n">compute_K_analytical</span><span class="p">(</span><span class="n">spacing</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">seit</span><span class="o">.</span><span class="n">plot_pseudosections</span><span class="p">(</span>
+            <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">return_fig</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;ps_r_</span><span class="si">{:02}</span><span class="s1">.jpg&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nr</span></a><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+        <span class="n">seit</span><span class="o">.</span><span class="n">plot_pseudosections</span><span class="p">(</span>
+            <span class="s1">&#39;rho_a&#39;</span><span class="p">,</span> <span class="n">return_fig</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;ps_rho_a_</span><span class="si">{:02}</span><span class="s1">.jpg&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nr</span></a><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+        <span class="n">seit</span><span class="o">.</span><span class="n">plot_pseudosections</span><span class="p">(</span>
+            <span class="s1">&#39;rpha&#39;</span><span class="p">,</span> <span class="n">return_fig</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;ps_rpha_</span><span class="si">{:02}</span><span class="s1">.jpg&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nr</span></a><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_06_synthetic_4d_001.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_001.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_002.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_002.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_003.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_003.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_004.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_004.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_005.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_005.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_006.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_006.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_007.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_007.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_008.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_008.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_009.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_009.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_010.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_010.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_011.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_011.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_012.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_012.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_013.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_013.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_014.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_014.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_015.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_015.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_016.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_016.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_017.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_017.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_018.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_018.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_019.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_019.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_020.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_020.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_021.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_021.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_022.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_022.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_023.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_023.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_024.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_024.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_025.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_025.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_026.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_026.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_027.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_027.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_028.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_028.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_029.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_029.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_030.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_030.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_031.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_031.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_032.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_032.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_033.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_033.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_034.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_034.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_035.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_035.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_036.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_036.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_037.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_037.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_038.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_038.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_039.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_039.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_040.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_040.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_041.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_041.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_042.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_042.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_043.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_043.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_044.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_044.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_045.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_045.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_046.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_046.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_047.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_047.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_048.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_048.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_049.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_049.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_050.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_050.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_051.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_051.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_052.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_052.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_053.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_053.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_054.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_054.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_055.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_055.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_056.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_056.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_057.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_057.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_058.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_058.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_059.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_059.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_060.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_060.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_061.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_061.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_062.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_062.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_063.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_063.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_064.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_064.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_065.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_065.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_066.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_066.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_067.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_067.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_068.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_068.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_069.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_069.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_070.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_070.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_071.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_071.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_072.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_072.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_073.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_073.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_074.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_074.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_075.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_075.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_076.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_076.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_077.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_077.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_078.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_078.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_079.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_079.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_080.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_080.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_081.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_081.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_082.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_082.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_083.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_083.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_084.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_084.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_085.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_085.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_086.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_086.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_087.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_087.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_088.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_088.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_089.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_089.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_090.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_090.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_091.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_091.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_092.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_092.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_093.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_093.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>This grid was sorted using CutMcK. The nodes were resorted!
+Rectangular grid found
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.380445    106.285593     -0.414318
+std       11.269695     11.269695     11.269695     11.269695      1.092125    257.160101      3.872796
+min        1.000000      2.000000      2.000000      1.000000      0.000583      0.001000    -35.835327
+25%       10.000000     11.000000     11.000000     10.000000      0.003988      0.019307      0.001356
+50%       20.000000     21.000000     21.000000     20.000000      0.017445      1.000000      0.154706
+75%       30.000000     31.000000     31.000000     30.000000      0.096849     51.794747      0.903003
+max       39.000000     40.000000     40.000000     39.000000      4.926872   1000.000000      7.660527
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.380444    106.285593     -0.416545
+std       11.269695     11.269695     11.269695     11.269695      1.092122    257.160101      3.894778
+min        1.000000      2.000000      2.000000      1.000000      0.000582      0.001000    -36.449777
+25%       10.000000     11.000000     11.000000     10.000000      0.003989      0.019307      0.001337
+50%       20.000000     21.000000     21.000000     20.000000      0.017451      1.000000      0.152537
+75%       30.000000     31.000000     31.000000     30.000000      0.096859     51.794747      0.904502
+max       39.000000     40.000000     40.000000     39.000000      4.929787   1000.000000      9.153910
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.380448    106.285593     -0.417535
+std       11.269695     11.269695     11.269695     11.269695      1.092135    257.160101      3.920785
+min        1.000000      2.000000      2.000000      1.000000      0.000580      0.001000    -35.282374
+25%       10.000000     11.000000     11.000000     10.000000      0.003988      0.019307      0.001320
+50%       20.000000     21.000000     21.000000     20.000000      0.017454      1.000000      0.151409
+75%       30.000000     31.000000     31.000000     30.000000      0.096854     51.794747      0.894922
+max       39.000000     40.000000     40.000000     39.000000      4.932667   1000.000000     10.660329
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.380450    106.285593     -0.422057
+std       11.269695     11.269695     11.269695     11.269695      1.092130    257.160101      3.951730
+min        1.000000      2.000000      2.000000      1.000000      0.000581      0.001000    -37.619660
+25%       10.000000     11.000000     11.000000     10.000000      0.003988      0.019307      0.001303
+50%       20.000000     21.000000     21.000000     20.000000      0.017454      1.000000      0.151593
+75%       30.000000     31.000000     31.000000     30.000000      0.096848     51.794747      0.893930
+max       39.000000     40.000000     40.000000     39.000000      4.932269   1000.000000     11.742578
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.380450    106.285593     -0.415531
+std       11.269695     11.269695     11.269695     11.269695      1.092133    257.160101      3.958231
+min        1.000000      2.000000      2.000000      1.000000      0.000581      0.001000    -41.770669
+25%       10.000000     11.000000     11.000000     10.000000      0.003988      0.019307      0.001304
+50%       20.000000     21.000000     21.000000     20.000000      0.017445      1.000000      0.150281
+75%       30.000000     31.000000     31.000000     30.000000      0.096842     51.794747      0.885378
+max       39.000000     40.000000     40.000000     39.000000      4.932193   1000.000000     11.777438
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.380449    106.285593     -0.411232
+std       11.269695     11.269695     11.269695     11.269695      1.092126    257.160101      3.968336
+min        1.000000      2.000000      2.000000      1.000000      0.000581      0.001000    -41.324135
+25%       10.000000     11.000000     11.000000     10.000000      0.003987      0.019307      0.001276
+50%       20.000000     21.000000     21.000000     20.000000      0.017456      1.000000      0.148734
+75%       30.000000     31.000000     31.000000     30.000000      0.096893     51.794747      0.883354
+max       39.000000     40.000000     40.000000     39.000000      4.930208   1000.000000     14.149319
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.380453    106.285593     -0.414421
+std       11.269695     11.269695     11.269695     11.269695      1.092139    257.160101      3.995177
+min        1.000000      2.000000      2.000000      1.000000      0.000580      0.001000    -38.816363
+25%       10.000000     11.000000     11.000000     10.000000      0.003986      0.019307      0.001246
+50%       20.000000     21.000000     21.000000     20.000000      0.017459      1.000000      0.147941
+75%       30.000000     31.000000     31.000000     30.000000      0.096835     51.794747      0.881387
+max       39.000000     40.000000     40.000000     39.000000      4.929714   1000.000000     13.725376
+/home/mweigand/.virtualenvs/reda/lib/python3.9/site-packages/reda/containers/sEIT.py:653: RuntimeWarning: More than 20 figures have been opened. Figures created through the pyplot interface (`matplotlib.pyplot.figure`) are retained until explicitly closed and may consume too much memory. (To control this warning, see the rcParam `figure.max_open_warning`).
+  fig, axes = plt.subplots(
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.380450    106.285593     -0.408876
+std       11.269695     11.269695     11.269695     11.269695      1.092131    257.160101      3.998005
+min        1.000000      2.000000      2.000000      1.000000      0.000579      0.001000    -41.315842
+25%       10.000000     11.000000     11.000000     10.000000      0.003986      0.019307      0.001238
+50%       20.000000     21.000000     21.000000     20.000000      0.017455      1.000000      0.147311
+75%       30.000000     31.000000     31.000000     30.000000      0.096898     51.794747      0.874514
+max       39.000000     40.000000     40.000000     39.000000      4.930456   1000.000000     15.558651
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382116    106.285593     -0.271471
+std       11.269695     11.269695     11.269695     11.269695      1.096959    257.160101      0.689539
+min        1.000000      2.000000      2.000000      1.000000      0.000583      0.001000     -3.433361
+25%       10.000000     11.000000     11.000000     10.000000      0.003980      0.019307     -0.265431
+50%       20.000000     21.000000     21.000000     20.000000      0.018235      1.000000      0.001025
+75%       30.000000     31.000000     31.000000     30.000000      0.094609     51.794747      0.043235
+max       39.000000     40.000000     40.000000     39.000000      4.869180   1000.000000      0.486131
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382118    106.285593     -0.271804
+std       11.269695     11.269695     11.269695     11.269695      1.096964    257.160101      0.693917
+min        1.000000      2.000000      2.000000      1.000000      0.000581      0.001000     -4.223127
+25%       10.000000     11.000000     11.000000     10.000000      0.003977      0.019307     -0.264751
+50%       20.000000     21.000000     21.000000     20.000000      0.018231      1.000000      0.001018
+75%       30.000000     31.000000     31.000000     30.000000      0.094628     51.794747      0.042370
+max       39.000000     40.000000     40.000000     39.000000      4.873014   1000.000000      0.556781
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382116    106.285593     -0.271295
+std       11.269695     11.269695     11.269695     11.269695      1.096953    257.160101      0.696965
+min        1.000000      2.000000      2.000000      1.000000      0.000579      0.001000     -4.609947
+25%       10.000000     11.000000     11.000000     10.000000      0.003976      0.019307     -0.262231
+50%       20.000000     21.000000     21.000000     20.000000      0.018225      1.000000      0.001009
+75%       30.000000     31.000000     31.000000     30.000000      0.094686     51.794747      0.041666
+max       39.000000     40.000000     40.000000     39.000000      4.875304   1000.000000      0.624270
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382105    106.285593     -0.273318
+std       11.269695     11.269695     11.269695     11.269695      1.096908    257.160101      0.705783
+min        1.000000      2.000000      2.000000      1.000000      0.000579      0.001000     -4.817849
+25%       10.000000     11.000000     11.000000     10.000000      0.003973      0.019307     -0.262322
+50%       20.000000     21.000000     21.000000     20.000000      0.018217      1.000000      0.001007
+75%       30.000000     31.000000     31.000000     30.000000      0.094711     51.794747      0.041118
+max       39.000000     40.000000     40.000000     39.000000      4.875976   1000.000000      0.850738
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382102    106.285593     -0.273292
+std       11.269695     11.269695     11.269695     11.269695      1.096895    257.160101      0.709755
+min        1.000000      2.000000      2.000000      1.000000      0.000579      0.001000     -5.455219
+25%       10.000000     11.000000     11.000000     10.000000      0.003973      0.019307     -0.261871
+50%       20.000000     21.000000     21.000000     20.000000      0.018216      1.000000      0.001018
+75%       30.000000     31.000000     31.000000     30.000000      0.094758     51.794747      0.040793
+max       39.000000     40.000000     40.000000     39.000000      4.877193   1000.000000      0.733469
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382106    106.285593     -0.272760
+std       11.269695     11.269695     11.269695     11.269695      1.096909    257.160101      0.713637
+min        1.000000      2.000000      2.000000      1.000000      0.000578      0.001000     -5.611581
+25%       10.000000     11.000000     11.000000     10.000000      0.003970      0.019307     -0.257211
+50%       20.000000     21.000000     21.000000     20.000000      0.018206      1.000000      0.001006
+75%       30.000000     31.000000     31.000000     30.000000      0.094799     51.794747      0.040570
+max       39.000000     40.000000     40.000000     39.000000      4.879000   1000.000000      0.868114
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382104    106.285593     -0.272759
+std       11.269695     11.269695     11.269695     11.269695      1.096899    257.160101      0.716741
+min        1.000000      2.000000      2.000000      1.000000      0.000577      0.001000     -5.782418
+25%       10.000000     11.000000     11.000000     10.000000      0.003971      0.019307     -0.257064
+50%       20.000000     21.000000     21.000000     20.000000      0.018203      1.000000      0.000993
+75%       30.000000     31.000000     31.000000     30.000000      0.094821     51.794747      0.040312
+max       39.000000     40.000000     40.000000     39.000000      4.879156   1000.000000      0.871987
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382103    106.285593     -0.272515
+std       11.269695     11.269695     11.269695     11.269695      1.096896    257.160101      0.720381
+min        1.000000      2.000000      2.000000      1.000000      0.000577      0.001000     -6.112819
+25%       10.000000     11.000000     11.000000     10.000000      0.003970      0.019307     -0.255457
+50%       20.000000     21.000000     21.000000     20.000000      0.018195      1.000000      0.000973
+75%       30.000000     31.000000     31.000000     30.000000      0.094849     51.794747      0.040330
+max       39.000000     40.000000     40.000000     39.000000      4.879658   1000.000000      0.811106
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382133    106.285593     -0.146572
+std       11.269695     11.269695     11.269695     11.269695      1.096926    257.160101      0.260740
+min        1.000000      2.000000      2.000000      1.000000      0.000583      0.001000     -1.161327
+25%       10.000000     11.000000     11.000000     10.000000      0.003976      0.019307     -0.190543
+50%       20.000000     21.000000     21.000000     20.000000      0.018394      1.000000     -0.020338
+75%       30.000000     31.000000     31.000000     30.000000      0.094607     51.794747      0.002783
+max       39.000000     40.000000     40.000000     39.000000      4.869179   1000.000000      0.126950
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382130    106.285593     -0.146691
+std       11.269695     11.269695     11.269695     11.269695      1.096919    257.160101      0.262852
+min        1.000000      2.000000      2.000000      1.000000      0.000581      0.001000     -1.426090
+25%       10.000000     11.000000     11.000000     10.000000      0.003977      0.019307     -0.187667
+50%       20.000000     21.000000     21.000000     20.000000      0.018382      1.000000     -0.019929
+75%       30.000000     31.000000     31.000000     30.000000      0.094631     51.794747      0.002782
+max       39.000000     40.000000     40.000000     39.000000      4.874067   1000.000000      0.145367
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382128    106.285593     -0.146585
+std       11.269695     11.269695     11.269695     11.269695      1.096912    257.160101      0.264251
+min        1.000000      2.000000      2.000000      1.000000      0.000581      0.001000     -1.545443
+25%       10.000000     11.000000     11.000000     10.000000      0.003977      0.019307     -0.187009
+50%       20.000000     21.000000     21.000000     20.000000      0.018374      1.000000     -0.019800
+75%       30.000000     31.000000     31.000000     30.000000      0.094671     51.794747      0.002747
+max       39.000000     40.000000     40.000000     39.000000      4.874107   1000.000000      0.174970
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382127    106.285593     -0.146572
+std       11.269695     11.269695     11.269695     11.269695      1.096909    257.160101      0.265976
+min        1.000000      2.000000      2.000000      1.000000      0.000580      0.001000     -1.775479
+25%       10.000000     11.000000     11.000000     10.000000      0.003976      0.019307     -0.185747
+50%       20.000000     21.000000     21.000000     20.000000      0.018361      1.000000     -0.019730
+75%       30.000000     31.000000     31.000000     30.000000      0.094699     51.794747      0.002725
+max       39.000000     40.000000     40.000000     39.000000      4.875418   1000.000000      0.189817
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382128    106.285593     -0.146494
+std       11.269695     11.269695     11.269695     11.269695      1.096914    257.160101      0.267072
+min        1.000000      2.000000      2.000000      1.000000      0.000579      0.001000     -1.836899
+25%       10.000000     11.000000     11.000000     10.000000      0.003976      0.019307     -0.183907
+50%       20.000000     21.000000     21.000000     20.000000      0.018353      1.000000     -0.019446
+75%       30.000000     31.000000     31.000000     30.000000      0.094739     51.794747      0.002714
+max       39.000000     40.000000     40.000000     39.000000      4.878051   1000.000000      0.174261
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382127    106.285593     -0.146214
+std       11.269695     11.269695     11.269695     11.269695      1.096910    257.160101      0.268762
+min        1.000000      2.000000      2.000000      1.000000      0.000580      0.001000     -1.965929
+25%       10.000000     11.000000     11.000000     10.000000      0.003976      0.019307     -0.182406
+50%       20.000000     21.000000     21.000000     20.000000      0.018349      1.000000     -0.019251
+75%       30.000000     31.000000     31.000000     30.000000      0.094768     51.794747      0.002724
+max       39.000000     40.000000     40.000000     39.000000      4.881287   1000.000000      0.185859
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382126    106.285593     -0.146221
+std       11.269695     11.269695     11.269695     11.269695      1.096905    257.160101      0.270701
+min        1.000000      2.000000      2.000000      1.000000      0.000579      0.001000     -2.498888
+25%       10.000000     11.000000     11.000000     10.000000      0.003975      0.019307     -0.181399
+50%       20.000000     21.000000     21.000000     20.000000      0.018347      1.000000     -0.019084
+75%       30.000000     31.000000     31.000000     30.000000      0.094770     51.794747      0.002690
+max       39.000000     40.000000     40.000000     39.000000      4.883401   1000.000000      0.205360
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382127    106.285593     -0.146264
+std       11.269695     11.269695     11.269695     11.269695      1.096910    257.160101      0.273080
+min        1.000000      2.000000      2.000000      1.000000      0.000578      0.001000     -2.306592
+25%       10.000000     11.000000     11.000000     10.000000      0.003974      0.019307     -0.178592
+50%       20.000000     21.000000     21.000000     20.000000      0.018342      1.000000     -0.018930
+75%       30.000000     31.000000     31.000000     30.000000      0.094812     51.794747      0.002659
+max       39.000000     40.000000     40.000000     39.000000      4.883462   1000.000000      0.231437
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382134    106.285593     -0.073828
+std       11.269695     11.269695     11.269695     11.269695      1.096921    257.160101      0.129389
+min        1.000000      2.000000      2.000000      1.000000      0.000583      0.001000     -0.563876
+25%       10.000000     11.000000     11.000000     10.000000      0.003983      0.019307     -0.096832
+50%       20.000000     21.000000     21.000000     20.000000      0.018447      1.000000     -0.008022
+75%       30.000000     31.000000     31.000000     30.000000      0.094606     51.794747      0.001271
+max       39.000000     40.000000     40.000000     39.000000      4.869178   1000.000000      0.045792
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382127    106.285593     -0.073900
+std       11.269695     11.269695     11.269695     11.269695      1.096893    257.160101      0.130406
+min        1.000000      2.000000      2.000000      1.000000      0.000581      0.001000     -0.686443
+25%       10.000000     11.000000     11.000000     10.000000      0.003981      0.019307     -0.095096
+50%       20.000000     21.000000     21.000000     20.000000      0.018418      1.000000     -0.007857
+75%       30.000000     31.000000     31.000000     30.000000      0.094637     51.794747      0.001266
+max       39.000000     40.000000     40.000000     39.000000      4.873760   1000.000000      0.051236
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382127    106.285593     -0.073978
+std       11.269695     11.269695     11.269695     11.269695      1.096895    257.160101      0.131355
+min        1.000000      2.000000      2.000000      1.000000      0.000580      0.001000     -0.763344
+25%       10.000000     11.000000     11.000000     10.000000      0.003980      0.019307     -0.094404
+50%       20.000000     21.000000     21.000000     20.000000      0.018403      1.000000     -0.007887
+75%       30.000000     31.000000     31.000000     30.000000      0.094691     51.794747      0.001255
+max       39.000000     40.000000     40.000000     39.000000      4.874864   1000.000000      0.056605
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382125    106.285593     -0.073991
+std       11.269695     11.269695     11.269695     11.269695      1.096885    257.160101      0.132119
+min        1.000000      2.000000      2.000000      1.000000      0.000580      0.001000     -0.835272
+25%       10.000000     11.000000     11.000000     10.000000      0.003979      0.019307     -0.093754
+50%       20.000000     21.000000     21.000000     20.000000      0.018389      1.000000     -0.007891
+75%       30.000000     31.000000     31.000000     30.000000      0.094721     51.794747      0.001252
+max       39.000000     40.000000     40.000000     39.000000      4.876415   1000.000000      0.064479
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382120    106.285593     -0.073925
+std       11.269695     11.269695     11.269695     11.269695      1.096869    257.160101      0.132825
+min        1.000000      2.000000      2.000000      1.000000      0.000579      0.001000     -1.009534
+25%       10.000000     11.000000     11.000000     10.000000      0.003979      0.019307     -0.093200
+50%       20.000000     21.000000     21.000000     20.000000      0.018376      1.000000     -0.007656
+75%       30.000000     31.000000     31.000000     30.000000      0.094768     51.794747      0.001240
+max       39.000000     40.000000     40.000000     39.000000      4.878912   1000.000000      0.069674
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382126    106.285593     -0.073782
+std       11.269695     11.269695     11.269695     11.269695      1.096891    257.160101      0.133620
+min        1.000000      2.000000      2.000000      1.000000      0.000580      0.001000     -1.208037
+25%       10.000000     11.000000     11.000000     10.000000      0.003978      0.019307     -0.092014
+50%       20.000000     21.000000     21.000000     20.000000      0.018375      1.000000     -0.007474
+75%       30.000000     31.000000     31.000000     30.000000      0.094790     51.794747      0.001242
+max       39.000000     40.000000     40.000000     39.000000      4.880270   1000.000000      0.065766
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382123    106.285593     -0.073814
+std       11.269695     11.269695     11.269695     11.269695      1.096881    257.160101      0.134438
+min        1.000000      2.000000      2.000000      1.000000      0.000579      0.001000     -1.188507
+25%       10.000000     11.000000     11.000000     10.000000      0.003977      0.019307     -0.091308
+50%       20.000000     21.000000     21.000000     20.000000      0.018365      1.000000     -0.007493
+75%       30.000000     31.000000     31.000000     30.000000      0.094807     51.794747      0.001241
+max       39.000000     40.000000     40.000000     39.000000      4.880078   1000.000000      0.065658
+</pre></div>
+</div>
+<p>now generate noisy data</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># this context manager makes sure that all output is relative to the given</span>
+<span class="c1"># directory</span>
+<span class="k">with</span> <span class="n">reda</span><span class="o">.</span><span class="n">CreateEnterDirectory</span><span class="p">(</span><span class="s1">&#39;output_synthetic_4d&#39;</span><span class="p">):</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Vdirs</span></a> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><a href="https://docs.python.org/3/library/glob.html#glob.glob" title="glob.glob" class="sphx-glr-backref-module-glob sphx-glr-backref-type-py-function"><span class="n">glob</span></a><span class="p">(</span><span class="s1">&#39;modV*&#39;</span><span class="p">))</span>
+    <span class="k">for</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nr</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Vdir</span></a> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Vdirs</span></a><span class="p">):</span>
+        <span class="n">seit</span> <span class="o">=</span> <span class="n">reda</span><span class="o">.</span><span class="n">sEIT</span><span class="p">()</span>
+        <span class="n">seit</span><span class="o">.</span><span class="n">import_crtomo</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Vdir</span></a><span class="p">)</span>
+        <span class="n">seit</span><span class="o">.</span><span class="n">compute_K_analytical</span><span class="p">(</span><span class="n">spacing</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># use different seeds for different time steps</span>
+        <a href="http://docs.scipy.org/doc/numpy/reference/random/generated/numpy.random.seed.html#numpy.random.seed" title="numpy.random.seed" class="sphx-glr-backref-module-numpy-random sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span></a><span class="p">(</span><span class="mi">34</span> <span class="o">+</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nr</span></a><span class="p">)</span>
+        <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">noise</span></a> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy/reference/random/generated/numpy.random.normal.html#numpy.random.normal" title="numpy.random.normal" class="sphx-glr-backref-module-numpy-random sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span></a><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.shape.html#pandas.DataFrame.shape" title="pandas.DataFrame.shape" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-property"><span class="n">seit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span></a><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">r_save</span></a> <span class="o">=</span> <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">seit</span><span class="o">.</span><span class="n">data</span></a><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">seit</span><span class="o">.</span><span class="n">data</span></a><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">r_save</span></a> <span class="o">+</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">noise</span></a> <span class="o">*</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">r_save</span></a> <span class="o">/</span> <span class="mf">8000.0</span> <span class="o">*</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ufunc.html#numpy.ufunc" title="numpy.ufunc" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">np</span><span class="o">.</span><span class="n">log</span></a><span class="p">(</span><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">seit</span><span class="o">.</span><span class="n">data</span></a><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">])</span>
+        <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">seit</span><span class="o">.</span><span class="n">data</span></a><span class="p">[</span><span class="s1">&#39;rho_a&#39;</span><span class="p">]</span> <span class="o">=</span> <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">seit</span><span class="o">.</span><span class="n">data</span></a><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span> <span class="o">*</span> <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">seit</span><span class="o">.</span><span class="n">data</span></a><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">]</span>
+        <span class="n">seit</span><span class="o">.</span><span class="n">plot_pseudosections</span><span class="p">(</span>
+            <span class="s1">&#39;rho_a&#39;</span><span class="p">,</span> <span class="n">return_fig</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;noisy_ps_rho_a_</span><span class="si">{:02}</span><span class="s1">.jpg&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nr</span></a><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+        <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">rpha_save</span></a> <span class="o">=</span> <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">seit</span><span class="o">.</span><span class="n">data</span></a><span class="p">[</span><span class="s1">&#39;rpha&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">noise_rpha</span></a> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy/reference/random/generated/numpy.random.normal.html#numpy.random.normal" title="numpy.random.normal" class="sphx-glr-backref-module-numpy-random sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span></a><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.shape.html#pandas.DataFrame.shape" title="pandas.DataFrame.shape" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-property"><span class="n">seit</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span></a><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">seit</span><span class="o">.</span><span class="n">data</span></a><span class="p">[</span><span class="s1">&#39;rpha&#39;</span><span class="p">]</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">rpha_save</span></a> <span class="o">+</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">noise_rpha</span></a> <span class="o">*</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">rpha_save</span></a> <span class="o">/</span> <span class="mf">10.0</span>
+        <span class="n">seit</span><span class="o">.</span><span class="n">plot_pseudosections</span><span class="p">(</span>
+            <span class="s1">&#39;rpha&#39;</span><span class="p">,</span> <span class="n">return_fig</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;ps_rpha_</span><span class="si">{:02}</span><span class="s1">.jpg&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">nr</span></a><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+        <span class="n">seit</span><span class="o">.</span><span class="n">export_to_crtomo_multi_frequency</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">Vdir</span></a> <span class="o">+</span> <span class="s1">&#39;_noisy&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_06_synthetic_4d_094.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_094.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_095.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_095.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_096.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_096.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_097.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_097.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_098.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_098.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_099.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_099.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_100.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_100.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_101.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_101.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_102.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_102.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_103.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_103.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_104.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_104.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_105.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_105.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_106.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_106.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_107.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_107.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_108.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_108.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_109.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_109.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_110.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_110.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_111.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_111.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_112.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_112.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_113.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_113.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_114.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_114.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_115.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_115.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_116.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_116.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_117.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_117.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_118.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_118.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_119.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_119.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_120.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_120.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_121.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_121.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_122.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_122.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_123.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_123.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_124.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_124.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_125.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_125.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_126.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_126.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_127.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_127.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_128.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_128.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_129.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_129.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_130.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_130.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_131.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_131.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_132.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_132.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_133.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_133.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_134.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_134.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_135.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_135.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_136.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_136.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_137.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_137.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_138.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_138.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_139.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_139.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_140.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_140.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_141.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_141.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_142.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_142.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_143.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_143.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_144.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_144.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_145.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_145.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_146.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_146.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_147.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_147.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_148.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_148.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_149.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_149.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_150.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_150.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_151.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_151.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_152.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_152.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_153.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_153.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_154.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_154.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_06_synthetic_4d_155.png" srcset="../../_images/sphx_glr_plot_06_synthetic_4d_155.png" alt="f: 0.001 Hz, f: 0.003 Hz, f: 0.007 Hz, f: 0.019 Hz, f: 0.052 Hz, f: 0.139 Hz, f: 0.373 Hz, f: 1.000 Hz" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.380445    106.285593     -0.414318
+std       11.269695     11.269695     11.269695     11.269695      1.092125    257.160101      3.872796
+min        1.000000      2.000000      2.000000      1.000000      0.000583      0.001000    -35.835327
+25%       10.000000     11.000000     11.000000     10.000000      0.003988      0.019307      0.001356
+50%       20.000000     21.000000     21.000000     20.000000      0.017445      1.000000      0.154706
+75%       30.000000     31.000000     31.000000     30.000000      0.096849     51.794747      0.903003
+max       39.000000     40.000000     40.000000     39.000000      4.926872   1000.000000      7.660527
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.380444    106.285593     -0.416545
+std       11.269695     11.269695     11.269695     11.269695      1.092122    257.160101      3.894778
+min        1.000000      2.000000      2.000000      1.000000      0.000582      0.001000    -36.449777
+25%       10.000000     11.000000     11.000000     10.000000      0.003989      0.019307      0.001337
+50%       20.000000     21.000000     21.000000     20.000000      0.017451      1.000000      0.152537
+75%       30.000000     31.000000     31.000000     30.000000      0.096859     51.794747      0.904502
+max       39.000000     40.000000     40.000000     39.000000      4.929787   1000.000000      9.153910
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.380448    106.285593     -0.417535
+std       11.269695     11.269695     11.269695     11.269695      1.092135    257.160101      3.920785
+min        1.000000      2.000000      2.000000      1.000000      0.000580      0.001000    -35.282374
+25%       10.000000     11.000000     11.000000     10.000000      0.003988      0.019307      0.001320
+50%       20.000000     21.000000     21.000000     20.000000      0.017454      1.000000      0.151409
+75%       30.000000     31.000000     31.000000     30.000000      0.096854     51.794747      0.894922
+max       39.000000     40.000000     40.000000     39.000000      4.932667   1000.000000     10.660329
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.380450    106.285593     -0.422057
+std       11.269695     11.269695     11.269695     11.269695      1.092130    257.160101      3.951730
+min        1.000000      2.000000      2.000000      1.000000      0.000581      0.001000    -37.619660
+25%       10.000000     11.000000     11.000000     10.000000      0.003988      0.019307      0.001303
+50%       20.000000     21.000000     21.000000     20.000000      0.017454      1.000000      0.151593
+75%       30.000000     31.000000     31.000000     30.000000      0.096848     51.794747      0.893930
+max       39.000000     40.000000     40.000000     39.000000      4.932269   1000.000000     11.742578
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.380450    106.285593     -0.415531
+std       11.269695     11.269695     11.269695     11.269695      1.092133    257.160101      3.958231
+min        1.000000      2.000000      2.000000      1.000000      0.000581      0.001000    -41.770669
+25%       10.000000     11.000000     11.000000     10.000000      0.003988      0.019307      0.001304
+50%       20.000000     21.000000     21.000000     20.000000      0.017445      1.000000      0.150281
+75%       30.000000     31.000000     31.000000     30.000000      0.096842     51.794747      0.885378
+max       39.000000     40.000000     40.000000     39.000000      4.932193   1000.000000     11.777438
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.380449    106.285593     -0.411232
+std       11.269695     11.269695     11.269695     11.269695      1.092126    257.160101      3.968336
+min        1.000000      2.000000      2.000000      1.000000      0.000581      0.001000    -41.324135
+25%       10.000000     11.000000     11.000000     10.000000      0.003987      0.019307      0.001276
+50%       20.000000     21.000000     21.000000     20.000000      0.017456      1.000000      0.148734
+75%       30.000000     31.000000     31.000000     30.000000      0.096893     51.794747      0.883354
+max       39.000000     40.000000     40.000000     39.000000      4.930208   1000.000000     14.149319
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.380453    106.285593     -0.414421
+std       11.269695     11.269695     11.269695     11.269695      1.092139    257.160101      3.995177
+min        1.000000      2.000000      2.000000      1.000000      0.000580      0.001000    -38.816363
+25%       10.000000     11.000000     11.000000     10.000000      0.003986      0.019307      0.001246
+50%       20.000000     21.000000     21.000000     20.000000      0.017459      1.000000      0.147941
+75%       30.000000     31.000000     31.000000     30.000000      0.096835     51.794747      0.881387
+max       39.000000     40.000000     40.000000     39.000000      4.929714   1000.000000     13.725376
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.380450    106.285593     -0.408876
+std       11.269695     11.269695     11.269695     11.269695      1.092131    257.160101      3.998005
+min        1.000000      2.000000      2.000000      1.000000      0.000579      0.001000    -41.315842
+25%       10.000000     11.000000     11.000000     10.000000      0.003986      0.019307      0.001238
+50%       20.000000     21.000000     21.000000     20.000000      0.017455      1.000000      0.147311
+75%       30.000000     31.000000     31.000000     30.000000      0.096898     51.794747      0.874514
+max       39.000000     40.000000     40.000000     39.000000      4.930456   1000.000000     15.558651
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382116    106.285593     -0.271471
+std       11.269695     11.269695     11.269695     11.269695      1.096959    257.160101      0.689539
+min        1.000000      2.000000      2.000000      1.000000      0.000583      0.001000     -3.433361
+25%       10.000000     11.000000     11.000000     10.000000      0.003980      0.019307     -0.265431
+50%       20.000000     21.000000     21.000000     20.000000      0.018235      1.000000      0.001025
+75%       30.000000     31.000000     31.000000     30.000000      0.094609     51.794747      0.043235
+max       39.000000     40.000000     40.000000     39.000000      4.869180   1000.000000      0.486131
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382114    106.285593     -0.270886
+std       11.269695     11.269695     11.269695     11.269695      1.096949    257.160101      0.692079
+min        1.000000      2.000000      2.000000      1.000000      0.000581      0.001000     -4.336227
+25%       10.000000     11.000000     11.000000     10.000000      0.003978      0.019307     -0.266605
+50%       20.000000     21.000000     21.000000     20.000000      0.018230      1.000000      0.001015
+75%       30.000000     31.000000     31.000000     30.000000      0.094671     51.794747      0.042203
+max       39.000000     40.000000     40.000000     39.000000      4.873021   1000.000000      0.568025
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382103    106.285593     -0.272885
+std       11.269695     11.269695     11.269695     11.269695      1.096903    257.160101      0.700957
+min        1.000000      2.000000      2.000000      1.000000      0.000580      0.001000     -4.601608
+25%       10.000000     11.000000     11.000000     10.000000      0.003975      0.019307     -0.264997
+50%       20.000000     21.000000     21.000000     20.000000      0.018226      1.000000      0.001012
+75%       30.000000     31.000000     31.000000     30.000000      0.094713     51.794747      0.041314
+max       39.000000     40.000000     40.000000     39.000000      4.873986   1000.000000      0.689858
+/home/mweigand/.virtualenvs/reda/lib/python3.9/site-packages/reda/containers/sEIT.py:653: RuntimeWarning: More than 20 figures have been opened. Figures created through the pyplot interface (`matplotlib.pyplot.figure`) are retained until explicitly closed and may consume too much memory. (To control this warning, see the rcParam `figure.max_open_warning`).
+  fig, axes = plt.subplots(
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382100    106.285593     -0.272879
+std       11.269695     11.269695     11.269695     11.269695      1.096891    257.160101      0.705152
+min        1.000000      2.000000      2.000000      1.000000      0.000581      0.001000     -5.309147
+25%       10.000000     11.000000     11.000000     10.000000      0.003973      0.019307     -0.262348
+50%       20.000000     21.000000     21.000000     20.000000      0.018221      1.000000      0.001012
+75%       30.000000     31.000000     31.000000     30.000000      0.094742     51.794747      0.041119
+max       39.000000     40.000000     40.000000     39.000000      4.877690   1000.000000      0.722055
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382104    106.285593     -0.272281
+std       11.269695     11.269695     11.269695     11.269695      1.096905    257.160101      0.708489
+min        1.000000      2.000000      2.000000      1.000000      0.000580      0.001000     -5.258071
+25%       10.000000     11.000000     11.000000     10.000000      0.003972      0.019307     -0.258710
+50%       20.000000     21.000000     21.000000     20.000000      0.018208      1.000000      0.001011
+75%       30.000000     31.000000     31.000000     30.000000      0.094776     51.794747      0.040695
+max       39.000000     40.000000     40.000000     39.000000      4.878508   1000.000000      0.776673
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382102    106.285593     -0.272286
+std       11.269695     11.269695     11.269695     11.269695      1.096895    257.160101      0.711687
+min        1.000000      2.000000      2.000000      1.000000      0.000580      0.001000     -5.576797
+25%       10.000000     11.000000     11.000000     10.000000      0.003971      0.019307     -0.257580
+50%       20.000000     21.000000     21.000000     20.000000      0.018212      1.000000      0.000988
+75%       30.000000     31.000000     31.000000     30.000000      0.094813     51.794747      0.040670
+max       39.000000     40.000000     40.000000     39.000000      4.879754   1000.000000      0.811758
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382101    106.285593     -0.272010
+std       11.269695     11.269695     11.269695     11.269695      1.096892    257.160101      0.715399
+min        1.000000      2.000000      2.000000      1.000000      0.000578      0.001000     -5.790665
+25%       10.000000     11.000000     11.000000     10.000000      0.003970      0.019307     -0.258702
+50%       20.000000     21.000000     21.000000     20.000000      0.018200      1.000000      0.000985
+75%       30.000000     31.000000     31.000000     30.000000      0.094819     51.794747      0.040492
+max       39.000000     40.000000     40.000000     39.000000      4.878995   1000.000000      0.856992
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382098    106.285593     -0.272047
+std       11.269695     11.269695     11.269695     11.269695      1.096885    257.160101      0.718736
+min        1.000000      2.000000      2.000000      1.000000      0.000579      0.001000     -6.098519
+25%       10.000000     11.000000     11.000000     10.000000      0.003969      0.019307     -0.255048
+50%       20.000000     21.000000     21.000000     20.000000      0.018206      1.000000      0.000985
+75%       30.000000     31.000000     31.000000     30.000000      0.094841     51.794747      0.040604
+max       39.000000     40.000000     40.000000     39.000000      4.881527   1000.000000      0.962487
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382133    106.285593     -0.146572
+std       11.269695     11.269695     11.269695     11.269695      1.096926    257.160101      0.260740
+min        1.000000      2.000000      2.000000      1.000000      0.000583      0.001000     -1.161327
+25%       10.000000     11.000000     11.000000     10.000000      0.003976      0.019307     -0.190543
+50%       20.000000     21.000000     21.000000     20.000000      0.018394      1.000000     -0.020338
+75%       30.000000     31.000000     31.000000     30.000000      0.094607     51.794747      0.002783
+max       39.000000     40.000000     40.000000     39.000000      4.869179   1000.000000      0.126950
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382131    106.285593     -0.146568
+std       11.269695     11.269695     11.269695     11.269695      1.096923    257.160101      0.262456
+min        1.000000      2.000000      2.000000      1.000000      0.000581      0.001000     -1.356188
+25%       10.000000     11.000000     11.000000     10.000000      0.003977      0.019307     -0.188743
+50%       20.000000     21.000000     21.000000     20.000000      0.018376      1.000000     -0.020148
+75%       30.000000     31.000000     31.000000     30.000000      0.094666     51.794747      0.002765
+max       39.000000     40.000000     40.000000     39.000000      4.872790   1000.000000      0.141645
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382133    106.285593     -0.146542
+std       11.269695     11.269695     11.269695     11.269695      1.096927    257.160101      0.264000
+min        1.000000      2.000000      2.000000      1.000000      0.000580      0.001000     -1.549598
+25%       10.000000     11.000000     11.000000     10.000000      0.003977      0.019307     -0.186426
+50%       20.000000     21.000000     21.000000     20.000000      0.018370      1.000000     -0.019901
+75%       30.000000     31.000000     31.000000     30.000000      0.094688     51.794747      0.002730
+max       39.000000     40.000000     40.000000     39.000000      4.873464   1000.000000      0.159523
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382132    106.285593     -0.146241
+std       11.269695     11.269695     11.269695     11.269695      1.096924    257.160101      0.265577
+min        1.000000      2.000000      2.000000      1.000000      0.000580      0.001000     -1.758336
+25%       10.000000     11.000000     11.000000     10.000000      0.003976      0.019307     -0.185345
+50%       20.000000     21.000000     21.000000     20.000000      0.018356      1.000000     -0.019625
+75%       30.000000     31.000000     31.000000     30.000000      0.094723     51.794747      0.002718
+max       39.000000     40.000000     40.000000     39.000000      4.876697   1000.000000      0.164672
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382130    106.285593     -0.146227
+std       11.269695     11.269695     11.269695     11.269695      1.096919    257.160101      0.267421
+min        1.000000      2.000000      2.000000      1.000000      0.000580      0.001000     -1.960443
+25%       10.000000     11.000000     11.000000     10.000000      0.003975      0.019307     -0.182799
+50%       20.000000     21.000000     21.000000     20.000000      0.018365      1.000000     -0.019647
+75%       30.000000     31.000000     31.000000     30.000000      0.094743     51.794747      0.002695
+max       39.000000     40.000000     40.000000     39.000000      4.878809   1000.000000      0.192441
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382131    106.285593     -0.146286
+std       11.269695     11.269695     11.269695     11.269695      1.096924    257.160101      0.270036
+min        1.000000      2.000000      2.000000      1.000000      0.000579      0.001000     -2.262618
+25%       10.000000     11.000000     11.000000     10.000000      0.003975      0.019307     -0.181557
+50%       20.000000     21.000000     21.000000     20.000000      0.018353      1.000000     -0.019504
+75%       30.000000     31.000000     31.000000     30.000000      0.094793     51.794747      0.002679
+max       39.000000     40.000000     40.000000     39.000000      4.878870   1000.000000      0.230988
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382124    106.285593     -0.146460
+std       11.269695     11.269695     11.269695     11.269695      1.096895    257.160101      0.271869
+min        1.000000      2.000000      2.000000      1.000000      0.000578      0.001000     -2.490482
+25%       10.000000     11.000000     11.000000     10.000000      0.003973      0.019307     -0.180351
+50%       20.000000     21.000000     21.000000     20.000000      0.018353      1.000000     -0.019225
+75%       30.000000     31.000000     31.000000     30.000000      0.094818     51.794747      0.002684
+max       39.000000     40.000000     40.000000     39.000000      4.880017   1000.000000      0.224431
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382124    106.285593     -0.146656
+std       11.269695     11.269695     11.269695     11.269695      1.096898    257.160101      0.274540
+min        1.000000      2.000000      2.000000      1.000000      0.000579      0.001000     -2.612938
+25%       10.000000     11.000000     11.000000     10.000000      0.003973      0.019307     -0.179949
+50%       20.000000     21.000000     21.000000     20.000000      0.018343      1.000000     -0.019204
+75%       30.000000     31.000000     31.000000     30.000000      0.094856     51.794747      0.002632
+max       39.000000     40.000000     40.000000     39.000000      4.884569   1000.000000      0.228073
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382134    106.285593     -0.073828
+std       11.269695     11.269695     11.269695     11.269695      1.096921    257.160101      0.129389
+min        1.000000      2.000000      2.000000      1.000000      0.000583      0.001000     -0.563876
+25%       10.000000     11.000000     11.000000     10.000000      0.003983      0.019307     -0.096832
+50%       20.000000     21.000000     21.000000     20.000000      0.018447      1.000000     -0.008022
+75%       30.000000     31.000000     31.000000     30.000000      0.094606     51.794747      0.001271
+max       39.000000     40.000000     40.000000     39.000000      4.869178   1000.000000      0.045792
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382129    106.285593     -0.073773
+std       11.269695     11.269695     11.269695     11.269695      1.096906    257.160101      0.130134
+min        1.000000      2.000000      2.000000      1.000000      0.000582      0.001000     -0.671279
+25%       10.000000     11.000000     11.000000     10.000000      0.003981      0.019307     -0.094985
+50%       20.000000     21.000000     21.000000     20.000000      0.018413      1.000000     -0.007953
+75%       30.000000     31.000000     31.000000     30.000000      0.094641     51.794747      0.001270
+max       39.000000     40.000000     40.000000     39.000000      4.873774   1000.000000      0.049713
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382128    106.285593     -0.073841
+std       11.269695     11.269695     11.269695     11.269695      1.096897    257.160101      0.131230
+min        1.000000      2.000000      2.000000      1.000000      0.000581      0.001000     -0.743067
+25%       10.000000     11.000000     11.000000     10.000000      0.003981      0.019307     -0.094004
+50%       20.000000     21.000000     21.000000     20.000000      0.018405      1.000000     -0.007936
+75%       30.000000     31.000000     31.000000     30.000000      0.094665     51.794747      0.001265
+max       39.000000     40.000000     40.000000     39.000000      4.875181   1000.000000      0.058277
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382127    106.285593     -0.073857
+std       11.269695     11.269695     11.269695     11.269695      1.096899    257.160101      0.131904
+min        1.000000      2.000000      2.000000      1.000000      0.000581      0.001000     -0.852437
+25%       10.000000     11.000000     11.000000     10.000000      0.003980      0.019307     -0.093170
+50%       20.000000     21.000000     21.000000     20.000000      0.018390      1.000000     -0.007821
+75%       30.000000     31.000000     31.000000     30.000000      0.094700     51.794747      0.001257
+max       39.000000     40.000000     40.000000     39.000000      4.877611   1000.000000      0.058154
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382128    106.285593     -0.074000
+std       11.269695     11.269695     11.269695     11.269695      1.096904    257.160101      0.133037
+min        1.000000      2.000000      2.000000      1.000000      0.000581      0.001000     -1.026950
+25%       10.000000     11.000000     11.000000     10.000000      0.003979      0.019307     -0.092886
+50%       20.000000     21.000000     21.000000     20.000000      0.018384      1.000000     -0.007826
+75%       30.000000     31.000000     31.000000     30.000000      0.094748     51.794747      0.001254
+max       39.000000     40.000000     40.000000     39.000000      4.881607   1000.000000      0.067721
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382129    106.285593     -0.073735
+std       11.269695     11.269695     11.269695     11.269695      1.096913    257.160101      0.133153
+min        1.000000      2.000000      2.000000      1.000000      0.000580      0.001000     -0.945913
+25%       10.000000     11.000000     11.000000     10.000000      0.003978      0.019307     -0.091639
+50%       20.000000     21.000000     21.000000     20.000000      0.018373      1.000000     -0.007674
+75%       30.000000     31.000000     31.000000     30.000000      0.094800     51.794747      0.001236
+max       39.000000     40.000000     40.000000     39.000000      4.882048   1000.000000      0.062573
+Summary:
+                  a             b             m             n             r     frequency          rpha
+count  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000  21090.000000
+mean      20.000000     21.000000     21.000000     20.000000      0.382125    106.285593     -0.073784
+std       11.269695     11.269695     11.269695     11.269695      1.096898    257.160101      0.134249
+min        1.000000      2.000000      2.000000      1.000000      0.000580      0.001000     -0.975368
+25%       10.000000     11.000000     11.000000     10.000000      0.003978      0.019307     -0.090577
+50%       20.000000     21.000000     21.000000     20.000000      0.018366      1.000000     -0.007592
+75%       30.000000     31.000000     31.000000     30.000000      0.094837     51.794747      0.001230
+max       39.000000     40.000000     40.000000     39.000000      4.880413   1000.000000      0.070778
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 4 minutes  37.018 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-01-modelling-plot-06-synthetic-4d-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/81a7c375e9ba4f9813b3692165b7b1c5/plot_06_synthetic_4d.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_06_synthetic_4d.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/31a1c7c1e31350da0b99db81b601a073/plot_06_synthetic_4d.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_06_synthetic_4d.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plot_05_seit_fwd_lookup.html" class="btn btn-neutral float-left" title="Generating sEIT forward models using a mask and a lookup table" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_07_fwd_model_plotting.html" class="btn btn-neutral float-right" title="Plot forward models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2021, CRTomo contributors.
+      <span class="lastupdated">Last updated on Dec 14, 2021.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

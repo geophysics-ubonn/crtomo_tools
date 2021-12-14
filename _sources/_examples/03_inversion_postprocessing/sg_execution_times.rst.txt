@@ -1,0 +1,18 @@
+
+:orphan:
+
+.. _sphx_glr__examples_03_inversion_postprocessing_sg_execution_times:
+
+Computation times
+=================
+**00:12.361** total execution time for **_examples_03_inversion_postprocessing** files:
+
++---------------------------------------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr__examples_03_inversion_postprocessing_plot_03_seit_forward_responses.py` (``plot_03_seit_forward_responses.py``) | 00:09.140 | 0.0 MB |
++---------------------------------------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr__examples_03_inversion_postprocessing_plot_02_inversion_results.py` (``plot_02_inversion_results.py``)           | 00:02.532 | 0.0 MB |
++---------------------------------------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr__examples_03_inversion_postprocessing_plot_01_tdm_basics.py` (``plot_01_tdm_basics.py``)                         | 00:00.690 | 0.0 MB |
++---------------------------------------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr__examples_03_inversion_postprocessing_test_seit.py` (``test_seit.py``)                                           | 00:00.000 | 0.0 MB |
++---------------------------------------------------------------------------------------------------------------------------------+-----------+--------+

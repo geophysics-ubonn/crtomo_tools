@@ -1,0 +1,440 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>crtomo.interface &#8212; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for crtomo.interface</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;This is meant as a simple interface to CRMod, i.e. the forward operator and</span>
+<span class="sd">its Jacobian. Nothing more.</span>
+
+<span class="sd">It can be used to experiment with alternative inversion strategies outside of</span>
+<span class="sd">the old FORTRAN code, but bear in mind that the CRMod binary is used to compute</span>
+<span class="sd">everything. This is slow and involves writing things to disc. If possible use</span>
+<span class="sd">another, better interfaced forward code such as pygimli.</span>
+
+<span class="sd">The plan is to support both resistivity-only and complex (magnitude/phase)</span>
+<span class="sd">versions.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">crtomo</span>
+<span class="kn">from</span> <span class="nn">crtomo.grid</span> <span class="kn">import</span> <span class="n">crt_grid</span>
+
+
+<div class="viewcode-block" id="crmod_interface"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.interface.crmod_interface">[docs]</a><span class="k">class</span> <span class="nc">crmod_interface</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="crmod_interface.__init__"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.interface.crmod_interface.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">configs</span><span class="p">,</span> <span class="n">tempdir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize the CRMod interface</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        grid : crtomo.grid.crt_grid</span>
+<span class="sd">            FE grid to work with</span>
+<span class="sd">        configs : Nx4 numpy.ndarray</span>
+<span class="sd">            Measurement configurations to work with (ABMN)</span>
+<span class="sd">        tempdir : string, optional</span>
+<span class="sd">            If set, use this directory for (temporary) file output. For example</span>
+<span class="sd">            using the RAM-disc (/dev/shm) can potentially speed things up a</span>
+<span class="sd">            lot.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">configs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">crt_grid</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">tempdir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">tempdir</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="n">grid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configs</span> <span class="o">=</span> <span class="n">configs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tempdir</span> <span class="o">=</span> <span class="n">tempdir</span></div>
+
+<div class="viewcode-block" id="crmod_interface._get_tdm"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.interface.crmod_interface._get_tdm">[docs]</a>    <span class="k">def</span> <span class="nf">_get_tdm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;For a given model of resistivity magnitudes and phases, return a</span>
+<span class="sd">        tdMan instance</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        m : Nx1|Nx2 ndarray</span>
+<span class="sd">            N Model parameters, first column linear resistivity magnitudes [ohm</span>
+<span class="sd">            m], second column resistivity phase values [mrad]</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tdm : crtomo.tdMan</span>
+<span class="sd">            td manager</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">m</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+        <span class="c1"># print(&#39;gettm&#39;)</span>
+        <span class="c1"># import IPython</span>
+        <span class="c1"># IPython.embed()</span>
+        <span class="n">tdm</span> <span class="o">=</span> <span class="n">crtomo</span><span class="o">.</span><span class="n">tdMan</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">tempdir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tempdir</span><span class="p">)</span>
+        <span class="n">tdm</span><span class="o">.</span><span class="n">configs</span><span class="o">.</span><span class="n">add_to_configs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configs</span><span class="p">)</span>
+
+        <span class="n">pid_mag</span> <span class="o">=</span> <span class="n">tdm</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">m</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="n">tdm</span><span class="o">.</span><span class="n">register_magnitude_model</span><span class="p">(</span><span class="n">pid_mag</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">pid_pha</span> <span class="o">=</span> <span class="n">tdm</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">m</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pid_pha</span> <span class="o">=</span> <span class="n">tdm</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">tdm</span><span class="o">.</span><span class="n">register_phase_model</span><span class="p">(</span><span class="n">pid_pha</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tdm</span></div>
+
+<div class="viewcode-block" id="crmod_interface.forward_complex"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.interface.crmod_interface.forward_complex">[docs]</a>    <span class="k">def</span> <span class="nf">forward_complex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_sigma</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute a model response, i.e. complex impedances</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        log_sigma : 1xN or 2xN numpy.ndarray</span>
+<span class="sd">            Model parameters. First column: :math:`log_e(\sigma)`, second</span>
+<span class="sd">            column: :math:`\phi_{cond} [mrad]`.  If first dimension is of</span>
+<span class="sd">            length one, assume phase values to be zero.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        measurements : Nx2 numpy.ndarray</span>
+<span class="sd">            Return log_e Y values of computed forward response</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">log_sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">log_sigma</span><span class="p">)</span>
+        <span class="n">rmag</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_sigma</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="k">if</span> <span class="n">log_sigma</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">rpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">rmag</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># convert to resistivities</span>
+            <span class="n">rpha</span> <span class="o">=</span> <span class="o">-</span><span class="n">log_sigma</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">rmag</span><span class="p">,</span> <span class="n">rpha</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">tdm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_tdm</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+        <span class="n">measurements</span> <span class="o">=</span> <span class="n">tdm</span><span class="o">.</span><span class="n">measurements</span><span class="p">()</span>
+        <span class="c1"># convert R to log Y</span>
+        <span class="n">measurements</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">measurements</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="c1"># convert rpha to cpha</span>
+        <span class="n">measurements</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">return</span> <span class="n">measurements</span></div>
+
+<div class="viewcode-block" id="crmod_interface.J"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.interface.crmod_interface.J">[docs]</a>    <span class="k">def</span> <span class="nf">J</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_sigma</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the sensitivity matrix</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        log_sigma : numpy.ndarray</span>
+<span class="sd">            log_e conductivities</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_sigma</span><span class="p">)</span>
+        <span class="n">tdm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_tdm</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+
+        <span class="n">tdm</span><span class="o">.</span><span class="n">model</span><span class="p">(</span>
+            <span class="n">sensitivities</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="c1"># output_directory=stage_dir + &#39;modeling&#39;,</span>
+        <span class="p">)</span>
+
+        <span class="n">measurements</span> <span class="o">=</span> <span class="n">tdm</span><span class="o">.</span><span class="n">measurements</span><span class="p">()</span>
+
+        <span class="c1"># build up the sensitivity matrix</span>
+        <span class="n">sens_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">config_nr</span><span class="p">,</span> <span class="n">cids</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span>
+                <span class="n">tdm</span><span class="o">.</span><span class="n">assignments</span><span class="p">[</span><span class="s1">&#39;sensitivities&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">sens_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tdm</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">parsets</span><span class="p">[</span><span class="n">cids</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+
+        <span class="c1"># [del V / del sigma]</span>
+        <span class="n">sensitivities_lin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sens_list</span><span class="p">)</span>
+
+        <span class="c1"># now convert to the log-sensitivities relevant for CRTomo and the</span>
+        <span class="c1"># resolution matrix</span>
+        <span class="n">sensitivities_log</span> <span class="o">=</span> <span class="n">sensitivities_lin</span>
+        <span class="c1"># multiply measurements on first dimension</span>
+        <span class="n">measurements_rep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span>
+            <span class="n">measurements</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+            <span class="n">sensitivities_lin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># sensitivities_log = sensitivities_log * mfit</span>
+
+        <span class="c1"># multiply resistivities on second dimension</span>
+        <span class="n">m_rep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span>
+            <span class="n">m</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:],</span> <span class="n">sensitivities_lin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+        <span class="p">)</span>
+
+        <span class="c1"># eq. 3.41 in Kemna, 2000: notice that m_rep here is in rho, not sigma</span>
+        <span class="n">factor</span> <span class="o">=</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">m_rep</span> <span class="o">*</span> <span class="n">measurements_rep</span><span class="p">)</span>
+        <span class="n">sensitivities_log</span> <span class="o">=</span> <span class="n">factor</span> <span class="o">*</span> <span class="n">sensitivities_lin</span>
+
+        <span class="c1">#         import IPython</span>
+        <span class="c1">#         IPython.embed()</span>
+
+        <span class="k">return</span> <span class="n">sensitivities_log</span></div>
+
+<div class="viewcode-block" id="crmod_interface.fwd_complex_R_sigma"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.interface.crmod_interface.fwd_complex_R_sigma">[docs]</a>    <span class="k">def</span> <span class="nf">fwd_complex_R_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_ccomplex</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compute the model response from linear complex conductivities</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">m_rmag</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">model_ccomplex</span><span class="p">)</span>
+        <span class="n">m_rpha</span> <span class="o">=</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">model_ccomplex</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">model_ccomplex</span><span class="p">)</span>
+        <span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
+        <span class="n">model_rmag_rpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">m_rmag</span><span class="p">,</span> <span class="n">m_rpha</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">tdm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_tdm</span><span class="p">(</span><span class="n">model_rmag_rpha</span><span class="p">)</span>
+        <span class="n">measurements</span> <span class="o">=</span> <span class="n">tdm</span><span class="o">.</span><span class="n">measurements</span><span class="p">()</span>
+        <span class="n">rmag</span> <span class="o">=</span> <span class="n">measurements</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">rpha</span> <span class="o">=</span> <span class="n">measurements</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">rcomplex</span> <span class="o">=</span> <span class="n">rmag</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">rpha</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rcomplex</span></div>
+
+<div class="viewcode-block" id="crmod_interface.fwd_complex_R_rho"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.interface.crmod_interface.fwd_complex_R_rho">[docs]</a>    <span class="k">def</span> <span class="nf">fwd_complex_R_rho</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_rcomplex</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compute the forward response.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model_rcomplex : size M numpy.ndarray</span>
+<span class="sd">            Complex forward model, complex resistivities</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        response : numpy.ndarray</span>
+<span class="sd">            Model response, complex impedances</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">m_rmag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">model_rcomplex</span><span class="p">)</span>
+        <span class="n">m_rpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">model_rcomplex</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">model_rcomplex</span><span class="p">)</span>
+        <span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
+        <span class="n">model_rmag_rpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">m_rmag</span><span class="p">,</span> <span class="n">m_rpha</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">tdm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_tdm</span><span class="p">(</span><span class="n">model_rmag_rpha</span><span class="p">)</span>
+        <span class="n">measurements</span> <span class="o">=</span> <span class="n">tdm</span><span class="o">.</span><span class="n">measurements</span><span class="p">()</span>
+        <span class="n">rmag</span> <span class="o">=</span> <span class="n">measurements</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">rpha</span> <span class="o">=</span> <span class="n">measurements</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">rcomplex</span> <span class="o">=</span> <span class="n">rmag</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">rpha</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rcomplex</span></div>
+
+<div class="viewcode-block" id="crmod_interface.J_complex_R_sigma"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.interface.crmod_interface.J_complex_R_sigma">[docs]</a>    <span class="k">def</span> <span class="nf">J_complex_R_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_ccomplex</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compute the Jacobian</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">m_rmag</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">model_ccomplex</span><span class="p">)</span>
+        <span class="n">m_rpha</span> <span class="o">=</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">model_ccomplex</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">model_ccomplex</span><span class="p">)</span>
+        <span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
+        <span class="n">model_rmag_rpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">m_rmag</span><span class="p">,</span> <span class="n">m_rpha</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Reistivity model used to calculate Jacobian:&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">model_rmag_rpha</span><span class="p">)</span>
+        <span class="n">tdm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_tdm</span><span class="p">(</span><span class="n">model_rmag_rpha</span><span class="p">)</span>
+        <span class="n">tdm</span><span class="o">.</span><span class="n">save_to_tomodir</span><span class="p">(</span><span class="s1">&#39;tomodir&#39;</span><span class="p">)</span>
+
+        <span class="n">tdm</span><span class="o">.</span><span class="n">model</span><span class="p">(</span>
+            <span class="n">sensitivities</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="c1"># output_directory=stage_dir + &#39;modeling&#39;,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># measurements = tdm.measurements()</span>
+
+        <span class="c1"># build up the sensitivity matrix</span>
+        <span class="n">sens_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">config_nr</span><span class="p">,</span> <span class="n">cids</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span>
+                <span class="n">tdm</span><span class="o">.</span><span class="n">assignments</span><span class="p">[</span><span class="s1">&#39;sensitivities&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">cids</span><span class="p">)</span>
+            <span class="n">sens_re</span> <span class="o">=</span> <span class="n">tdm</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">parsets</span><span class="p">[</span><span class="n">cids</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="n">sens_im</span> <span class="o">=</span> <span class="n">tdm</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">parsets</span><span class="p">[</span><span class="n">cids</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+            <span class="n">sens_complex</span> <span class="o">=</span> <span class="n">sens_re</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">sens_im</span>
+            <span class="c1"># magnitude sensitvitiy</span>
+            <span class="n">sens_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sens_complex</span><span class="p">)</span>
+
+        <span class="c1"># [del V / del sigma]</span>
+        <span class="n">sensitivities_lin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sens_list</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sensitivities_lin</span></div>
+
+<div class="viewcode-block" id="crmod_interface.fwd_complex_logY_sigma"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.interface.crmod_interface.fwd_complex_logY_sigma">[docs]</a>    <span class="k">def</span> <span class="nf">fwd_complex_logY_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sigma</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compute a model response from linear complex conductivities</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sigma : 1xN or 2xN numpy.ndarray</span>
+<span class="sd">            Model parameters as sigma and sigma phase, N the number of cells.</span>
+<span class="sd">            If first dimension is of length one, assume phase values to be zero</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        measurements : Nx2 numpy nd array</span>
+<span class="sd">            Return log_e sigma values of computed forward response (i.e., first</span>
+<span class="sd">            column: log(sigma), second column: sigma phase</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">m_rmag</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">sigma</span>
+        <span class="n">tdm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_tdm</span><span class="p">(</span><span class="n">m_rmag</span><span class="p">)</span>
+        <span class="n">measurements</span> <span class="o">=</span> <span class="n">tdm</span><span class="o">.</span><span class="n">measurements</span><span class="p">()</span>
+        <span class="c1"># import IPython</span>
+        <span class="c1"># IPython.embed()</span>
+        <span class="c1"># convert R to log Y</span>
+        <span class="n">measurements</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">measurements</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="c1"># convert resistivity phase to conductivity phase</span>
+        <span class="n">measurements</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">return</span> <span class="n">measurements</span></div>
+
+<div class="viewcode-block" id="crmod_interface.J_complex_Y_sigma"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.interface.crmod_interface.J_complex_Y_sigma">[docs]</a>    <span class="k">def</span> <span class="nf">J_complex_Y_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sigma_model_linear</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the complex sensitivity matrix for :math:`\frac{\del V}{\del</span>
+<span class="sd">        \sigma}`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sigma_model_linear : numpy.ndarray</span>
+<span class="sd">            complex linear conductivities</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        J_complex_lin : NxM numpy.ndarray</span>
+<span class="sd">            Jacobian</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="crmod_interface.J_complex_logY_sigma"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.interface.crmod_interface.J_complex_logY_sigma">[docs]</a>    <span class="k">def</span> <span class="nf">J_complex_logY_sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sigma</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the sensitivity matrix</span>
+
+<span class="sd">        At this point works only with resistivities.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sigma : numpy.ndarray</span>
+<span class="sd">            log_e conductivities</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">m_rmag</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">sigma</span>
+        <span class="n">tdm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_tdm</span><span class="p">(</span><span class="n">m_rmag</span><span class="p">)</span>
+
+        <span class="n">tdm</span><span class="o">.</span><span class="n">model</span><span class="p">(</span>
+            <span class="n">sensitivities</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">output_directory</span><span class="o">=</span><span class="s1">&#39;tmp_td&#39;</span>
+            <span class="c1"># output_directory=stage_dir + &#39;modeling&#39;,</span>
+        <span class="p">)</span>
+
+        <span class="n">measurements</span> <span class="o">=</span> <span class="n">tdm</span><span class="o">.</span><span class="n">measurements</span><span class="p">()</span>
+
+        <span class="c1"># build up the sensitivity matrix</span>
+        <span class="n">sens_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">config_nr</span><span class="p">,</span> <span class="n">cids</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span>
+                <span class="n">tdm</span><span class="o">.</span><span class="n">assignments</span><span class="p">[</span><span class="s1">&#39;sensitivities&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">sens_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tdm</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">parsets</span><span class="p">[</span><span class="n">cids</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+
+        <span class="c1"># [del V / del sigma]</span>
+        <span class="n">sensitivities_lin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sens_list</span><span class="p">)</span>
+
+        <span class="c1"># multiply measurements on first dimension</span>
+        <span class="n">measurements_rep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span>
+            <span class="n">measurements</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span>
+            <span class="n">sensitivities_lin</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># after, eq. 3.41 in Kemna, 2000: notice that m_rep here is in rho, not</span>
+        <span class="c1"># sigma</span>
+        <span class="c1"># however, we now have model parameters in linear</span>
+        <span class="n">factor</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="n">measurements_rep</span>
+        <span class="n">sensitivities_logY</span> <span class="o">=</span> <span class="n">factor</span> <span class="o">*</span> <span class="n">sensitivities_lin</span>
+
+        <span class="k">return</span> <span class="n">sensitivities_logY</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">crtomo tools</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">lib</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2021, CRTomo contributors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

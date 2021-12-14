@@ -1,0 +1,1009 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>crtomo.eitManager &#8212; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for crtomo.eitManager</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *-* coding: utf-8 *-*</span>
+<span class="sd">&quot;&quot;&quot;A digital representation of a sEIT inversion directory.</span>
+
+<span class="sd">A sEIT-dir (or sipdir) has the following structure:</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Number</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">from</span> <span class="nn">glob</span> <span class="kn">import</span> <span class="n">glob</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">pylab</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="kn">from</span> <span class="nn">crtomo.grid</span> <span class="kn">import</span> <span class="n">crt_grid</span>
+<span class="kn">import</span> <span class="nn">crtomo.cfg</span> <span class="k">as</span> <span class="nn">CRcfg</span>
+<span class="kn">import</span> <span class="nn">crtomo.tdManager</span> <span class="k">as</span> <span class="nn">CRman</span>
+<span class="c1"># from crtomo.status import seitdir_is_finished</span>
+
+<span class="kn">import</span> <span class="nn">sip_models.res.cc</span> <span class="k">as</span> <span class="nn">cc_res</span>
+<span class="kn">from</span> <span class="nn">reda.eis.plots</span> <span class="kn">import</span> <span class="n">sip_response</span>
+<span class="c1"># this is the same object as sip_response, but for legacy reasons we have</span>
+<span class="c1"># multiple locations for it</span>
+<span class="kn">from</span> <span class="nn">sip_models.sip_response</span> <span class="kn">import</span> <span class="n">sip_response</span> <span class="k">as</span> <span class="n">sip_response2</span>
+
+
+<div class="viewcode-block" id="eitMan"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.eitManager.eitMan">[docs]</a><span class="k">class</span> <span class="nc">eitMan</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Manage sEIT data</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="eitMan.__init__"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.eitManager.eitMan.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Data/frequency input: Note that only one of the parameters seitdir,</span>
+<span class="sd">        crt_data_dir, seit_data will be used during initialization, in the</span>
+<span class="sd">        stated priority.</span>
+
+<span class="sd">        Initialization diagram:</span>
+
+<span class="sd">        .. blockdiag::</span>
+
+<span class="sd">            diagram {</span>
+<span class="sd">                group g_grid {</span>
+<span class="sd">                    par_grid -&gt; a_grid [label=&quot;loads&quot;];</span>
+<span class="sd">                    group g_elmc {</span>
+<span class="sd">                        par_elem -&gt; a_grid [label=&quot;loads&quot;];</span>
+<span class="sd">                        par_elec -&gt; a_grid [label=&quot;loads&quot;];</span>
+<span class="sd">                    }</span>
+<span class="sd">                }</span>
+<span class="sd">                a_grid [label=&quot;grid&quot;]</span>
+<span class="sd">                seitdir[label=&quot;sEIT inversion directory&quot;];</span>
+<span class="sd">                seitdir -&gt; a_grid [label=&quot;grid&quot;];</span>
+<span class="sd">                seitdir -&gt; frequencies [label=&quot;loads&quot;];</span>
+<span class="sd">                seitdir -&gt; inv_results [label=&quot;loads&quot;];</span>
+<span class="sd">                seitdir -&gt; seit_data [label=&quot;loads&quot;];</span>
+<span class="sd">                crt_data_dir -&gt; seit_data [label=&quot;loads&quot;];</span>
+<span class="sd">                inv_results[label=&quot;loads&quot;];</span>
+<span class="sd">                crt_data_dir[label=&quot;CRTomo style multi-frequency data&quot;];</span>
+<span class="sd">                crt_data_dir -&gt; frequencies [label=&quot;loads&quot;];</span>
+<span class="sd">                crt_data_dir -&gt; seit_data [label=&quot;loads&quot;];</span>
+<span class="sd">                dict_seit_data [label=&quot;data dictionary&quot;];</span>
+<span class="sd">                par_frequencies -&gt; frequencies [label=&quot;loads&quot;];</span>
+
+<span class="sd">           }</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        seitdir : string, optional</span>
+<span class="sd">            Load frequencies, grid, and data from an existing sEIT directory.</span>
+<span class="sd">            Honors the shallow_import parameter.</span>
+<span class="sd">        shallow_import : bool, optional</span>
+<span class="sd">            In combination with seitdir, only import the last iteration</span>
+<span class="sd">            inversion results (faster).</span>
+<span class="sd">        crt_data_dir : string, optional</span>
+<span class="sd">            if given, then try to load data from this directory. Expect a</span>
+<span class="sd">            &#39;frequencies.dat&#39; file and corresponding &#39;volt_*.dat&#39; files.</span>
+<span class="sd">        only_frequency_ids : numpy.ndarray|None</span>
+<span class="sd">            Load only the frequencies associated with these indices</span>
+<span class="sd">            (zero-based). Only works with crt_data_dir.</span>
+<span class="sd">        seit_data : dict</span>
+<span class="sd">            A dictionary with frequencies as keys, and numpy arrays as items.</span>
+<span class="sd">            Each array must have 6 columns: a,b,m,n,magnitude[Ohm],phase[mrad]</span>
+<span class="sd">        frequencies : numpy.ndarray, optional</span>
+<span class="sd">            frequencies that we work with</span>
+<span class="sd">        grid : crtomo.crt_grid.crt_grid, optional</span>
+<span class="sd">            A grid instance</span>
+<span class="sd">        elem_file : string, optional</span>
+<span class="sd">            Path to elem file</span>
+<span class="sd">        elec_file : string, optional</span>
+<span class="sd">            Path to elec file</span>
+<span class="sd">        decouplings_file : str, optional</span>
+<span class="sd">            Path to decoupling file: For not will be copied to the exe/ subdir</span>
+<span class="sd">            of each tomodir written</span>
+<span class="sd">        crmod_cfg : ?, optional</span>
+
+<span class="sd">        crtomo_cfg : ?, optional</span>
+
+<span class="sd">        parman : ?, optional</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># the following variables will be partially duplicated in the tomodir</span>
+        <span class="c1"># instances down below. Thus, they are used primarily to store blue</span>
+        <span class="c1"># prints or &quot;parent&quot; files for the various frequencies. For example:</span>
+        <span class="c1"># mask-files that are then parameterized using some kind of SIP model</span>
+        <span class="c1"># such as the Cole-Cole model.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crmod_cfg</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;crmod_cfg&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crtomo_cfg</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;crtomo_cfg&#39;</span><span class="p">,</span> <span class="n">CRcfg</span><span class="o">.</span><span class="n">crtomo_config</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parman</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;parman&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">noise_model</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;noise_model&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">decoupling_file</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;decouplings_file&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="c1"># for each frequency we have a separate tomodir object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tds</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># when we load data from inversion results, we need to store the</span>
+        <span class="c1"># corresponding parameter ids for the various quantities</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assigments</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;rmag&#39;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s1">&#39;rpha&#39;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s1">&#39;cre&#39;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s1">&#39;cim&#39;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s1">&#39;forward_rmag&#39;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s1">&#39;forward_rpha&#39;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="p">}</span>
+        <span class="c1"># shortcut</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assigments</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;frequencies&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="c1"># # now load data/initialize things</span>
+        <span class="n">seit_dir</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;seitdir&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">crt_data_dir</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;crt_data_dir&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">seit_data</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;seit_data&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="c1"># load/assign grid</span>
+        <span class="k">if</span> <span class="s1">&#39;grid&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;grid&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s1">&#39;elem_file&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="s1">&#39;elec_file&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">grid</span> <span class="o">=</span> <span class="n">crt_grid</span><span class="p">()</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">load_grid</span><span class="p">(</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;elem_file&#39;</span><span class="p">],</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;elec_file&#39;</span><span class="p">],</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="n">grid</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># these are the principle ways to add data</span>
+        <span class="k">if</span> <span class="n">seit_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># load the grid from the first invmod subdirectory</span>
+            <span class="n">tdirs</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="p">(</span><span class="n">seit_dir</span> <span class="o">+</span> <span class="s1">&#39;/invmod/*&#39;</span><span class="p">))</span>
+            <span class="n">grid</span> <span class="o">=</span> <span class="n">crt_grid</span><span class="p">(</span>
+                <span class="n">elem_file</span><span class="o">=</span><span class="n">tdirs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/grid/elem.dat&#39;</span><span class="p">,</span>
+                <span class="n">elec_file</span><span class="o">=</span><span class="n">tdirs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/grid/elec.dat&#39;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="n">grid</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_inversion_results</span><span class="p">(</span>
+                <span class="n">seit_dir</span><span class="p">,</span> <span class="n">shallow_import</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;shallow_import&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">crt_data_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data_files</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">data_files</span><span class="p">[</span><span class="s1">&#39;frequencies&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/frequencies.dat&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">crt_data_dir</span><span class="p">)</span>
+            <span class="n">files</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/volt_*.crt&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">crt_data_dir</span><span class="p">)))</span>
+            <span class="n">only_frequency_ids</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;only_use_frequency_ids&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">data_files</span><span class="p">[</span><span class="s1">&#39;crt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">files</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_data_crt_files</span><span class="p">(</span>
+                <span class="n">data_files</span><span class="p">,</span> <span class="n">only_frequency_ids</span><span class="o">=</span><span class="n">only_frequency_ids</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">seit_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">frequencies</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">seit_data</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_init_frequencies</span><span class="p">(</span><span class="n">frequencies</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">frequency</span> <span class="ow">in</span> <span class="n">frequencies</span><span class="p">:</span>
+                <span class="n">abmn</span> <span class="o">=</span> <span class="n">seit_data</span><span class="p">[</span><span class="n">frequency</span><span class="p">][:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+                <span class="n">rmag</span> <span class="o">=</span> <span class="n">seit_data</span><span class="p">[</span><span class="n">frequency</span><span class="p">][:,</span> <span class="mi">4</span><span class="p">]</span>
+                <span class="n">rpha</span> <span class="o">=</span> <span class="n">seit_data</span><span class="p">[</span><span class="n">frequency</span><span class="p">][:,</span> <span class="mi">5</span><span class="p">]</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="p">[</span><span class="n">frequency</span><span class="p">]</span><span class="o">.</span><span class="n">configs</span><span class="o">.</span><span class="n">add_to_configs</span><span class="p">(</span><span class="n">abmn</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="p">[</span><span class="n">frequency</span><span class="p">]</span><span class="o">.</span><span class="n">register_measurements</span><span class="p">(</span><span class="n">rmag</span><span class="p">,</span> <span class="n">rpha</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># initialize frequency tomodirs</span>
+            <span class="k">if</span> <span class="s1">&#39;frequencies&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_init_frequencies</span><span class="p">(</span>
+                    <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;frequencies&#39;</span><span class="p">),</span>
+                    <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;configs_abmn&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s1">&#39;You must provide either a grid instance or &#39;</span>
+                <span class="s1">&#39;elem_file/elec_file file paths&#39;</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="eitMan._init_frequencies"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.eitManager.eitMan._init_frequencies">[docs]</a>    <span class="k">def</span> <span class="nf">_init_frequencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frequencies</span><span class="p">,</span> <span class="n">configs_abmn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize the tdMan instances associated with each frequency</span>
+
+<span class="sd">        Note that existing tds will not be deleted/overwritten</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        frequencies : Nx1 numpy.ndarray</span>
+<span class="sd">            Frequencies in ascending order</span>
+<span class="sd">        configs_abmn : None|numpy.ndarray (Mx4)</span>
+<span class="sd">            Measurement configurations to provide to the generated tdMan</span>
+<span class="sd">            instances</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span> <span class="o">=</span> <span class="n">frequencies</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">frequency</span> <span class="ow">in</span> <span class="n">frequencies</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">frequency</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="p">:</span>
+                <span class="c1"># already present, do not generate a new tdMan instance</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">crtomo_cfg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;crtomo_cfg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crtomo_cfg</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">td</span> <span class="o">=</span> <span class="n">CRman</span><span class="o">.</span><span class="n">tdMan</span><span class="p">(</span>
+                <span class="n">grid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span>
+                <span class="n">configs_abmn</span><span class="o">=</span><span class="n">configs_abmn</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="p">[</span><span class="n">frequency</span><span class="p">]</span> <span class="o">=</span> <span class="n">td</span></div>
+
+<div class="viewcode-block" id="eitMan.set_area_to_sip_signature"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.eitManager.eitMan.set_area_to_sip_signature">[docs]</a>    <span class="k">def</span> <span class="nf">set_area_to_sip_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">zmin</span><span class="p">,</span> <span class="n">zmax</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Parameterize the eit instance by supplying one</span>
+<span class="sd">        SIP spectrum and the area to apply to.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        xmin : float</span>
+<span class="sd">            Minimum x coordinate of the area</span>
+<span class="sd">        xmax : float</span>
+<span class="sd">            Maximum x coordinate of the area</span>
+<span class="sd">        zmin : float</span>
+<span class="sd">            Minimum z coordinate of the area</span>
+<span class="sd">        zmax : float</span>
+<span class="sd">            Maximum z coordinate of the area</span>
+<span class="sd">        spectrum : sip_response</span>
+<span class="sd">            SIP spectrum to use for parameterization</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="p">(</span><span class="n">sip_response</span><span class="p">,</span> <span class="n">sip_response2</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span> <span class="o">==</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">frequencies</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">frequency</span><span class="p">,</span> <span class="n">rmag</span><span class="p">,</span> <span class="n">rpha</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">rmag</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">rpha</span><span class="p">):</span>
+            <span class="n">td</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="p">[</span><span class="n">frequency</span><span class="p">]</span>
+            <span class="n">pidm</span><span class="p">,</span> <span class="n">pidp</span> <span class="o">=</span> <span class="n">td</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;forward_model&#39;</span><span class="p">]</span>
+            <span class="n">td</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">modify_area</span><span class="p">(</span><span class="n">pidm</span><span class="p">,</span> <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">zmin</span><span class="p">,</span> <span class="n">zmax</span><span class="p">,</span> <span class="n">rmag</span><span class="p">)</span>
+            <span class="n">td</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">modify_area</span><span class="p">(</span><span class="n">pidp</span><span class="p">,</span> <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">zmin</span><span class="p">,</span> <span class="n">zmax</span><span class="p">,</span> <span class="n">rpha</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="eitMan.set_area_to_single_colecole"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.eitManager.eitMan.set_area_to_single_colecole">[docs]</a>    <span class="k">def</span> <span class="nf">set_area_to_single_colecole</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">zmin</span><span class="p">,</span> <span class="n">zmax</span><span class="p">,</span> <span class="n">ccpars</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Parameterize a rectangular area of the forward model using a</span>
+<span class="sd">        single-term Cole-Cole response.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">objcc</span> <span class="o">=</span> <span class="n">cc_res</span><span class="o">.</span><span class="n">cc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">objcc</span><span class="o">.</span><span class="n">response</span><span class="p">(</span><span class="n">ccpars</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_area_to_sip_signature</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">zmin</span><span class="p">,</span> <span class="n">zmax</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="eitMan.add_homogeneous_model"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.eitManager.eitMan.add_homogeneous_model">[docs]</a>    <span class="k">def</span> <span class="nf">add_homogeneous_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">magnitude</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">frequency</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add homogeneous models to one or all tomodirs. Register those as</span>
+<span class="sd">        forward models</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        magnitude : float</span>
+<span class="sd">            Value of homogeneous magnitude model</span>
+<span class="sd">        phase : float, optional</span>
+<span class="sd">            Value of homogeneous phase model. Default 0</span>
+<span class="sd">        frequency : float, optional</span>
+<span class="sd">            Frequency of of the tomodir to use. If None, then apply to all</span>
+<span class="sd">            tomodirs. Default is None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">frequency</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">frequencies</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frequency</span><span class="p">,</span> <span class="n">Number</span><span class="p">)</span>
+            <span class="n">frequencies</span> <span class="o">=</span> <span class="p">[</span><span class="n">frequency</span><span class="p">,</span> <span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">freq</span> <span class="ow">in</span> <span class="n">frequencies</span><span class="p">:</span>
+            <span class="n">pidm</span><span class="p">,</span> <span class="n">pidp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="p">[</span><span class="n">freq</span><span class="p">]</span><span class="o">.</span><span class="n">add_homogeneous_model</span><span class="p">(</span><span class="n">magnitude</span><span class="p">,</span> <span class="n">phase</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;forward_rmag&#39;</span><span class="p">][</span><span class="n">freq</span><span class="p">]</span> <span class="o">=</span> <span class="n">pidm</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;forward_rpha&#39;</span><span class="p">][</span><span class="n">freq</span><span class="p">]</span> <span class="o">=</span> <span class="n">pidp</span></div>
+
+<div class="viewcode-block" id="eitMan.load_data_crt_files"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.eitManager.eitMan.load_data_crt_files">[docs]</a>    <span class="k">def</span> <span class="nf">load_data_crt_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_dict</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Load sEIT data from .ctr files (volt.dat files readable by CRTomo,</span>
+<span class="sd">        produced by CRMod)</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data_dict : dict</span>
+<span class="sd">            Data files that are imported. See example down below</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">        &gt;&gt;&gt; import glob</span>
+<span class="sd">            data_files = {}</span>
+<span class="sd">            data_files[&#39;frequencies&#39;] = &#39;data/frequencies.dat&#39;</span>
+<span class="sd">            files = sorted(glob.glob(&#39;data/volt_*.crt&#39;))</span>
+<span class="sd">            data_files[&#39;crt&#39;] = files</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Parameter must be a dict!&#39;</span><span class="p">)</span>
+
+        <span class="n">frequency_data</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="s1">&#39;frequencies&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frequency_data</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">frequencies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s1">&#39;frequencies&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># if this is not a string, assume it to be the data</span>
+            <span class="n">frequencies</span> <span class="o">=</span> <span class="n">frequency_data</span>
+
+        <span class="k">if</span> <span class="n">frequencies</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s1">&#39;crt&#39;</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s1">&#39;number of frequencies does not match the number of data files&#39;</span>
+            <span class="p">)</span>
+        <span class="n">only_frequency_ids</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;only_frequency_ids&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">only_frequency_ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">frequencies</span> <span class="o">=</span> <span class="n">frequencies</span><span class="p">[</span><span class="n">only_frequency_ids</span><span class="p">]</span>
+            <span class="n">data_dict</span><span class="p">[</span><span class="s1">&#39;crt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">data_dict</span><span class="p">[</span><span class="s1">&#39;crt&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">only_frequency_ids</span>
+            <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_frequencies</span><span class="p">(</span><span class="n">frequencies</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">frequency</span><span class="p">,</span> <span class="n">filename</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">frequencies</span><span class="p">,</span> <span class="n">data_dict</span><span class="p">[</span><span class="s1">&#39;crt&#39;</span><span class="p">]):</span>
+            <span class="n">subdata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">subdata</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="c1"># extract configurations</span>
+            <span class="n">A</span> <span class="o">=</span> <span class="p">(</span><span class="n">subdata</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1e4</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">B</span> <span class="o">=</span> <span class="p">(</span><span class="n">subdata</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">%</span> <span class="mf">1e4</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">M</span> <span class="o">=</span> <span class="p">(</span><span class="n">subdata</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1e4</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">N</span> <span class="o">=</span> <span class="p">(</span><span class="n">subdata</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">%</span> <span class="mf">1e4</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+            <span class="n">ABMN</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+
+            <span class="n">magnitudes</span> <span class="o">=</span> <span class="n">subdata</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">phases</span> <span class="o">=</span> <span class="n">subdata</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="p">[</span><span class="n">frequency</span><span class="p">]</span><span class="o">.</span><span class="n">configs</span><span class="o">.</span><span class="n">add_to_configs</span><span class="p">(</span><span class="n">ABMN</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="p">[</span><span class="n">frequency</span><span class="p">]</span><span class="o">.</span><span class="n">register_measurements</span><span class="p">(</span><span class="n">magnitudes</span><span class="p">,</span> <span class="n">phases</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="eitMan.apply_crtomo_cfg"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.eitManager.eitMan.apply_crtomo_cfg">[docs]</a>    <span class="k">def</span> <span class="nf">apply_crtomo_cfg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the global crtomo_cfg for all frequencies</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">crtomo_cfg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crtomo_cfg</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="eitMan.apply_noise_models"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.eitManager.eitMan.apply_noise_models">[docs]</a>    <span class="k">def</span> <span class="nf">apply_noise_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the global noise_model for all frequencies</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">noise_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">noise_model</span></div>
+
+<div class="viewcode-block" id="eitMan.save_to_eitdir"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.eitManager.eitMan.save_to_eitdir">[docs]</a>    <span class="k">def</span> <span class="nf">save_to_eitdir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Save the eit data into a eit/sip directory structure</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        directory: string|path</span>
+<span class="sd">            output directory</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;output directory already exists&#39;</span><span class="p">)</span>
+
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">directory</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;frequencies.dat&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">)</span>
+
+        <span class="n">invmod_dir</span> <span class="o">=</span> <span class="n">directory</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;invmod&#39;</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">invmod_dir</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">nr</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="o">.</span><span class="n">keys</span><span class="p">())):</span>
+            <span class="n">outdir</span> <span class="o">=</span> <span class="n">invmod_dir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="si">{0:02}</span><span class="s1">_</span><span class="si">{1:.6f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nr</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">save_to_tomodir</span><span class="p">(</span><span class="n">outdir</span><span class="p">)</span>
+            <span class="c1"># HACK: if available, copy the decouplings file</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoupling_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">decoupling_file</span><span class="p">,</span>
+                    <span class="n">outdir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;exe&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;decouplings.dat&#39;</span>
+                <span class="p">)</span></div>
+
+<div class="viewcode-block" id="eitMan.reset_tds"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.eitManager.eitMan.reset_tds">[docs]</a>    <span class="k">def</span> <span class="nf">reset_tds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reset the data stored in all tds&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">frequency</span><span class="p">,</span> <span class="n">td</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">td</span><span class="o">.</span><span class="n">reset_data</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;rmag&#39;</span><span class="p">,</span> <span class="s1">&#39;rpha&#39;</span><span class="p">,</span> <span class="s1">&#39;cre&#39;</span><span class="p">,</span> <span class="s1">&#39;cim&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span></div>
+
+<div class="viewcode-block" id="eitMan.load_inversion_results"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.eitManager.eitMan.load_inversion_results">[docs]</a>    <span class="k">def</span> <span class="nf">load_inversion_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sipdir</span><span class="p">,</span> <span class="n">shallow_import</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Given an sEIT inversion directory, load inversion results and store</span>
+<span class="sd">        the corresponding parameter ids in self.assignments</span>
+
+<span class="sd">        Note that all previous data stored in this instance of the eitManager</span>
+<span class="sd">        will be overwritten, if required!</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sipdir : string</span>
+<span class="sd">            path to a CRTomo sip-invdir (i.e., a full sEIT inversion directory)</span>
+
+<span class="sd">        shallow_import : bool, optional</span>
+<span class="sd">            If set to True, then only import the last inversion result, nothing</span>
+<span class="sd">            else.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># load frequencies and initialize tomodir objects for all frequencies</span>
+        <span class="n">frequency_file</span> <span class="o">=</span> <span class="n">sipdir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;frequencies.dat&#39;</span>
+        <span class="n">frequencies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">frequency_file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_frequencies</span><span class="p">(</span><span class="n">frequencies</span><span class="p">)</span>
+
+        <span class="c1"># cycle through all tomodirs on disc and load the data</span>
+        <span class="k">for</span> <span class="n">nr</span><span class="p">,</span> <span class="p">(</span><span class="n">frequency_key</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="o">.</span><span class="n">items</span><span class="p">())):</span>
+            <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;rmag&#39;</span><span class="p">,</span> <span class="s1">&#39;rpha&#39;</span><span class="p">,</span> <span class="s1">&#39;cre&#39;</span><span class="p">,</span> <span class="s1">&#39;cim&#39;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">label</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">assigments</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="c1"># some old inversion directories are one-indexed, while new ones</span>
+            <span class="c1"># start with zero. As such, try both approaches</span>
+            <span class="k">for</span> <span class="n">test_nr</span> <span class="ow">in</span> <span class="p">(</span><span class="n">nr</span><span class="p">,</span> <span class="n">nr</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">tdir</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span>
+                    <span class="n">sipdir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span>
+                    <span class="s1">&#39;invmod&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span>
+                    <span class="s1">&#39;</span><span class="si">{:02}</span><span class="s1">_</span><span class="si">{:.6f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">test_nr</span><span class="p">,</span> <span class="n">frequency_key</span><span class="p">)</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span>
+                <span class="p">))</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">tdir</span><span class="p">):</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">tdir</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;tdir not found: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tdir</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">shallow_import</span><span class="p">:</span>
+                <span class="n">rmag_file</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="p">(</span><span class="n">tdir</span> <span class="o">+</span> <span class="s1">&#39;inv/*.mag&#39;</span><span class="p">))</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rmag_file</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">rmag_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">rmag_file</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span> <span class="mi">2</span><span class="p">]</span>
+                    <span class="n">pid_rmag</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">rmag_data</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">pid_rmag</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;rmag&#39;</span><span class="p">][</span><span class="n">frequency_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">pid_rmag</span>
+
+                <span class="n">rpha_file</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="p">(</span><span class="n">tdir</span> <span class="o">+</span> <span class="s1">&#39;inv/*.pha&#39;</span><span class="p">))</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rpha_file</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">rpha_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">rpha_file</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span> <span class="mi">2</span><span class="p">]</span>
+                    <span class="n">pid_rpha</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">rpha_data</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">pid_rpha</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;rpha&#39;</span><span class="p">][</span><span class="n">frequency_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">pid_rpha</span>
+
+                <span class="n">sigma_files</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="p">(</span><span class="n">tdir</span> <span class="o">+</span> <span class="s1">&#39;inv/*.sig&#39;</span><span class="p">))</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sigma_files</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">sigma_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">sigma_files</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">pid_cre</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">sigma_data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+                    <span class="n">pid_cim</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">sigma_data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">rmag_file</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">rpha_file</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">pid_cre</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">pid_cim</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># very old CRTomo runs...</span>
+                    <span class="n">crho</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">parsets</span><span class="p">[</span>
+                        <span class="n">pid_rmag</span>
+                    <span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">item</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">parsets</span><span class="p">[</span><span class="n">pid_rpha</span><span class="p">]</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+                    <span class="n">csigma</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">crho</span>
+                    <span class="n">pid_cre</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">csigma</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+                    <span class="n">pid_cim</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="n">csigma</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;cre&#39;</span><span class="p">][</span><span class="n">frequency_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">pid_cre</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;cim&#39;</span><span class="p">][</span><span class="n">frequency_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">pid_cim</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">crtomo_cfg_file</span> <span class="o">=</span> <span class="n">tdir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;exe&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;crtomo.cfg&#39;</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">crtomo_cfg_file</span><span class="p">):</span>
+                    <span class="n">item</span><span class="o">.</span><span class="n">crtomo_cfg</span><span class="o">.</span><span class="n">import_from_file</span><span class="p">(</span><span class="n">crtomo_cfg_file</span><span class="p">)</span>
+                <span class="c1"># forward configurations</span>
+                <span class="n">config_file</span> <span class="o">=</span> <span class="n">tdir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;config&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;config.dat&#39;</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">config_file</span><span class="p">):</span>
+                    <span class="n">item</span><span class="o">.</span><span class="n">configs</span><span class="o">.</span><span class="n">load_crmod_config</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
+
+                <span class="c1"># load data/modeling results</span>
+                <span class="n">item</span><span class="o">.</span><span class="n">_read_modeling_results</span><span class="p">(</span><span class="n">tdir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;mod&#39;</span><span class="p">)</span>
+
+                <span class="n">item</span><span class="o">.</span><span class="n">read_inversion_results</span><span class="p">(</span><span class="n">tdir</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;inversion&#39;</span><span class="p">][</span><span class="s1">&#39;rmag&#39;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;rmag&#39;</span><span class="p">][</span><span class="n">frequency_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">a</span><span class="p">[</span>
+                        <span class="s1">&#39;inversion&#39;</span><span class="p">][</span><span class="s1">&#39;rmag&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;rpha&#39;</span><span class="p">][</span><span class="n">frequency_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">a</span><span class="p">[</span>
+                        <span class="s1">&#39;inversion&#39;</span><span class="p">][</span><span class="s1">&#39;rpha&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;cre&#39;</span><span class="p">][</span><span class="n">frequency_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">a</span><span class="p">[</span>
+                        <span class="s1">&#39;inversion&#39;</span><span class="p">][</span><span class="s1">&#39;cre&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;cim&#39;</span><span class="p">][</span><span class="n">frequency_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">a</span><span class="p">[</span>
+                        <span class="s1">&#39;inversion&#39;</span><span class="p">][</span><span class="s1">&#39;cim&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;rmag&#39;</span><span class="p">][</span><span class="n">frequency_key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;rpha&#39;</span><span class="p">][</span><span class="n">frequency_key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;cre&#39;</span><span class="p">][</span><span class="n">frequency_key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;cim&#39;</span><span class="p">][</span><span class="n">frequency_key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="eitMan.extract_polygon_area"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.eitManager.eitMan.extract_polygon_area">[docs]</a>    <span class="k">def</span> <span class="nf">extract_polygon_area</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">polygon_points</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;DEFUNCT</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        label : str</span>
+<span class="sd">            the label (data type) to extract. This corresponds to a key in</span>
+<span class="sd">            eitMan.assignments. Possible values are rmag, rpha, cre,</span>
+<span class="sd">            cim</span>
+<span class="sd">        polygon_points : list of (x,y) floats</span>
+<span class="sd">            list of points that form the polygon</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Not implemented&#39;</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        if isinstance(label, str):</span>
+<span class="sd">            label = [label, ]</span>
+
+<span class="sd">        data_list = []</span>
+<span class="sd">        for label_key in label:</span>
+<span class="sd">            value_list = {}</span>
+<span class="sd">            for frequency, tdobj in sorted(self.tds.items()):</span>
+<span class="sd">                values = tdobj.parman.extract_polygon_area(</span>
+<span class="sd">                    pid=self.a[label_key][frequency],</span>
+<span class="sd">                    polygon_points=polygon_points</span>
+<span class="sd">                )</span>
+<span class="sd">                value_list[key] = values</span>
+<span class="sd">            df = pd.DataFrame(value_list)</span>
+<span class="sd">            df[&#39;x&#39;] = points[:, 0]</span>
+<span class="sd">            df[&#39;z&#39;] = points[:, 1]</span>
+<span class="sd">            df[&#39;key&#39;] = label_key</span>
+<span class="sd">            data_list.append(df)</span>
+<span class="sd">        df_all = pd.concat(data_list)</span>
+
+<span class="sd">        return df_all</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="eitMan.extract_all_spectra"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.eitManager.eitMan.extract_all_spectra">[docs]</a>    <span class="k">def</span> <span class="nf">extract_all_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Extract all SIP spectra, and return frequencies and a numpy array</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        label : str</span>
+<span class="sd">            the label (data type) to extract. This corresponds to a key in</span>
+<span class="sd">            eitMan.assignments. Possible values are rmag, rpha, cre, cim</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="p">[</span><span class="n">label</span><span class="p">,</span> <span class="p">]</span>
+
+        <span class="n">data_list</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">label_key</span> <span class="ow">in</span> <span class="n">label</span><span class="p">:</span>
+            <span class="n">frequencies</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">frequency</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                <span class="n">pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="n">label_key</span><span class="p">][</span><span class="n">frequency</span><span class="p">]</span>
+                <span class="n">value_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">parsets</span><span class="p">[</span><span class="n">pid</span><span class="p">])</span>
+                <span class="n">frequencies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">frequency</span><span class="p">)</span>
+            <span class="n">data_list</span><span class="p">[</span><span class="n">label_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">frequencies</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">value_list</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">data_list</span></div>
+
+<div class="viewcode-block" id="eitMan.extract_points"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.eitManager.eitMan.extract_points">[docs]</a>    <span class="k">def</span> <span class="nf">extract_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Extract data points (i.e., SIP spectra) for one or more points.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        label : str</span>
+<span class="sd">            the label (data type) to extract. This corresponds to a key in</span>
+<span class="sd">            eitMan.assignments. Possible values are rmag, rpha, cre,</span>
+<span class="sd">            cim</span>
+<span class="sd">        points : Nx2 numpy.ndarray</span>
+<span class="sd">            (x, y) pairs</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        df_all : pandas.DataFrame</span>
+<span class="sd">            A dataframe with the extracted data</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="p">[</span><span class="n">label</span><span class="p">,</span> <span class="p">]</span>
+
+        <span class="n">points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+
+        <span class="n">data_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">label_key</span> <span class="ow">in</span> <span class="n">label</span><span class="p">:</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                <span class="n">values</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">extract_points</span><span class="p">(</span>
+                    <span class="n">pid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="n">label_key</span><span class="p">][</span><span class="n">key</span><span class="p">],</span>
+                    <span class="n">points</span><span class="o">=</span><span class="n">points</span>
+                <span class="p">)</span>
+                <span class="n">value_list</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">value_list</span><span class="p">)</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">points</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">label_key</span>
+            <span class="n">data_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="n">df_all</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">data_list</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">df_all</span></div>
+
+<div class="viewcode-block" id="eitMan.plot_forward_models"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.eitManager.eitMan.plot_forward_models">[docs]</a>    <span class="k">def</span> <span class="nf">plot_forward_models</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maglim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">phalim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create plots of the forward models</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        return_dict : dict</span>
+<span class="sd">            Dictionary containing the figure and axes objects of the magnitude</span>
+<span class="sd">            plots</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">return_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">)</span>
+        <span class="n">nrx</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">nrz</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">N</span> <span class="o">/</span> <span class="n">nrx</span><span class="p">))</span>
+
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="sa">r</span><span class="s1">&#39;$\rho~[\Omega m]$&#39;</span><span class="p">,</span>
+            <span class="sa">r</span><span class="s1">&#39;$\phi~[mrad]$&#39;</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="n">cmaps</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;turbo&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;jet&#39;</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="c1"># try to select a suitable colorbar position</span>
+        <span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">),</span> <span class="p">(</span><span class="n">zmin</span><span class="p">,</span> <span class="n">zmax</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">get_minmax</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">xmax</span> <span class="o">-</span> <span class="n">xmin</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">zmax</span> <span class="o">-</span> <span class="n">zmin</span><span class="p">):</span>
+            <span class="n">cbposition</span> <span class="o">=</span> <span class="s1">&#39;horizontal&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cbposition</span> <span class="o">=</span> <span class="s1">&#39;vertical&#39;</span>
+
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">limits</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;rmag&#39;</span><span class="p">,</span> <span class="s1">&#39;rpha&#39;</span><span class="p">),</span> <span class="p">(</span><span class="n">maglim</span><span class="p">,</span> <span class="n">phalim</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">limits</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">cbmin</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">cbmax</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cbmin</span> <span class="o">=</span> <span class="n">limits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">cbmax</span> <span class="o">=</span> <span class="n">limits</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span>
+                <span class="n">nrz</span><span class="p">,</span> <span class="n">nrx</span><span class="p">,</span>
+                <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span> <span class="o">/</span> <span class="mf">2.54</span><span class="p">,</span> <span class="n">nrz</span> <span class="o">*</span> <span class="mf">3.5</span> <span class="o">/</span> <span class="mf">2.54</span><span class="p">),</span>
+                <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="o">.</span><span class="n">flat</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">frequency</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="o">.</span><span class="n">flat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">):</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">td</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="p">[</span><span class="n">frequency</span><span class="p">]</span>
+                <span class="n">pids</span> <span class="o">=</span> <span class="n">td</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;forward_model&#39;</span><span class="p">]</span>
+                <span class="n">td</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">plot_elements_to_ax</span><span class="p">(</span>
+                    <span class="n">pids</span><span class="p">[</span><span class="n">index</span><span class="p">],</span>
+                    <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
+                    <span class="n">plot_colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">cbposition</span><span class="o">=</span><span class="n">cbposition</span><span class="p">,</span>
+                    <span class="n">cbmin</span><span class="o">=</span><span class="n">cbmin</span><span class="p">,</span>
+                    <span class="n">cbmax</span><span class="o">=</span><span class="n">cbmax</span><span class="p">,</span>
+                    <span class="n">title</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{:.3f}</span><span class="s1"> Hz&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">frequency</span><span class="p">),</span>
+                    <span class="n">cblabel</span><span class="o">=</span><span class="n">labels</span><span class="p">[</span><span class="n">index</span><span class="p">],</span>
+                    <span class="n">cmap_name</span><span class="o">=</span><span class="n">cmaps</span><span class="p">[</span><span class="n">index</span><span class="p">],</span>
+                    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">flat</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">flat</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+            <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+            <span class="n">return_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;fig&#39;</span><span class="p">:</span> <span class="n">fig</span><span class="p">,</span>
+                <span class="s1">&#39;axes&#39;</span><span class="p">:</span> <span class="n">axes</span><span class="p">,</span>
+            <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">return_dict</span></div>
+
+<div class="viewcode-block" id="eitMan.add_to_configs"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.eitManager.eitMan.add_to_configs">[docs]</a>    <span class="k">def</span> <span class="nf">add_to_configs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add configurations to all tomodirs</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        configs : :class:`numpy.ndarray`</span>
+<span class="sd">            Nx4 numpy array with abmn configurations</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">td</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">td</span><span class="o">.</span><span class="n">configs</span><span class="o">.</span><span class="n">add_to_configs</span><span class="p">(</span><span class="n">configs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="eitMan.model"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.eitManager.eitMan.model">[docs]</a>    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Run the forward modeling for all frequencies.</span>
+
+<span class="sd">        Use :py:func:`crtomo.eitManager.eitMan.measurements` to retrieve the</span>
+<span class="sd">        resulting synthetic measurement spectra.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        **kwargs : dict, optional</span>
+<span class="sd">            All kwargs are directly provide to the underlying</span>
+<span class="sd">            :py:func:`crtomo.tdManager.tdMan.model` function calls.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">td</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">td</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="eitMan.measurements"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.eitManager.eitMan.measurements">[docs]</a>    <span class="k">def</span> <span class="nf">measurements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return modeled measurements. If not already done, call CRMod for</span>
+<span class="sd">        each frequency to actually compute the forward response.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        m_all : numpy.ndarray</span>
+<span class="sd">            1. dimension: frequency</span>
+<span class="sd">            2. dimension: config-number</span>
+<span class="sd">            3. dimension: 2: magnitude and phase (resistivity)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">m_all</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">measurements</span><span class="p">()</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span>
+                          <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="o">.</span><span class="n">keys</span><span class="p">())])</span>
+        <span class="k">return</span> <span class="n">m_all</span></div>
+
+<div class="viewcode-block" id="eitMan.get_measurement_responses"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.eitManager.eitMan.get_measurement_responses">[docs]</a>    <span class="k">def</span> <span class="nf">get_measurement_responses</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a dictionary of sip_responses for the modeled SIP spectra</span>
+
+<span class="sd">        Note that this function does NOT check that each frequency contains the</span>
+<span class="sd">        same configurations!</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        responses : dict</span>
+<span class="sd">            Dictionary with configurations as keys</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># take configurations from first tomodir</span>
+        <span class="n">configs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="p">[</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">configs</span><span class="o">.</span><span class="n">configs</span>
+
+        <span class="n">measurements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">measurements</span><span class="p">()</span>
+        <span class="n">responses</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">config</span><span class="p">,</span> <span class="n">sip_measurement</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">configs</span><span class="p">,</span>
+                                           <span class="n">np</span><span class="o">.</span><span class="n">rollaxis</span><span class="p">(</span><span class="n">measurements</span><span class="p">,</span> <span class="mi">1</span><span class="p">)):</span>
+            <span class="n">sip</span> <span class="o">=</span> <span class="n">sip_response</span><span class="p">(</span>
+                <span class="n">frequencies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">,</span>
+                <span class="n">rmag</span><span class="o">=</span><span class="n">sip_measurement</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span>
+                <span class="n">rpha</span><span class="o">=</span><span class="n">sip_measurement</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">responses</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">config</span><span class="p">)]</span> <span class="o">=</span> <span class="n">sip</span>
+        <span class="k">return</span> <span class="n">responses</span></div>
+
+<div class="viewcode-block" id="eitMan.save_measurements_to_directory"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.eitManager.eitMan.save_measurements_to_directory">[docs]</a>    <span class="k">def</span> <span class="nf">save_measurements_to_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Store the measurements (either from a previous import, or from</span>
+<span class="sd">        forward modeling, in one directory in the CRTomo &#39;crt&#39;-style.</span>
+
+<span class="sd">        Frequencies are stored in a file frequencies.dat.</span>
+
+<span class="sd">        For each frequency, data is stored in a file volt_%.2i.dat in the</span>
+<span class="sd">        CRTomo format.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">directory</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;frequencies.dat&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">nr</span><span class="p">,</span> <span class="p">(</span><span class="n">frequency</span><span class="p">,</span> <span class="n">td</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="o">.</span><span class="n">items</span><span class="p">())):</span>
+            <span class="n">td</span><span class="o">.</span><span class="n">save_measurements</span><span class="p">(</span>
+                <span class="n">directory</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;volt_</span><span class="si">{:02}</span><span class="s1">_f</span><span class="si">{:08.3f}</span><span class="s1">.dat&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">nr</span><span class="p">,</span> <span class="n">frequency</span>
+                <span class="p">)</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="eitMan.plot_all_result_spectra"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.eitManager.eitMan.plot_all_result_spectra">[docs]</a>    <span class="k">def</span> <span class="nf">plot_all_result_spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">configs</span><span class="o">.</span><span class="n">configs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Plotting </span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plot_result_spectrum</span><span class="p">(</span>
+                <span class="n">directory</span> <span class="o">+</span> <span class="s1">&#39;/spectrum_</span><span class="si">{:03}</span><span class="s1">.jpg&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">i</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="eitMan.plot_result_spectrum"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.eitManager.eitMan.plot_result_spectrum">[docs]</a>    <span class="k">def</span> <span class="nf">plot_result_spectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">nr</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Plot a given data and inversion response spectrum to file.</span>
+
+<span class="sd">        WARNING: At this point does not take into account missing</span>
+<span class="sd">        configurations for certain frequencies...</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename : str</span>
+<span class="sd">            Output filename</span>
+<span class="sd">        nr : int</span>
+<span class="sd">            Index of spectrum to plot. Starts at 0</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">td</span><span class="o">.</span><span class="n">configs</span><span class="o">.</span><span class="n">measurements</span><span class="p">[</span>
+                <span class="n">td</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;inversion&#39;</span><span class="p">][</span><span class="s1">&#39;fwd_response_rpha&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="p">]</span> <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">td</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="o">.</span><span class="n">items</span><span class="p">())])</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">rmag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">td</span><span class="o">.</span><span class="n">configs</span><span class="o">.</span><span class="n">measurements</span><span class="p">[</span>
+                <span class="n">td</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;inversion&#39;</span><span class="p">][</span><span class="s1">&#39;fwd_response_rmag&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="p">]</span> <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">td</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="o">.</span><span class="n">items</span><span class="p">())])</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">spec1</span> <span class="o">=</span> <span class="n">sip_response</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">,</span> <span class="n">rmag</span><span class="o">=</span><span class="n">rmag</span><span class="p">[</span><span class="n">nr</span><span class="p">,</span> <span class="p">:],</span> <span class="n">rpha</span><span class="o">=</span><span class="n">rpha</span><span class="p">[</span><span class="n">nr</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="n">rmag_true</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">td</span><span class="o">.</span><span class="n">configs</span><span class="o">.</span><span class="n">measurements</span><span class="p">[</span>
+                <span class="n">td</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;measurements&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="p">]</span> <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">td</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="o">.</span><span class="n">items</span><span class="p">())])</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">rpha_true</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">td</span><span class="o">.</span><span class="n">configs</span><span class="o">.</span><span class="n">measurements</span><span class="p">[</span>
+                <span class="n">td</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;measurements&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="p">]</span> <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">td</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="o">.</span><span class="n">items</span><span class="p">())])</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">spec_true</span> <span class="o">=</span> <span class="n">sip_response</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">,</span> <span class="n">rmag</span><span class="o">=</span><span class="n">rmag_true</span><span class="p">[</span><span class="n">nr</span><span class="p">,</span> <span class="p">:],</span> <span class="n">rpha</span><span class="o">=</span><span class="n">rpha_true</span><span class="p">[</span><span class="n">nr</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="n">spec_true</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="n">filename</span><span class="p">,</span>
+            <span class="n">reciprocal</span><span class="o">=</span><span class="n">spec1</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="s1">&#39;abmn: </span><span class="si">{}</span><span class="s1">-</span><span class="si">{}</span><span class="s1">-</span><span class="si">{}</span><span class="s1">-</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">configs</span><span class="o">.</span><span class="n">configs</span><span class="p">[</span><span class="n">nr</span><span class="p">]),</span>
+            <span class="n">label_nor</span><span class="o">=</span><span class="s1">&#39;data&#39;</span><span class="p">,</span>
+            <span class="n">label_rec</span><span class="o">=</span><span class="s1">&#39;inversion response&#39;</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="eitMan.set_electrode_capacitances"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.eitManager.eitMan.set_electrode_capacitances">[docs]</a>    <span class="k">def</span> <span class="nf">set_electrode_capacitances</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">capacitance</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Zimmermann et al 2018&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">frequency</span><span class="p">,</span> <span class="n">td</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">td</span><span class="o">.</span><span class="n">electrode_admittance</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">frequency</span> <span class="o">*</span> <span class="n">capacitance</span></div>
+
+<div class="viewcode-block" id="eitMan.assign_sip_signatures_using_mask"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.eitManager.eitMan.assign_sip_signatures_using_mask">[docs]</a>    <span class="k">def</span> <span class="nf">assign_sip_signatures_using_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask_raw</span><span class="p">,</span> <span class="n">lookup_table</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lookup_table : dict</span>
+
+<span class="sd">        spectrum : sip_response</span>
+<span class="sd">            SIP spectrum to use for parameterization</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mask_raw</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">),</span> <span class="s2">&quot;mask must be numpy array&quot;</span>
+        <span class="c1"># these are indices - we need them to be integers</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">mask_raw</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;mask must be an 1D array&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">mask</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">nr_of_elements</span>
+        <span class="p">),</span> <span class="s2">&quot;mask must be of the same size as number of mesh elements&quot;</span>
+
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">lookup_table</span><span class="p">,</span> <span class="nb">dict</span><span class="p">),</span> <span class="s2">&quot;parameter lookup_table must be a dict&quot;</span>
+
+        <span class="c1"># check the lookup table</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">lookup_table</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+                <span class="n">item</span><span class="p">,</span> <span class="p">(</span><span class="n">sip_response</span><span class="p">,</span> <span class="n">sip_response2</span><span class="p">)</span>
+            <span class="p">),</span> <span class="s2">&quot;the item with key </span><span class="si">{}</span><span class="s2"> is not a sip_response!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span> <span class="o">==</span> <span class="n">item</span><span class="o">.</span><span class="n">frequencies</span><span class="p">),</span> \
+                <span class="s2">&quot;The frequencies in the spectrum of key &quot;</span> <span class="o">+</span> \
+                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> do not match&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">lookup_table</span><span class="p">)</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> \
+            <span class="s2">&quot;Number of entries in the lookup table does not match number &quot;</span> <span class="o">+</span> \
+            <span class="s2">&quot;of unique mask entries&quot;</span>
+
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+            <span class="p">)</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">lookup_table</span><span class="o">.</span><span class="n">keys</span><span class="p">())))</span>
+            <span class="p">),</span> \
+            <span class="s2">&quot;entries in mask and lookup_table do not match&quot;</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;forward_rmag&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No forward models registered yet. Creating empty ones&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_homogeneous_model</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># loop over assignments</span>
+        <span class="k">for</span> <span class="n">assignment</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">mask</span><span class="p">):</span>
+            <span class="n">pixel_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span> <span class="o">==</span> <span class="n">assignment</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">spectrum</span> <span class="o">=</span> <span class="n">lookup_table</span><span class="p">[</span><span class="n">assignment</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">frequency</span><span class="p">,</span> <span class="n">rmag</span><span class="p">,</span> <span class="n">rpha</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">rmag</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">rpha</span><span class="p">):</span>
+                <span class="n">td</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tds</span><span class="p">[</span><span class="n">frequency</span><span class="p">]</span>
+                <span class="n">pid_mag</span><span class="p">,</span> <span class="n">pid_phase</span> <span class="o">=</span> <span class="n">td</span><span class="o">.</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;forward_model&#39;</span><span class="p">]</span>
+                <span class="n">td</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">modify_pixels</span><span class="p">(</span>
+                    <span class="n">pid_mag</span><span class="p">,</span>
+                    <span class="n">pixel_indices</span><span class="p">,</span>
+                    <span class="n">rmag</span>
+                <span class="p">)</span>
+                <span class="n">td</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">modify_pixels</span><span class="p">(</span>
+                    <span class="n">pid_phase</span><span class="p">,</span>
+                    <span class="n">pixel_indices</span><span class="p">,</span>
+                    <span class="n">rpha</span>
+                <span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">crtomo tools</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">lib</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2021, CRTomo contributors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

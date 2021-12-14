@@ -1,0 +1,9 @@
+cr\_trig\_parse\_gmsh module
+============================
+
+.. automodule:: cr_trig_parse_gmsh
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:

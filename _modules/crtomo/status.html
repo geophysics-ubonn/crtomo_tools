@@ -1,0 +1,271 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>crtomo.status &#8212; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for crtomo.status</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+
+
+<div class="viewcode-block" id="is_tomodir"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.status.is_tomodir">[docs]</a><span class="k">def</span> <span class="nf">is_tomodir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check if the supplied directory is a tomodir</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    directory: string</span>
+<span class="sd">        Check if the supplied path is a valid tomodir</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    is_tomodir: bool</span>
+<span class="sd">        True if the supplied directory is a tomodir directory</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span>
+            <span class="n">directory</span> <span class="o">+</span> <span class="s2">&quot;/exe&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span>
+                <span class="n">directory</span> <span class="o">+</span> <span class="s2">&quot;/config&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span>
+                    <span class="n">directory</span> <span class="o">+</span> <span class="s2">&quot;/rho&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span>
+                        <span class="n">directory</span> <span class="o">+</span> <span class="s2">&quot;/inv&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span>
+                            <span class="n">directory</span> <span class="o">+</span> <span class="s2">&quot;/mod&quot;</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="td_is_finished"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.status.td_is_finished">[docs]</a><span class="k">def</span> <span class="nf">td_is_finished</span><span class="p">(</span><span class="n">tomodir</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the state of modeling and inversion for a given tomodir. The</span>
+<span class="sd">    result does not take into account sensitivities or potentials, as</span>
+<span class="sd">    optionally generated by CRMod.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    tomodir : string</span>
+<span class="sd">        Directory to check</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    crmod_is_finished : bool</span>
+<span class="sd">        True if a successful CRMod result is contained in the tomodir</span>
+<span class="sd">        directory.</span>
+<span class="sd">    crtomo_is_finished : bool</span>
+<span class="sd">        True if a successful CRTomo inversion results is contained in the</span>
+<span class="sd">        tomodir directory.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_tomodir</span><span class="p">(</span><span class="n">tomodir</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Supplied directory is not a tomodir!&#39;</span><span class="p">)</span>
+
+    <span class="c1"># crmod finished is determined by:</span>
+    <span class="c1"># config.dat/rho.dat/crmod.cfg are present</span>
+    <span class="c1"># volt.dat is present</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">tomodir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;config/config.dat&#39;</span><span class="p">)</span> <span class="ow">and</span>
+       <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">tomodir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;rho/rho.dat&#39;</span><span class="p">)</span> <span class="ow">and</span>
+       <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">tomodir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;grid/elem.dat&#39;</span><span class="p">)</span> <span class="ow">and</span>
+       <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">tomodir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;grid/elec.dat&#39;</span><span class="p">)</span> <span class="ow">and</span>
+       <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">tomodir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;exe/crmod.cfg&#39;</span><span class="p">)</span> <span class="ow">and</span>
+       <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">tomodir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;mod/volt.dat&#39;</span><span class="p">)):</span>
+        <span class="n">crmod_is_finished</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">crmod_is_finished</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># crtomo is finished if</span>
+    <span class="c1"># crtomo.cfg/volt.dat/elem.dat/elec.dat are present</span>
+    <span class="c1"># inv/run.ctr contains the word &quot;CPU&quot; in the last line</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">tomodir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;grid/elem.dat&#39;</span><span class="p">)</span> <span class="ow">and</span>
+       <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">tomodir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;grid/elec.dat&#39;</span><span class="p">)</span> <span class="ow">and</span>
+       <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">tomodir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;exe/crtomo.cfg&#39;</span><span class="p">)</span> <span class="ow">and</span>
+       <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">tomodir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;inv/inv.ctr&#39;</span><span class="p">)</span> <span class="ow">and</span>
+       <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">tomodir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;inv/run.ctr&#39;</span><span class="p">)</span> <span class="ow">and</span>
+       <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">tomodir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;mod/volt.dat&#39;</span><span class="p">)):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">tomodir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;inv/run.ctr&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fid</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">fid</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+            <span class="n">crtomo_is_finished</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="c1"># check the last 5 lines</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">:]:</span>
+                <span class="n">test_line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="n">regex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;CPU&#39;</span><span class="p">)</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">regex</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">test_line</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">crtomo_is_finished</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">crtomo_is_finished</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">crmod_is_finished</span><span class="p">,</span> <span class="n">crtomo_is_finished</span></div>
+
+
+<div class="viewcode-block" id="is_sipdir"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.status.is_sipdir">[docs]</a><span class="k">def</span> <span class="nf">is_sipdir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Simple check if the supplied directory is a SIP directory.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    directory: string</span>
+<span class="sd">        Check if the supplied path is a valid SIP directory</span>
+
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    is_sipdir: bool</span>
+<span class="sd">        True if the supplied directory is a SIP directory</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">is_sipdir</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">directory</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;frequencies.dat&#39;</span><span class="p">)):</span>
+        <span class="n">is_sipdir</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">directory</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;invmod&#39;</span><span class="p">)):</span>
+        <span class="n">is_sipdir</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="n">is_sipdir</span></div>
+
+
+<div class="viewcode-block" id="seitdir_is_finished"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.status.seitdir_is_finished">[docs]</a><span class="k">def</span> <span class="nf">seitdir_is_finished</span><span class="p">(</span><span class="n">seitdir</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">sipdir_is_finished</span><span class="p">(</span><span class="n">seitdir</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="sipdir_is_finished"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.status.sipdir_is_finished">[docs]</a><span class="k">def</span> <span class="nf">sipdir_is_finished</span><span class="p">(</span><span class="n">sipdir</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the state of modeling and inversion for a given SIP dir. The</span>
+<span class="sd">    result does not take into account sensitivities or potentials, as</span>
+<span class="sd">    optionally generated by CRMod.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sipdir: string</span>
+<span class="sd">        Directory to check</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    crmod_is_finished: bool</span>
+<span class="sd">        True if all tomodirs of this SIP directory contain finished modeling</span>
+<span class="sd">        results.</span>
+<span class="sd">    crtomo_is_finished: bool</span>
+<span class="sd">        True if all tomodirs of this SIP directory contain finished inversion</span>
+<span class="sd">        results.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_sipdir</span><span class="p">(</span><span class="n">sipdir</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Directory is not a valid SIP directory!&#39;</span><span class="p">)</span>
+
+    <span class="n">subdirs_raw</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">sipdir</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;invmod&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s1">&#39;*&#39;</span><span class="p">))</span>
+    <span class="n">subdirs</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">subdirs_raw</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">x</span><span class="p">)]</span>
+
+    <span class="n">crmod_finished</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">crtomo_finished</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">for</span> <span class="n">subdir</span> <span class="ow">in</span> <span class="n">subdirs</span><span class="p">:</span>
+        <span class="n">subcrmod</span><span class="p">,</span> <span class="n">subcrtomo</span> <span class="o">=</span> <span class="n">td_is_finished</span><span class="p">(</span><span class="n">subdir</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">subcrmod</span><span class="p">:</span>
+            <span class="n">crmod_finished</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">subcrtomo</span><span class="p">:</span>
+            <span class="n">crtomo_finished</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="n">crmod_finished</span><span class="p">,</span> <span class="n">crtomo_finished</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">crtomo tools</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">lib</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2021, CRTomo contributors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

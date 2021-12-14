@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Examples &mdash; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Creating and handling grids" href="00_grids/plot_grid1.html" />
+    <link rel="prev" title="Grid creation" href="../grid_creation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> crtomo tools
+          </a>
+              <div class="version">
+                0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#examples-grid-handling">Examples: Grid handling</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="00_grids/plot_grid1.html">Creating and handling grids</a></li>
+<li class="toctree-l3"><a class="reference internal" href="00_grids/plot_test.html">Plotting the exponential function</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#examples-modelling">Examples: Modelling</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="01_modelling/plot_00_sensitivity.html">Plotting sensitivities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="01_modelling/plot_01_gaussian_model.html">Generate Gaussian Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="01_modelling/plot_02_potentials.html">Plot a potential distribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="01_modelling/plot_04_gen_seit_model.html">Generating sEIT forward models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="01_modelling/plot_05_seit_fwd_lookup.html">Generating sEIT forward models using a mask and a lookup table</a></li>
+<li class="toctree-l3"><a class="reference internal" href="01_modelling/plot_06_synthetic_4d.html">Generating a 4D synthetic data set with noise.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="01_modelling/plot_07_fwd_model_plotting.html">Plot forward models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="01_modelling/plot_08_sensitivity_thresholding.html">Segmenting sensitivity distributions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#examples-single-frequency-inversion">Examples: Single-frequency inversion</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="02_simple_inversion/plot_01_inversion_settings.html">Setting modeling and inversion settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="02_simple_inversion/plot_02_data_errors.html">Data error handling in CRTomo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="02_simple_inversion/plot_03_adding_data_noise.html">Adding data noise to measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="02_simple_inversion/plot_05_single_freq_inversion_CR.html">A single-frequency inversion (CR container)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="02_simple_inversion/plot_06_single_freq_inversion_sEIT.html">A single-frequency inversion (sEIT container)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="02_simple_inversion/plot_07_synthetic_modinv_study.html">Single frequency synthetic study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="02_simple_inversion/plot_08_study_mgs.html">Using alternative regularization approaches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="02_simple_inversion/plot_09_individual_errors.html">Using individual data errors in CRTomo</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#examples-postprocessing-of-inversion-results">Examples: Postprocessing of inversion results</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="03_inversion_postprocessing/plot_01_tdm_basics.html">Using the tdManager to investigate inversion results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="03_inversion_postprocessing/plot_02_inversion_results.html">Plot inversion results from a tomodir</a></li>
+<li class="toctree-l3"><a class="reference internal" href="03_inversion_postprocessing/plot_03_seit_forward_responses.html">Analyzing data response of inversion result</a></li>
+<li class="toctree-l3"><a class="reference internal" href="03_inversion_postprocessing/test_seit.html">bla</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#examples-seit-import-and-inversions">Examples: sEIT import and inversions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="04_full_dataprocessing/plot_sEIT_import_inversion.html">Full sEIT data processing example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#calculating-correction-factors">Calculating correction factors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="05_correction_factors/plot_calculate_correction_factors.html">Calculating 2D correction factors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#examples-field-data-processing">Examples: Field data processing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="06_field_data_processing/plot_01_field_data_syscal.html">Example for processing field data from Sycal</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">lib</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">crtomo tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Examples</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_examples/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="examples">
+<span id="sphx-glr-examples"></span><h1>Examples<a class="headerlink" href="#examples" title="Permalink to this headline"></a></h1>
+<p>Below is a gallery of examples</p>
+<div class="sphx-glr-clear"></div><section id="examples-grid-handling">
+<span id="sphx-glr-examples-00-grids"></span><h2>Examples: Grid handling<a class="headerlink" href="#examples-grid-handling" title="Permalink to this headline"></a></h2>
+<div class="sphx-glr-thumbcontainer" tooltip="Grids for CRTomo can be created in multiple ways. We now support two ways:"><figure class="align-default" id="id1">
+<img alt="Creating and handling grids" src="../_images/sphx_glr_plot_grid1_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="00_grids/plot_grid1.html#sphx-glr-examples-00-grids-plot-grid1-py"><span class="std std-ref">Creating and handling grids</span></a></span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates how to import a local module and how images are stacked when two plot..."><figure class="align-default" id="id2">
+<img alt="Plotting the exponential function" src="../_images/sphx_glr_plot_test_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="00_grids/plot_test.html#sphx-glr-examples-00-grids-plot-test-py"><span class="std std-ref">Plotting the exponential function</span></a></span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-clear"></div></section>
+<section id="examples-modelling">
+<span id="sphx-glr-examples-01-modelling"></span><h2>Examples: Modelling<a class="headerlink" href="#examples-modelling" title="Permalink to this headline"></a></h2>
+<div class="sphx-glr-thumbcontainer" tooltip="Sensitivity distributions can be easily plotted using the tdMan class:"><figure class="align-default" id="id3">
+<img alt="Plotting sensitivities" src="../_images/sphx_glr_plot_00_sensitivity_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="01_modelling/plot_00_sensitivity.html#sphx-glr-examples-01-modelling-plot-00-sensitivity-py"><span class="std std-ref">Plotting sensitivities</span></a></span><a class="headerlink" href="#id3" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="Generate Gaussian Models"><figure class="align-default" id="id4">
+<img alt="Generate Gaussian Models" src="../_images/sphx_glr_plot_01_gaussian_model_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="01_modelling/plot_01_gaussian_model.html#sphx-glr-examples-01-modelling-plot-01-gaussian-model-py"><span class="std std-ref">Generate Gaussian Models</span></a></span><a class="headerlink" href="#id4" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="Plot a potential distribution"><figure class="align-default" id="id5">
+<img alt="Plot a potential distribution" src="../_images/sphx_glr_plot_02_potentials_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="01_modelling/plot_02_potentials.html#sphx-glr-examples-01-modelling-plot-02-potentials-py"><span class="std std-ref">Plot a potential distribution</span></a></span><a class="headerlink" href="#id5" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="The eit manager can be used to easily create forward models using different parameterizations."><figure class="align-default" id="id6">
+<img alt="Generating sEIT forward models" src="../_images/sphx_glr_plot_04_gen_seit_model_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="01_modelling/plot_04_gen_seit_model.html#sphx-glr-examples-01-modelling-plot-04-gen-seit-model-py"><span class="std std-ref">Generating sEIT forward models</span></a></span><a class="headerlink" href="#id6" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="Generating sEIT forward models using a mask and a lookup table"><figure class="align-default" id="id7">
+<img alt="Generating sEIT forward models using a mask and a lookup table" src="../_images/sphx_glr_plot_05_seit_fwd_lookup_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="01_modelling/plot_05_seit_fwd_lookup.html#sphx-glr-examples-01-modelling-plot-05-seit-fwd-lookup-py"><span class="std std-ref">Generating sEIT forward models using a mask and a lookup table</span></a></span><a class="headerlink" href="#id7" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="A 2D space, time and frequency data set is generated for testing purposes in reda."><figure class="align-default" id="id8">
+<img alt="Generating a 4D synthetic data set with noise." src="../_images/sphx_glr_plot_06_synthetic_4d_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="01_modelling/plot_06_synthetic_4d.html#sphx-glr-examples-01-modelling-plot-06-synthetic-4d-py"><span class="std std-ref">Generating a 4D synthetic data set with noise.</span></a></span><a class="headerlink" href="#id8" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="Test plotting forward models for different mesh boundaries."><figure class="align-default" id="id9">
+<img alt="Plot forward models" src="../_images/sphx_glr_plot_07_fwd_model_plotting_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="01_modelling/plot_07_fwd_model_plotting.html#sphx-glr-examples-01-modelling-plot-07-fwd-model-plotting-py"><span class="std std-ref">Plot forward models</span></a></span><a class="headerlink" href="#id9" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="Segmenting sensitivity distributions"><figure class="align-default" id="id10">
+<img alt="Segmenting sensitivity distributions" src="../_images/sphx_glr_plot_08_sensitivity_thresholding_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="01_modelling/plot_08_sensitivity_thresholding.html#sphx-glr-examples-01-modelling-plot-08-sensitivity-thresholding-py"><span class="std std-ref">Segmenting sensitivity distributions</span></a></span><a class="headerlink" href="#id10" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-clear"></div></section>
+<section id="examples-single-frequency-inversion">
+<span id="sphx-glr-examples-02-simple-inversion"></span><h2>Examples: Single-frequency inversion<a class="headerlink" href="#examples-single-frequency-inversion" title="Permalink to this headline"></a></h2>
+<div class="sphx-glr-thumbcontainer" tooltip="This example discusses details of settings various settings for modeling or inversion using the..."><figure class="align-default" id="id11">
+<img alt="Setting modeling and inversion settings" src="../_images/sphx_glr_plot_01_inversion_settings_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="02_simple_inversion/plot_01_inversion_settings.html#sphx-glr-examples-02-simple-inversion-plot-01-inversion-settings-py"><span class="std std-ref">Setting modeling and inversion settings</span></a></span><a class="headerlink" href="#id11" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="CRTomo implements a last-square inversion with regularization based on the Thikonov appraoch. H..."><figure class="align-default" id="id12">
+<img alt="Data error handling in CRTomo" src="../_images/sphx_glr_plot_02_data_errors_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="02_simple_inversion/plot_02_data_errors.html#sphx-glr-examples-02-simple-inversion-plot-02-data-errors-py"><span class="std std-ref">Data error handling in CRTomo</span></a></span><a class="headerlink" href="#id12" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="Especially for synthetic modeling/inversion studies it is important to add data noise to the da..."><figure class="align-default" id="id13">
+<img alt="Adding data noise to measurements" src="../_images/sphx_glr_plot_03_adding_data_noise_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="02_simple_inversion/plot_03_adding_data_noise.html#sphx-glr-examples-02-simple-inversion-plot-03-adding-data-noise-py"><span class="std std-ref">Adding data noise to measurements</span></a></span><a class="headerlink" href="#id13" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="Full processing of one frequency of one timestep of the data from Weigand and Kemna 2017 (Bioge..."><figure class="align-default" id="id14">
+<img alt="A single-frequency inversion (CR container)" src="../_images/sphx_glr_plot_05_single_freq_inversion_CR_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="02_simple_inversion/plot_05_single_freq_inversion_CR.html#sphx-glr-examples-02-simple-inversion-plot-05-single-freq-inversion-cr-py"><span class="std std-ref">A single-frequency inversion (CR container)</span></a></span><a class="headerlink" href="#id14" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="Full processing of one frequency of one timestep of the data from Weigand and Kemna 2017 (Bioge..."><figure class="align-default" id="id15">
+<img alt="A single-frequency inversion (sEIT container)" src="../_images/sphx_glr_plot_06_single_freq_inversion_sEIT_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="02_simple_inversion/plot_06_single_freq_inversion_sEIT.html#sphx-glr-examples-02-simple-inversion-plot-06-single-freq-inversion-seit-py"><span class="std std-ref">A single-frequency inversion (sEIT container)</span></a></span><a class="headerlink" href="#id15" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="Single frequency synthetic study"><figure class="align-default" id="id16">
+<img alt="Single frequency synthetic study" src="../_images/sphx_glr_plot_07_synthetic_modinv_study_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="02_simple_inversion/plot_07_synthetic_modinv_study.html#sphx-glr-examples-02-simple-inversion-plot-07-synthetic-modinv-study-py"><span class="std std-ref">Single frequency synthetic study</span></a></span><a class="headerlink" href="#id16" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="This example shortly shows how to use the MGS regularization"><figure class="align-default" id="id17">
+<img alt="Using alternative regularization approaches" src="../_images/sphx_glr_plot_08_study_mgs_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="02_simple_inversion/plot_08_study_mgs.html#sphx-glr-examples-02-simple-inversion-plot-08-study-mgs-py"><span class="std std-ref">Using alternative regularization approaches</span></a></span><a class="headerlink" href="#id17" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="In principle an individual data error can be assigned to each data point. However, since data e..."><figure class="align-default" id="id18">
+<img alt="Using individual data errors in CRTomo" src="../_images/sphx_glr_plot_09_individual_errors_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="02_simple_inversion/plot_09_individual_errors.html#sphx-glr-examples-02-simple-inversion-plot-09-individual-errors-py"><span class="std std-ref">Using individual data errors in CRTomo</span></a></span><a class="headerlink" href="#id18" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-clear"></div></section>
+<section id="examples-postprocessing-of-inversion-results">
+<span id="sphx-glr-examples-03-inversion-postprocessing"></span><h2>Examples: Postprocessing of inversion results<a class="headerlink" href="#examples-postprocessing-of-inversion-results" title="Permalink to this headline"></a></h2>
+<div class="sphx-glr-thumbcontainer" tooltip="One of the purposes of the tdManager is to provide an easy interface to analyze inversion resul..."><figure class="align-default" id="id19">
+<img alt="Using the tdManager to investigate inversion results" src="../_images/sphx_glr_plot_01_tdm_basics_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="03_inversion_postprocessing/plot_01_tdm_basics.html#sphx-glr-examples-03-inversion-postprocessing-plot-01-tdm-basics-py"><span class="std std-ref">Using the tdManager to investigate inversion results</span></a></span><a class="headerlink" href="#id19" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="Plot inversion results from a tomodir"><figure class="align-default" id="id20">
+<img alt="Plot inversion results from a tomodir" src="../_images/sphx_glr_plot_02_inversion_results_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="03_inversion_postprocessing/plot_02_inversion_results.html#sphx-glr-examples-03-inversion-postprocessing-plot-02-inversion-results-py"><span class="std std-ref">Plot inversion results from a tomodir</span></a></span><a class="headerlink" href="#id20" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="Analyzing data response of inversion result"><figure class="align-default" id="id21">
+<img alt="Analyzing data response of inversion result" src="../_images/sphx_glr_plot_03_seit_forward_responses_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="03_inversion_postprocessing/plot_03_seit_forward_responses.html#sphx-glr-examples-03-inversion-postprocessing-plot-03-seit-forward-responses-py"><span class="std std-ref">Analyzing data response of inversion result</span></a></span><a class="headerlink" href="#id21" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-thumbcontainer" tooltip="bla"><figure class="align-default" id="id22">
+<img alt="bla" src="../_images/sphx_glr_test_seit_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="03_inversion_postprocessing/test_seit.html#sphx-glr-examples-03-inversion-postprocessing-test-seit-py"><span class="std std-ref">bla</span></a></span><a class="headerlink" href="#id22" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-clear"></div></section>
+<section id="examples-seit-import-and-inversions">
+<span id="sphx-glr-examples-04-full-dataprocessing"></span><h2>Examples: sEIT import and inversions<a class="headerlink" href="#examples-seit-import-and-inversions" title="Permalink to this headline"></a></h2>
+<div class="sphx-glr-thumbcontainer" tooltip="Full processing of one timestep of the data from Weigand and Kemna 2017 (Biogeosciences)."><figure class="align-default" id="id23">
+<img alt="Full sEIT data processing example" src="../_images/sphx_glr_plot_sEIT_import_inversion_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="04_full_dataprocessing/plot_sEIT_import_inversion.html#sphx-glr-examples-04-full-dataprocessing-plot-seit-import-inversion-py"><span class="std std-ref">Full sEIT data processing example</span></a></span><a class="headerlink" href="#id23" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-clear"></div></section>
+<section id="calculating-correction-factors">
+<span id="sphx-glr-examples-05-correction-factors"></span><h2>Calculating correction factors<a class="headerlink" href="#calculating-correction-factors" title="Permalink to this headline"></a></h2>
+<div class="sphx-glr-thumbcontainer" tooltip="Calculation factors used to correct rhizotron tank measurements for analysis with the 2D CRTomo..."><figure class="align-default" id="id24">
+<img alt="Calculating 2D correction factors" src="../_images/sphx_glr_plot_calculate_correction_factors_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="05_correction_factors/plot_calculate_correction_factors.html#sphx-glr-examples-05-correction-factors-plot-calculate-correction-factors-py"><span class="std std-ref">Calculating 2D correction factors</span></a></span><a class="headerlink" href="#id24" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-clear"></div></section>
+<section id="examples-field-data-processing">
+<span id="sphx-glr-examples-06-field-data-processing"></span><h2>Examples: Field data processing<a class="headerlink" href="#examples-field-data-processing" title="Permalink to this headline"></a></h2>
+<div class="sphx-glr-thumbcontainer" tooltip="    This example is work in progress!!!"><figure class="align-default" id="id25">
+<img alt="Example for processing field data from Sycal" src="../_images/sphx_glr_plot_01_field_data_syscal_thumb.png" />
+<figcaption>
+<p><span class="caption-text"><a class="reference internal" href="06_field_data_processing/plot_01_field_data_syscal.html#sphx-glr-examples-06-field-data-processing-plot-01-field-data-syscal-py"><span class="std std-ref">Example for processing field data from Sycal</span></a></span><a class="headerlink" href="#id25" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+</div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-clear"></div><p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../grid_creation.html" class="btn btn-neutral float-left" title="Grid creation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="00_grids/plot_grid1.html" class="btn btn-neutral float-right" title="Creating and handling grids" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2021, CRTomo contributors.
+      <span class="lastupdated">Last updated on Dec 14, 2021.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

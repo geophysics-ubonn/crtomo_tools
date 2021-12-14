@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Creating and handling grids &mdash; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Plotting the exponential function" href="plot_test.html" />
+    <link rel="prev" title="Examples" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> crtomo tools
+          </a>
+              <div class="version">
+                0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#examples-grid-handling">Examples: Grid handling</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Creating and handling grids</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_test.html">Plotting the exponential function</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-modelling">Examples: Modelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-single-frequency-inversion">Examples: Single-frequency inversion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-postprocessing-of-inversion-results">Examples: Postprocessing of inversion results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-seit-import-and-inversions">Examples: sEIT import and inversions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#calculating-correction-factors">Calculating correction factors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-field-data-processing">Examples: Field data processing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">lib</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">crtomo tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Examples</a> &raquo;</li>
+      <li>Creating and handling grids</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/_examples/00_grids/plot_grid1.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-00-grids-plot-grid1-py"><span class="std std-ref">here</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="creating-and-handling-grids">
+<span id="sphx-glr-examples-00-grids-plot-grid1-py"></span><h1>Creating and handling grids<a class="headerlink" href="#creating-and-handling-grids" title="Permalink to this headline"></a></h1>
+<p>Grids for CRTomo can be created in multiple ways. We now support two ways:</p>
+<ul class="simple">
+<li><p>using the crtomo.crt_grid.create_surface_grid function</p></li>
+<li><p>using the command line command cr_trig_create</p></li>
+</ul>
+<p>This example only shows the usage of the former method.</p>
+<p>The top level crtomo import suffices for most tasks</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">crtomo</span>
+</pre></div>
+</div>
+<p>Create simple surface grids with this wrapper</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.crt_grid.create_surface_grid" title="crtomo.crt_grid.create_surface_grid" class="sphx-glr-backref-module-crtomo-crt_grid sphx-glr-backref-type-py-method"><span class="n">crtomo</span><span class="o">.</span><span class="n">crt_grid</span><span class="o">.</span><span class="n">create_surface_grid</span></a><span class="p">(</span><span class="n">nr_electrodes</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
+<a href="../../api/crtomo.html#crtomo.crt_grid.plot_grid" title="crtomo.crt_grid.plot_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">grid</span><span class="o">.</span><span class="n">plot_grid</span></a><span class="p">()</span>
+<span class="c1"># number the electrodes (useful for numerical studies)</span>
+<a href="../../api/crtomo.html#crtomo.crt_grid.plot_grid" title="crtomo.crt_grid.plot_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">grid</span><span class="o">.</span><span class="n">plot_grid</span></a><span class="p">(</span><span class="n">plot_electrode_numbers</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># save this grid to disc</span>
+<a href="../../api/crtomo.html#crtomo.crt_grid.save_elem_file" title="crtomo.crt_grid.save_elem_file" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">grid</span><span class="o">.</span><span class="n">save_elem_file</span></a><span class="p">(</span><span class="s1">&#39;elem.dat&#39;</span><span class="p">)</span>
+<a href="../../api/crtomo.html#crtomo.crt_grid.save_elec_file" title="crtomo.crt_grid.save_elec_file" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">grid</span><span class="o">.</span><span class="n">save_elec_file</span></a><span class="p">(</span><span class="s1">&#39;elec.dat&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_grid1_001.png" srcset="../../_images/sphx_glr_plot_grid1_001.png" alt="plot grid1" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_grid1_002.png" srcset="../../_images/sphx_glr_plot_grid1_002.png" alt="plot grid1" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>This grid was sorted using CutMcK. The nodes were resorted!
+Triangular grid found
+</pre></div>
+</div>
+<p>Grid can be read from disk:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid1</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class"><span class="n">crtomo</span><span class="o">.</span><span class="n">crt_grid</span></a><span class="p">(</span><span class="s1">&#39;elem.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;elec.dat&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid1</span></a><span class="p">)</span>
+<a href="../../api/crtomo.html#crtomo.crt_grid.plot_grid" title="crtomo.crt_grid.plot_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">grid1</span><span class="o">.</span><span class="n">plot_grid</span></a><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_grid1_003.png" srcset="../../_images/sphx_glr_plot_grid1_003.png" alt="plot grid1" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>This grid was sorted using CutMcK. The nodes were resorted!
+Triangular grid found
+CRMod/CTRomo grid instance
+number of elements: 1332
+number of nodes: 722
+number of electrodes: 10
+grid dimsensions:
+X: -3.375 16.875
+Z: -6.75 0.0
+</pre></div>
+</div>
+<p>Create a grid with layering</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.crt_grid.create_surface_grid" title="crtomo.crt_grid.create_surface_grid" class="sphx-glr-backref-module-crtomo-crt_grid sphx-glr-backref-type-py-method"><span class="n">crtomo</span><span class="o">.</span><span class="n">crt_grid</span><span class="o">.</span><span class="n">create_surface_grid</span></a><span class="p">(</span>
+    <span class="n">nr_electrodes</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">spacing</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span>
+    <span class="n">lines</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid</span></a><span class="p">)</span>
+<a href="../../api/crtomo.html#crtomo.crt_grid.plot_grid" title="crtomo.crt_grid.plot_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">grid</span><span class="o">.</span><span class="n">plot_grid</span></a><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_grid1_004.png" srcset="../../_images/sphx_glr_plot_grid1_004.png" alt="plot grid1" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[[-3.375 -1.    12.   ]
+ [-3.375 -0.5   12.   ]]
+[[16.875 -0.5   12.   ]
+ [16.875 -1.    12.   ]]
+This grid was sorted using CutMcK. The nodes were resorted!
+Triangular grid found
+CRMod/CTRomo grid instance
+number of elements: 1428
+number of nodes: 770
+number of electrodes: 10
+grid dimsensions:
+X: -3.375 16.875
+Z: -6.75 0.0
+</pre></div>
+</div>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-00-grids-plot-grid1-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/cae4729350cb403722ba0fdf4d12cc67/plot_grid1.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_grid1.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/ac76b2f5bc12f74f862d436f4611aa06/plot_grid1.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_grid1.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_test.html" class="btn btn-neutral float-right" title="Plotting the exponential function" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2021, CRTomo contributors.
+      <span class="lastupdated">Last updated on Dec 14, 2021.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>volt_correct_temperature module &mdash; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="volt_histogram module" href="volt_histogram.html" />
+    <link rel="prev" title="td_test module" href="td_test.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> crtomo tools
+          </a>
+              <div class="version">
+                0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../_examples/index.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="cr_get_analytical_solutions.html">cr_get_analytical_solutions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cr_get_modelling_errors.html">cr_get_modelling_errors module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cr_trig_create.html">cr_trig_create module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cr_trig_parse_gmsh.html">cr_trig_parse_gmsh module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_extralines_gen_decouplings.html">grid_extralines_gen_decouplings module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_gen_decouplings.html">grid_gen_decouplings module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_gen_depth_decoupling.html">grid_gen_depth_decoupling module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_gen_surface_files.html">grid_gen_surface_files module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_homogenize.html">grid_homogenize module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_plot_elem_angles.html">grid_plot_elem_angles module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_plot_wireframe.html">grid_plot_wireframe module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_rotate.html">grid_rotate module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_translate.html">grid_translate module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid_translate_model.html">grid_translate_model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sd_plot.html">sd_plot module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sens_center_plot.html">sens_center_plot module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_clean.html">td_clean module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_correct_temperature.html">td_correct_temperature module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_init.html">td_init module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_plot.html">td_plot module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_residuals.html">td_residuals module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_run_all_local.html">td_run_all_local module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="td_test.html">td_test module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">volt_correct_temperature module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="volt_histogram.html">volt_histogram module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">lib</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">crtomo tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="modules.html">src</a> &raquo;</li>
+      <li>volt_correct_temperature module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/scripts/grid_tools/volt_correct_temperature.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-volt_correct_temperature">
+<span id="volt-correct-temperature-module"></span><h1>volt_correct_temperature module<a class="headerlink" href="#module-volt_correct_temperature" title="Permalink to this headline"></a></h1>
+<p>Tool to substract the temperature effect of given rawdata in a volt.dat file.
+The calculation is done after Hayley (2010):</p>
+<blockquote>
+<div><p>d_obs^TC = d_obs + (d_est^TC - d_est)</p>
+</div></blockquote>
+<p>Necessary Input:
+* d_obs: measured field data to correct
+* d_est: synthetic data of inversion result from d_obs
+* d_estTC: synthetic data of temperature corrected inversion result of d_obs</p>
+<p>Options:
+* output: output file</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="volt_correct_temperature.calc_correction">
+<span class="sig-prename descclassname"><span class="pre">volt_correct_temperature.</span></span><span class="sig-name descname"><span class="pre">calc_correction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">volt1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">volt2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">volt3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/volt_correct_temperature.html#calc_correction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volt_correct_temperature.calc_correction" title="Permalink to this definition"></a></dt>
+<dd><p>Remove the temperature effect from field data using inversion results of
+that data:</p>
+<blockquote>
+<div><p>print(volt[0])
+d_obs^TC = d_obs + (d_est^TC - d_est)</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>d_obs</strong> – measured field data to correct (volt1)</p></li>
+<li><p><strong>d_est</strong> – synthetic data of inversion result from d_obs (volt2)</p></li>
+<li><p><strong>d_estTC</strong> – synthetic data of temperature corrected inversion result of d_obs
+(volt3)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="volt_correct_temperature.handle_options">
+<span class="sig-prename descclassname"><span class="pre">volt_correct_temperature.</span></span><span class="sig-name descname"><span class="pre">handle_options</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/volt_correct_temperature.html#handle_options"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volt_correct_temperature.handle_options" title="Permalink to this definition"></a></dt>
+<dd><p>Handle options.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="volt_correct_temperature.main">
+<span class="sig-prename descclassname"><span class="pre">volt_correct_temperature.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/volt_correct_temperature.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volt_correct_temperature.main" title="Permalink to this definition"></a></dt>
+<dd><p>Function to remove temperature effect from field data</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="volt_correct_temperature.readin_volt">
+<span class="sig-prename descclassname"><span class="pre">volt_correct_temperature.</span></span><span class="sig-name descname"><span class="pre">readin_volt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/volt_correct_temperature.html#readin_volt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volt_correct_temperature.readin_volt" title="Permalink to this definition"></a></dt>
+<dd><p>Read in measurement data from a volt.dat file and return electrodes and
+measured resistance.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="volt_correct_temperature.save_volt">
+<span class="sig-prename descclassname"><span class="pre">volt_correct_temperature.</span></span><span class="sig-name descname"><span class="pre">save_volt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elecs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">volt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/volt_correct_temperature.html#save_volt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volt_correct_temperature.save_volt" title="Permalink to this definition"></a></dt>
+<dd><p>Save the values in volt-format.</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="td_test.html" class="btn btn-neutral float-left" title="td_test module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="volt_histogram.html" class="btn btn-neutral float-right" title="volt_histogram module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2021, CRTomo contributors.
+      <span class="lastupdated">Last updated on Dec 14, 2021.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

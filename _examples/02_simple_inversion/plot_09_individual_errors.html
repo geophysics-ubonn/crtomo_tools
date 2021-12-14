@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Using individual data errors in CRTomo &mdash; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Using the tdManager to investigate inversion results" href="../03_inversion_postprocessing/plot_01_tdm_basics.html" />
+    <link rel="prev" title="Using alternative regularization approaches" href="plot_08_study_mgs.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> crtomo tools
+          </a>
+              <div class="version">
+                0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-grid-handling">Examples: Grid handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-modelling">Examples: Modelling</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#examples-single-frequency-inversion">Examples: Single-frequency inversion</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="plot_01_inversion_settings.html">Setting modeling and inversion settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_02_data_errors.html">Data error handling in CRTomo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_03_adding_data_noise.html">Adding data noise to measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_05_single_freq_inversion_CR.html">A single-frequency inversion (CR container)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_06_single_freq_inversion_sEIT.html">A single-frequency inversion (sEIT container)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_07_synthetic_modinv_study.html">Single frequency synthetic study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_08_study_mgs.html">Using alternative regularization approaches</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Using individual data errors in CRTomo</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-postprocessing-of-inversion-results">Examples: Postprocessing of inversion results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-seit-import-and-inversions">Examples: sEIT import and inversions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#calculating-correction-factors">Calculating correction factors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-field-data-processing">Examples: Field data processing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">lib</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">crtomo tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Examples</a> &raquo;</li>
+      <li>Using individual data errors in CRTomo</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/_examples/02_simple_inversion/plot_09_individual_errors.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-02-simple-inversion-plot-09-individual-errors-py"><span class="std std-ref">here</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="using-individual-data-errors-in-crtomo">
+<span id="sphx-glr-examples-02-simple-inversion-plot-09-individual-errors-py"></span><h1>Using individual data errors in CRTomo<a class="headerlink" href="#using-individual-data-errors-in-crtomo" title="Permalink to this headline"></a></h1>
+<p>In principle an individual data error can be assigned to each data point.
+However, since data errors are not easily determined in geoelectrical
+applications, it is common to employ various data error models that exploit
+empirically observed relationships between the data errors and the measurements
+themselves.</p>
+<p>Setup:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">crtomo</span>
+
+<a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mesh</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.crt_grid.create_surface_grid" title="crtomo.crt_grid.create_surface_grid" class="sphx-glr-backref-module-crtomo-crt_grid sphx-glr-backref-type-py-method"><span class="n">crtomo</span><span class="o">.</span><span class="n">crt_grid</span><span class="o">.</span><span class="n">create_surface_grid</span></a><span class="p">(</span><span class="n">nr_electrodes</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<a href="../../api/crtomo.html#crtomo.tdMan" title="crtomo.tdMan" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.tdMan" title="crtomo.tdMan" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class"><span class="n">crtomo</span><span class="o">.</span><span class="n">tdMan</span></a><span class="p">(</span><span class="n">grid</span><span class="o">=</span><a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mesh</span></a><span class="p">)</span>
+
+<a href="../../api/crtomo.html#crtomo.tdMan.add_homogeneous_model" title="crtomo.tdMan.add_homogeneous_model" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">tdm</span><span class="o">.</span><span class="n">add_homogeneous_model</span></a><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<a href="../../api/crtomo.html#crtomo.ConfigManager.gen_dipole_dipole" title="crtomo.ConfigManager.gen_dipole_dipole" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">tdm</span><span class="o">.</span><span class="n">configs</span><span class="o">.</span><span class="n">gen_dipole_dipole</span></a><span class="p">(</span><span class="n">skipc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">measurements</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.tdMan.measurements" title="crtomo.tdMan.measurements" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">tdm</span><span class="o">.</span><span class="n">measurements</span></a><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>This grid was sorted using CutMcK. The nodes were resorted!
+Triangular grid found
+attempting modeling
+b&#39;\nlibgomp: Invalid value for environment variable OMP_NUM_THREADS\n ######### CMod ############\nLicence:\nCopyright \xc2\xa9 1990-2020 Andreas Kemna &lt;kemna@geo.uni-bonn.de&gt;\nCopyright \xc2\xa9 2008-2020 CRTomo development team (see AUTHORS file)\nPermission is hereby granted, free of charge, to any person obtaining a copy of\nthis software and associated documentation files (the \xe2\x80\x9cSoftware\xe2\x80\x9d), to deal in\nthe Software without restriction, including without limitation the rights to\nuse, copy, modify, merge, publish, distribute, sublicense, and/or sell copies\nof the Software, and to permit persons to whom the Software is furnished to do\nso, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \xe2\x80\x9cAS IS\xe2\x80\x9d, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n \n \n CRMod Process_ID ::       99128\n OpenMP max threads:   4\n Git-Branch  master\n Commit-ID   85c7db34c4d77d51aa595704ccccff586eff89c8\n Created     Wed-May-13-08:58:54-2020\n Compiler    \n OS          GNU/Linux\n\n Reading Input-Files\n++ check 1\r++ check 2 done!\n\rGetting voltage      1\rGetting voltage      2\rGetting voltage      3\rGetting voltage      4\rGetting voltage      5\rGetting voltage      6\rGetting voltage      7\rGetting voltage      8\rGetting voltage      9\rGetting voltage     10\rGetting voltage     11\rGetting voltage     12\rGetting voltage     13\rGetting voltage     14\rGetting voltage     15\rGetting voltage     16\rGetting voltage     17\rGetting voltage     18\rGetting voltage     19\rGetting voltage     20\rGetting voltage     21\rGetting voltage     22\rGetting voltage     23\rGetting voltage     24\rGetting voltage     25\rGetting voltage     26\rGetting voltage     27\rGetting voltage     28 No electrode cap file\n \n Rescheduling..\n less nodes than wavenumbers\n OpenMP threads:   3(  4)\n\n\r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          4                                                   \r Calculating Potentials : Wavenumber          5                                                   \r Calculating Potentials : Wavenumber          6                                                   \r Calculating Potentials : Wavenumber          7                                                   \r Calculating Potentials : Wavenumber          8                                                   \r Calculating Potentials : Wavenumber          9                                                    done, now processing\n solution time  0d/  0h/  0m/  0s/  19ms\n\n Modelling completedSTOP 0\n&#39;
+reading voltages
+</pre></div>
+</div>
+<p>Determine individual errors in some meaningful way</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mag_errors</span></a> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">measurements</span><span class="o">.</span><span class="n">shape</span></a><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span>
+<a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pha_errors</span></a> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">measurements</span><span class="o">.</span><span class="n">shape</span></a><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1000</span>
+</pre></div>
+</div>
+<p>Register them</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../api/crtomo.html#crtomo.tdMan.register_data_errors" title="crtomo.tdMan.register_data_errors" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">tdm</span><span class="o">.</span><span class="n">register_data_errors</span></a><span class="p">(</span>
+    <a href="../../api/crtomo.html#crtomo.ConfigManager.add_measurements" title="crtomo.ConfigManager.add_measurements" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">tdm</span><span class="o">.</span><span class="n">configs</span><span class="o">.</span><span class="n">add_measurements</span></a><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mag_errors</span></a><span class="p">),</span>
+    <a href="../../api/crtomo.html#crtomo.ConfigManager.add_measurements" title="crtomo.ConfigManager.add_measurements" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">tdm</span><span class="o">.</span><span class="n">configs</span><span class="o">.</span><span class="n">add_measurements</span></a><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pha_errors</span></a><span class="p">),</span>
+    <span class="n">norm_mag</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">norm_pha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that the volt.dat will look slightly different now</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../api/crtomo.html#crtomo.tdMan.save_to_tomodir" title="crtomo.tdMan.save_to_tomodir" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">tdm</span><span class="o">.</span><span class="n">save_to_tomodir</span></a><span class="p">(</span><span class="s1">&#39;td_test&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-02-simple-inversion-plot-09-individual-errors-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/f01b46eaa4b170e34a03a385358000b6/plot_09_individual_errors.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_09_individual_errors.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/01bd9a505dd5446736946e122925cec6/plot_09_individual_errors.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_09_individual_errors.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plot_08_study_mgs.html" class="btn btn-neutral float-left" title="Using alternative regularization approaches" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../03_inversion_postprocessing/plot_01_tdm_basics.html" class="btn btn-neutral float-right" title="Using the tdManager to investigate inversion results" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2021, CRTomo contributors.
+      <span class="lastupdated">Last updated on Dec 14, 2021.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

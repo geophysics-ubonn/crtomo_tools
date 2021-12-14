@@ -1,0 +1,445 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>crtomo.cfg &#8212; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for crtomo.cfg</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Representations of CRMod and CRTomo configurations.</span>
+
+<span class="sd">Examples</span>
+<span class="sd">--------</span>
+
+<span class="sd">    &gt;&gt;&gt; import crtomo.cfg as CRcfg</span>
+<span class="sd">        crmod_cfg = CRcfg.crmod_config()</span>
+<span class="sd">        print(crmod_cfg)</span>
+<span class="sd">    ***FILES***       !  mswitch</span>
+<span class="sd">    ../grid/elem.dat       !  elem</span>
+<span class="sd">    ../grid/elec.dat       !  elec</span>
+<span class="sd">    ../rho/rho.dat       !  rho</span>
+<span class="sd">    ../config/config.dat       !  config</span>
+<span class="sd">    F       !  write_pot</span>
+<span class="sd">    ../mod/pot/pot.dat       !  pot_file</span>
+<span class="sd">    T       !  write_volts</span>
+<span class="sd">    ../mod/volt.dat       !  volt_file</span>
+<span class="sd">    F       !  write_sens</span>
+<span class="sd">    ../mod/sens/sens.dat       !  sens_file</span>
+<span class="sd">    F       !  another_dataset</span>
+<span class="sd">    1       !  2D</span>
+<span class="sd">    F       !  fictitious_sink</span>
+<span class="sd">    1660       !  sink_node</span>
+<span class="sd">    F       !  boundary_values</span>
+<span class="sd">    boundary.dat       !  boundary_file</span>
+
+<span class="sd">TODO</span>
+<span class="sd">----</span>
+
+<span class="sd">* we could also add help texts here for each parameter</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="crmod_config"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.cfg.crmod_config">[docs]</a><span class="k">class</span> <span class="nc">crmod_config</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write CRMod configuration files (crmod.cfg).</span>
+
+<span class="sd">    This class is essentially a dict of CRMod configurations with a few extra</span>
+<span class="sd">    functions that know how to write a proper crmod.cfg file.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; import crtomo.cfg as cCFG</span>
+<span class="sd">        crmod_cfg = cCfg.crmod_config()</span>
+<span class="sd">        crmod_cfg.write_to_file(&#39;crmod.cfg&#39;)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">arg</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">crmod_config</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">arg</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">key_order</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s1">&#39;mswitch&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;elem&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;elec&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;rho&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;config&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;write_pots&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;pot_file&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;write_volts&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;volt_file&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;write_sens&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;sens_file&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;another_dataset&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;2D&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;fictitious_sink&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;sink_node&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;boundary_values&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;boundary_file&#39;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># boolean options</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bools</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s1">&#39;write_pots&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;write_volts&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;write_sens&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="crmod_config._check_and_convert_bools"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.cfg.crmod_config._check_and_convert_bools">[docs]</a>    <span class="k">def</span> <span class="nf">_check_and_convert_bools</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Replace boolean variables by the characters &#39;F&#39;/&#39;T&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">replacements</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="kc">True</span><span class="p">:</span> <span class="s1">&#39;T&#39;</span><span class="p">,</span>
+            <span class="kc">False</span><span class="p">:</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bools</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">replacements</span><span class="p">[</span><span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]]</span></div>
+
+<div class="viewcode-block" id="crmod_config.copy"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.cfg.crmod_config.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__copy__</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">new_copy</span> <span class="o">=</span> <span class="n">crmod_config</span><span class="p">()</span>
+        <span class="c1"># translate the keys</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">new_copy</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">new_copy</span>
+
+    <span class="k">def</span> <span class="nf">__deepcopy__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;deepcopy&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;not implemented&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="crmod_config.set_defaults"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.cfg.crmod_config.set_defaults">[docs]</a>    <span class="k">def</span> <span class="nf">set_defaults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fill the dictionary with all defaults</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;mswitch&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;***FILES***&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;elem&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;../grid/elem.dat&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;elec&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;../grid/elec.dat&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;rho&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;../rho/rho.dat&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;../config/config.dat&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;write_pots&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;F&#39;</span>  <span class="c1"># ! potentials ?</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;pot_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;../mod/pot/pot.dat&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;write_volts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;T&#39;</span>  <span class="c1"># ! measurements ?</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;volt_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;../mod/volt.dat&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;write_sens&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;F&#39;</span>  <span class="c1"># ! sensitivities ?</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;sens_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;../mod/sens/sens.dat&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;another_dataset&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;F&#39;</span>  <span class="c1"># ! another dataset ?</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;2D&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;1&#39;</span>  <span class="c1"># ! 2D (=0) or 2.5D (=1)</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;fictitious_sink&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;F&#39;</span>  <span class="c1"># ! fictitious sink ?</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;sink_node&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;1660&#39;</span>  <span class="c1"># ! fictitious sink node number</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;boundary_values&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;F&#39;</span>  <span class="c1"># ! boundary values ?</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;boundary_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;boundary.dat&#39;</span></div>
+
+<div class="viewcode-block" id="crmod_config.write_to_file"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.cfg.crmod_config.write_to_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write the configuration to a file. Use the correct order of values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_and_convert_bools</span><span class="p">()</span>
+        <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_order</span><span class="p">:</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">key</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]))</span>
+
+        <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_and_convert_bools</span><span class="p">()</span>
+        <span class="n">representation</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_order</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">representation</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">representation</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">       !  </span><span class="si">{1}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">representation</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="crtomo_config"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.cfg.crtomo_config">[docs]</a><span class="k">class</span> <span class="nc">crtomo_config</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write CRTomo configuration files (crtomo.cfg).</span>
+
+<span class="sd">    This class is essentially a dict of CRTomo configurations with a few extra</span>
+<span class="sd">    functions that know how to write a proper crtomo.cfg file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">arg</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">crtomo_config</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">arg</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">()</span>
+
+        <span class="c1"># -1 indicates an empty line</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key_order</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s1">&#39;mswitch&#39;</span><span class="p">,</span> <span class="s1">&#39;elem&#39;</span><span class="p">,</span> <span class="s1">&#39;elec&#39;</span><span class="p">,</span> <span class="s1">&#39;volt&#39;</span><span class="p">,</span> <span class="s1">&#39;inv_dir&#39;</span><span class="p">,</span> <span class="s1">&#39;diff_inv&#39;</span><span class="p">,</span>
+            <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;prior_model&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;iseed_var&#39;</span><span class="p">,</span> <span class="s1">&#39;cells_x&#39;</span><span class="p">,</span> <span class="s1">&#39;cells_z&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;ani_x&#39;</span><span class="p">,</span> <span class="s1">&#39;ani_z&#39;</span><span class="p">,</span> <span class="s1">&#39;max_it&#39;</span><span class="p">,</span> <span class="s1">&#39;dc_inv&#39;</span><span class="p">,</span> <span class="s1">&#39;robust_inv&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;fpi_inv&#39;</span><span class="p">,</span> <span class="s1">&#39;mag_rel&#39;</span><span class="p">,</span> <span class="s1">&#39;mag_abs&#39;</span><span class="p">,</span> <span class="s1">&#39;pha_a1&#39;</span><span class="p">,</span> <span class="s1">&#39;pha_b&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;pha_rel&#39;</span><span class="p">,</span> <span class="s1">&#39;pha_abs&#39;</span><span class="p">,</span> <span class="s1">&#39;hom_bg&#39;</span><span class="p">,</span> <span class="s1">&#39;hom_mag&#39;</span><span class="p">,</span> <span class="s1">&#39;hom_pha&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;another_ds&#39;</span><span class="p">,</span> <span class="s1">&#39;d2_5&#39;</span><span class="p">,</span> <span class="s1">&#39;fic_sink&#39;</span><span class="p">,</span> <span class="s1">&#39;fic_sink_node&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;boundaries&#39;</span><span class="p">,</span> <span class="s1">&#39;boundaries_file&#39;</span><span class="p">,</span> <span class="s1">&#39;mswitch2&#39;</span><span class="p">,</span> <span class="s1">&#39;lambda&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mswitch_values</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;l1_cov_dw&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s1">&#39;lcov1&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="s1">&#39;res_m&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="s1">&#39;lcov2&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="s1">&#39;ols_gauss&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+            <span class="s1">&#39;err_ellipse&#39;</span><span class="p">:</span> <span class="mi">32</span><span class="p">,</span>
+            <span class="s1">&#39;force_neg_phase&#39;</span><span class="p">:</span> <span class="mi">128</span><span class="p">,</span>
+            <span class="s1">&#39;lsytop&#39;</span><span class="p">:</span> <span class="mi">256</span><span class="p">,</span>
+            <span class="s1">&#39;lvario&#39;</span><span class="p">:</span> <span class="mi">512</span><span class="p">,</span>
+            <span class="s1">&#39;verbose&#39;</span><span class="p">:</span> <span class="mi">1024</span><span class="p">,</span>
+            <span class="s1">&#39;verbose_dat&#39;</span><span class="p">:</span> <span class="mi">2048</span><span class="p">,</span>
+        <span class="p">}</span>
+
+<div class="viewcode-block" id="crtomo_config.set_defaults"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.cfg.crtomo_config.set_defaults">[docs]</a>    <span class="k">def</span> <span class="nf">set_defaults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fill the dictionary with all defaults</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;mswitch&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;elem&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;../grid/elem.dat&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;elec&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;../grid/elec.dat&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;volt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;../mod/volt.dat&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;inv_dir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;../inv&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;prior_model&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;diff_inv&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;F ! difference inversion?&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;iseed_var&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;iseed variance&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;cells_x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;0    ! # cells in x-direction&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;cells_z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;0    ! # cells in z-direction&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;ani_x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;1.000  ! smoothing parameter in x-direction&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;ani_z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;1.000  ! smoothing parameter in z-direction&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;max_it&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;20    ! max. nr of iterations&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;dc_inv&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;F     ! DC inversion?&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;robust_inv&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;T     ! robust inversion?&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;fpi_inv&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;F     ! final phase improvement?&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;mag_rel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;5&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;mag_abs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;1e-3&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;pha_a1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;pha_b&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;pha_rel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;pha_abs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;hom_bg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;F&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;hom_mag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;10.00&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;hom_pha&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;0.00&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;another_ds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;F&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;d2_5&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;1&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;fic_sink&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;F&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;fic_sink_node&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;10000&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;boundaries&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;F&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;boundaries_file&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;boundary.dat&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;mswitch2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;1&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;lambda&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;lambda&#39;</span></div>
+
+<div class="viewcode-block" id="crtomo_config.set_mswitch"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.cfg.crtomo_config.set_mswitch">[docs]</a>    <span class="k">def</span> <span class="nf">set_mswitch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">active</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The mswitch can enable/disable various functions of CRTomo, mainly</span>
+<span class="sd">        concerned with the computation of various resolution parameters.</span>
+<span class="sd">        The switch itself is implemented as a binary switch, meaning that each</span>
+<span class="sd">        function can be enabled/disabled by setting its corresponding bit.</span>
+
+<span class="sd">        This function simplifies control of these functions by providing a</span>
+<span class="sd">        simple boolean interface for these options.</span>
+
+<span class="sd">        Possible keys: {}</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        key : str</span>
+<span class="sd">            Function to control</span>
+<span class="sd">        active : bool</span>
+<span class="sd">            Activate (True) or deactivate (False) the feature</span>
+<span class="sd">        &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="p">[</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mswitch_values</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
+        <span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mswitch_values</span>
+        <span class="k">if</span> <span class="n">active</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;mswitch&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;mswitch&#39;</span><span class="p">]</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">mswitch_values</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">mswitch_values</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;mswitch&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s1">&#39;mswitch&#39;</span><span class="p">]</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">mswitch_values</span><span class="p">[</span><span class="n">key</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="crtomo_config.write_to_file"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.cfg.crtomo_config.write_to_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Write the configuration to a file. Use the correct order of values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_order</span><span class="p">:</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">key</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]))</span>
+
+        <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="crtomo_config.copy"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.cfg.crtomo_config.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__copy__</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">new_copy</span> <span class="o">=</span> <span class="n">crtomo_config</span><span class="p">()</span>
+        <span class="c1"># translate the keys</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">new_copy</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">new_copy</span>
+
+    <span class="k">def</span> <span class="nf">__deepcopy__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;deepcopy&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;not implemented&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">representation</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_order</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">representation</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">representation</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">       !  </span><span class="si">{1}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">representation</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span>
+
+<div class="viewcode-block" id="crtomo_config.help"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.cfg.crtomo_config.help">[docs]</a>    <span class="k">def</span> <span class="nf">help</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the help text specific to a certain key</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">help_dict</span> <span class="o">=</span> <span class="p">{</span>
+
+        <span class="p">}</span>
+        <span class="n">return_text</span> <span class="o">=</span> <span class="n">help_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;no help available&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">return_text</span></div>
+
+<div class="viewcode-block" id="crtomo_config.import_from_file"><a class="viewcode-back" href="../../api/crtomo.html#crtomo.cfg.crtomo_config.import_from_file">[docs]</a>    <span class="k">def</span> <span class="nf">import_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Import a CRTomo configuration from an existing crtomo.cfg file</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename : str</span>
+<span class="sd">            Path to crtomo.cfg file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lines_raw</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">()]</span>
+        <span class="n">key_index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines_raw</span><span class="p">:</span>
+            <span class="c1"># ignore comments</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># check if we have inline comments</span>
+                <span class="n">index_inline_comment</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;!&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">index_inline_comment</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">index_inline_comment</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_order</span><span class="p">[</span><span class="n">key_index</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">line</span>
+            <span class="c1"># increment the key_index</span>
+            <span class="n">key_index</span> <span class="o">+=</span> <span class="mi">1</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">crtomo tools</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">lib</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2021, CRTomo contributors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,12 @@
+
+:orphan:
+
+.. _sphx_glr__examples_06_field_data_processing_sg_execution_times:
+
+Computation times
+=================
+**03:47.160** total execution time for **_examples_06_field_data_processing** files:
+
++--------------------------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr__examples_06_field_data_processing_plot_01_field_data_syscal.py` (``plot_01_field_data_syscal.py``) | 03:47.160 | 0.0 MB |
++--------------------------------------------------------------------------------------------------------------------+-----------+--------+

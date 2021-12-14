@@ -1,0 +1,9 @@
+td\_plot module
+===============
+
+.. automodule:: td_plot
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:

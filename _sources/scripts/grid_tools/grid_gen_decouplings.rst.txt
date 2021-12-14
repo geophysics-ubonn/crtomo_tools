@@ -1,0 +1,9 @@
+grid\_gen\_decouplings module
+=============================
+
+.. automodule:: grid_gen_decouplings
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:

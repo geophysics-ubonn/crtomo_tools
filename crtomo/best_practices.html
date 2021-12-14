@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configuration checklist &mdash; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Grid creation" href="../grid_creation.html" />
+    <link rel="prev" title="Files and directories" href="files.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> crtomo tools
+          </a>
+              <div class="version">
+                0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">lib</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">crtomo tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="crtomo.html">The original CRTomo code</a> &raquo;</li>
+      <li>Configuration checklist</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/crtomo/best_practices.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="configuration-checklist">
+<h1>Configuration checklist<a class="headerlink" href="#configuration-checklist" title="Permalink to this headline"></a></h1>
+<p><strong>Before</strong> using any <code class="docutils literal notranslate"><span class="pre">crtomo.cfg</span></code> file check the following settings:</p>
+<ul class="simple">
+<li><p>Robust/non-robust</p></li>
+<li><p>Anisotropic filtering?</p></li>
+<li><p>Homogeneous starting model (use F if you invert surface configurations, this
+will use an average of the data values as the starting model)</p></li>
+<li><p>Magnitude errors (abs. error of 1e-4 stabilzes)</p></li>
+<li><p>Phase errors</p></li>
+<li><p>FPI?</p></li>
+<li><p>Start FPI with homogenous starting model (only if phases get over fitted in
+complex inversion)?</p></li>
+<li><p>Error ellipsis enabled/disabled?</p></li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The following “standard” inversion scheme are really old and should be
+reviewed and modified to adapt modern inversion practices!</p>
+</div>
+</section>
+<section id="standard-inversion-schemes">
+<h1>Standard inversion schemes<a class="headerlink" href="#standard-inversion-schemes" title="Permalink to this headline"></a></h1>
+<p>The following inversion schemes can be used for initial screenings of the data
+if no error analysis was made. They can also be used as a starting point for
+further error parameter adaption.</p>
+<p>Each scheme denotes important parameters to be changed in the <code class="docutils literal notranslate"><span class="pre">crtomo.cfg</span></code>
+file.</p>
+<section id="normal">
+<h2>Normal<a class="headerlink" href="#normal" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p>5 % Magnitude error + <span class="math notranslate nohighlight">\(1e^{-4}\Omega\)</span></p></li>
+<li><p>2 mrad phase error</p></li>
+<li><p>robust inversion</p></li>
+<li><p>no homogeneous starting model for FPI</p></li>
+</ul>
+</section>
+<section id="optimistic">
+<h2>Optimistic<a class="headerlink" href="#optimistic" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p>5 % Magnitude error + <span class="math notranslate nohighlight">\(1e^{-4}\Omega\)</span></p></li>
+<li><p>1 mrad phase error</p></li>
+<li><p>non-robust inversion</p></li>
+<li><p>no homogeneous starting model for FPI</p></li>
+</ul>
+</section>
+<section id="pessimistic">
+<h2>Pessimistic<a class="headerlink" href="#pessimistic" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p>10 % Magnitude error + <span class="math notranslate nohighlight">\(1e^{-4}\Omega\)</span></p></li>
+<li><p>4 mrad phase error</p></li>
+<li><p>robust inversion</p></li>
+<li><p>no homogeneous starting model for FPI</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="files.html" class="btn btn-neutral float-left" title="Files and directories" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../grid_creation.html" class="btn btn-neutral float-right" title="Grid creation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2021, CRTomo contributors.
+      <span class="lastupdated">Last updated on Dec 14, 2021.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

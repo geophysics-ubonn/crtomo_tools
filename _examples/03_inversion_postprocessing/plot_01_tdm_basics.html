@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Using the tdManager to investigate inversion results &mdash; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Plot inversion results from a tomodir" href="plot_02_inversion_results.html" />
+    <link rel="prev" title="Using individual data errors in CRTomo" href="../02_simple_inversion/plot_09_individual_errors.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> crtomo tools
+          </a>
+              <div class="version">
+                0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-grid-handling">Examples: Grid handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-modelling">Examples: Modelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-single-frequency-inversion">Examples: Single-frequency inversion</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#examples-postprocessing-of-inversion-results">Examples: Postprocessing of inversion results</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Using the tdManager to investigate inversion results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_02_inversion_results.html">Plot inversion results from a tomodir</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_03_seit_forward_responses.html">Analyzing data response of inversion result</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_seit.html">bla</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-seit-import-and-inversions">Examples: sEIT import and inversions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#calculating-correction-factors">Calculating correction factors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-field-data-processing">Examples: Field data processing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">lib</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">crtomo tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Examples</a> &raquo;</li>
+      <li>Using the tdManager to investigate inversion results</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/_examples/03_inversion_postprocessing/plot_01_tdm_basics.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-03-inversion-postprocessing-plot-01-tdm-basics-py"><span class="std std-ref">here</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="using-the-tdmanager-to-investigate-inversion-results">
+<span id="sphx-glr-examples-03-inversion-postprocessing-plot-01-tdm-basics-py"></span><h1>Using the tdManager to investigate inversion results<a class="headerlink" href="#using-the-tdmanager-to-investigate-inversion-results" title="Permalink to this headline"></a></h1>
+<p>One of the purposes of the tdManager is to provide an easy interface to analyze
+inversion results.
+Inversion results can either be directly generated using the
+<a class="reference internal" href="../../api/crtomo.html#crtomo.tdMan.invert" title="crtomo.tdMan.invert"><code class="xref py py-meth docutils literal notranslate"><span class="pre">crtomo.tdMan.invert()</span></code></a> function, or by loading from an already-finished
+inversion directory (the tomodir).</p>
+<p>In this example we will explore the various functionalities of the tdManager.</p>
+<p>we need the crtomo module to continue</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">crtomo</span>
+<span class="c1"># the pprint module is used just to prettify the output of this example, please</span>
+<span class="c1"># ignore for further use</span>
+<span class="kn">import</span> <span class="nn">pprint</span>
+</pre></div>
+</div>
+<p>load inversion results from an already-finished tomodir</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../api/crtomo.html#crtomo.tdMan" title="crtomo.tdMan" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.tdMan" title="crtomo.tdMan" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class"><span class="n">crtomo</span><span class="o">.</span><span class="n">tdMan</span></a><span class="p">(</span><span class="n">tomodir</span><span class="o">=</span><span class="s1">&#39;tomodir&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>importing tomodir tomodir
+This grid was sorted using CutMcK. The nodes were resorted!
+Triangular grid found
+importing tomodir results
+loaded configs: (220, 2)
+reading voltages
+is robust True
+</pre></div>
+</div>
+<p>The first order of business is to access the convergence behavior of the
+inversion. This data is loaded into a <a class="reference external" href="https://pandas-docs.github.io/pandas-docs-travis/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.25.0.dev0+752.g49f33f0d)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span><span class="o">.</span><span class="n">inv_stats</span></a><span class="p">)</span>
+
+<span class="c1"># TODO Plot inv stats</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>    iteration  main_iteration it_type    type  dataRMS  magRMS  phaRMS    lambda  roughness  cgsteps  nrdata  steplength  stepsize  l1ratio
+0           0               0   DC/IP    main  77.8100   77.80     NaN       NaN        NaN      NaN   213.0         NaN       NaN     1.14
+1           1               1   DC/IP  update  14.1300     NaN     NaN  4303.000     0.7264    142.0     NaN         NaN  13200.00      NaN
+2           2               1   DC/IP  update  13.6900     NaN     NaN  2152.000     1.7400    116.0     NaN         NaN  13600.00      NaN
+3           3               1   DC/IP  update  13.1300     NaN     NaN  1083.000     4.5070     78.0     NaN         NaN  14200.00      NaN
+4           4               1   DC/IP  update  12.7700     NaN     NaN   550.500     8.8480     62.0     NaN         NaN  15300.00      NaN
+..        ...             ...     ...     ...      ...     ...     ...       ...        ...      ...     ...         ...       ...      ...
+75          8               8   DC/IP  update   0.9789     NaN     NaN     1.322    10.3300     81.0     NaN         NaN     48.90      NaN
+76          9               8   DC/IP  update   0.9805     NaN     NaN     1.476    10.0200     82.0     NaN         NaN     52.60      NaN
+77         10               8   DC/IP  update   0.9823     NaN     NaN     1.647     9.7190     83.0     NaN         NaN     56.60      NaN
+78         11               8   DC/IP  update   0.9694     NaN     NaN     1.476    13.7100     82.0     NaN         NaN     26.30      NaN
+79          8               8   DC/IP    main   0.9805   27.57     NaN     1.476    10.0200     82.0   213.0         0.0     52.63     1.00
+
+[80 rows x 14 columns]
+</pre></div>
+</div>
+<p>Inversion results are stored as parameter sets in the ParMan instance
+(<code class="xref py py-class docutils literal notranslate"><span class="pre">crtomo.ParMan</span></code>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><a href="../../api/crtomo.html#crtomo.parManager.ParMan" title="crtomo.parManager.ParMan" class="sphx-glr-backref-module-crtomo-parManager sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span><span class="o">.</span><span class="n">parman</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;crtomo.parManager.ParMan object at 0x7f55607834f0&gt;
+</pre></div>
+</div>
+<p>the ParMan stores multiple parameter sets (i.e., data sets which assign each
+cell of the FE-mesh a given value), identified by an integer index number,
+the parameter id, pid.
+The pids for the various parameters imported from the inversion results are
+stored in dictionary entries:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/pprint.html#pprint.pprint" title="pprint.pprint" class="sphx-glr-backref-module-pprint sphx-glr-backref-type-py-function"><span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span><span class="o">.</span><span class="n">a</span></a><span class="p">[</span><span class="s1">&#39;inversion&#39;</span><span class="p">])</span>
+
+<span class="c1"># We can see several entries in the dictionary: The resistivity magnitude</span>
+<span class="c1"># (rmag), the phase value (rpha), the real part of the complex conductivity</span>
+<span class="c1"># (cre), the imaginary part of the complex conductivity (cim) and an entry</span>
+<span class="c1"># which combines cre and cim (cre_cim). For each inversion, the parameter sets</span>
+<span class="c1"># have an own pid to make the results accessible.</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{&#39;cim&#39;: [19, 21, 23, 25, 27, 29, 31, 33, 35],
+ &#39;cre&#39;: [18, 20, 22, 24, 26, 28, 30, 32, 34],
+ &#39;cre_cim&#39;: [[18, 19],
+             [20, 21],
+             [22, 23],
+             [24, 25],
+             [26, 27],
+             [28, 29],
+             [30, 31],
+             [32, 33],
+             [34, 35]],
+ &#39;fwd_response_rmag&#39;: [2, 5, 8, 11, 14, 17, 20, 23, 26],
+ &#39;fwd_response_rpha&#39;: [3, 6, 9, 12, 15, 18, 21, 24, 27],
+ &#39;fwd_response_wdfak&#39;: [4, 7, 10, 13, 16, 19, 22, 25, 28],
+ &#39;l1_dw_log10_norm&#39;: 37,
+ &#39;l2_dw_log10_norm&#39;: 38,
+ &#39;resm&#39;: 36,
+ &#39;rmag&#39;: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+ &#39;rpha&#39;: [9, 10, 11, 12, 13, 14, 15, 16, 17]}
+</pre></div>
+</div>
+<p>To access a given parameter set, extract the pid from the dict and then
+access the data in the ParMan instance. If we would like to access the
+phase values for e.g. the second inversion run, we have to choose the index
+accordingly:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pid_rpha_2nd</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span><span class="o">.</span><span class="n">a</span></a><span class="p">[</span><span class="s1">&#39;inversion&#39;</span><span class="p">][</span><span class="s1">&#39;rpha&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;pid of the second phase inversion result: &#39;</span><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pid_rpha_2nd</span></a><span class="p">)</span>
+
+<a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">rpha_second_inversion</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">parsets</span></a><span class="p">[</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pid_rpha_2nd</span></a><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="s1">&#39;Pixel values of the second phase inverion result: &#39;</span><span class="p">,</span>
+    <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">rpha_second_inversion</span></a>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>pid of the second phase inversion result:  10
+Pixel values of the second phase inverion result:  [ -7.50958061 -14.9736643  -10.9377241  ...  -2.00979733  -2.66891265
+ -12.5039339 ]
+</pre></div>
+</div>
+<p>The last inversion result can be accessed using the index -1</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">rpha_last_inversion</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span><span class="o">.</span><span class="n">parman</span><span class="o">.</span><span class="n">parsets</span></a><span class="p">[</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span><span class="o">.</span><span class="n">a</span></a><span class="p">[</span><span class="s1">&#39;inversion&#39;</span><span class="p">][</span><span class="s1">&#39;rmag&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>Most of the time, it is of interest to get the final inversion result. This
+can be done in two seperate ways. Either by settings the index to [-1] or by
+using the built-in retriever function from crtomo-tools:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">rmag_final_inversion</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.tdMan.inv_last_rmag_parset" title="crtomo.tdMan.inv_last_rmag_parset" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">tdm</span><span class="o">.</span><span class="n">inv_last_rmag_parset</span></a><span class="p">()</span>
+
+<span class="c1"># The function returns a numpy-array with the inversion results. A similar</span>
+<span class="c1"># function exists to extract the final results for the phase value (rpha),</span>
+<span class="c1"># the real part of the complex conductivity (cre) and the imaginary</span>
+<span class="c1"># part of the complex conductivity (cim):</span>
+
+<a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">rpha_final_inversion</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.tdMan.inv_last_rpha_parset" title="crtomo.tdMan.inv_last_rpha_parset" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">tdm</span><span class="o">.</span><span class="n">inv_last_rpha_parset</span></a><span class="p">()</span>
+<a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">cre_final_inversion</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.tdMan.inv_last_cre_parset" title="crtomo.tdMan.inv_last_cre_parset" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">tdm</span><span class="o">.</span><span class="n">inv_last_cre_parset</span></a><span class="p">()</span>
+<a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">cim_final_inversion</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.tdMan.inv_last_cim_parset" title="crtomo.tdMan.inv_last_cim_parset" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">tdm</span><span class="o">.</span><span class="n">inv_last_cim_parset</span></a><span class="p">()</span>
+</pre></div>
+</div>
+<p>TODO: Extract from point, line, polygon, rectangle</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-03-inversion-postprocessing-plot-01-tdm-basics-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/4175a45f594f7c01276cf3c641e84809/plot_01_tdm_basics.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_01_tdm_basics.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/d76137c32ec4ae9175f70119801843d9/plot_01_tdm_basics.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_01_tdm_basics.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../02_simple_inversion/plot_09_individual_errors.html" class="btn btn-neutral float-left" title="Using individual data errors in CRTomo" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_02_inversion_results.html" class="btn btn-neutral float-right" title="Plot inversion results from a tomodir" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2021, CRTomo contributors.
+      <span class="lastupdated">Last updated on Dec 14, 2021.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

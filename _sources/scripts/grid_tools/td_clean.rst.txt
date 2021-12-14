@@ -1,0 +1,9 @@
+td\_clean module
+================
+
+.. automodule:: td_clean
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:

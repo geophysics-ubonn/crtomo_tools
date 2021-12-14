@@ -1,0 +1,165 @@
+crtomo package
+==============
+
+Submodules
+----------
+
+crtomo.analytical\_solution module
+----------------------------------
+
+.. automodule:: crtomo.analytical_solution
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+crtomo.binaries module
+----------------------
+
+.. automodule:: crtomo.binaries
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+crtomo.cfg module
+-----------------
+
+.. automodule:: crtomo.cfg
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+crtomo.configManager module
+---------------------------
+
+.. automodule:: crtomo.configManager
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+crtomo.debug module
+-------------------
+
+.. automodule:: crtomo.debug
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+crtomo.eitManager module
+------------------------
+
+.. automodule:: crtomo.eitManager
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+crtomo.grid module
+------------------
+
+.. automodule:: crtomo.grid
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+crtomo.interface module
+-----------------------
+
+.. automodule:: crtomo.interface
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+crtomo.mpl module
+-----------------
+
+.. automodule:: crtomo.mpl
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+crtomo.mpl\_setup module
+------------------------
+
+.. automodule:: crtomo.mpl_setup
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+crtomo.nodeManager module
+-------------------------
+
+.. automodule:: crtomo.nodeManager
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+crtomo.parManager module
+------------------------
+
+.. automodule:: crtomo.parManager
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+crtomo.plotManager module
+-------------------------
+
+.. automodule:: crtomo.plotManager
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+crtomo.status module
+--------------------
+
+.. automodule:: crtomo.status
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+crtomo.tdManager module
+-----------------------
+
+.. automodule:: crtomo.tdManager
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: crtomo
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:

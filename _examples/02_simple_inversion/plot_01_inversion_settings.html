@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Setting modeling and inversion settings &mdash; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Data error handling in CRTomo" href="plot_02_data_errors.html" />
+    <link rel="prev" title="Segmenting sensitivity distributions" href="../01_modelling/plot_08_sensitivity_thresholding.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> crtomo tools
+          </a>
+              <div class="version">
+                0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-grid-handling">Examples: Grid handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-modelling">Examples: Modelling</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#examples-single-frequency-inversion">Examples: Single-frequency inversion</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Setting modeling and inversion settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_02_data_errors.html">Data error handling in CRTomo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_03_adding_data_noise.html">Adding data noise to measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_05_single_freq_inversion_CR.html">A single-frequency inversion (CR container)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_06_single_freq_inversion_sEIT.html">A single-frequency inversion (sEIT container)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_07_synthetic_modinv_study.html">Single frequency synthetic study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_08_study_mgs.html">Using alternative regularization approaches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_09_individual_errors.html">Using individual data errors in CRTomo</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-postprocessing-of-inversion-results">Examples: Postprocessing of inversion results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-seit-import-and-inversions">Examples: sEIT import and inversions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#calculating-correction-factors">Calculating correction factors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-field-data-processing">Examples: Field data processing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">lib</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">crtomo tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Examples</a> &raquo;</li>
+      <li>Setting modeling and inversion settings</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/_examples/02_simple_inversion/plot_01_inversion_settings.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-02-simple-inversion-plot-01-inversion-settings-py"><span class="std std-ref">here</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="setting-modeling-and-inversion-settings">
+<span id="example-crmod-crtomo-cfg"></span><span id="sphx-glr-examples-02-simple-inversion-plot-01-inversion-settings-py"></span><h1>Setting modeling and inversion settings<a class="headerlink" href="#setting-modeling-and-inversion-settings" title="Permalink to this headline"></a></h1>
+<p>This example discusses details of settings various settings for modeling or
+inversion using the single-frequency tdManager</p>
+<p>we create an empty tdMan instance, which lacks a model and measurement
+configurations in order to run a forward modeling and subsequent inversion.
+However, we still can set inversion settings</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">crtomo</span>
+
+<a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.crt_grid.create_surface_grid" title="crtomo.crt_grid.create_surface_grid" class="sphx-glr-backref-module-crtomo-crt_grid sphx-glr-backref-type-py-method"><span class="n">crtomo</span><span class="o">.</span><span class="n">crt_grid</span><span class="o">.</span><span class="n">create_surface_grid</span></a><span class="p">(</span>
+    <span class="n">nr_electrodes</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">char_lengths</span><span class="o">=</span><span class="p">[</span><span class="mf">0.3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">)</span>
+
+<span class="c1"># create the tdManager instance used for the inversion</span>
+<a href="../../api/crtomo.html#crtomo.tdMan" title="crtomo.tdMan" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.tdMan" title="crtomo.tdMan" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class"><span class="n">crtomo</span><span class="o">.</span><span class="n">tdMan</span></a><span class="p">(</span><a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid</span></a><span class="o">=</span><a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>This grid was sorted using CutMcK. The nodes were resorted!
+Triangular grid found
+</pre></div>
+</div>
+<p>Forward modeling settings are stored in tdm.crmod_cfg. This object is an
+extended dict, containing the settings for each modeling setting.
+Documentation <a class="reference internal" href="../../api/crtomo.html#crtomo.cfg.crmod_config" title="crtomo.cfg.crmod_config"><code class="xref py py-class docutils literal notranslate"><span class="pre">crtomo.cfg.crmod_config</span></code></a>
+This class wraps the file-based CRMod configuration file crmod.cfg, which is
+described here: <a class="reference internal" href="../../crtomo/files.html#description-crmod-cfg"><span class="std std-ref">crmod.cfg</span></a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Type:&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><a href="../../api/crtomo.html#crtomo.cfg.crmod_config" title="crtomo.cfg.crmod_config" class="sphx-glr-backref-module-crtomo-cfg sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span><span class="o">.</span><span class="n">crmod_cfg</span></a><span class="p">))</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Type: &lt;class &#39;crtomo.cfg.crmod_config&#39;&gt;
+</pre></div>
+</div>
+<p>Access the settings just as with a normal dict:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><a href="../../api/crtomo.html#crtomo.cfg.crmod_config" title="crtomo.cfg.crmod_config" class="sphx-glr-backref-module-crtomo-cfg sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span><span class="o">.</span><span class="n">crmod_cfg</span></a><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>dict_keys([&#39;mswitch&#39;, &#39;elem&#39;, &#39;elec&#39;, &#39;rho&#39;, &#39;config&#39;, &#39;write_pots&#39;, &#39;pot_file&#39;, &#39;write_volts&#39;, &#39;volt_file&#39;, &#39;write_sens&#39;, &#39;sens_file&#39;, &#39;another_dataset&#39;, &#39;2D&#39;, &#39;fictitious_sink&#39;, &#39;sink_node&#39;, &#39;boundary_values&#39;, &#39;boundary_file&#39;])
+</pre></div>
+</div>
+<p>Note that printing it will print all keys and current settings</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><a href="../../api/crtomo.html#crtomo.cfg.crmod_config" title="crtomo.cfg.crmod_config" class="sphx-glr-backref-module-crtomo-cfg sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span><span class="o">.</span><span class="n">crmod_cfg</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>***FILES***       !  mswitch
+../grid/elem.dat       !  elem
+../grid/elec.dat       !  elec
+../rho/rho.dat       !  rho
+../config/config.dat       !  config
+F       !  write_pots
+../mod/pot/pot.dat       !  pot_file
+T       !  write_volts
+../mod/volt.dat       !  volt_file
+F       !  write_sens
+../mod/sens/sens.dat       !  sens_file
+F       !  another_dataset
+1       !  2D
+F       !  fictitious_sink
+1660       !  sink_node
+F       !  boundary_values
+boundary.dat       !  boundary_file
+</pre></div>
+</div>
+<p>Examples for setting parameters</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../api/crtomo.html#crtomo.cfg.crmod_config" title="crtomo.cfg.crmod_config" class="sphx-glr-backref-module-crtomo-cfg sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span><span class="o">.</span><span class="n">crmod_cfg</span></a><span class="p">[</span><span class="s1">&#39;write_pots&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+<a href="../../api/crtomo.html#crtomo.cfg.crmod_config" title="crtomo.cfg.crmod_config" class="sphx-glr-backref-module-crtomo-cfg sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span><span class="o">.</span><span class="n">crmod_cfg</span></a><span class="p">[</span><span class="s1">&#39;2D&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+<p>CRTomo (inversion) settings are stored in tdm.crtomo_cfg
+Documentation <a class="reference internal" href="../../api/crtomo.html#crtomo.cfg.crtomo_config" title="crtomo.cfg.crtomo_config"><code class="xref py py-class docutils literal notranslate"><span class="pre">crtomo.cfg.crtomo_config</span></code></a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Type:&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><a href="../../api/crtomo.html#crtomo.cfg.crtomo_config" title="crtomo.cfg.crtomo_config" class="sphx-glr-backref-module-crtomo-cfg sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span><span class="o">.</span><span class="n">crtomo_cfg</span></a><span class="p">))</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Type: &lt;class &#39;crtomo.cfg.crtomo_config&#39;&gt;
+</pre></div>
+</div>
+<p>Access the settings just as with a normal dict:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><a href="../../api/crtomo.html#crtomo.cfg.crtomo_config" title="crtomo.cfg.crtomo_config" class="sphx-glr-backref-module-crtomo-cfg sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span><span class="o">.</span><span class="n">crtomo_cfg</span></a><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>dict_keys([&#39;mswitch&#39;, &#39;elem&#39;, &#39;elec&#39;, &#39;volt&#39;, &#39;inv_dir&#39;, &#39;prior_model&#39;, &#39;diff_inv&#39;, &#39;iseed_var&#39;, &#39;cells_x&#39;, &#39;cells_z&#39;, &#39;ani_x&#39;, &#39;ani_z&#39;, &#39;max_it&#39;, &#39;dc_inv&#39;, &#39;robust_inv&#39;, &#39;fpi_inv&#39;, &#39;mag_rel&#39;, &#39;mag_abs&#39;, &#39;pha_a1&#39;, &#39;pha_b&#39;, &#39;pha_rel&#39;, &#39;pha_abs&#39;, &#39;hom_bg&#39;, &#39;hom_mag&#39;, &#39;hom_pha&#39;, &#39;another_ds&#39;, &#39;d2_5&#39;, &#39;fic_sink&#39;, &#39;fic_sink_node&#39;, &#39;boundaries&#39;, &#39;boundaries_file&#39;, &#39;mswitch2&#39;, &#39;lambda&#39;])
+</pre></div>
+</div>
+<p>Note that printing it will print all keys and current settings</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><a href="../../api/crtomo.html#crtomo.cfg.crtomo_config" title="crtomo.cfg.crtomo_config" class="sphx-glr-backref-module-crtomo-cfg sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdm</span><span class="o">.</span><span class="n">crtomo_cfg</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>1       !  mswitch
+../grid/elem.dat       !  elem
+../grid/elec.dat       !  elec
+../mod/volt.dat       !  volt
+../inv       !  inv_dir
+F ! difference inversion?       !  diff_inv
+
+       !  prior_model
+
+iseed variance       !  iseed_var
+0    ! # cells in x-direction       !  cells_x
+0    ! # cells in z-direction       !  cells_z
+1.000  ! smoothing parameter in x-direction       !  ani_x
+1.000  ! smoothing parameter in z-direction       !  ani_z
+20    ! max. nr of iterations       !  max_it
+F     ! DC inversion?       !  dc_inv
+T     ! robust inversion?       !  robust_inv
+F     ! final phase improvement?       !  fpi_inv
+5       !  mag_rel
+1e-3       !  mag_abs
+0       !  pha_a1
+0       !  pha_b
+0       !  pha_rel
+0       !  pha_abs
+F       !  hom_bg
+10.00       !  hom_mag
+0.00       !  hom_pha
+F       !  another_ds
+1       !  d2_5
+F       !  fic_sink
+10000       !  fic_sink_node
+F       !  boundaries
+boundary.dat       !  boundaries_file
+1       !  mswitch2
+lambda       !  lambda
+</pre></div>
+</div>
+<p>Settings of the mswitch can be set in a simple way</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../api/crtomo.html#crtomo.cfg.crtomo_config.set_mswitch" title="crtomo.cfg.crtomo_config.set_mswitch" class="sphx-glr-backref-module-crtomo-cfg sphx-glr-backref-type-py-method"><span class="n">tdm</span><span class="o">.</span><span class="n">crtomo_cfg</span><span class="o">.</span><span class="n">set_mswitch</span></a><span class="p">(</span><span class="s1">&#39;res_m&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-02-simple-inversion-plot-01-inversion-settings-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/309a7d796a4206487805d40afda81f46/plot_01_inversion_settings.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_01_inversion_settings.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/7c74887fc6cce10498bc7d2a1011bfda/plot_01_inversion_settings.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_01_inversion_settings.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../01_modelling/plot_08_sensitivity_thresholding.html" class="btn btn-neutral float-left" title="Segmenting sensitivity distributions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_02_data_errors.html" class="btn btn-neutral float-right" title="Data error handling in CRTomo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2021, CRTomo contributors.
+      <span class="lastupdated">Last updated on Dec 14, 2021.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

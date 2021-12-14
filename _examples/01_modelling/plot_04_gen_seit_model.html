@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generating sEIT forward models &mdash; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Generating sEIT forward models using a mask and a lookup table" href="plot_05_seit_fwd_lookup.html" />
+    <link rel="prev" title="Plot a potential distribution" href="plot_02_potentials.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> crtomo tools
+          </a>
+              <div class="version">
+                0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-grid-handling">Examples: Grid handling</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#examples-modelling">Examples: Modelling</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="plot_00_sensitivity.html">Plotting sensitivities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_01_gaussian_model.html">Generate Gaussian Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_02_potentials.html">Plot a potential distribution</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Generating sEIT forward models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_05_seit_fwd_lookup.html">Generating sEIT forward models using a mask and a lookup table</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_06_synthetic_4d.html">Generating a 4D synthetic data set with noise.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_07_fwd_model_plotting.html">Plot forward models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_08_sensitivity_thresholding.html">Segmenting sensitivity distributions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-single-frequency-inversion">Examples: Single-frequency inversion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-postprocessing-of-inversion-results">Examples: Postprocessing of inversion results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-seit-import-and-inversions">Examples: sEIT import and inversions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#calculating-correction-factors">Calculating correction factors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-field-data-processing">Examples: Field data processing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">lib</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">crtomo tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Examples</a> &raquo;</li>
+      <li>Generating sEIT forward models</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/_examples/01_modelling/plot_04_gen_seit_model.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-01-modelling-plot-04-gen-seit-model-py"><span class="std std-ref">here</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="generating-seit-forward-models">
+<span id="sphx-glr-examples-01-modelling-plot-04-gen-seit-model-py"></span><h1>Generating sEIT forward models<a class="headerlink" href="#generating-seit-forward-models" title="Permalink to this headline"></a></h1>
+<p>The eit manager can be used to easily create forward models using different
+parameterizations.</p>
+<p>imports</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">crtomo</span>
+<span class="kn">import</span> <span class="nn">reda</span>
+</pre></div>
+</div>
+<p>we need a FE grid</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.crt_grid.create_surface_grid" title="crtomo.crt_grid.create_surface_grid" class="sphx-glr-backref-module-crtomo-crt_grid sphx-glr-backref-type-py-method"><span class="n">crtomo</span><span class="o">.</span><span class="n">crt_grid</span><span class="o">.</span><span class="n">create_surface_grid</span></a><span class="p">(</span><span class="n">nr_electrodes</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<a href="../../api/crtomo.html#crtomo.crt_grid.plot_grid" title="crtomo.crt_grid.plot_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">grid</span><span class="o">.</span><span class="n">plot_grid</span></a><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_04_gen_seit_model_001.png" srcset="../../_images/sphx_glr_plot_04_gen_seit_model_001.png" alt="plot 04 gen seit model" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>This grid was sorted using CutMcK. The nodes were resorted!
+Triangular grid found
+</pre></div>
+</div>
+<p>define frequencies</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">frequencies</span></a> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.logspace.html#numpy.logspace" title="numpy.logspace" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">logspace</span></a><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+<span class="c1"># create the eit manager</span>
+<a href="../../api/crtomo.html#crtomo.eitMan" title="crtomo.eitMan" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">eitman</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.eitMan" title="crtomo.eitMan" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class"><span class="n">crtomo</span><span class="o">.</span><span class="n">eitMan</span></a><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">frequencies</span></a><span class="o">=</span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">frequencies</span></a><span class="p">,</span> <a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid</span></a><span class="o">=</span><a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<p>start with a homogeneous complex resistivity distribution</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../api/crtomo.html#crtomo.eitMan.add_homogeneous_model" title="crtomo.eitMan.add_homogeneous_model" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">eitman</span><span class="o">.</span><span class="n">add_homogeneous_model</span></a><span class="p">(</span><span class="n">magnitude</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">r</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.eitMan.plot_forward_models" title="crtomo.eitMan.plot_forward_models" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">eitman</span><span class="o">.</span><span class="n">plot_forward_models</span></a><span class="p">(</span><span class="n">maglim</span><span class="o">=</span><span class="p">[</span><span class="mi">90</span><span class="p">,</span> <span class="mi">110</span><span class="p">])</span>
+<span class="c1"># r[&#39;rmag&#39;][&#39;fig&#39;].show()</span>
+
+<span class="c1"># save to files</span>
+<span class="c1"># with reda.CreateEnterDirectory(&#39;output_gen_seit_model&#39;):</span>
+<span class="c1">#     # magnitude</span>
+<span class="c1">#     r[&#39;rmag&#39;][&#39;fig&#39;].savefig(&#39;fwd_model_hom_rmag.png&#39;, dpi=300)</span>
+<span class="c1">#     r[&#39;rmag&#39;][&#39;fig&#39;].show()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_04_gen_seit_model_002.png" srcset="../../_images/sphx_glr_plot_04_gen_seit_model_002.png" alt="0.001 Hz, 0.005 Hz, 0.022 Hz, 0.100 Hz, 0.464 Hz, 2.154 Hz, 10.000 Hz, 46.416 Hz, 215.443 Hz, 1000.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_04_gen_seit_model_003.png" srcset="../../_images/sphx_glr_plot_04_gen_seit_model_003.png" alt="0.001 Hz, 0.005 Hz, 0.022 Hz, 0.100 Hz, 0.464 Hz, 2.154 Hz, 10.000 Hz, 46.416 Hz, 215.443 Hz, 1000.000 Hz" class = "sphx-glr-single-img"/><dl class="simple">
+<dt>with reda.CreateEnterDirectory(‘output_gen_seit_model’):</dt><dd><p># phase
+r[‘rpha’][‘fig’].savefig(‘fwd_model_hom_rpha.png’, dpi=300)</p>
+</dd>
+</dl>
+<p>now we can start parameterizing the subsurface</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../api/crtomo.html#crtomo.eitMan.set_area_to_single_colecole" title="crtomo.eitMan.set_area_to_single_colecole" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">eitman</span><span class="o">.</span><span class="n">set_area_to_single_colecole</span></a><span class="p">(</span>
+    <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.04</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">]</span>
+<span class="p">)</span>
+
+<a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">r</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.eitMan.plot_forward_models" title="crtomo.eitMan.plot_forward_models" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">eitman</span><span class="o">.</span><span class="n">plot_forward_models</span></a><span class="p">(</span><span class="n">maglim</span><span class="o">=</span><span class="p">[</span><span class="mi">90</span><span class="p">,</span> <span class="mi">110</span><span class="p">],</span> <span class="n">phalim</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">30</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+<span class="c1"># save to files</span>
+<span class="k">with</span> <span class="n">reda</span><span class="o">.</span><span class="n">CreateEnterDirectory</span><span class="p">(</span><span class="s1">&#39;output_gen_seit_model&#39;</span><span class="p">):</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">r</span></a><span class="p">[</span><span class="s1">&#39;rmag&#39;</span><span class="p">][</span><span class="s1">&#39;fig&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;fwd_model_par_rmag.png&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">r</span></a><span class="p">[</span><span class="s1">&#39;rpha&#39;</span><span class="p">][</span><span class="s1">&#39;fig&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;fwd_model_par_rpha.png&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_04_gen_seit_model_004.png" srcset="../../_images/sphx_glr_plot_04_gen_seit_model_004.png" alt="0.001 Hz, 0.005 Hz, 0.022 Hz, 0.100 Hz, 0.464 Hz, 2.154 Hz, 10.000 Hz, 46.416 Hz, 215.443 Hz, 1000.000 Hz" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_04_gen_seit_model_005.png" srcset="../../_images/sphx_glr_plot_04_gen_seit_model_005.png" alt="0.001 Hz, 0.005 Hz, 0.022 Hz, 0.100 Hz, 0.464 Hz, 2.154 Hz, 10.000 Hz, 46.416 Hz, 215.443 Hz, 1000.000 Hz" class = "sphx-glr-single-img"/><p>add configurations</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">configs</span></a> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.array.html#numpy.array" title="numpy.array" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">((</span>
+    <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+    <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
+<span class="p">))</span>
+<a href="../../api/crtomo.html#crtomo.eitMan.add_to_configs" title="crtomo.eitMan.add_to_configs" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">eitman</span><span class="o">.</span><span class="n">add_to_configs</span></a><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">configs</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<p>conduct forward modeling</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../api/crtomo.html#crtomo.eitMan.model" title="crtomo.eitMan.model" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">eitman</span><span class="o">.</span><span class="n">model</span></a><span class="p">()</span>
+<a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">measurements</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.eitMan.measurements" title="crtomo.eitMan.measurements" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">eitman</span><span class="o">.</span><span class="n">measurements</span></a><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>attempting modeling
+b&#39; ######### CMod ############\nLicence:\nCopyright \xc2\xa9 1990-2020 Andreas Kemna &lt;kemna@geo.uni-bonn.de&gt;\nCopyright \xc2\xa9 2008-2020 CRTomo development team (see AUTHORS file)\nPermission is hereby granted, free of charge, to any person obtaining a copy of\nthis software and associated documentation files (the \xe2\x80\x9cSoftware\xe2\x80\x9d), to deal in\nthe Software without restriction, including without limitation the rights to\nuse, copy, modify, merge, publish, distribute, sublicense, and/or sell copies\nof the Software, and to permit persons to whom the Software is furnished to do\nso, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \xe2\x80\x9cAS IS\xe2\x80\x9d, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n \n \n CRMod Process_ID ::       97662\n OpenMP max threads:   4\n Git-Branch  master\n Commit-ID   85c7db34c4d77d51aa595704ccccff586eff89c8\n Created     Wed-May-13-08:58:54-2020\n Compiler    \n OS          GNU/Linux\n\n Reading Input-Files\n++ check 1\r++ check 2 done!\n\rGetting voltage      1\rGetting voltage      2 No electrode cap file\n \n Rescheduling..\n less nodes than wavenumbers\n OpenMP threads:   3(  4)\n\n\r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          4                                                   \r Calculating Potentials : Wavenumber          5                                                   \r Calculating Potentials : Wavenumber          6                                                   \r Calculating Potentials : Wavenumber          7                                                   \r Calculating Potentials : Wavenumber          8                                                    done, now processing\n solution time  0d/  0h/  0m/  0s/  95ms\n\n Modelling completedSTOP 0\n&#39;
+reading voltages
+attempting modeling
+b&#39; ######### CMod ############\nLicence:\nCopyright \xc2\xa9 1990-2020 Andreas Kemna &lt;kemna@geo.uni-bonn.de&gt;\nCopyright \xc2\xa9 2008-2020 CRTomo development team (see AUTHORS file)\nPermission is hereby granted, free of charge, to any person obtaining a copy of\nthis software and associated documentation files (the \xe2\x80\x9cSoftware\xe2\x80\x9d), to deal in\nthe Software without restriction, including without limitation the rights to\nuse, copy, modify, merge, publish, distribute, sublicense, and/or sell copies\nof the Software, and to permit persons to whom the Software is furnished to do\nso, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \xe2\x80\x9cAS IS\xe2\x80\x9d, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n \n \n CRMod Process_ID ::       97666\n OpenMP max threads:   4\n Git-Branch  master\n Commit-ID   85c7db34c4d77d51aa595704ccccff586eff89c8\n Created     Wed-May-13-08:58:54-2020\n Compiler    \n OS          GNU/Linux\n\n Reading Input-Files\n++ check 1\r++ check 2 done!\n\rGetting voltage      1\rGetting voltage      2 No electrode cap file\n \n Rescheduling..\n less nodes than wavenumbers\n OpenMP threads:   3(  4)\n\n\r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          4                                                   \r Calculating Potentials : Wavenumber          5                                                   \r Calculating Potentials : Wavenumber          6                                                   \r Calculating Potentials : Wavenumber          7                                                   \r Calculating Potentials : Wavenumber          8                                                    done, now processing\n solution time  0d/  0h/  0m/  0s/  91ms\n\n Modelling completedSTOP 0\n&#39;
+reading voltages
+attempting modeling
+b&#39; ######### CMod ############\nLicence:\nCopyright \xc2\xa9 1990-2020 Andreas Kemna &lt;kemna@geo.uni-bonn.de&gt;\nCopyright \xc2\xa9 2008-2020 CRTomo development team (see AUTHORS file)\nPermission is hereby granted, free of charge, to any person obtaining a copy of\nthis software and associated documentation files (the \xe2\x80\x9cSoftware\xe2\x80\x9d), to deal in\nthe Software without restriction, including without limitation the rights to\nuse, copy, modify, merge, publish, distribute, sublicense, and/or sell copies\nof the Software, and to permit persons to whom the Software is furnished to do\nso, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \xe2\x80\x9cAS IS\xe2\x80\x9d, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n \n \n CRMod Process_ID ::       97670\n OpenMP max threads:   4\n Git-Branch  master\n Commit-ID   85c7db34c4d77d51aa595704ccccff586eff89c8\n Created     Wed-May-13-08:58:54-2020\n Compiler    \n OS          GNU/Linux\n\n Reading Input-Files\n++ check 1\r++ check 2 done!\n\rGetting voltage      1\rGetting voltage      2 No electrode cap file\n \n Rescheduling..\n less nodes than wavenumbers\n OpenMP threads:   3(  4)\n\n\r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          4                                                   \r Calculating Potentials : Wavenumber          5                                                   \r Calculating Potentials : Wavenumber          6                                                   \r Calculating Potentials : Wavenumber          7                                                   \r Calculating Potentials : Wavenumber          8                                                    done, now processing\n solution time  0d/  0h/  0m/  0s/  90ms\n\n Modelling completedSTOP 0\n&#39;
+reading voltages
+attempting modeling
+b&#39; ######### CMod ############\nLicence:\nCopyright \xc2\xa9 1990-2020 Andreas Kemna &lt;kemna@geo.uni-bonn.de&gt;\nCopyright \xc2\xa9 2008-2020 CRTomo development team (see AUTHORS file)\nPermission is hereby granted, free of charge, to any person obtaining a copy of\nthis software and associated documentation files (the \xe2\x80\x9cSoftware\xe2\x80\x9d), to deal in\nthe Software without restriction, including without limitation the rights to\nuse, copy, modify, merge, publish, distribute, sublicense, and/or sell copies\nof the Software, and to permit persons to whom the Software is furnished to do\nso, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \xe2\x80\x9cAS IS\xe2\x80\x9d, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n \n \n CRMod Process_ID ::       97674\n OpenMP max threads:   4\n Git-Branch  master\n Commit-ID   85c7db34c4d77d51aa595704ccccff586eff89c8\n Created     Wed-May-13-08:58:54-2020\n Compiler    \n OS          GNU/Linux\n\n Reading Input-Files\n++ check 1\r++ check 2 done!\n\rGetting voltage      1\rGetting voltage      2 No electrode cap file\n \n Rescheduling..\n less nodes than wavenumbers\n OpenMP threads:   3(  4)\n\n\r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          4                                                   \r Calculating Potentials : Wavenumber          5                                                   \r Calculating Potentials : Wavenumber          6                                                   \r Calculating Potentials : Wavenumber          7                                                   \r Calculating Potentials : Wavenumber          8                                                    done, now processing\n solution time  0d/  0h/  0m/  0s/  90ms\n\n Modelling completedSTOP 0\n&#39;
+reading voltages
+attempting modeling
+b&#39; ######### CMod ############\nLicence:\nCopyright \xc2\xa9 1990-2020 Andreas Kemna &lt;kemna@geo.uni-bonn.de&gt;\nCopyright \xc2\xa9 2008-2020 CRTomo development team (see AUTHORS file)\nPermission is hereby granted, free of charge, to any person obtaining a copy of\nthis software and associated documentation files (the \xe2\x80\x9cSoftware\xe2\x80\x9d), to deal in\nthe Software without restriction, including without limitation the rights to\nuse, copy, modify, merge, publish, distribute, sublicense, and/or sell copies\nof the Software, and to permit persons to whom the Software is furnished to do\nso, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \xe2\x80\x9cAS IS\xe2\x80\x9d, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n \n \n CRMod Process_ID ::       97678\n OpenMP max threads:   4\n Git-Branch  master\n Commit-ID   85c7db34c4d77d51aa595704ccccff586eff89c8\n Created     Wed-May-13-08:58:54-2020\n Compiler    \n OS          GNU/Linux\n\n Reading Input-Files\n++ check 1\r++ check 2 done!\n\rGetting voltage      1\rGetting voltage      2 No electrode cap file\n \n Rescheduling..\n less nodes than wavenumbers\n OpenMP threads:   3(  4)\n\n\r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          4                                                   \r Calculating Potentials : Wavenumber          5                                                   \r Calculating Potentials : Wavenumber          6                                                   \r Calculating Potentials : Wavenumber          7                                                   \r Calculating Potentials : Wavenumber          8                                                    done, now processing\n solution time  0d/  0h/  0m/  0s/  90ms\n\n Modelling completedSTOP 0\n&#39;
+reading voltages
+attempting modeling
+b&#39; ######### CMod ############\nLicence:\nCopyright \xc2\xa9 1990-2020 Andreas Kemna &lt;kemna@geo.uni-bonn.de&gt;\nCopyright \xc2\xa9 2008-2020 CRTomo development team (see AUTHORS file)\nPermission is hereby granted, free of charge, to any person obtaining a copy of\nthis software and associated documentation files (the \xe2\x80\x9cSoftware\xe2\x80\x9d), to deal in\nthe Software without restriction, including without limitation the rights to\nuse, copy, modify, merge, publish, distribute, sublicense, and/or sell copies\nof the Software, and to permit persons to whom the Software is furnished to do\nso, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \xe2\x80\x9cAS IS\xe2\x80\x9d, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n \n \n CRMod Process_ID ::       97685\n OpenMP max threads:   4\n Git-Branch  master\n Commit-ID   85c7db34c4d77d51aa595704ccccff586eff89c8\n Created     Wed-May-13-08:58:54-2020\n Compiler    \n OS          GNU/Linux\n\n Reading Input-Files\n++ check 1\r++ check 2 done!\n\rGetting voltage      1\rGetting voltage      2 No electrode cap file\n \n Rescheduling..\n less nodes than wavenumbers\n OpenMP threads:   3(  4)\n\n\r Calculating Potentials : Wavenumber          2                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          4                                                   \r Calculating Potentials : Wavenumber          5                                                   \r Calculating Potentials : Wavenumber          6                                                   \r Calculating Potentials : Wavenumber          7                                                   \r Calculating Potentials : Wavenumber          8                                                    done, now processing\n solution time  0d/  0h/  0m/  0s/  92ms\n\n Modelling completedSTOP 0\n&#39;
+reading voltages
+attempting modeling
+b&#39; ######### CMod ############\nLicence:\nCopyright \xc2\xa9 1990-2020 Andreas Kemna &lt;kemna@geo.uni-bonn.de&gt;\nCopyright \xc2\xa9 2008-2020 CRTomo development team (see AUTHORS file)\nPermission is hereby granted, free of charge, to any person obtaining a copy of\nthis software and associated documentation files (the \xe2\x80\x9cSoftware\xe2\x80\x9d), to deal in\nthe Software without restriction, including without limitation the rights to\nuse, copy, modify, merge, publish, distribute, sublicense, and/or sell copies\nof the Software, and to permit persons to whom the Software is furnished to do\nso, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \xe2\x80\x9cAS IS\xe2\x80\x9d, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n \n \n CRMod Process_ID ::       97689\n OpenMP max threads:   4\n Git-Branch  master\n Commit-ID   85c7db34c4d77d51aa595704ccccff586eff89c8\n Created     Wed-May-13-08:58:54-2020\n Compiler    \n OS          GNU/Linux\n\n Reading Input-Files\n++ check 1\r++ check 2 done!\n\rGetting voltage      1\rGetting voltage      2 No electrode cap file\n \n Rescheduling..\n less nodes than wavenumbers\n OpenMP threads:   3(  4)\n\n\r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          4                                                   \r Calculating Potentials : Wavenumber          5                                                   \r Calculating Potentials : Wavenumber          6                                                   \r Calculating Potentials : Wavenumber          7                                                   \r Calculating Potentials : Wavenumber          8                                                    done, now processing\n solution time  0d/  0h/  0m/  0s/  92ms\n\n Modelling completedSTOP 0\n&#39;
+reading voltages
+attempting modeling
+b&#39; ######### CMod ############\nLicence:\nCopyright \xc2\xa9 1990-2020 Andreas Kemna &lt;kemna@geo.uni-bonn.de&gt;\nCopyright \xc2\xa9 2008-2020 CRTomo development team (see AUTHORS file)\nPermission is hereby granted, free of charge, to any person obtaining a copy of\nthis software and associated documentation files (the \xe2\x80\x9cSoftware\xe2\x80\x9d), to deal in\nthe Software without restriction, including without limitation the rights to\nuse, copy, modify, merge, publish, distribute, sublicense, and/or sell copies\nof the Software, and to permit persons to whom the Software is furnished to do\nso, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \xe2\x80\x9cAS IS\xe2\x80\x9d, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n \n \n CRMod Process_ID ::       97693\n OpenMP max threads:   4\n Git-Branch  master\n Commit-ID   85c7db34c4d77d51aa595704ccccff586eff89c8\n Created     Wed-May-13-08:58:54-2020\n Compiler    \n OS          GNU/Linux\n\n Reading Input-Files\n++ check 1\r++ check 2 done!\n\rGetting voltage      1\rGetting voltage      2 No electrode cap file\n \n Rescheduling..\n less nodes than wavenumbers\n OpenMP threads:   3(  4)\n\n\r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          4                                                   \r Calculating Potentials : Wavenumber          5                                                   \r Calculating Potentials : Wavenumber          6                                                   \r Calculating Potentials : Wavenumber          7                                                   \r Calculating Potentials : Wavenumber          8                                                    done, now processing\n solution time  0d/  0h/  0m/  0s/  89ms\n\n Modelling completedSTOP 0\n&#39;
+reading voltages
+attempting modeling
+b&#39; ######### CMod ############\nLicence:\nCopyright \xc2\xa9 1990-2020 Andreas Kemna &lt;kemna@geo.uni-bonn.de&gt;\nCopyright \xc2\xa9 2008-2020 CRTomo development team (see AUTHORS file)\nPermission is hereby granted, free of charge, to any person obtaining a copy of\nthis software and associated documentation files (the \xe2\x80\x9cSoftware\xe2\x80\x9d), to deal in\nthe Software without restriction, including without limitation the rights to\nuse, copy, modify, merge, publish, distribute, sublicense, and/or sell copies\nof the Software, and to permit persons to whom the Software is furnished to do\nso, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \xe2\x80\x9cAS IS\xe2\x80\x9d, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n \n \n CRMod Process_ID ::       97697\n OpenMP max threads:   4\n Git-Branch  master\n Commit-ID   85c7db34c4d77d51aa595704ccccff586eff89c8\n Created     Wed-May-13-08:58:54-2020\n Compiler    \n OS          GNU/Linux\n\n Reading Input-Files\n++ check 1\r++ check 2 done!\n\rGetting voltage      1\rGetting voltage      2 No electrode cap file\n \n Rescheduling..\n less nodes than wavenumbers\n OpenMP threads:   3(  4)\n\n\r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          4                                                   \r Calculating Potentials : Wavenumber          5                                                   \r Calculating Potentials : Wavenumber          6                                                   \r Calculating Potentials : Wavenumber          7                                                   \r Calculating Potentials : Wavenumber          8                                                    done, now processing\n solution time  0d/  0h/  0m/  0s/  92ms\n\n Modelling completedSTOP 0\n&#39;
+reading voltages
+attempting modeling
+b&#39; ######### CMod ############\nLicence:\nCopyright \xc2\xa9 1990-2020 Andreas Kemna &lt;kemna@geo.uni-bonn.de&gt;\nCopyright \xc2\xa9 2008-2020 CRTomo development team (see AUTHORS file)\nPermission is hereby granted, free of charge, to any person obtaining a copy of\nthis software and associated documentation files (the \xe2\x80\x9cSoftware\xe2\x80\x9d), to deal in\nthe Software without restriction, including without limitation the rights to\nuse, copy, modify, merge, publish, distribute, sublicense, and/or sell copies\nof the Software, and to permit persons to whom the Software is furnished to do\nso, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \xe2\x80\x9cAS IS\xe2\x80\x9d, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n \n \n CRMod Process_ID ::       97701\n OpenMP max threads:   4\n Git-Branch  master\n Commit-ID   85c7db34c4d77d51aa595704ccccff586eff89c8\n Created     Wed-May-13-08:58:54-2020\n Compiler    \n OS          GNU/Linux\n\n Reading Input-Files\n++ check 1\r++ check 2 done!\n\rGetting voltage      1\rGetting voltage      2 No electrode cap file\n \n Rescheduling..\n less nodes than wavenumbers\n OpenMP threads:   3(  4)\n\n\r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          4                                                   \r Calculating Potentials : Wavenumber          5                                                   \r Calculating Potentials : Wavenumber          6                                                   \r Calculating Potentials : Wavenumber          7                                                   \r Calculating Potentials : Wavenumber          8                                                    done, now processing\n solution time  0d/  0h/  0m/  0s/  90ms\n\n Modelling completedSTOP 0\n&#39;
+reading voltages
+</pre></div>
+</div>
+<p>modeled SIP signatures can be retrieved as a dict:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sip_sigs</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.eitMan.get_measurement_responses" title="crtomo.eitMan.get_measurement_responses" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">eitman</span><span class="o">.</span><span class="n">get_measurement_responses</span></a><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sip_sigs</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>{(1, 3, 5, 4): &lt;reda.eis.plots.sip_response object at 0x7f5583702280&gt;, (5, 7, 10, 8): &lt;reda.eis.plots.sip_response object at 0x7f5561ac0ca0&gt;}
+</pre></div>
+</div>
+<p>plot modeled SIP signatures</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">reda</span><span class="o">.</span><span class="n">CreateEnterDirectory</span><span class="p">(</span><span class="s1">&#39;output_gen_seit_model&#39;</span><span class="p">):</span>
+    <span class="k">for</span> <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">key</span></a><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <a href="../../api/crtomo.html#crtomo.eitMan.get_measurement_responses" title="crtomo.eitMan.get_measurement_responses" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">eitman</span><span class="o">.</span><span class="n">get_measurement_responses</span></a><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;mod_sip_</span><span class="si">{}</span><span class="s1">.png&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">key</span></a><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Extract SIP signature at one point from the forward model</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sip_one_p</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.eitMan.extract_points" title="crtomo.eitMan.extract_points" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">eitman</span><span class="o">.</span><span class="n">extract_points</span></a><span class="p">(</span>
+    <span class="p">[</span><span class="s1">&#39;forward_rmag&#39;</span><span class="p">,</span> <span class="s1">&#39;forward_rpha&#39;</span><span class="p">],</span>
+    <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.atleast_2d.html#numpy.atleast_2d" title="numpy.atleast_2d" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span></a><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.array.html#numpy.array" title="numpy.array" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
+<span class="p">)</span>
+
+<span class="c1"># import IPython</span>
+<span class="c1"># IPython.embed()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  15.673 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-01-modelling-plot-04-gen-seit-model-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/d3399b5350d2ad177ebacda04af2d542/plot_04_gen_seit_model.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_04_gen_seit_model.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/9904d1508f2e385f067d20f22ae232dc/plot_04_gen_seit_model.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_04_gen_seit_model.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plot_02_potentials.html" class="btn btn-neutral float-left" title="Plot a potential distribution" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_05_seit_fwd_lookup.html" class="btn btn-neutral float-right" title="Generating sEIT forward models using a mask and a lookup table" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2021, CRTomo contributors.
+      <span class="lastupdated">Last updated on Dec 14, 2021.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

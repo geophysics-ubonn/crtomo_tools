@@ -1,0 +1,295 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>grid_gen_depth_decoupling &#8212; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for grid_gen_depth_decoupling</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;Create depth-dependent grid decouplings.</span>
+
+<span class="sd">WORK IN PROGRESS!</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">optparse</span> <span class="kn">import</span> <span class="n">OptionParser</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">UnivariateSpline</span>
+
+<span class="kn">from</span> <span class="nn">crtomo.mpl_setup</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">crtomo.grid</span> <span class="k">as</span> <span class="nn">CRGrid</span>
+
+
+<div class="viewcode-block" id="handle_cmd_options"><a class="viewcode-back" href="../scripts/grid_tools/grid_gen_depth_decoupling.html#grid_gen_depth_decoupling.handle_cmd_options">[docs]</a><span class="k">def</span> <span class="nf">handle_cmd_options</span><span class="p">():</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">OptionParser</span><span class="p">()</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s1">&#39;-e&#39;</span><span class="p">,</span> <span class="s2">&quot;--elem&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;elem_file&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+                      <span class="n">help</span><span class="o">=</span><span class="s2">&quot;elem.dat file (default: elem.dat)&quot;</span><span class="p">,</span>
+                      <span class="n">default</span><span class="o">=</span><span class="s2">&quot;elem.dat&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s1">&#39;-d&#39;</span><span class="p">,</span> <span class="s2">&quot;--decfile&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;dec_file&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+                      <span class="n">help</span><span class="o">=</span><span class="s2">&quot;elem.dat file (default: decfile.dat)&quot;</span><span class="p">,</span>
+                      <span class="n">default</span><span class="o">=</span><span class="s2">&quot;decfile.dat&quot;</span><span class="p">)</span>
+    <span class="c1"># parser.add_option(&quot;--eps&quot;, dest=&quot;eps&quot;, type=&quot;float&quot;,</span>
+    <span class="c1">#                   help=&quot;User override for distance eps&quot;,</span>
+    <span class="c1">#                   default=None)</span>
+    <span class="c1"># parser.add_option(&#39;-l&#39;, &quot;--linefile&quot;, dest=&quot;linefile&quot;,</span>
+    <span class="c1">#                   help=&quot;Line file (default: extra_lines.dat)&quot;,</span>
+    <span class="c1">#                   default=&#39;extra_lines.dat&#39;)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s2">&quot;-o&quot;</span><span class="p">,</span> <span class="s2">&quot;--output&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;output&quot;</span><span class="p">,</span>
+                      <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Output file (default: decouplings.dat)&quot;</span><span class="p">,</span>
+                      <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;FILE&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;decouplings.dat&quot;</span><span class="p">)</span>
+
+    <span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">options</span></div>
+
+
+<div class="viewcode-block" id="load_decfile"><a class="viewcode-back" href="../scripts/grid_tools/grid_gen_depth_decoupling.html#grid_gen_depth_decoupling.load_decfile">[docs]</a><span class="k">def</span> <span class="nf">load_decfile</span><span class="p">(</span><span class="n">decfile</span><span class="p">):</span>
+    <span class="n">decdata_raw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">decfile</span><span class="p">)</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">decdata_raw</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">decdata</span> <span class="o">=</span> <span class="n">decdata_raw</span><span class="p">[</span><span class="n">indices</span><span class="p">,</span> <span class="p">:]</span>
+
+    <span class="k">return</span> <span class="n">decdata</span></div>
+
+
+<div class="viewcode-block" id="get_univariate_spline"><a class="viewcode-back" href="../scripts/grid_tools/grid_gen_depth_decoupling.html#grid_gen_depth_decoupling.get_univariate_spline">[docs]</a><span class="k">def</span> <span class="nf">get_univariate_spline</span><span class="p">(</span><span class="n">zn</span><span class="p">,</span> <span class="n">dn</span><span class="p">):</span>
+    <span class="n">spl</span> <span class="o">=</span> <span class="n">UnivariateSpline</span><span class="p">(</span><span class="n">xn</span><span class="p">,</span> <span class="n">dn</span><span class="p">)</span>
+    <span class="n">spl</span><span class="o">.</span><span class="n">set_smoothing_factor</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">spl</span></div>
+
+
+<div class="viewcode-block" id="get_linear_fit"><a class="viewcode-back" href="../scripts/grid_tools/grid_gen_depth_decoupling.html#grid_gen_depth_decoupling.get_linear_fit">[docs]</a><span class="k">def</span> <span class="nf">get_linear_fit</span><span class="p">(</span><span class="n">zn</span><span class="p">,</span> <span class="n">dn</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">z</span> <span class="o">&lt;=</span> <span class="n">zn</span><span class="o">.</span><span class="n">min</span><span class="p">():</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">zn</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">dn</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">z</span> <span class="o">&gt;=</span> <span class="n">zn</span><span class="o">.</span><span class="n">max</span><span class="p">():</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">zn</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">dn</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">zn</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">z</span> <span class="o">==</span> <span class="n">zn</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">dn</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">zn</span> <span class="o">-</span> <span class="n">z</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">diff</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">pos_nr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">zn</span><span class="p">[</span><span class="n">p</span><span class="p">])</span>
+        <span class="n">max_index</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="n">pos_nr</span><span class="p">]</span>
+
+        <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">diff</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">neg_nr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">zn</span><span class="p">[</span><span class="n">p</span><span class="p">])</span>
+        <span class="n">min_index</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="n">neg_nr</span><span class="p">]</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="n">zn</span><span class="p">[</span><span class="n">min_index</span><span class="p">],</span> <span class="n">zn</span><span class="p">[</span><span class="n">max_index</span><span class="p">]]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">dn</span><span class="p">[</span><span class="n">min_index</span><span class="p">],</span> <span class="n">dn</span><span class="p">[</span><span class="n">max_index</span><span class="p">]]</span>
+
+        <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">array_func</span><span class="p">(</span><span class="n">z_array</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">func</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">z_array</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">return</span> <span class="n">array_func</span></div>
+
+
+<div class="viewcode-block" id="get_func_decoupling_at_z"><a class="viewcode-back" href="../scripts/grid_tools/grid_gen_depth_decoupling.html#grid_gen_depth_decoupling.get_func_decoupling_at_z">[docs]</a><span class="k">def</span> <span class="nf">get_func_decoupling_at_z</span><span class="p">(</span><span class="n">decfile</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">decdata</span> <span class="o">=</span> <span class="n">load_decfile</span><span class="p">(</span><span class="n">decfile</span><span class="p">)</span>
+
+    <span class="c1"># interpolate between the nearest z values</span>
+    <span class="c1"># Use a spline interpolation to get a smooth curve</span>
+    <span class="n">zn</span> <span class="o">=</span> <span class="n">decdata</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">dn</span> <span class="o">=</span> <span class="n">decdata</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># interp_func = get_univariate_spline(zn, dn)</span>
+    <span class="n">interp_func</span> <span class="o">=</span> <span class="n">get_linear_fit</span><span class="p">(</span><span class="n">zn</span><span class="p">,</span> <span class="n">dn</span><span class="p">)</span>
+
+    <span class="c1"># interp_func(-1.1)</span>
+
+    <span class="n">zs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">zn</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">zn</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="mi">40</span><span class="p">)</span>
+    <span class="n">smooth_decouplings</span> <span class="o">=</span> <span class="n">interp_func</span><span class="p">(</span><span class="n">zs</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">decdata</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span>
+                <span class="n">decdata</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span>
+                <span class="s1">&#39;.-&#39;</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">smooth_decouplings</span><span class="p">,</span>
+                <span class="n">zs</span><span class="p">,</span>
+                <span class="s1">&#39;.-&#39;</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;decoupling&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;depth z&#39;</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">interp_func</span></div>
+
+
+<div class="viewcode-block" id="find_neighbors"><a class="viewcode-back" href="../scripts/grid_tools/grid_gen_depth_decoupling.html#grid_gen_depth_decoupling.find_neighbors">[docs]</a><span class="k">def</span> <span class="nf">find_neighbors</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">element_id</span><span class="p">):</span>
+    <span class="c1"># find neighboring elements</span>
+    <span class="n">neighbors</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">elm1</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">elements</span><span class="p">):</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">intersect1d</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">element_id</span><span class="p">],</span> <span class="n">elm1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="c1"># append element index and the two adjoining nodes</span>
+            <span class="n">neighbors</span><span class="o">.</span><span class="n">append</span><span class="p">((</span>
+                <span class="n">index</span><span class="p">,</span>
+                <span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="p">))</span>
+        <span class="c1"># skip rest of the elements if we reached the maximum nr of possible</span>
+        <span class="c1"># neighbors</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">neighbors</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">break</span>
+    <span class="k">return</span> <span class="n">neighbors</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../scripts/grid_tools/grid_gen_depth_decoupling.html#grid_gen_depth_decoupling.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">handle_cmd_options</span><span class="p">()</span>
+    <span class="n">decfunc</span> <span class="o">=</span> <span class="n">get_func_decoupling_at_z</span><span class="p">(</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">dec_file</span><span class="p">,</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">output</span> <span class="o">+</span> <span class="s1">&#39;.png&#39;</span>
+    <span class="p">)</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">CRGrid</span><span class="o">.</span><span class="n">crt_grid</span><span class="p">()</span>
+    <span class="n">grid</span><span class="o">.</span><span class="n">load_elem_file</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">elem_file</span><span class="p">)</span>
+
+    <span class="n">nx</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;sorted&#39;</span><span class="p">][:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">ny</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;sorted&#39;</span><span class="p">][:,</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="n">nxy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="n">decoupling_items</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">elmnr</span><span class="p">,</span> <span class="n">element</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">elements</span><span class="p">):</span>
+        <span class="n">neighbors</span> <span class="o">=</span> <span class="n">find_neighbors</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">elmnr</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">neighbor</span> <span class="ow">in</span> <span class="n">neighbors</span><span class="p">:</span>
+            <span class="n">xz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">nxy</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">neighbor</span><span class="p">[</span><span class="mi">1</span><span class="p">:]])</span>
+            <span class="c1"># we are only interested in z-coordinates</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">xz</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">z</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">==</span> <span class="n">z</span><span class="o">.</span><span class="n">max</span><span class="p">():</span>
+                <span class="c1"># add decoupling</span>
+                <span class="n">decoupling</span> <span class="o">=</span> <span class="n">decfunc</span><span class="p">((</span><span class="n">z</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="c1"># print(&#39;decoupling&#39;, decoupling)</span>
+                <span class="n">decoupling_items</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">elmnr</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                                         <span class="n">neighbor</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                                         <span class="n">decoupling</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># print(&#39;vertical side&#39;)</span>
+                <span class="k">continue</span>
+
+    <span class="n">final_decouplings</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">decoupling_items</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fid</span><span class="p">:</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">final_decouplings</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span> <span class="n">final_decouplings</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%i</span><span class="s1"> </span><span class="si">%i</span><span class="s1"> </span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">crtomo tools</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">lib</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2021, CRTomo contributors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

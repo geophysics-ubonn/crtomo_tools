@@ -1,0 +1,9 @@
+cr\_trig\_create module
+=======================
+
+.. automodule:: cr_trig_create
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:

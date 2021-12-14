@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plotting sensitivities &mdash; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Generate Gaussian Models" href="plot_01_gaussian_model.html" />
+    <link rel="prev" title="Plotting the exponential function" href="../00_grids/plot_test.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> crtomo tools
+          </a>
+              <div class="version">
+                0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-grid-handling">Examples: Grid handling</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#examples-modelling">Examples: Modelling</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Plotting sensitivities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_01_gaussian_model.html">Generate Gaussian Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_02_potentials.html">Plot a potential distribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_04_gen_seit_model.html">Generating sEIT forward models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_05_seit_fwd_lookup.html">Generating sEIT forward models using a mask and a lookup table</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_06_synthetic_4d.html">Generating a 4D synthetic data set with noise.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_07_fwd_model_plotting.html">Plot forward models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_08_sensitivity_thresholding.html">Segmenting sensitivity distributions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-single-frequency-inversion">Examples: Single-frequency inversion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-postprocessing-of-inversion-results">Examples: Postprocessing of inversion results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-seit-import-and-inversions">Examples: sEIT import and inversions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#calculating-correction-factors">Calculating correction factors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-field-data-processing">Examples: Field data processing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">lib</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">crtomo tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Examples</a> &raquo;</li>
+      <li>Plotting sensitivities</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/_examples/01_modelling/plot_00_sensitivity.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-01-modelling-plot-00-sensitivity-py"><span class="std std-ref">here</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="plotting-sensitivities">
+<span id="sphx-glr-examples-01-modelling-plot-00-sensitivity-py"></span><h1>Plotting sensitivities<a class="headerlink" href="#plotting-sensitivities" title="Permalink to this headline"></a></h1>
+<p>Sensitivity distributions can be easily plotted using the tdMan class:</p>
+<p>imports</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">crtomo</span>
+<span class="c1"># is only used for reda.CreateEnterDirectory</span>
+<span class="kn">import</span> <span class="nn">reda</span>
+</pre></div>
+</div>
+<p>create and save a FEM-grid</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.crt_grid.create_surface_grid" title="crtomo.crt_grid.create_surface_grid" class="sphx-glr-backref-module-crtomo-crt_grid sphx-glr-backref-type-py-method"><span class="n">crtomo</span><span class="o">.</span><span class="n">crt_grid</span><span class="o">.</span><span class="n">create_surface_grid</span></a><span class="p">(</span>
+    <span class="n">nr_electrodes</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">depth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">char_lengths</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+<span class="p">)</span>
+
+<a href="../../api/crtomo.html#crtomo.crt_grid.plot_grid" title="crtomo.crt_grid.plot_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">grid</span><span class="o">.</span><span class="n">plot_grid</span></a><span class="p">()</span>
+
+<span class="k">with</span> <span class="n">reda</span><span class="o">.</span><span class="n">CreateEnterDirectory</span><span class="p">(</span><span class="s1">&#39;output_plot_00_sensitivity&#39;</span><span class="p">):</span>
+    <a href="../../api/crtomo.html#crtomo.crt_grid.save_elem_file" title="crtomo.crt_grid.save_elem_file" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">grid</span><span class="o">.</span><span class="n">save_elem_file</span></a><span class="p">(</span><span class="s1">&#39;elem.dat&#39;</span><span class="p">)</span>
+    <a href="../../api/crtomo.html#crtomo.crt_grid.save_elec_file" title="crtomo.crt_grid.save_elec_file" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">grid</span><span class="o">.</span><span class="n">save_elec_file</span></a><span class="p">(</span><span class="s1">&#39;elec.dat&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_00_sensitivity_001.png" srcset="../../_images/sphx_glr_plot_00_sensitivity_001.png" alt="plot 00 sensitivity" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>This grid was sorted using CutMcK. The nodes were resorted!
+Triangular grid found
+</pre></div>
+</div>
+<p>create the measurement configuration</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">configs</span></a> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.array.html#numpy.array" title="numpy.array" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">((</span>
+    <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>
+<span class="p">))</span>
+</pre></div>
+</div>
+<p>for different background, plot the sensitivities</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">bg</span></a> <span class="ow">in</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">):</span>
+    <a href="../../api/crtomo.html#crtomo.tdMan" title="crtomo.tdMan" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">td</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.tdMan" title="crtomo.tdMan" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class"><span class="n">crtomo</span><span class="o">.</span><span class="n">tdMan</span></a><span class="p">(</span><a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid</span></a><span class="o">=</span><a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid</span></a><span class="p">)</span>
+    <a href="../../api/crtomo.html#crtomo.ConfigManager.add_to_configs" title="crtomo.ConfigManager.add_to_configs" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">td</span><span class="o">.</span><span class="n">configs</span><span class="o">.</span><span class="n">add_to_configs</span></a><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">configs</span></a><span class="p">)</span>
+    <a href="../../api/crtomo.html#crtomo.tdMan.add_homogeneous_model" title="crtomo.tdMan.add_homogeneous_model" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">td</span><span class="o">.</span><span class="n">add_homogeneous_model</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">bg</span></a><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <a href="../../api/crtomo.html#crtomo.tdMan.model" title="crtomo.tdMan.model" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">td</span><span class="o">.</span><span class="n">model</span></a><span class="p">(</span><span class="n">sensitivities</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">r</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.tdMan.plot_sensitivity" title="crtomo.tdMan.plot_sensitivity" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">td</span><span class="o">.</span><span class="n">plot_sensitivity</span></a><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">reda</span><span class="o">.</span><span class="n">CreateEnterDirectory</span><span class="p">(</span><span class="s1">&#39;output_plot_00_sensitivity&#39;</span><span class="p">):</span>
+        <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">r</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;sensitivity_bg_</span><span class="si">{}</span><span class="s1">.pdf&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">bg</span></a><span class="p">),</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">r</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.tdMan.plot_sensitivity" title="crtomo.tdMan.plot_sensitivity" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">td</span><span class="o">.</span><span class="n">plot_sensitivity</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">mag_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">reda</span><span class="o">.</span><span class="n">CreateEnterDirectory</span><span class="p">(</span><span class="s1">&#39;output_plot_00_sensitivity&#39;</span><span class="p">):</span>
+        <a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">r</span></a><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span>
+            <span class="s1">&#39;sensitivity_magonly_bg_</span><span class="si">{}</span><span class="s1">.pdf&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">bg</span></a><span class="p">),</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_00_sensitivity_002.png" srcset="../../_images/sphx_glr_plot_00_sensitivity_002.png" alt="plot 00 sensitivity" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_00_sensitivity_003.png" srcset="../../_images/sphx_glr_plot_00_sensitivity_003.png" alt="plot 00 sensitivity" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_00_sensitivity_004.png" srcset="../../_images/sphx_glr_plot_00_sensitivity_004.png" alt="plot 00 sensitivity" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_00_sensitivity_005.png" srcset="../../_images/sphx_glr_plot_00_sensitivity_005.png" alt="plot 00 sensitivity" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_00_sensitivity_006.png" srcset="../../_images/sphx_glr_plot_00_sensitivity_006.png" alt="plot 00 sensitivity" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_00_sensitivity_007.png" srcset="../../_images/sphx_glr_plot_00_sensitivity_007.png" alt="plot 00 sensitivity" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_00_sensitivity_008.png" srcset="../../_images/sphx_glr_plot_00_sensitivity_008.png" alt="plot 00 sensitivity" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_00_sensitivity_009.png" srcset="../../_images/sphx_glr_plot_00_sensitivity_009.png" alt="plot 00 sensitivity" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>attempting modeling
+b&#39; ######### CMod ############\nLicence:\nCopyright \xc2\xa9 1990-2020 Andreas Kemna &lt;kemna@geo.uni-bonn.de&gt;\nCopyright \xc2\xa9 2008-2020 CRTomo development team (see AUTHORS file)\nPermission is hereby granted, free of charge, to any person obtaining a copy of\nthis software and associated documentation files (the \xe2\x80\x9cSoftware\xe2\x80\x9d), to deal in\nthe Software without restriction, including without limitation the rights to\nuse, copy, modify, merge, publish, distribute, sublicense, and/or sell copies\nof the Software, and to permit persons to whom the Software is furnished to do\nso, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \xe2\x80\x9cAS IS\xe2\x80\x9d, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n \n \n CRMod Process_ID ::       97547\n OpenMP max threads:   4\n Git-Branch  master\n Commit-ID   85c7db34c4d77d51aa595704ccccff586eff89c8\n Created     Wed-May-13-08:58:54-2020\n Compiler    \n OS          GNU/Linux\n\n Reading Input-Files\n++ check 1\r++ check 2 done!\n\rGetting voltage      1 No electrode cap file\n \n Rescheduling..\n less nodes than wavenumbers\n OpenMP threads:   3(  4)\n\n\r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          4                                                   \r Calculating Potentials : Wavenumber          5                                                   \r Calculating Potentials : Wavenumber          6                                                    done, now processing\n solution time  0d/  0h/  0m/  0s/  60ms\n\n Modelling completedSTOP 0\n&#39;
+reading voltages
+reading sensitivities
+/home/mweigand/.virtualenvs/reda/lib/python3.9/site-packages/crtomo/tdManager.py:935: RuntimeWarning: invalid value encountered in true_divide
+  sens_normed = sens_data / norm_value
+attempting modeling
+b&#39; ######### CMod ############\nLicence:\nCopyright \xc2\xa9 1990-2020 Andreas Kemna &lt;kemna@geo.uni-bonn.de&gt;\nCopyright \xc2\xa9 2008-2020 CRTomo development team (see AUTHORS file)\nPermission is hereby granted, free of charge, to any person obtaining a copy of\nthis software and associated documentation files (the \xe2\x80\x9cSoftware\xe2\x80\x9d), to deal in\nthe Software without restriction, including without limitation the rights to\nuse, copy, modify, merge, publish, distribute, sublicense, and/or sell copies\nof the Software, and to permit persons to whom the Software is furnished to do\nso, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \xe2\x80\x9cAS IS\xe2\x80\x9d, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n \n \n CRMod Process_ID ::       97562\n OpenMP max threads:   4\n Git-Branch  master\n Commit-ID   85c7db34c4d77d51aa595704ccccff586eff89c8\n Created     Wed-May-13-08:58:54-2020\n Compiler    \n OS          GNU/Linux\n\n Reading Input-Files\n++ check 1\r++ check 2 done!\n\rGetting voltage      1 No electrode cap file\n \n Rescheduling..\n less nodes than wavenumbers\n OpenMP threads:   3(  4)\n\n\r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          4                                                   \r Calculating Potentials : Wavenumber          5                                                   \r Calculating Potentials : Wavenumber          6                                                    done, now processing\n solution time  0d/  0h/  0m/  0s/  58ms\n\n Modelling completedSTOP 0\n&#39;
+reading voltages
+reading sensitivities
+/home/mweigand/.virtualenvs/reda/lib/python3.9/site-packages/crtomo/tdManager.py:935: RuntimeWarning: invalid value encountered in true_divide
+  sens_normed = sens_data / norm_value
+attempting modeling
+b&#39; ######### CMod ############\nLicence:\nCopyright \xc2\xa9 1990-2020 Andreas Kemna &lt;kemna@geo.uni-bonn.de&gt;\nCopyright \xc2\xa9 2008-2020 CRTomo development team (see AUTHORS file)\nPermission is hereby granted, free of charge, to any person obtaining a copy of\nthis software and associated documentation files (the \xe2\x80\x9cSoftware\xe2\x80\x9d), to deal in\nthe Software without restriction, including without limitation the rights to\nuse, copy, modify, merge, publish, distribute, sublicense, and/or sell copies\nof the Software, and to permit persons to whom the Software is furnished to do\nso, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \xe2\x80\x9cAS IS\xe2\x80\x9d, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n \n \n CRMod Process_ID ::       97569\n OpenMP max threads:   4\n Git-Branch  master\n Commit-ID   85c7db34c4d77d51aa595704ccccff586eff89c8\n Created     Wed-May-13-08:58:54-2020\n Compiler    \n OS          GNU/Linux\n\n Reading Input-Files\n++ check 1\r++ check 2 done!\n\rGetting voltage      1 No electrode cap file\n \n Rescheduling..\n less nodes than wavenumbers\n OpenMP threads:   3(  4)\n\n\r Calculating Potentials : Wavenumber          2                                                   \r Calculating Potentials : Wavenumber          2                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          4                                                   \r Calculating Potentials : Wavenumber          5                                                   \r Calculating Potentials : Wavenumber          6                                                    done, now processing\n solution time  0d/  0h/  0m/  0s/  61ms\n\n Modelling completedSTOP 0\n&#39;
+reading voltages
+reading sensitivities
+/home/mweigand/.virtualenvs/reda/lib/python3.9/site-packages/crtomo/tdManager.py:935: RuntimeWarning: invalid value encountered in true_divide
+  sens_normed = sens_data / norm_value
+attempting modeling
+b&#39; ######### CMod ############\nLicence:\nCopyright \xc2\xa9 1990-2020 Andreas Kemna &lt;kemna@geo.uni-bonn.de&gt;\nCopyright \xc2\xa9 2008-2020 CRTomo development team (see AUTHORS file)\nPermission is hereby granted, free of charge, to any person obtaining a copy of\nthis software and associated documentation files (the \xe2\x80\x9cSoftware\xe2\x80\x9d), to deal in\nthe Software without restriction, including without limitation the rights to\nuse, copy, modify, merge, publish, distribute, sublicense, and/or sell copies\nof the Software, and to permit persons to whom the Software is furnished to do\nso, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \xe2\x80\x9cAS IS\xe2\x80\x9d, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n \n \n CRMod Process_ID ::       97579\n OpenMP max threads:   4\n Git-Branch  master\n Commit-ID   85c7db34c4d77d51aa595704ccccff586eff89c8\n Created     Wed-May-13-08:58:54-2020\n Compiler    \n OS          GNU/Linux\n\n Reading Input-Files\n++ check 1\r++ check 2 done!\n\rGetting voltage      1 No electrode cap file\n \n Rescheduling..\n less nodes than wavenumbers\n OpenMP threads:   3(  4)\n\n\r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          3                                                   \r Calculating Potentials : Wavenumber          4                                                   \r Calculating Potentials : Wavenumber          5                                                   \r Calculating Potentials : Wavenumber          6                                                    done, now processing\n solution time  0d/  0h/  0m/  0s/  61ms\n\n Modelling completedSTOP 0\n&#39;
+reading voltages
+reading sensitivities
+/home/mweigand/.virtualenvs/reda/lib/python3.9/site-packages/crtomo/tdManager.py:935: RuntimeWarning: invalid value encountered in true_divide
+  sens_normed = sens_data / norm_value
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  14.074 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-01-modelling-plot-00-sensitivity-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/4fed6d48997d42937cb6d16603ac5d8f/plot_00_sensitivity.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_00_sensitivity.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/cb369c973bf064fcecd43b553caf9e78/plot_00_sensitivity.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_00_sensitivity.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../00_grids/plot_test.html" class="btn btn-neutral float-left" title="Plotting the exponential function" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_01_gaussian_model.html" class="btn btn-neutral float-right" title="Generate Gaussian Models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2021, CRTomo contributors.
+      <span class="lastupdated">Last updated on Dec 14, 2021.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

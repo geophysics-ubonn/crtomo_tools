@@ -1,0 +1,12 @@
+
+:orphan:
+
+.. _sphx_glr__examples_05_correction_factors_sg_execution_times:
+
+Computation times
+=================
+**00:03.429** total execution time for **_examples_05_correction_factors** files:
+
++---------------------------------------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr__examples_05_correction_factors_plot_calculate_correction_factors.py` (``plot_calculate_correction_factors.py``) | 00:03.429 | 0.0 MB |
++---------------------------------------------------------------------------------------------------------------------------------+-----------+--------+

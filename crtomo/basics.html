@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Basics &mdash; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Files and directories" href="files.html" />
+    <link rel="prev" title="The original CRTomo code" href="crtomo.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> crtomo tools
+          </a>
+              <div class="version">
+                0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">lib</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">crtomo tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="crtomo.html">The original CRTomo code</a> &raquo;</li>
+      <li>Basics</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/crtomo/basics.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="basics">
+<h1>Basics<a class="headerlink" href="#basics" title="Permalink to this headline"></a></h1>
+<section id="rms">
+<h2>RMS<a class="headerlink" href="#rms" title="Permalink to this headline"></a></h2>
+<div class="math notranslate nohighlight">
+\[\text{RMS} = \sqrt{\frac{1}{N}\sum_i^N \left| \frac{d_i -
+      f(\underline{m})_i}{\epsilon_i}\right|^2}\]</div>
+<p>The RMS is a measure of how good or bad the forward model was fitted to the
+measurements within the specified error margin. It sums the differences between
+the measurements and the response of the forward model (synthetic measurements)
+weighted with the assumed error. Thus a sum of one means that the measurements
+are correctly described by the forward model created by the inversion. This is
+what we seek to do. Adapt your <code class="docutils literal notranslate"><span class="pre">crtomo.cfg</span></code> and rerun the inversion until you
+have a good RMS value (near to one, but not below one).</p>
+<p>A RMS value smaller than one means that the sum of differences between
+measurements and model responses is smaller than the assumed error, on average.
+We call this ‘over-fitted’. Either the error assumption is wrong (the actual
+error is smaller than expected), or the inversion introduced artificial data
+into the process that has nothing to do with structures found in the
+subsurface. In most cases the error values are just too small.</p>
+<p>A RMS value greater than one indicates that the data was not described within
+the given error estimates, and shows larger average residuals (<span class="math notranslate nohighlight">\(|d_k -
+f_k|\)</span>) than expected by the error estimates <span class="math notranslate nohighlight">\(\epsilon_k\)</span>: <span class="math notranslate nohighlight">\(|d_k
+-f_k| &lt; \epsilon_k\)</span>. This holds true ONLY for the average of all measurements,
+and therefore some data points <span class="math notranslate nohighlight">\(d_i\)</span> can be estimated within the expected
+error margin while some show larger residuals.</p>
+<p>In the <code class="docutils literal notranslate"><span class="pre">inv.ctr</span></code> file the mag RMS is computed using only the magnitude error,
+while the phase RMS is computed only with the phase error. The data RMS uses
+the complex error composed of the square root of the sum of squares of
+magnitude and phase errors.</p>
+</section>
+</section>
+<section id="advanced-usage">
+<h1>Advanced usage<a class="headerlink" href="#advanced-usage" title="Permalink to this headline"></a></h1>
+<section id="artificial-noise">
+<h2>Artificial Noise<a class="headerlink" href="#artificial-noise" title="Permalink to this headline"></a></h2>
+<p>The file <code class="docutils literal notranslate"><span class="pre">crt.noisemod</span></code> looks like follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">1</span>          <span class="c1"># Ensemble seed</span>
+<span class="mf">5.00</span>       <span class="c1"># Relative error resistance A (noise) [%] von dR=AR+B</span>
+<span class="mf">0.100E-03</span>  <span class="c1"># Absolute error resistance B (noise) [Ohm m]</span>
+<span class="mf">0.00</span>       <span class="c1"># Phase error parameter A1 (noise) [mRad/Ohm/m] von dp=A1*R^B1+A2*p+p0</span>
+<span class="mf">0.00</span>       <span class="c1"># Phase error parameter B1 (noise) []</span>
+<span class="mf">0.00</span>       <span class="c1"># Relative phase error A2 (noise) [%]</span>
+<span class="mf">0.500</span>      <span class="c1"># Absolute phase error p0 (noise) [mRad]</span>
+</pre></div>
+</div>
+<p>The file will be created by CRTomo even when the noise levels are coupled to
+the error model, and filled with the actually used parameters.</p>
+<p>CRTomo creates the files <code class="docutils literal notranslate"><span class="pre">inv.mynoise_rho</span></code>, <code class="docutils literal notranslate"><span class="pre">inv.mynoise_pha</span></code> and
+<code class="docutils literal notranslate"><span class="pre">inv.mynoise_voltages</span></code> in its execution directory when noise is added to the
+measurements. Those files contain the absolute noise levels added to the data,
+and the resulting data used in the inversion.</p>
+</section>
+<section id="error-estimates">
+<h2>Error estimates<a class="headerlink" href="#error-estimates" title="Permalink to this headline"></a></h2>
+<p>(<a class="reference external" href="../pyplots/error_parameterization.py">Source code</a>, <a class="reference external" href="../pyplots/error_parameterization.png">png</a>, <a class="reference external" href="../pyplots/error_parameterization.hires.png">hires.png</a>, <a class="reference external" href="../pyplots/error_parameterization.pdf">pdf</a>)</p>
+<figure class="align-default">
+<img alt="../_images/error_parameterization.png" class="plot-directive" src="../_images/error_parameterization.png" />
+</figure>
+<p>Error ellipsis</p>
+<p>For the master branch:</p>
+<blockquote>
+<div><table class="docutils align-default">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 19%" />
+<col style="width: 65%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Complex</p></th>
+<th class="head"><p>FPI</p></th>
+<th class="head"><p>Error ellipsis in complex inversion</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>X</p></td>
+<td><p>X</p></td>
+<td><p>–</p></td>
+</tr>
+<tr class="row-odd"><td><p>X</p></td>
+<td><p>–</p></td>
+<td><p>X</p></td>
+</tr>
+<tr class="row-even"><td><p>– (DC)</p></td>
+<td><p>–</p></td>
+<td><p>X</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</section>
+<section id="cuthill-mckee-algorithm">
+<h2>Cuthill-McKee Algorithm<a class="headerlink" href="#cuthill-mckee-algorithm" title="Permalink to this headline"></a></h2>
+<p>The ordering of the nodes in the <code class="docutils literal notranslate"><span class="pre">elem.dat</span></code> file can be changed to reduce the
+amount of computing power needed for forward modellings and inversion runs (The
+bandwidth of the stiffness matrix <span class="math notranslate nohighlight">\(S\)</span> is reduced).</p>
+<p>While the order of the nodes will be changed, the order of elements will not be
+changed. You cannot use a non-CutMcK’ed <code class="docutils literal notranslate"><span class="pre">elec.dat</span></code> with an optimized
+<code class="docutils literal notranslate"><span class="pre">elem.dat</span></code> file, as the electrodes are assigned to node numbers which were
+renumbered.</p>
+<p>The CutMcK algorithm we use doesn’t change the coordinates. It merely renumbers
+those coordinates. To find the coordinates of the element nodes, for each node
+<span class="math notranslate nohighlight">\(n_i\)</span> of the element follow the steps:</p>
+<ul class="simple">
+<li><ol class="arabic simple">
+<li><p>Go to the <span class="math notranslate nohighlight">\(n_i\)</span>-th node of the <code class="docutils literal notranslate"><span class="pre">elem.dat</span></code> file.</p></li>
+</ol>
+</li>
+<li><p>2. The index of the coordinates are specified by the number located in the
+first column.</p></li>
+</ul>
+<p>Example: Suppose you have the element nodes:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">99</span> <span class="mi">100</span> <span class="mi">101</span> <span class="mi">102</span>
+</pre></div>
+</div>
+<p>and the snippet from the <code class="docutils literal notranslate"><span class="pre">elem.dat</span></code> file (the numbers in () indicate the
+number of the nodes corresponding to the line number + 4 lines for the header):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="p">(</span> <span class="mi">99</span><span class="p">)</span>   <span class="mi">205</span> <span class="mi">3</span> <span class="mi">4</span>
+<span class="p">(</span><span class="mi">100</span><span class="p">)</span>   <span class="mi">304</span> <span class="mi">5</span> <span class="mi">3</span>
+<span class="p">(</span><span class="mi">101</span><span class="p">)</span>   <span class="mi">405</span> <span class="mi">1</span> <span class="mi">2</span>
+<span class="p">(</span><span class="mi">102</span><span class="p">)</span>   <span class="mi">604</span> <span class="mi">0</span> <span class="mi">9</span>
+<span class="o">...</span>
+<span class="p">(</span><span class="mi">205</span><span class="p">)</span>   <span class="mi">321</span> <span class="mi">0</span> <span class="mi">0</span>
+<span class="o">...</span>
+<span class="p">(</span><span class="mi">304</span><span class="p">)</span>   <span class="mi">221</span> <span class="mi">0</span> <span class="o">-</span><span class="mi">1</span>
+<span class="o">...</span>
+<span class="p">(</span><span class="mi">405</span><span class="p">)</span>   <span class="mi">665</span> <span class="mi">1</span> <span class="o">-</span><span class="mi">1</span>
+<span class="o">...</span>
+<span class="p">(</span><span class="mi">604</span><span class="p">)</span>   <span class="mi">123</span> <span class="mi">1</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>For the first node specified for the element (node 99), go to line 99 and find
+the index for the coordinates (205). Thus the coordinates for this node are
+<span class="math notranslate nohighlight">\((0,0)\)</span>. The other coordinates resolve to <span class="math notranslate nohighlight">\((0,-1)\)</span>, <span class="math notranslate nohighlight">\((1,-1)\)</span>,
+and <span class="math notranslate nohighlight">\((1,0)\)</span>, respectively.</p>
+</section>
+<section id="sort-the-nodes">
+<h2>Sort the nodes<a class="headerlink" href="#sort-the-nodes" title="Permalink to this headline"></a></h2>
+<p>If you want to sort the nodes so that the node indices in the element
+definitions point directly to the correct coordinates, do the following:</p>
+<p>For each line (node):</p>
+<ol class="arabic simple">
+<li><p>Find the line (node) where the first column holds the number for the current
+node.</p></li>
+<li><p>Move the coordinates of the current node to this position.</p></li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The sorting cannot be done in only one array!</p>
+</div>
+</section>
+<section id="lambda-value">
+<h2><span class="math notranslate nohighlight">\(\lambda\)</span> value<a class="headerlink" href="#lambda-value" title="Permalink to this headline"></a></h2>
+<p>There are three ways to calculate the initial value for <span class="math notranslate nohighlight">\(\lambda\)</span>:</p>
+<ol class="arabic simple">
+<li><p>Citation from Kemna, 2000: “Following a suggestion of Newman et al, 1997, an
+adequate starting value <span class="math notranslate nohighlight">\(\lambda_0\)</span> at the first iteration step may be
+estimated from the row sums of the matrix product <span class="math notranslate nohighlight">\(A^H W_d^H W_d A\)</span>.
+Such a choice properly scales the regularizing term <span class="math notranslate nohighlight">\(\lambda W_m^T
+W_m\)</span> in eq. (3.53) at the beginning of the inversion process. However,
+whereas Newman et al., 1997 use the maximum absolute row value which occurs,
+for the problem considered herein five times the corresponding mean value
+has been found to be sufficiently large. Taking in addition the smoothing
+parameters <span class="math notranslate nohighlight">\(\alpha_x\)</span> and <span class="math notranslate nohighlight">\(\alpha_z\)</span> into account, it is:</p></li>
+</ol>
+<div class="math notranslate nohighlight">
+\[\lambda_0 = \frac{2}{\alpha_x+\alpha_z} \frac{5}{M} \sum_{m=1}^M \left|
+\sum_{j=1}^M \sum_{i=1}^N
+\frac{{\overline{a}}_{im}a_{ij}}{{\overline{\epsilon}}_i\epsilon_j}\right|,\]</div>
+<p>where <span class="math notranslate nohighlight">\(\overline{\; }\)</span> denotes complex conjugation.”</p>
+<ol class="arabic simple" start="2">
+<li><p>Easylam: <span class="math notranslate nohighlight">\(\lambda_0\)</span> = Number of model cells</p></li>
+<li><p>User supplied lambda_0</p></li>
+</ol>
+<p>Roland Martin (Juli 2012):</p>
+<p>Dann noch etwas zur generellen Vorgehensweise mit der Lambda Bestimmung:</p>
+<p>Ich hatte seinerzeit mal aus Zeit-Kosten-Gründen für (nz=Anzahl der Gitterpunkte
+in z-Richtung) den switch eingebaut für eine “einfache” <span class="math notranslate nohighlight">\(\lambda_0\)</span>
+Bestimmung (taking easy lam0). Das ist eine mehr oder weniger brauchbare
+Einstellung, die man nicht immer nutzen sollte, sondern nur dann, wenn man sich
+sicher ist, was man tut.</p>
+<p>Mein Vorschlag für ein Vorgehen ist folgendermaßen:</p>
+<p>Bei einem ersten Inversionslauf nimmt man für diesen switch (nz) nz=0, dann
+wird das <span class="math notranslate nohighlight">\(\lambda\)</span> “ordentlich” bestimmt, also:</p>
+<p><span class="math notranslate nohighlight">\(\lambda_0 = \sum (WJTWJ_{ii})\)</span></p>
+<p>Wenn der Wert in etwa der Anzahl der Modellparameter (oder auch Messungen, je
+nach dem) entspricht, dann kann man in den darauf folgenden Inversionsläufen
+entweder <span class="math notranslate nohighlight">\(nz=-1\)</span> wählen (dann wird MAX(m,n) als Startwert gesetzt), oder
+man notiert sich den Wert aus dem ersten Lauf und gibt diesen dann als Integer
+mit einem Minus davor an, also <span class="math notranslate nohighlight">\(nz = -&lt; \lambda_0\)</span> vom ersten Lauf.</p>
+<p>Wenn man nz=-1 immer nimmt, ohne das vorher zu prüfen, dann sucht man evtl
+nicht in die richtige Richtung, denn CRTomo braucht im Grunde einen maximalen
+Startwert für die lambda suche, keinen mittendrin oder sogar ganz unten (im
+Sinne der Anpassung), denn es benutzt ein Such-Verfahren, welches am liebsten
+einen Startpunkt außerhalb und oberhalb des Minimums hat. Unterhalb (lambda zu
+klein) ginge theoretisch zwar auch, ist aber insofern schlecht, da hier der
+singuläre Charakter von JTJ, bzw der Sensitivitätsmatrix viel stärker zum
+Tragen kommt, als wenn man mit einer starken Dämpfung (=großes Lambda) anfängt.
+Die Ergebnisse sind dann also in der Regel “schrott”.</p>
+<p>For normal use the first method should always be used! If you know what you are
+doing, easylam0 can be used. But be carefull: If the initial value of methods 2
+and 3 is too small, it is unlikely that CRTomo can recover and the results will
+be suboptimal.</p>
+</section>
+<section id="roughness">
+<h2>Roughness<a class="headerlink" href="#roughness" title="Permalink to this headline"></a></h2>
+<p>Cited from Kemna et al 2000: “A measure of the model roughness is introduced by
+<span class="math notranslate nohighlight">\(\Psi_m (m) = \iint ||\nabla m||^2 dxdz,\)</span> where <span class="math notranslate nohighlight">\(||\;||\)</span> represents
+the standard <span class="math notranslate nohighlight">\(L_2\)</span>-norm, and <span class="math notranslate nohighlight">\(\nabla\)</span> is the 2D gradient operator.”</p>
+</section>
+<section id="stepsize">
+<h2>Stepsize<a class="headerlink" href="#stepsize" title="Permalink to this headline"></a></h2>
+<p>Cited from Kemna et al 2000: “There (…) exists (an) approach to minimize
+nonquadratic functions like <span class="math notranslate nohighlight">\(\Psi\)</span> by the CG (Conjugate Gradient)
+technique alone, going back to (Polak et al.,1969). Herein, at each CG
+relaxation step the model itself is updated, i.e., <span class="math notranslate nohighlight">\(m_{k+1} = m_k
++\alpha_k p_k\)</span> [cf. the corresponding line in the algorithm (3.55)], where the
+step length <span class="math notranslate nohighlight">\(\alpha_k\)</span> is chosen to minimize <span class="math notranslate nohighlight">\(\Psi\)</span> as a function
+of <span class="math notranslate nohighlight">\(\alpha_k\)</span>, i.e., a line search is performed. The new gradient of
+<span class="math notranslate nohighlight">\(\Psi(m_{k+1})\)</span> is directly evaluated and used to determine the
+subsequent CG diretion <span class="math notranslate nohighlight">\(p_{k+1}\)</span>. Thus, this approach involves only a
+single iteration cycle (the outer Gauss-Newton iteration vanishes) at the price
+of having to calculate the gradient vector, virtually given by eq (3.54), at
+each CG step (note that the Hessian is not exploited at all). The connection
+between the combined Gauss-Newton/CG method and the Polak-Ribière method is
+dicussed in Hestenes et al.,1980.</p>
+</section>
+<section id="steplength">
+<h2>Steplength<a class="headerlink" href="#steplength" title="Permalink to this headline"></a></h2>
+<p>The steplength <span class="math notranslate nohighlight">\(s\)</span> scales the model update in each iteration:</p>
+<p><span class="math notranslate nohighlight">\(m_{q+1} = m_q + s \Delta m_q ,\)</span></p>
+<p>where <span class="math notranslate nohighlight">\(s \in [0,1]\)</span>. This scaling, also called steplength damping, is
+used to prevent the solution to over shoot the best solution due to the
+non-linearity of the underlying problem.</p>
+</section>
+<section id="difference-inversion">
+<h2>Difference inversion<a class="headerlink" href="#difference-inversion" title="Permalink to this headline"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Difference inversion is only available for DC data!</p>
+</div>
+<ul class="simple">
+<li><p>voltages of all involved data files must be the same for all lines</p></li>
+</ul>
+<p>Required input:</p>
+<blockquote>
+<div><ul>
+<li><p>full, absolute inversion of time0:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>volt.dat file for time 0: volt0.dat</p></li>
+<li><p>model response of time0 inversion, volt0X.dat</p></li>
+<li><p>inversion model for time0: rho0X.mag</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+<p>crtomo.cfg snippet (with preceding line numbers):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>4 ../mod/volt1.dat
+5 ../inv
+6 T ! difference inversion?
+7 ../../time0/mod/volt.dat
+8 ../../time0/inv/rho05.mag
+9 ../../time0/inv/volt05.dat
+10 iseed variance
+11 0    ! # cells in x-direction
+12 -1   ! # cells in z-direction
+</pre></div>
+</div>
+<p>Changes to output files:</p>
+<p>rho0X.mag:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">3828</span>       <span class="mf">2.7374096866950728</span>
+<span class="o">-</span><span class="mf">1.6500</span>     <span class="o">-</span><span class="mf">0.1500</span>      <span class="mf">1.9428</span>     <span class="o">-</span><span class="mf">1.9318</span>     <span class="o">-</span><span class="mf">1.7267</span>      <span class="mf">1.9698</span>      <span class="mf">0.2204</span>
+<span class="o">-</span><span class="mf">1.3500</span>     <span class="o">-</span><span class="mf">0.1500</span>      <span class="mf">1.9408</span>     <span class="o">-</span><span class="mf">1.2176</span>     <span class="o">-</span><span class="mf">1.0756</span>      <span class="mf">1.2326</span>      <span class="mf">0.1395</span>
+<span class="o">-</span><span class="mf">1.0500</span>     <span class="o">-</span><span class="mf">0.1500</span>      <span class="mf">1.9370</span>      <span class="mf">0.3139</span>      <span class="mf">0.2707</span>     <span class="o">-</span><span class="mf">0.3129</span>     <span class="o">-</span><span class="mf">0.0363</span>
+<span class="o">-</span><span class="mf">0.7500</span>     <span class="o">-</span><span class="mf">0.1500</span>      <span class="mf">1.9316</span>      <span class="mf">2.6170</span>      <span class="mf">2.1785</span>     <span class="o">-</span><span class="mf">2.5503</span>     <span class="o">-</span><span class="mf">0.3064</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>Columns for lines 2-:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 4%" />
+<col style="width: 11%" />
+<col style="width: 19%" />
+<col style="width: 65%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>line</p></th>
+<th class="head"><p>plot-index</p></th>
+<th class="head"><p>can use –cmaglin</p></th>
+<th class="head"><p>description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><ol class="arabic simple">
+<li></li>
+</ol>
+</td>
+<td><p>0</p></td>
+<td></td>
+<td><p>center of element, x coordinate</p></td>
+</tr>
+<tr class="row-odd"><td><ol class="arabic simple" start="2">
+<li></li>
+</ol>
+</td>
+<td><p>1</p></td>
+<td></td>
+<td><p>center of element, z coordinate</p></td>
+</tr>
+<tr class="row-even"><td><ol class="arabic simple" start="3">
+<li></li>
+</ol>
+</td>
+<td><p>2</p></td>
+<td><p>yes</p></td>
+<td><p>inversion result, absolute resistivity (log10-values), rho</p></td>
+</tr>
+<tr class="row-odd"><td><ol class="arabic simple" start="4">
+<li></li>
+</ol>
+</td>
+<td><p>3</p></td>
+<td><p>yes</p></td>
+<td><p>starting model (log10, resisitivity), rho0</p></td>
+</tr>
+<tr class="row-even"><td><ol class="arabic simple" start="5">
+<li></li>
+</ol>
+</td>
+<td><p>4</p></td>
+<td><p>yes</p></td>
+<td><p>log10(rho) - log10(rho0)</p></td>
+</tr>
+<tr class="row-odd"><td><ol class="arabic simple" start="6">
+<li></li>
+</ol>
+</td>
+<td><p>5</p></td>
+<td><p>no</p></td>
+<td><p>(rho - rho0) / rho0 * 100</p></td>
+</tr>
+<tr class="row-even"><td><ol class="arabic simple" start="7">
+<li></li>
+</ol>
+</td>
+<td><p>6</p></td>
+<td><p>no</p></td>
+<td><p>(sigma - sigma0) / sigma0 * 100</p></td>
+</tr>
+</tbody>
+</table>
+<p>The additional columns 4-7 can be plotted using the <strong>–column</strong> switch of
+<strong>plot_td.py</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># starting model log10</span>
+<span class="n">plot_ty</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">column</span> <span class="mi">3</span>
+<span class="c1"># starting model linear</span>
+<span class="n">plot_ty</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">column</span> <span class="mi">3</span> <span class="o">--</span><span class="n">cmaglin</span>
+<span class="c1"># log10(rho) - log10(rho0)</span>
+<span class="n">plot_ty</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">column</span> <span class="mi">4</span>
+<span class="c1"># rho/rho0</span>
+<span class="n">plot_ty</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">column</span> <span class="mi">4</span> <span class="o">--</span><span class="n">cmaglin</span>
+<span class="c1"># (rho - rho0) / rho0 * 100</span>
+<span class="n">plot_ty</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">column</span> <span class="mi">5</span>
+<span class="c1"># (sigma - sigma0) / sigma0 * 100</span>
+<span class="n">plot_ty</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">column</span> <span class="mi">6</span>
+</pre></div>
+</div>
+<p>Error parameters must be adapted according to the new data parameterization of
+the difference inversion.</p>
+</section>
+<section id="regularization">
+<h2>Regularization<a class="headerlink" href="#regularization" title="Permalink to this headline"></a></h2>
+</section>
+<section id="calculation-of-k-factors">
+<h2>Calculation of K-factors<a class="headerlink" href="#calculation-of-k-factors" title="Permalink to this headline"></a></h2>
+<p>The K-factors are calculated in the module <code class="docutils literal notranslate"><span class="pre">bkfak.f90</span></code>. The resulting
+variable <code class="docutils literal notranslate"><span class="pre">kfak(i)</span></code> includes the K-factor for each electrode configuration
+<code class="docutils literal notranslate"><span class="pre">i</span></code> of a measurement.</p>
+</section>
+<section id="method-of-image-charges">
+<h2>Method of image charges<a class="headerlink" href="#method-of-image-charges" title="Permalink to this headline"></a></h2>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../_images/image_source.png"><img alt="../_images/image_source.png" src="../_images/image_source.png" style="width: 516.6px; height: 338.4px;" /></a>
+</figure>
+<p>In order to determine the potential at any point in space due to a quadripole
+(whether you have no surface array) you have to use the method of image
+charges. So the charge within the surface, for example (0,0,-z), will produce
+the same electrical field as a mirror charge located in (0,0,z). This satisfies
+the boundary condition, that the potential along the surface must be zero.</p>
+<p>The potential in full-space is formulated as <span class="math notranslate nohighlight">\(\varphi(r) =
+\frac{I}{4\pi\sigma_0 r}\)</span>.  Hence the potential of one borehole-electrode can
+be described by the principle of superposition:</p>
+<p><span class="math notranslate nohighlight">\(\varphi(x,y,z) = \frac{I}{4\pi\sigma_0 r} \left(\frac{1}{r_{-}} + \frac{1}{r_{+}}\right)\)</span>, with</p>
+<p><span class="math notranslate nohighlight">\(r_{-}^{2} = (x-x_s)^2 + (y-y_s)^2 + (z-z_s)^2\)</span> and</p>
+<p><span class="math notranslate nohighlight">\(r_{+}^{2} = (x-x_s)^2 + (y-y_s)^2 + (z+z_s)^2\)</span>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If <span class="math notranslate nohighlight">\(z_s = 0\)</span> then <span class="math notranslate nohighlight">\(r_-\)</span> equals <span class="math notranslate nohighlight">\(r_+\)</span> and you will receive
+a solution for a half-space.</p>
+</div>
+<p>Typically you don’t want to measure the potential at one point but the
+potential-difference between two points (one current and one voltage
+electrode).  The four possibilities for a quadripole arrangement are:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(r_1\)</span> (Between B and N)</p></li>
+<li><p><span class="math notranslate nohighlight">\(r_2\)</span> (Between A and N)</p></li>
+<li><p><span class="math notranslate nohighlight">\(r_3\)</span> (Between B and M)</p></li>
+<li><p><span class="math notranslate nohighlight">\(r_4\)</span> (Between A and M)</p></li>
+</ul>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../_images/k_factor.png"><img alt="../_images/k_factor.png" src="../_images/k_factor.png" style="width: 530.4px; height: 235.2px;" /></a>
+</figure>
+<p>The value for the apparent resistivity of one quadripole can be calculated with
+<span class="math notranslate nohighlight">\(\rho_0 = \frac{1}{\sigma_0} = K \cdot \frac{U}{I}\)</span> with</p>
+<p><span class="math notranslate nohighlight">\(K = \frac{4\pi}{\frac{1}{r_1}-\frac{1}{r_2}-\frac{1}{r_3}+\frac{1}{r_4}}\)</span>.</p>
+<p>Each <span class="math notranslate nohighlight">\(r\)</span> is calculated by the method of image charges with <span class="math notranslate nohighlight">\(r =
+r_{-} + r_{+}\)</span>.</p>
+</section>
+<section id="guidance-through-bkfak-f90">
+<h2>Guidance through <code class="docutils literal notranslate"><span class="pre">bkfak.f90</span></code><a class="headerlink" href="#guidance-through-bkfak-f90" title="Permalink to this headline"></a></h2>
+<p>Declaration of variables and open file <code class="docutils literal notranslate"><span class="pre">tmp.kfak</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pi</span> <span class="o">=</span> <span class="n">dacos</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="n">d0</span><span class="p">)</span>
+<span class="n">xk</span> <span class="o">=</span> <span class="mi">0</span><span class="n">D0</span>
+<span class="n">yk</span> <span class="o">=</span> <span class="mi">0</span><span class="n">D0</span>
+<span class="n">CALL</span> <span class="n">get_unit</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
+<span class="n">OPEN</span> <span class="p">(</span><span class="n">fp</span><span class="p">,</span><span class="n">FILE</span><span class="o">=</span><span class="s1">&#39;tmp.kfak&#39;</span><span class="p">,</span><span class="n">STATUS</span><span class="o">=</span><span class="s1">&#39;replace&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Starting loop over all measurements, where <code class="docutils literal notranslate"><span class="pre">nanz</span></code> is the number of
+measurements, coming from <code class="docutils literal notranslate"><span class="pre">datmod.f90</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">do</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">nanz</span>
+</pre></div>
+</div>
+<p>Reading in current and voltage electrodes with variables <code class="docutils literal notranslate"><span class="pre">strnr</span></code> and
+<code class="docutils literal notranslate"><span class="pre">vnr</span></code> declared in <code class="docutils literal notranslate"><span class="pre">datmod.f90</span></code> and convert them.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">elec1</span> <span class="o">=</span> <span class="n">mod</span><span class="p">(</span><span class="n">strnr</span><span class="p">(</span><span class="n">i</span><span class="p">),</span><span class="mi">10000</span><span class="p">)</span>
+<span class="n">elec2</span> <span class="o">=</span> <span class="p">(</span><span class="n">strnr</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">-</span><span class="n">elec1</span><span class="p">)</span><span class="o">/</span><span class="mi">10000</span>
+<span class="n">elec3</span> <span class="o">=</span> <span class="n">mod</span><span class="p">(</span><span class="n">vnr</span><span class="p">(</span><span class="n">i</span><span class="p">),</span><span class="mi">10000</span><span class="p">)</span>
+<span class="n">elec4</span> <span class="o">=</span> <span class="p">(</span><span class="n">vnr</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">-</span><span class="n">elec3</span><span class="p">)</span><span class="o">/</span><span class="mi">10000</span>
+</pre></div>
+</div>
+<p>Same if-loop for each electrode, if it is greater than zero.
+<code class="docutils literal notranslate"><span class="pre">xk(1)</span> <span class="pre">=</span> <span class="pre">sx(snr(enr(elec1)))</span></code> means, that a transformation from
+the node-numbering of an electrode to a x-coordinate will be
+performed.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">enr</span></code> is the node-number of an electrode. (electrmod.f90)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">snr</span></code> is a pointer on coordinates of nodes. (elemmod.f90)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sx</span></code> is the x-coordinate of a node. (elemmod.f90)</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="p">(</span><span class="n">elec1</span><span class="o">.</span><span class="n">gt</span><span class="mf">.0</span><span class="p">)</span> <span class="n">then</span>
+<span class="n">xk</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">sx</span><span class="p">(</span><span class="n">snr</span><span class="p">(</span><span class="n">enr</span><span class="p">(</span><span class="n">elec1</span><span class="p">)))</span>
+<span class="n">yk</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">sy</span><span class="p">(</span><span class="n">snr</span><span class="p">(</span><span class="n">enr</span><span class="p">(</span><span class="n">elec1</span><span class="p">)))</span>
+<span class="n">end</span> <span class="k">if</span>
+</pre></div>
+</div>
+<p>In <code class="docutils literal notranslate"><span class="pre">bkfak.f90</span></code> <span class="math notranslate nohighlight">\(r_1\)</span> is calculated as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="p">(</span><span class="n">elec4</span><span class="o">.</span><span class="n">gt</span><span class="mf">.0</span><span class="o">.</span><span class="ow">and</span><span class="o">.</span><span class="n">elec2</span><span class="o">.</span><span class="n">gt</span><span class="mf">.0</span><span class="p">)</span> <span class="n">then</span>
+<span class="n">dx</span>  <span class="o">=</span> <span class="n">xk</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">-</span><span class="n">xk</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">dym</span> <span class="o">=</span> <span class="n">yk</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">-</span><span class="n">yk</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">dyp</span> <span class="o">=</span> <span class="n">yk</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">+</span><span class="n">yk</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">dym</span> <span class="o">=</span> <span class="mi">1</span><span class="n">d0</span><span class="o">/</span><span class="n">dsqrt</span><span class="p">(</span><span class="n">dx</span><span class="o">*</span><span class="n">dx</span><span class="o">+</span><span class="n">dym</span><span class="o">*</span><span class="n">dym</span><span class="p">)</span>
+<span class="n">dyp</span> <span class="o">=</span> <span class="mi">1</span><span class="n">d0</span><span class="o">/</span><span class="n">dsqrt</span><span class="p">(</span><span class="n">dx</span><span class="o">*</span><span class="n">dx</span><span class="o">+</span><span class="n">dyp</span><span class="o">*</span><span class="n">dyp</span><span class="p">)</span>
+<span class="n">r1</span>  <span class="o">=</span> <span class="n">dym</span><span class="o">+</span><span class="n">dyp</span>
+<span class="k">else</span>
+<span class="n">r1</span>  <span class="o">=</span> <span class="mi">0</span><span class="n">d0</span>
+<span class="n">end</span> <span class="k">if</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">dx</span></code> is the distance between both electrodes, <code class="docutils literal notranslate"><span class="pre">dym</span></code> the change in
+height and <code class="docutils literal notranslate"><span class="pre">dyp</span></code> the y-coordinate of the image charge. The following
+overwritten <code class="docutils literal notranslate"><span class="pre">dym</span></code> and <code class="docutils literal notranslate"><span class="pre">dyp</span></code> represent the distances with included depth
+change for normal and image charge. The sum of both is <span class="math notranslate nohighlight">\(r_1\)</span>.</p>
+<p>Finally you receive <code class="docutils literal notranslate"><span class="pre">kfak(i)</span></code> with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dum</span> <span class="o">=</span> <span class="p">(</span><span class="n">r1</span><span class="o">-</span><span class="n">r2</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">r3</span><span class="o">-</span><span class="n">r4</span><span class="p">)</span>
+<span class="n">kfak</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">=</span> <span class="mi">4</span><span class="n">d0</span><span class="o">*</span><span class="n">pi</span> <span class="o">/</span> <span class="n">dum</span>
+</pre></div>
+</div>
+</section>
+<section id="modeling-with-k-factors">
+<h2>Modeling with K-factors<a class="headerlink" href="#modeling-with-k-factors" title="Permalink to this headline"></a></h2>
+<p>In order to use K-factors while modelling you can just do an integer switch at
+the last line of the <code class="docutils literal notranslate"><span class="pre">crmod.cfg</span></code>. For switching to the option <code class="docutils literal notranslate"><span class="pre">wkfak</span></code>
+insert a <code class="docutils literal notranslate"><span class="pre">2</span></code>.  After the Modelling with CRMod finished the third column of
+the <code class="docutils literal notranslate"><span class="pre">crmod.cfg</span></code> now represents the apparent resistivity <span class="math notranslate nohighlight">\(\rho\)</span>.</p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../_images/bkfak_flow.png"><img alt="../_images/bkfak_flow.png" src="../_images/bkfak_flow.png" style="width: 454.8px; height: 203.4px;" /></a>
+</figure>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="crtomo.html" class="btn btn-neutral float-left" title="The original CRTomo code" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="files.html" class="btn btn-neutral float-right" title="Files and directories" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2021, CRTomo contributors.
+      <span class="lastupdated">Last updated on Dec 14, 2021.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

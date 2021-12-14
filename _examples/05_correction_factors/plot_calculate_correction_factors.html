@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculating 2D correction factors &mdash; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Example for processing field data from Sycal" href="../06_field_data_processing/plot_01_field_data_syscal.html" />
+    <link rel="prev" title="Full sEIT data processing example" href="../04_full_dataprocessing/plot_sEIT_import_inversion.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> crtomo tools
+          </a>
+              <div class="version">
+                0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-grid-handling">Examples: Grid handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-modelling">Examples: Modelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-single-frequency-inversion">Examples: Single-frequency inversion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-postprocessing-of-inversion-results">Examples: Postprocessing of inversion results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-seit-import-and-inversions">Examples: sEIT import and inversions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#calculating-correction-factors">Calculating correction factors</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Calculating 2D correction factors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-field-data-processing">Examples: Field data processing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">lib</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">crtomo tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Examples</a> &raquo;</li>
+      <li>Calculating 2D correction factors</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/_examples/05_correction_factors/plot_calculate_correction_factors.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-05-correction-factors-plot-calculate-correction-factors-py"><span class="std std-ref">here</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="calculating-2d-correction-factors">
+<span id="sphx-glr-examples-05-correction-factors-plot-calculate-correction-factors-py"></span><h1>Calculating 2D correction factors<a class="headerlink" href="#calculating-2d-correction-factors" title="Permalink to this headline"></a></h1>
+<p>Calculation factors used to correct rhizotron tank measurements for analysis
+with the 2D CRTomo branch, as described in Weigand and Kemna 2017
+(Biogeosciences).</p>
+<ul class="simple">
+<li><p>create your measurement configurations abmn</p></li>
+<li><p>conduct a full measurements on water with known conductivity</p></li>
+<li><p>calculate synthetic forward results using 2D-CRMod using the true water
+conductivity</p></li>
+</ul>
+<p>imports</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">crtomo</span>
+<span class="kn">import</span> <span class="nn">reda</span>
+</pre></div>
+</div>
+<p>compute correction factors using data from this frequency</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">target_frequency</span></a> <span class="o">=</span> <span class="mi">70</span>
+</pre></div>
+</div>
+<p>dataset 1</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">seit1</span> <span class="o">=</span> <span class="n">reda</span><span class="o">.</span><span class="n">sEIT</span><span class="p">()</span>
+<span class="n">seit1</span><span class="o">.</span><span class="n">import_eit_fzj</span><span class="p">(</span>
+    <span class="s1">&#39;data/CalibrationData/bnk_water_blubber_20130428_1810_34_einzel.mat&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;data/configs.dat&#39;</span>
+<span class="p">)</span>
+<a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">configurations</span></a> <span class="o">=</span> <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html#pandas.DataFrame.query" title="pandas.DataFrame.query" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-method"><span class="n">seit1</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">query</span></a><span class="p">(</span>
+    <span class="s1">&#39;frequency == </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">target_frequency</span></a><span class="p">)</span>
+<span class="p">)[[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span>
+<span class="c1"># extract configurations for one frequency</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Constructing four-point measurements
+Summary:
+           a      b           m           n           r     frequency         rpha
+count  168.0  168.0  168.000000  168.000000  168.000000    168.000000   168.000000
+mean     1.0    2.0    7.000000    6.000000   10.557074   3716.673627    71.143553
+std      0.0    0.0    2.005979    2.005979   11.618603   9792.892071   280.605291
+min      1.0    2.0    4.000000    3.000000   -6.089346      1.000000 -1729.258195
+25%      1.0    2.0    5.000000    4.000000    3.001507     78.076923     1.811875
+50%      1.0    2.0    7.000000    6.000000    5.695181    275.000000     9.493903
+75%      1.0    2.0    9.000000    8.000000   13.400725    925.000000    49.152224
+max      1.0    2.0   10.000000    9.000000   60.247879  45000.000000  1121.184469
+</pre></div>
+</div>
+<p>synthetic forward modeling</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class"><span class="n">crtomo</span><span class="o">.</span><span class="n">crt_grid</span></a><span class="p">(</span><span class="s1">&#39;data/elem.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;data/elec.dat&#39;</span><span class="p">)</span>
+<a href="../../api/crtomo.html#crtomo.tdMan" title="crtomo.tdMan" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdman</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.tdMan" title="crtomo.tdMan" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class"><span class="n">crtomo</span><span class="o">.</span><span class="n">tdMan</span></a><span class="p">(</span><a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid</span></a><span class="o">=</span><a href="../../api/crtomo.html#crtomo.crt_grid" title="crtomo.crt_grid" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid</span></a><span class="p">)</span>
+
+<span class="c1"># add configuration added from the measurement data</span>
+<a href="../../api/crtomo.html#crtomo.ConfigManager.add_to_configs" title="crtomo.ConfigManager.add_to_configs" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">tdman</span><span class="o">.</span><span class="n">configs</span><span class="o">.</span><span class="n">add_to_configs</span></a><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">configurations</span></a><span class="p">)</span>
+
+<span class="c1"># true water conductivity 37.5 mS/m</span>
+<a href="../../api/crtomo.html#crtomo.tdMan.add_homogeneous_model" title="crtomo.tdMan.add_homogeneous_model" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">tdman</span><span class="o">.</span><span class="n">add_homogeneous_model</span></a><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mf">37.5</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+
+<a href="../../api/crtomo.html#crtomo.cfg.crmod_config" title="crtomo.cfg.crmod_config" class="sphx-glr-backref-module-crtomo-cfg sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdman</span><span class="o">.</span><span class="n">crmod_cfg</span></a><span class="p">[</span><span class="s1">&#39;2D&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
+<a href="../../api/crtomo.html#crtomo.cfg.crmod_config" title="crtomo.cfg.crmod_config" class="sphx-glr-backref-module-crtomo-cfg sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdman</span><span class="o">.</span><span class="n">crmod_cfg</span></a><span class="p">[</span><span class="s1">&#39;fictitious_sink&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;T&#39;</span>
+<a href="../../api/crtomo.html#crtomo.cfg.crmod_config" title="crtomo.cfg.crmod_config" class="sphx-glr-backref-module-crtomo-cfg sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdman</span><span class="o">.</span><span class="n">crmod_cfg</span></a><span class="p">[</span><span class="s1">&#39;sink_node&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;6467&#39;</span>
+<a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">R_mod</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.tdMan.measurements" title="crtomo.tdMan.measurements" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">tdman</span><span class="o">.</span><span class="n">measurements</span></a><span class="p">()</span>
+
+<a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">df_mod</span></a> <span class="o">=</span> <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.concat.html#pandas.concat" title="pandas.concat" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-function"><span class="n">pd</span><span class="o">.</span><span class="n">concat</span></a><span class="p">(</span>
+    <span class="p">(</span>
+        <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class"><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></a><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">tdman</span><span class="o">.</span><span class="n">configs</span><span class="o">.</span><span class="n">configs</span></a><span class="p">),</span>
+        <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class"><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span></a><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">R_mod</span></a><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="p">),</span>
+    <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+
+<a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Index.html#pandas.Index" title="pandas.Index" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">df_mod</span><span class="o">.</span><span class="n">columns</span></a> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;r_mod&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>This grid was sorted using CutMcK. The nodes were resorted!
+Rectangular grid found
+attempting modeling
+b&#39;\nlibgomp: Invalid value for environment variable OMP_NUM_THREADS\n ######### CMod ############\nLicence:\nCopyright \xc2\xa9 1990-2020 Andreas Kemna &lt;kemna@geo.uni-bonn.de&gt;\nCopyright \xc2\xa9 2008-2020 CRTomo development team (see AUTHORS file)\nPermission is hereby granted, free of charge, to any person obtaining a copy of\nthis software and associated documentation files (the \xe2\x80\x9cSoftware\xe2\x80\x9d), to deal in\nthe Software without restriction, including without limitation the rights to\nuse, copy, modify, merge, publish, distribute, sublicense, and/or sell copies\nof the Software, and to permit persons to whom the Software is furnished to do\nso, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \xe2\x80\x9cAS IS\xe2\x80\x9d, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n \n \n CRMod Process_ID ::       99143\n OpenMP max threads:   4\n Git-Branch  master\n Commit-ID   85c7db34c4d77d51aa595704ccccff586eff89c8\n Created     Wed-May-13-08:58:54-2020\n Compiler    \n OS          GNU/Linux\n\n Reading Input-Files\n++ check 1\r++ check 2 done!\n\rGetting voltage      1\rGetting voltage      2\rGetting voltage      3\rGetting voltage      4\rGetting voltage      5\rGetting voltage      6\rGetting voltage      7 No electrode cap file\n \n Rescheduling..\n perfect match\n OpenMP threads:   1(  4)\n\n\nFictious sink @ node  6467      31.000     -53.000\n\n Calculating Potentials\n done, now processing\n solution time  0d/  0h/  0m/  0s/ 218ms\n\n Modelling completedSTOP 0\n&#39;
+reading voltages
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">R_meas_70</span></a> <span class="o">=</span> <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html#pandas.DataFrame.query" title="pandas.DataFrame.query" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-method"><span class="n">seit1</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">query</span></a><span class="p">(</span><span class="s1">&#39;frequency == 70&#39;</span><span class="p">)[[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">]]</span>
+<a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">all_data</span></a> <span class="o">=</span> <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.merge.html#pandas.merge" title="pandas.merge" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-function"><span class="n">pd</span><span class="o">.</span><span class="n">merge</span></a><span class="p">(</span><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">df_mod</span></a><span class="p">,</span> <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">R_meas_70</span></a><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="p">])</span>
+<a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">all_data</span></a><span class="p">[</span><span class="s1">&#39;correction_factor&#39;</span><span class="p">]</span> <span class="o">=</span> <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">all_data</span></a><span class="p">[</span><span class="s1">&#39;r_mod&#39;</span><span class="p">]</span> <span class="o">/</span> <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">all_data</span></a><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span>
+<a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">all_data</span></a><span class="p">[</span><span class="s1">&#39;ab&#39;</span><span class="p">]</span> <span class="o">=</span> <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">all_data</span></a><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e4</span> <span class="o">+</span> <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">all_data</span></a><span class="p">[</span><span class="s1">&#39;b&#39;</span><span class="p">]</span>
+<a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">all_data</span></a><span class="p">[</span><span class="s1">&#39;mn&#39;</span><span class="p">]</span> <span class="o">=</span> <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">all_data</span></a><span class="p">[</span><span class="s1">&#39;m&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e4</span> <span class="o">+</span> <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">all_data</span></a><span class="p">[</span><span class="s1">&#39;n&#39;</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">all_data</span></a><span class="p">)</span>
+<span class="c1"># save to file</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.savetxt.html#numpy.savetxt" title="numpy.savetxt" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">savetxt</span></a><span class="p">(</span>
+    <span class="s1">&#39;correction_factors.dat&#39;</span><span class="p">,</span>
+    <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">all_data</span></a><span class="p">[[</span><span class="s1">&#39;ab&#39;</span><span class="p">,</span> <span class="s1">&#39;mn&#39;</span><span class="p">,</span> <span class="s1">&#39;correction_factor&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+    <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%i</span><span class="s1"> </span><span class="si">%i</span><span class="s1"> </span><span class="si">%f</span><span class="s1">&#39;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>   a  b   m  n     r_mod          r  correction_factor       ab        mn
+0  1  2   4  3  0.787501  34.735937           0.022671  10002.0   40003.0
+1  1  2   5  4  0.339173  13.179074           0.025736  10002.0   50004.0
+2  1  2   6  5  0.173090   7.226317           0.023953  10002.0   60005.0
+3  1  2   7  6  0.087116   3.509949           0.024820  10002.0   70006.0
+4  1  2   8  7  0.032915   1.711871           0.019228  10002.0   80007.0
+5  1  2   9  8  0.052979   2.794955           0.018955  10002.0   90008.0
+6  1  2  10  9  0.123367   5.704247           0.021627  10002.0  100009.0
+</pre></div>
+</div>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-05-correction-factors-plot-calculate-correction-factors-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/0b1210ff4840067e31904899b8b8d791/plot_calculate_correction_factors.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_calculate_correction_factors.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/4282c76d36f14817106ee52d1fc6d72c/plot_calculate_correction_factors.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_calculate_correction_factors.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../04_full_dataprocessing/plot_sEIT_import_inversion.html" class="btn btn-neutral float-left" title="Full sEIT data processing example" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../06_field_data_processing/plot_01_field_data_syscal.html" class="btn btn-neutral float-right" title="Example for processing field data from Sycal" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2021, CRTomo contributors.
+      <span class="lastupdated">Last updated on Dec 14, 2021.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

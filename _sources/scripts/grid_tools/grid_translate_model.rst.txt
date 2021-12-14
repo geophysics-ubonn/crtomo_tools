@@ -1,0 +1,9 @@
+grid\_translate\_model module
+=============================
+
+.. automodule:: grid_translate_model
+   :members:
+   :inherited-members:
+   :private-members:
+   :undoc-members:
+   :show-inheritance:

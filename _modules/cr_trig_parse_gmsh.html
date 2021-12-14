@@ -1,0 +1,565 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>cr_trig_parse_gmsh &#8212; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for cr_trig_parse_gmsh</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Parse a GMSH mesh and produce a FEM grid for CRMod/CRTomo. This script should</span>
+<span class="sd">not be called directly, as it requires the input and output files from</span>
+<span class="sd">&quot;cr_trig_create.py&quot;.</span>
+
+<span class="sd">TODO</span>
+<span class="sd">----</span>
+
+<span class="sd">* the program at some point looks for nodes on the boundary line. Perhaps some</span>
+<span class="sd">  funtions in &quot;grid_extralines_gen_decouplings.py&quot; can be used here (code</span>
+<span class="sd">  deduplication and speed improvements)</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">crtomo.mpl_setup</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="n">mpl</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;font.size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">6.0</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="parse_gmsh"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_parse_gmsh.html#cr_trig_parse_gmsh.parse_gmsh">[docs]</a><span class="k">def</span> <span class="nf">parse_gmsh</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">boundary_file</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parse a GMSH .msh file and return a dictionary containing the data</span>
+<span class="sd">    neccessary to create CRTomo grids</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mesh</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">fid</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+    <span class="k">while</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;$MeshFormat&#39;</span><span class="p">)):</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;$Nodes&#39;</span><span class="p">)):</span>
+            <span class="n">nodes</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">fid</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+            <span class="n">nr_nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;\n&#39;</span><span class="p">)</span>
+            <span class="n">nr_nodes</span>
+            <span class="k">while</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">fid</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;$EndNodes&#39;</span><span class="p">)):</span>
+                    <span class="k">break</span>
+                <span class="n">node</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+                <span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+            <span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nodes</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;$Elements&#39;</span><span class="p">)):</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Create a dictionary with the element types as keys. E.g.:</span>
+<span class="sd">            elements[&#39;15&#39;] provides all elements of type 15 (Points)</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">elements</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">fid</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+            <span class="n">nr_elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;\n&#39;</span><span class="p">)</span>
+            <span class="n">nr_elements</span>
+            <span class="k">while</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">fid</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;$EndElements&#39;</span><span class="p">)):</span>
+                    <span class="k">break</span>
+                <span class="n">element</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+                <span class="c1"># el_nr = element[0]</span>
+                <span class="n">el_type</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">el_nr_tags</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                <span class="c1"># el_tags = element[3:3 + el_nr_tags]</span>
+                <span class="n">el_nodes</span> <span class="o">=</span> <span class="n">element</span><span class="p">[</span><span class="mi">3</span> <span class="o">+</span> <span class="n">el_nr_tags</span><span class="p">:]</span>
+
+                <span class="c1"># now decide where to put it</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">el_type</span><span class="p">)</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">key</span> <span class="ow">in</span> <span class="n">elements</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                    <span class="n">elements</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">el_nodes</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">elements</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">elements</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">el_nodes</span><span class="p">)</span>
+
+            <span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;elements&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">elements</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">fid</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+    <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="c1"># if boundary_file is != None, then sort the lines (element type 1)</span>
+    <span class="c1"># according to the element types</span>
+    <span class="n">boundaries</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="n">boundary_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># load the original boundary lines</span>
+        <span class="c1"># it is possible that GMSH added additional nodes on these lines, and</span>
+        <span class="c1"># that is why we need to find all mesh lines that lie on these original</span>
+        <span class="c1"># lines.</span>
+        <span class="n">bids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">boundary_file</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">btype</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;12&#39;</span><span class="p">,</span> <span class="s1">&#39;11&#39;</span><span class="p">):</span>
+            <span class="c1"># select all original boundaries with this type</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">bids</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">btype</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">boundaries</span><span class="p">[</span><span class="n">btype</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># for each of those lines, find all lines of the mesh that belong</span>
+            <span class="c1"># here</span>
+            <span class="k">for</span> <span class="n">orig_line</span> <span class="ow">in</span> <span class="n">bids</span><span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="p">:]:</span>
+                <span class="c1"># print(&#39;Find all lines lying on the line: &#39;)</span>
+                <span class="n">found_one_line</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="c1"># print(orig_line)</span>
+                <span class="c1"># construct line equation</span>
+
+                <span class="c1"># x1 == x2 ?</span>
+                <span class="c1"># split into coordinates</span>
+                <span class="n">ox1</span> <span class="o">=</span> <span class="n">orig_line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">ox2</span> <span class="o">=</span> <span class="n">orig_line</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                <span class="n">oy1</span> <span class="o">=</span> <span class="n">orig_line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">oy2</span> <span class="o">=</span> <span class="n">orig_line</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+                <span class="k">if</span><span class="p">(</span><span class="n">orig_line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">orig_line</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+                    <span class="c1"># special case: we only need to find all lines with x1 ==</span>
+                    <span class="c1"># x2 == x1_orig and y_min &gt;= y_orig_min and y_max &lt;=</span>
+                    <span class="c1"># &lt;_orig_max</span>
+                    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">]:</span>
+                        <span class="k">if</span><span class="p">(</span><span class="n">btype</span> <span class="o">==</span> <span class="s1">&#39;11&#39;</span><span class="p">):</span>
+                            <span class="k">if</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">48</span> <span class="ow">and</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">150</span><span class="p">):</span>
+                                <span class="k">pass</span>
+                                <span class="c1"># print(&#39;Find all lines lying on the line: &#39;)</span>
+                                <span class="c1"># print(&#39;This is the line&#39;)</span>
+
+                        <span class="c1"># it doesn&#39;t matter any more to be able to assign x -&gt;</span>
+                        <span class="c1"># y values. Thus we can sort the y values and just</span>
+                        <span class="c1"># check</span>
+                        <span class="c1"># if the new line lies in between the original one</span>
+                        <span class="n">oy1</span><span class="p">,</span> <span class="n">oy2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">([</span><span class="n">orig_line</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">orig_line</span><span class="p">[</span><span class="mi">3</span><span class="p">]])</span>
+                        <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
+                            <span class="p">[</span>
+                                <span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">][</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+                                <span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">][</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="p">]</span>
+                        <span class="p">)</span>
+                        <span class="n">y1</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
+                            <span class="p">[</span>
+                                <span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">][</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span>
+                                <span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">][</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+                            <span class="p">]</span>
+                        <span class="p">)</span>
+
+                        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">ox1</span><span class="p">):</span>
+                            <span class="k">if</span><span class="p">(</span><span class="n">y1</span> <span class="o">&gt;=</span> <span class="n">oy1</span> <span class="ow">and</span> <span class="n">y2</span> <span class="o">&lt;=</span> <span class="n">oy2</span><span class="p">):</span>
+                                <span class="n">found_one_line</span> <span class="o">=</span> <span class="kc">True</span>
+                                <span class="n">boundaries</span><span class="p">[</span><span class="n">btype</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># print(&#39;checking with full line equation&#39;)</span>
+                    <span class="c1"># no vertical line</span>
+                    <span class="c1"># we need the full check using the line equation</span>
+                    <span class="n">slope</span> <span class="o">=</span> <span class="p">(</span><span class="n">orig_line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">orig_line</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span>
+                        <span class="n">orig_line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">orig_line</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                    <span class="n">intersect</span> <span class="o">=</span> <span class="n">orig_line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">slope</span> <span class="o">*</span> <span class="n">orig_line</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="c1"># print(&#39;Slope&#39;, slope, &#39; Intercept &#39;, intersect)</span>
+                    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">elements</span><span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">]:</span>
+                        <span class="n">x1</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">][</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">y1</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">][</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+                        <span class="n">x2</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">][</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">y2</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">][</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+
+                        <span class="c1"># print(x1, x2, y1, y1)</span>
+                        <span class="n">check</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="c1"># check if x coordinates of the test line fit in the</span>
+                        <span class="c1"># original line</span>
+                        <span class="k">if</span><span class="p">(</span><span class="n">ox1</span> <span class="o">&lt;</span> <span class="n">ox2</span><span class="p">):</span>
+                            <span class="k">if</span><span class="p">(</span><span class="n">x1</span> <span class="o">&lt;</span> <span class="n">x2</span><span class="p">):</span>
+                                <span class="k">if</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">ox1</span><span class="p">)</span> <span class="ow">or</span> <span class="n">x1</span> <span class="o">&gt;</span> <span class="n">ox1</span><span class="p">)</span> <span class="ow">and</span>
+                                   <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">ox2</span><span class="p">)</span> <span class="ow">or</span> <span class="n">x2</span> <span class="o">&lt;</span> <span class="n">ox2</span><span class="p">)):</span>
+                                    <span class="n">check</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="k">if</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">ox1</span><span class="p">)</span> <span class="ow">or</span> <span class="n">x2</span> <span class="o">&gt;=</span> <span class="n">ox1</span><span class="p">)</span> <span class="ow">and</span>
+                                   <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">ox2</span><span class="p">)</span> <span class="ow">or</span> <span class="n">x1</span> <span class="o">&lt;=</span> <span class="n">ox2</span><span class="p">)):</span>
+                                    <span class="n">check</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">if</span><span class="p">(</span><span class="n">x1</span> <span class="o">&lt;</span> <span class="n">x2</span><span class="p">):</span>
+                                <span class="k">if</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">ox2</span><span class="p">)</span> <span class="ow">or</span> <span class="n">x1</span> <span class="o">&gt;=</span> <span class="n">ox2</span><span class="p">)</span> <span class="ow">and</span>
+                                   <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">ox1</span><span class="p">)</span> <span class="ow">or</span> <span class="n">x2</span> <span class="o">&lt;=</span> <span class="n">ox1</span><span class="p">)):</span>
+                                    <span class="n">check</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="k">if</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">ox2</span><span class="p">)</span> <span class="ow">or</span> <span class="n">x2</span> <span class="o">&gt;=</span> <span class="n">ox2</span><span class="p">)</span> <span class="ow">and</span>
+                                   <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">ox1</span><span class="p">)</span> <span class="ow">or</span> <span class="n">x1</span> <span class="o">&lt;=</span> <span class="n">ox1</span><span class="p">)):</span>
+                                    <span class="n">check</span> <span class="o">=</span> <span class="kc">True</span>
+
+                        <span class="c1"># print(&#39;boundary check:&#39;, check)</span>
+                        <span class="k">if</span><span class="p">(</span><span class="n">check</span><span class="p">):</span>
+                            <span class="c1"># the line lies within the x-range of the orig line</span>
+                            <span class="n">ytest1</span> <span class="o">=</span> <span class="n">slope</span> <span class="o">*</span> <span class="n">x1</span> <span class="o">+</span> <span class="n">intersect</span>
+                            <span class="n">ytest2</span> <span class="o">=</span> <span class="n">slope</span> <span class="o">*</span> <span class="n">x2</span> <span class="o">+</span> <span class="n">intersect</span>
+                            <span class="k">if</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">ytest1</span> <span class="o">-</span> <span class="n">y1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span>
+                               <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">ytest2</span> <span class="o">-</span> <span class="n">y2</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                                <span class="n">boundaries</span><span class="p">[</span><span class="n">btype</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                                <span class="c1"># found = True</span>
+                                <span class="n">found_one_line</span> <span class="o">=</span> <span class="kc">True</span>
+                                <span class="c1"># print(&#39;found it new&#39;, line)</span>
+                <span class="c1"># add a weak check: we need to find at least one line in the</span>
+                <span class="c1"># mesh corresponding to this boundary line:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">found_one_line</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;no mesh line found for this boundary&#39;</span><span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total number of boundaries of this type:&#39;</span><span class="p">,</span>
+                  <span class="nb">len</span><span class="p">(</span><span class="n">boundaries</span><span class="p">[</span><span class="n">btype</span><span class="p">]))</span>
+    <span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;boundaries&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">boundaries</span>
+    <span class="k">return</span> <span class="n">mesh</span></div>
+
+
+<div class="viewcode-block" id="_line"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_parse_gmsh.html#cr_trig_parse_gmsh._line">[docs]</a><span class="k">class</span> <span class="nc">_line</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p1_x</span> <span class="o">=</span> <span class="n">p1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p1_y</span> <span class="o">=</span> <span class="n">p1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">p2_x</span> <span class="o">=</span> <span class="n">p2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p2_y</span> <span class="o">=</span> <span class="n">p2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+<div class="viewcode-block" id="_line.get_diff"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_parse_gmsh.html#cr_trig_parse_gmsh._line.get_diff">[docs]</a>    <span class="k">def</span> <span class="nf">get_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">diff</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p1_x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">p2_x</span><span class="p">)</span>
+        <span class="n">diff</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p1_y</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">p2_y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="_line.get_distance"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_parse_gmsh.html#cr_trig_parse_gmsh._line.get_distance">[docs]</a>    <span class="k">def</span> <span class="nf">get_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_diff</span><span class="p">()</span>
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">diff</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">dist</span></div>
+
+<div class="viewcode-block" id="_line.get_center"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_parse_gmsh.html#cr_trig_parse_gmsh._line.get_center">[docs]</a>    <span class="k">def</span> <span class="nf">get_center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return (x,y) coordinate of central point</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_distance</span><span class="p">()</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_diff</span><span class="p">()</span>
+        <span class="n">direction</span> <span class="o">=</span> <span class="n">diff</span> <span class="o">/</span> <span class="n">dist</span>
+
+        <span class="n">center_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p2_x</span> <span class="o">+</span> <span class="p">(</span><span class="n">dist</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">direction</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">center_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p2_y</span> <span class="o">+</span> <span class="p">(</span><span class="n">dist</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">direction</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">center_x</span><span class="p">,</span> <span class="n">center_y</span><span class="p">])</span></div></div>
+
+
+<div class="viewcode-block" id="debug_plot_mesh"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_parse_gmsh.html#cr_trig_parse_gmsh.debug_plot_mesh">[docs]</a><span class="k">def</span> <span class="nf">debug_plot_mesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">boundary_elements</span><span class="p">):</span>
+    <span class="n">plot_large</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># prepare nodes</span>
+    <span class="n">nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">])</span>
+    <span class="n">tx</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">ty</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="c1"># adapt height of plot to size of grid</span>
+    <span class="n">tx_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">tx</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">tx</span><span class="p">))</span>
+    <span class="n">ty_size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">ty</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">ty</span><span class="p">))</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="n">plot_large</span><span class="p">):</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="n">size_x</span> <span class="o">=</span> <span class="n">width</span>
+    <span class="n">size_y</span> <span class="o">=</span> <span class="n">width</span> <span class="o">*</span> <span class="p">(</span><span class="n">ty_size</span> <span class="o">/</span> <span class="n">tx_size</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.5</span>
+
+    <span class="c1"># plot triangles</span>
+    <span class="n">triangles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;elements&#39;</span><span class="p">][</span><span class="s1">&#39;2&#39;</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">size_x</span><span class="p">,</span> <span class="n">size_y</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">triplot</span><span class="p">(</span><span class="n">tx</span><span class="p">,</span> <span class="n">ty</span><span class="p">,</span> <span class="n">triangles</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+
+    <span class="c1"># plot boundaries in red</span>
+    <span class="c1"># lines = np.array(mesh[&#39;elements&#39;][&#39;1&#39;]) - 1</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;boundaries&#39;</span><span class="p">][</span><span class="s1">&#39;12&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;boundaries&#39;</span><span class="p">][</span><span class="s1">&#39;11&#39;</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">lx</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="n">lines</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">ly</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="n">lines</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">lx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="c1"># for index in range(0, 1):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lx</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="p">:],</span> <span class="n">ly</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="p">:],</span> <span class="s1">&#39;r.&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+        <span class="c1"># draw a line to the neighbour</span>
+        <span class="n">line_obj</span> <span class="o">=</span> <span class="n">_line</span><span class="p">([</span><span class="n">lx</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">ly</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span>
+                         <span class="p">[</span><span class="n">lx</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">ly</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+        <span class="n">center</span> <span class="o">=</span> <span class="n">line_obj</span><span class="o">.</span><span class="n">get_center</span><span class="p">()</span>
+        <span class="n">ntri</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;elements&#39;</span><span class="p">][</span><span class="s1">&#39;2&#39;</span><span class="p">])[</span><span class="nb">int</span><span class="p">(</span><span class="n">boundary_elements</span><span class="p">[</span><span class="n">index</span><span class="p">])]</span>
+        <span class="n">ntri_x</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="n">ntri</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">ntri_y</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="n">ntri</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+        <span class="c1"># compute centroid of element adjacent to the boundary element</span>
+        <span class="n">centroidx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ntri_x</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3</span>
+        <span class="n">centroidy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ntri_y</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">centroidx</span><span class="p">,</span> <span class="n">center</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="p">[</span><span class="n">centroidy</span><span class="p">,</span> <span class="n">center</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s1">&#39;adjacent elements&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">index</span><span class="p">),</span> <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="n">centroidx</span><span class="p">,</span> <span class="n">centroidy</span><span class="p">),</span>
+                    <span class="n">fontsize</span><span class="o">=</span><span class="mf">6.0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">tx</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">tx</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.1</span><span class="p">])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">ty</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">ty</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.1</span><span class="p">])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+
+    <span class="c1"># plot electrodes</span>
+    <span class="n">electrodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s1">&#39;../electrode_positions.dat&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">electrodes</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">electrodes</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+               <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span>
+               <span class="n">label</span><span class="o">=</span><span class="s1">&#39;electrodes&#39;</span><span class="p">)</span>
+
+    <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">plot_large</span><span class="p">):</span>
+        <span class="n">dpi</span> <span class="o">=</span> <span class="mi">600</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dpi</span> <span class="o">=</span> <span class="mi">300</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;../../triangle_grid.jpg&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="n">dpi</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_header"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_parse_gmsh.html#cr_trig_parse_gmsh.get_header">[docs]</a><span class="k">def</span> <span class="nf">get_header</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    For now we only know Element types 1 (line) and 2 (triangle)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nr_all_nodes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">])</span>
+    <span class="n">nr_types</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># triangles</span>
+
+    <span class="c1"># compute bandwidth</span>
+    <span class="n">bandwidth</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">for</span> <span class="n">triangle</span> <span class="ow">in</span> <span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;elements&#39;</span><span class="p">][</span><span class="s1">&#39;2&#39;</span><span class="p">]:</span>
+        <span class="n">diff1</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">triangle</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">triangle</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">diff2</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">triangle</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">triangle</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">diff3</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">triangle</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">triangle</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">diffm</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">diff1</span><span class="p">,</span> <span class="n">diff2</span><span class="p">,</span> <span class="n">diff3</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">diffm</span> <span class="o">&gt;</span> <span class="n">bandwidth</span><span class="p">):</span>
+            <span class="n">bandwidth</span> <span class="o">=</span> <span class="n">diffm</span>
+
+    <span class="n">el_infos</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># triangles</span>
+    <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;2&#39;</span><span class="p">,):</span>
+        <span class="n">el</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;elements&#39;</span><span class="p">][</span><span class="n">element</span><span class="p">]</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">element</span> <span class="o">==</span> <span class="s1">&#39;2&#39;</span><span class="p">):</span>
+            <span class="n">el_type</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">element</span> <span class="o">==</span> <span class="s1">&#39;1&#39;</span><span class="p">):</span>
+            <span class="n">el_type</span> <span class="o">=</span> <span class="mi">12</span>  <span class="c1"># Neumann</span>
+        <span class="n">nr</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">el</span><span class="p">)</span>
+        <span class="n">nr_nodes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">el</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">el_infos</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">el_type</span><span class="p">,</span> <span class="n">nr</span><span class="p">,</span> <span class="n">nr_nodes</span><span class="p">))</span>
+
+    <span class="c1"># boundary elements</span>
+    <span class="k">for</span> <span class="n">btype</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;12&#39;</span><span class="p">,</span> <span class="s1">&#39;11&#39;</span><span class="p">):</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">btype</span> <span class="ow">in</span> <span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;boundaries&#39;</span><span class="p">]):</span>
+            <span class="n">el_type</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">btype</span><span class="p">)</span>
+            <span class="n">nr</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;boundaries&#39;</span><span class="p">][</span><span class="n">btype</span><span class="p">])</span>
+            <span class="n">nr_nodes</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">nr</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">nr_types</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">el_infos</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">el_type</span><span class="p">,</span> <span class="n">nr</span><span class="p">,</span> <span class="n">nr_nodes</span><span class="p">))</span>
+
+    <span class="c1"># now convert to string</span>
+    <span class="n">str_header</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[(</span><span class="n">nr_all_nodes</span><span class="p">,</span> <span class="n">nr_types</span><span class="p">,</span> <span class="n">bandwidth</span><span class="p">),</span> <span class="p">]</span> <span class="o">+</span> <span class="n">el_infos</span><span class="p">:</span>
+        <span class="n">str_header</span> <span class="o">=</span> <span class="n">str_header</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">  </span><span class="si">{1}</span><span class="s1"> </span><span class="si">{2}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">str_header</span></div>
+
+
+<div class="viewcode-block" id="get_nodes"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_parse_gmsh.html#cr_trig_parse_gmsh.get_nodes">[docs]</a><span class="k">def</span> <span class="nf">get_nodes</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+    <span class="n">nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">])</span>
+
+    <span class="n">str_nodes</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">node_nr</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nodes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">str_nodes</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">   </span><span class="si">{1}</span><span class="s1"> </span><span class="si">{2}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">node_nr</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nodes</span><span class="p">[</span><span class="n">node_nr</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                                              <span class="n">nodes</span><span class="p">[</span><span class="n">node_nr</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">str_nodes</span></div>
+
+
+<div class="viewcode-block" id="get_elements"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_parse_gmsh.html#cr_trig_parse_gmsh.get_elements">[docs]</a><span class="k">def</span> <span class="nf">get_elements</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+    <span class="c1"># print(&#39;Get elements&#39;)</span>
+    <span class="n">str_elements</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="c1"># triangles</span>
+    <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;2&#39;</span><span class="p">):</span>
+        <span class="n">el</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;elements&#39;</span><span class="p">][</span><span class="n">element</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">el</span><span class="p">:</span>
+            <span class="c1"># the reverse should ensure counter-clockwise element nodes</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">element</span> <span class="o">==</span> <span class="s1">&#39;1&#39;</span><span class="p">):</span>
+                <span class="c1"># boundary elements</span>
+                <span class="n">lst</span> <span class="o">=</span> <span class="n">item</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">lst</span> <span class="o">=</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
+                <span class="n">str_elements</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">  &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">str_elements</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="c1"># boundary elements</span>
+    <span class="k">for</span> <span class="n">btype</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;12&#39;</span><span class="p">,</span> <span class="s1">&#39;11&#39;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;boundaries&#39;</span><span class="p">][</span><span class="n">btype</span><span class="p">]:</span>
+            <span class="n">str_elements</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> </span><span class="si">{1}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">return</span><span class="p">(</span><span class="n">str_elements</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_ajd_bound"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_parse_gmsh.html#cr_trig_parse_gmsh.get_ajd_bound">[docs]</a><span class="k">def</span> <span class="nf">get_ajd_bound</span><span class="p">(</span><span class="n">mesh</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determine triangular elements adjacend to the boundary elements</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Get elements adjacent to boundaries&#39;</span><span class="p">)</span>
+    <span class="n">boundary_elements</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">str_adj_boundaries</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="c1"># for boundary in mesh[&#39;elements&#39;][&#39;1&#39;]:</span>
+    <span class="n">boundaries</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;boundaries&#39;</span><span class="p">][</span><span class="s1">&#39;12&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;boundaries&#39;</span><span class="p">][</span><span class="s1">&#39;11&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">boundary</span> <span class="ow">in</span> <span class="n">boundaries</span><span class="p">:</span>
+        <span class="c1"># now find the triangle (&#39;2&#39;) with two nodes equal to this boundary</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">nr</span> <span class="k">if</span> <span class="p">(</span><span class="n">boundary</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">x</span> <span class="ow">and</span> <span class="n">boundary</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">x</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+                   <span class="k">for</span> <span class="p">(</span><span class="n">nr</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;elements&#39;</span><span class="p">][</span><span class="s1">&#39;2&#39;</span><span class="p">])]</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">indices</span><span class="p">)[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">indices</span><span class="p">)]</span>
+        <span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;More than one neighbour found!&#39;</span><span class="p">)</span>
+        <span class="k">elif</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No neighbour found!&#39;</span><span class="p">)</span>
+        <span class="n">boundary_elements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">str_adj_boundaries</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">str_adj_boundaries</span><span class="p">,</span> <span class="n">boundary_elements</span></div>
+
+
+<div class="viewcode-block" id="write_elec_file"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_parse_gmsh.html#cr_trig_parse_gmsh.write_elec_file">[docs]</a><span class="k">def</span> <span class="nf">write_elec_file</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read in the electrode positions and return the indices of the electrodes</span>
+
+<span class="sd">    # TODO: Check if you find all electrodes</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">elecs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># print(&#39;Write electrodes&#39;)</span>
+    <span class="n">electrodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">electrodes</span><span class="p">:</span>
+        <span class="c1"># find</span>
+        <span class="k">for</span> <span class="n">nr</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mesh</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="n">elecs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nr</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;elec.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">elecs</span><span class="p">)))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">elecs</span><span class="p">:</span>
+        <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../scripts/grid_tools/cr_trig_parse_gmsh.html#cr_trig_parse_gmsh.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">mesh</span> <span class="o">=</span> <span class="n">parse_gmsh</span><span class="p">(</span><span class="s1">&#39;../commands.msh&#39;</span><span class="p">,</span> <span class="s1">&#39;../boundary_lines.dat&#39;</span><span class="p">)</span>
+
+    <span class="c1"># now create the CRTomo grid</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    1. Header</span>
+<span class="sd">    2. Nodes</span>
+<span class="sd">    3. Elements: Triangles, Boundary elements</span>
+<span class="sd">    4. Element ids for adjoining boundary elements</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">str_header</span> <span class="o">=</span> <span class="n">get_header</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+    <span class="n">str_nodes</span> <span class="o">=</span> <span class="n">get_nodes</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+    <span class="n">str_elements</span> <span class="o">=</span> <span class="n">get_elements</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+    <span class="n">str_adj_boundaries</span><span class="p">,</span> <span class="n">boundary_elements</span> <span class="o">=</span> <span class="n">get_ajd_bound</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+
+    <span class="n">crt_mesh</span> <span class="o">=</span> <span class="n">str_header</span> <span class="o">+</span> <span class="n">str_nodes</span> <span class="o">+</span> <span class="n">str_elements</span> <span class="o">+</span> <span class="n">str_adj_boundaries</span>
+
+    <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;../elem.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">crt_mesh</span><span class="p">)</span>
+    <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="n">write_elec_file</span><span class="p">(</span><span class="s1">&#39;../electrode_positions.dat&#39;</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span>
+    <span class="n">debug_plot_mesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">boundary_elements</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">crtomo tools</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/modules.html">lib</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2021, CRTomo contributors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Example for processing field data from Sycal &mdash; &lt;project&gt; v&lt;release&gt; documentation (&lt;today&gt;)</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="src" href="../../scripts/grid_tools/modules.html" />
+    <link rel="prev" title="Calculating 2D correction factors" href="../05_correction_factors/plot_calculate_correction_factors.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> crtomo tools
+          </a>
+              <div class="version">
+                0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to the crtomo-tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html">Complex impedances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory/basics.html#modeling-and-inversion">Modeling and Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crtomo/crtomo.html">The original CRTomo code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../grid_creation.html">Grid creation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-grid-handling">Examples: Grid handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-modelling">Examples: Modelling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-single-frequency-inversion">Examples: Single-frequency inversion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-postprocessing-of-inversion-results">Examples: Postprocessing of inversion results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#examples-seit-import-and-inversions">Examples: sEIT import and inversions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#calculating-correction-factors">Calculating correction factors</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#examples-field-data-processing">Examples: Field data processing</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Example for processing field data from Sycal</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#daten-einlesen-und-berechnen">Daten einlesen und berechnen</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#histogramme-plotten">Histogramme plotten</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pseudosektionen-plotten">Pseudosektionen plotten</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#datenfile-in-crtomo-format-ausgeben-volt-dat">Datenfile in CRTomo Format ausgeben (volt.dat)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#arbeiten-im-tomodir">Arbeiten im Tomodir</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gitter-und-daten-einlesen">Gitter und Daten einlesen</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#inversionseinstellungen">Inversionseinstellungen</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts/grid_tools/modules.html">src</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">lib</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">crtomo tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Examples</a> &raquo;</li>
+      <li>Example for processing field data from Sycal</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/_examples/06_field_data_processing/plot_01_field_data_syscal.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-06-field-data-processing-plot-01-field-data-syscal-py"><span class="std std-ref">here</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="example-for-processing-field-data-from-sycal">
+<span id="sphx-glr-examples-06-field-data-processing-plot-01-field-data-syscal-py"></span><h1>Example for processing field data from Sycal<a class="headerlink" href="#example-for-processing-field-data-from-sycal" title="Permalink to this headline"></a></h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This example is work in progress!!!</p>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="kn">import</span> <span class="nn">crtomo</span>
+<span class="kn">import</span> <span class="nn">reda.exporters.crtomo</span> <span class="k">as</span> <span class="nn">crto</span>
+<span class="kn">import</span> <span class="nn">reda.utils.norrec</span> <span class="k">as</span> <span class="nn">NR</span>
+<span class="kn">import</span> <span class="nn">reda</span>
+</pre></div>
+</div>
+<section id="daten-einlesen-und-berechnen">
+<h2>Daten einlesen und berechnen<a class="headerlink" href="#daten-einlesen-und-berechnen" title="Permalink to this headline"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># reda container erstellen</span>
+<span class="n">ert</span> <span class="o">=</span> <span class="n">reda</span><span class="o">.</span><span class="n">ERT</span><span class="p">()</span>
+<span class="c1"># normal und reciproke Daten einlesen</span>
+<span class="n">ert</span><span class="o">.</span><span class="n">import_syscal_bin</span><span class="p">(</span><span class="s1">&#39;data_nor.bin&#39;</span><span class="p">)</span>
+<span class="n">ert</span><span class="o">.</span><span class="n">import_syscal_bin</span><span class="p">(</span><span class="s1">&#39;data_rec.bin&#39;</span><span class="p">,</span> <span class="n">reciprocals</span><span class="o">=</span><span class="mi">48</span><span class="p">)</span>
+<span class="c1"># K-Faktor berechnen</span>
+<a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">K</span></a> <span class="o">=</span> <span class="n">reda</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">geometric_factors</span><span class="o">.</span><span class="n">compute_K_analytical</span><span class="p">(</span><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ert</span><span class="o">.</span><span class="n">data</span></a><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="mf">2.5</span><span class="p">)</span>
+<span class="c1"># Rho_a berechnen</span>
+<span class="n">reda</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">geometric_factors</span><span class="o">.</span><span class="n">apply_K</span><span class="p">(</span><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ert</span><span class="o">.</span><span class="n">data</span></a><span class="p">,</span> <a href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">K</span></a><span class="p">)</span>
+<span class="c1"># negative Widerstände bei negativen K umdrehen</span>
+<span class="n">reda</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">fix_sign_with_K</span><span class="o">.</span><span class="n">fix_sign_with_K</span><span class="p">(</span><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ert</span><span class="o">.</span><span class="n">data</span></a><span class="p">)</span>
+<span class="c1"># calculate diffeence between nor and rec measurement</span>
+<a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ert</span><span class="o">.</span><span class="n">data</span></a> <span class="o">=</span> <span class="n">NR</span><span class="o">.</span><span class="n">assign_norrec_diffs</span><span class="p">(</span><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ert</span><span class="o">.</span><span class="n">data</span></a><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;rho_a&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</section>
+<section id="histogramme-plotten">
+<h2>Histogramme plotten<a class="headerlink" href="#histogramme-plotten" title="Permalink to this headline"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fig</span></a> <span class="o">=</span> <span class="n">ert</span><span class="o">.</span><span class="n">histogram</span><span class="p">((</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;rdiff&#39;</span><span class="p">,</span> <span class="s1">&#39;rho_a&#39;</span><span class="p">,</span> <span class="s1">&#39;rho_adiff&#39;</span><span class="p">,</span> <span class="s1">&#39;Iab&#39;</span><span class="p">))</span>
+<a href="https://matplotlib.org/api/_as_gen/matplotlib.pyplot.savefig.html#matplotlib.pyplot.savefig" title="matplotlib.pyplot.savefig" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">savefig</span></a><span class="p">(</span><span class="s1">&#39;histogramms.png&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_01_field_data_syscal_001.png" srcset="../../_images/sphx_glr_plot_01_field_data_syscal_001.png" alt="plot 01 field data syscal" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Generating histogram plot for key: r
+Generating histogram plot for key: rdiff
+Generating histogram plot for key: rho_a
+Generating histogram plot for key: rho_adiff
+Generating histogram plot for key: Iab
+</pre></div>
+</div>
+</section>
+<section id="pseudosektionen-plotten">
+<h2>Pseudosektionen plotten<a class="headerlink" href="#pseudosektionen-plotten" title="Permalink to this headline"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fig</span></a> <span class="o">=</span> <span class="n">ert</span><span class="o">.</span><span class="n">pseudosection</span><span class="p">(</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+<a href="https://matplotlib.org/api/_as_gen/matplotlib.pyplot.savefig.html#matplotlib.pyplot.savefig" title="matplotlib.pyplot.savefig" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">savefig</span></a><span class="p">(</span><span class="s1">&#39;pseudo_r.png&#39;</span><span class="p">)</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fig</span></a> <span class="o">=</span> <span class="n">ert</span><span class="o">.</span><span class="n">pseudosection</span><span class="p">(</span><span class="s1">&#39;rdiff&#39;</span><span class="p">)</span>
+<a href="https://matplotlib.org/api/_as_gen/matplotlib.pyplot.savefig.html#matplotlib.pyplot.savefig" title="matplotlib.pyplot.savefig" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">savefig</span></a><span class="p">(</span><span class="s1">&#39;pseudo_rdiff.png&#39;</span><span class="p">)</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fig</span></a> <span class="o">=</span> <span class="n">ert</span><span class="o">.</span><span class="n">pseudosection</span><span class="p">(</span><span class="s1">&#39;rho_a&#39;</span><span class="p">)</span>
+<a href="https://matplotlib.org/api/_as_gen/matplotlib.pyplot.savefig.html#matplotlib.pyplot.savefig" title="matplotlib.pyplot.savefig" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">savefig</span></a><span class="p">(</span><span class="s1">&#39;pseudo_rhoa.png&#39;</span><span class="p">)</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fig</span></a> <span class="o">=</span> <span class="n">ert</span><span class="o">.</span><span class="n">pseudosection</span><span class="p">(</span><span class="s1">&#39;rho_adiff&#39;</span><span class="p">)</span>
+<a href="https://matplotlib.org/api/_as_gen/matplotlib.pyplot.savefig.html#matplotlib.pyplot.savefig" title="matplotlib.pyplot.savefig" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">savefig</span></a><span class="p">(</span><span class="s1">&#39;pseudo_rhoadiff.png&#39;</span><span class="p">)</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fig</span></a> <span class="o">=</span> <span class="n">ert</span><span class="o">.</span><span class="n">pseudosection</span><span class="p">(</span><span class="s1">&#39;Iab&#39;</span><span class="p">)</span>
+<a href="https://matplotlib.org/api/_as_gen/matplotlib.pyplot.savefig.html#matplotlib.pyplot.savefig" title="matplotlib.pyplot.savefig" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">savefig</span></a><span class="p">(</span><span class="s1">&#39;pseudo_I.png&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_01_field_data_syscal_002.png" srcset="../../_images/sphx_glr_plot_01_field_data_syscal_002.png" alt="plot 01 field data syscal" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_01_field_data_syscal_003.png" srcset="../../_images/sphx_glr_plot_01_field_data_syscal_003.png" alt="plot 01 field data syscal" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_01_field_data_syscal_004.png" srcset="../../_images/sphx_glr_plot_01_field_data_syscal_004.png" alt="plot 01 field data syscal" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_01_field_data_syscal_005.png" srcset="../../_images/sphx_glr_plot_01_field_data_syscal_005.png" alt="plot 01 field data syscal" class = "sphx-glr-single-img"/><img src="../../_images/sphx_glr_plot_01_field_data_syscal_006.png" srcset="../../_images/sphx_glr_plot_01_field_data_syscal_006.png" alt="plot 01 field data syscal" class = "sphx-glr-single-img"/><p>apply data filters</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ert</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;norrec == &quot;rec&quot;&#39;</span><span class="p">)</span>
+<span class="n">ert</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;r &lt; 0 or r &gt; 1&#39;</span><span class="p">)</span>
+<span class="n">ert</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;rho_a &lt; 0 or rho_a &gt; 60&#39;</span><span class="p">)</span>
+<span class="n">ert</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;rdiff &gt; 0.2 or rdiff &lt; -0.2&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="datenfile-in-crtomo-format-ausgeben-volt-dat">
+<h2>Datenfile in CRTomo Format ausgeben (volt.dat)<a class="headerlink" href="#datenfile-in-crtomo-format-ausgeben-volt-dat" title="Permalink to this headline"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">crto</span><span class="o">.</span><span class="n">write_files_to_directory</span><span class="p">(</span><a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.DataFrame" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ert</span><span class="o">.</span><span class="n">data</span></a><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="arbeiten-im-tomodir">
+<h2>Arbeiten im Tomodir<a class="headerlink" href="#arbeiten-im-tomodir" title="Permalink to this headline"></a></h2>
+</section>
+<section id="gitter-und-daten-einlesen">
+<h2>Gitter und Daten einlesen<a class="headerlink" href="#gitter-und-daten-einlesen" title="Permalink to this headline"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../api/crtomo.html#crtomo.tdMan" title="crtomo.tdMan" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">td_obj</span></a> <span class="o">=</span> <a href="../../api/crtomo.html#crtomo.tdMan" title="crtomo.tdMan" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-class"><span class="n">crtomo</span><span class="o">.</span><span class="n">tdMan</span></a><span class="p">(</span>
+    <span class="n">elem_file</span><span class="o">=</span><span class="s1">&#39;elem.dat&#39;</span><span class="p">,</span>
+    <span class="n">elec_file</span><span class="o">=</span><span class="s1">&#39;elec.dat&#39;</span><span class="p">)</span>
+<a href="../../api/crtomo.html#crtomo.tdMan.read_voltages" title="crtomo.tdMan.read_voltages" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">td_obj</span><span class="o">.</span><span class="n">read_voltages</span></a><span class="p">(</span><span class="s1">&#39;volt.dat&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>This grid was sorted using CutMcK. The nodes were resorted!
+Rectangular grid found
+This grid was sorted using CutMcK. The nodes were resorted!
+Rectangular grid found
+</pre></div>
+</div>
+</section>
+<section id="inversionseinstellungen">
+<h2>Inversionseinstellungen<a class="headerlink" href="#inversionseinstellungen" title="Permalink to this headline"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../api/crtomo.html#crtomo.cfg.crtomo_config" title="crtomo.cfg.crtomo_config" class="sphx-glr-backref-module-crtomo-cfg sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">td_obj</span><span class="o">.</span><span class="n">crtomo_cfg</span></a><span class="p">[</span><span class="s1">&#39;robust_inv&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;F&#39;</span>
+<a href="../../api/crtomo.html#crtomo.cfg.crtomo_config" title="crtomo.cfg.crtomo_config" class="sphx-glr-backref-module-crtomo-cfg sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">td_obj</span><span class="o">.</span><span class="n">crtomo_cfg</span></a><span class="p">[</span><span class="s1">&#39;dc_inv&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;F&#39;</span>
+<a href="../../api/crtomo.html#crtomo.cfg.crtomo_config" title="crtomo.cfg.crtomo_config" class="sphx-glr-backref-module-crtomo-cfg sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">td_obj</span><span class="o">.</span><span class="n">crtomo_cfg</span></a><span class="p">[</span><span class="s1">&#39;cells_z&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;-1&#39;</span>
+<a href="../../api/crtomo.html#crtomo.cfg.crtomo_config" title="crtomo.cfg.crtomo_config" class="sphx-glr-backref-module-crtomo-cfg sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">td_obj</span><span class="o">.</span><span class="n">crtomo_cfg</span></a><span class="p">[</span><span class="s1">&#39;mag_rel&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;10&#39;</span>
+<a href="../../api/crtomo.html#crtomo.cfg.crtomo_config" title="crtomo.cfg.crtomo_config" class="sphx-glr-backref-module-crtomo-cfg sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">td_obj</span><span class="o">.</span><span class="n">crtomo_cfg</span></a><span class="p">[</span><span class="s1">&#39;mag_abs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;0.5&#39;</span>
+<a href="../../api/crtomo.html#crtomo.cfg.crtomo_config" title="crtomo.cfg.crtomo_config" class="sphx-glr-backref-module-crtomo-cfg sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">td_obj</span><span class="o">.</span><span class="n">crtomo_cfg</span></a><span class="p">[</span><span class="s1">&#39;fpi_inv&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;F&#39;</span>
+<span class="c1"># td_obj.crtomo_cfg[&#39;pha_a1&#39;] = &#39;10&#39;</span>
+<span class="c1"># td_obj.crtomo_cfg[&#39;pha_b&#39;] = &#39;-1.5&#39;</span>
+<span class="c1"># td_obj.crtomo_cfg[&#39;pha_rel&#39;] = &#39;10&#39;</span>
+<span class="c1"># td_obj.crtomo_cfg[&#39;pha_abs&#39;] = &#39;0&#39;</span>
+</pre></div>
+</div>
+<p>invert</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../api/crtomo.html#crtomo.tdMan.invert" title="crtomo.tdMan.invert" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">td_obj</span><span class="o">.</span><span class="n">invert</span></a><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Attempting inversion in directory: /tmp/tmprlvlo32e
+Using binary: /home/mweigand/bin/CRTomo
+Calling CRTomo
+Inversion finished
+Attempting to import the results
+is robust False
+Info: res_m.diag not found: /tmp/tmprlvlo32e/inv/res_m.diag
+/home/mweigand/Programme/crtomo_tools/examples/06_field_data_processing
+Info: ata.diag not found: /tmp/tmprlvlo32e/inv/ata.diag
+/home/mweigand/Programme/crtomo_tools/examples/06_field_data_processing
+Statistics of last iteration:
+iteration                1
+main_iteration           1
+it_type              DC/IP
+type                  main
+dataRMS             0.1107
+magRMS              0.1107
+phaRMS                 NaN
+lambda             42800.0
+roughness              0.0
+cgsteps              392.0
+nrdata               624.0
+steplength           0.001
+stepsize          0.007688
+l1ratio                NaN
+Name: 9, dtype: object
+</pre></div>
+</div>
+<p>save tomodir</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../api/crtomo.html#crtomo.tdMan.save_to_tomodir" title="crtomo.tdMan.save_to_tomodir" class="sphx-glr-backref-module-crtomo sphx-glr-backref-type-py-method"><span class="n">td_obj</span><span class="o">.</span><span class="n">save_to_tomodir</span></a><span class="p">(</span><span class="s1">&#39;td&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 3 minutes  47.160 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-06-field-data-processing-plot-01-field-data-syscal-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/fa561798b271e90484f1fe665c642389/plot_01_field_data_syscal.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_01_field_data_syscal.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/dfd0d16e201f64040da0eb26bde973a8/plot_01_field_data_syscal.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_01_field_data_syscal.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../05_correction_factors/plot_calculate_correction_factors.html" class="btn btn-neutral float-left" title="Calculating 2D correction factors" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../scripts/grid_tools/modules.html" class="btn btn-neutral float-right" title="src" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2021, CRTomo contributors.
+      <span class="lastupdated">Last updated on Dec 14, 2021.
+      </span></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
