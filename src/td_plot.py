@@ -846,6 +846,10 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
         # if save == 'fpi_imag':
         #     import IPython
         #     IPython.embed()
+        if save == 'rho' and options.cmaglin:
+            datum = np.power(10, datum)
+            unit = 'rho'
+
         sizex, sizez = getfigsize(plotman)
         f, ax = plt.subplots(1, figsize=(sizex, sizez))
         cid = plotman.parman.add_data(datum)
