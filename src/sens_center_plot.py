@@ -41,15 +41,15 @@ Use alternative weighting functions:
 
 """
 import crtomo.mpl
-plt, mpl = crtomo.mpl.setup()
 from optparse import OptionParser
 import numpy as np
 import shutil
 
 import crtomo.grid as CRGrid
-import crtomo.cfg as CRcfg
+# import crtomo.cfg as CRcfg
 # import crlab_py.elem as elem
 # import crlab_py.CRMod as CRMod
+plt, mpl = crtomo.mpl.setup()
 
 
 def handle_cmd_options():
@@ -172,10 +172,10 @@ class sens_center:
 
         Parameters
         ----------
-        config_nr: int
+        config_nr : int
             number of configuration
-        sens_file: string, file path
-            filename to sensitvity file
+        sens_file : string, file path
+            filename to sensitivity file
 
         """
         indices = elem.load_column_file_to_elements_advanced(
@@ -222,7 +222,7 @@ class sens_center:
     def plot_sens_center(self, frequency=2):
         """
         plot sensitivity center distribution for all configurations in
-        config.dat.  The centers of mass are colored by the data given in
+        config.dat. The centers of mass are colored by the data given in
         volt_file.
         """
         try:
