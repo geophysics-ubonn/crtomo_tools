@@ -587,3 +587,23 @@ def converter_change_sign(data):
     """Reverse the sign of the data. Useful for plotting phase values
     """
     return -data
+
+
+def converter_asinh(data):
+    norm = np.max(np.abs(data))
+    dyn = np.abs(
+        np.min(
+            np.log10(
+                np.abs(
+                    data
+                )
+            )
+        )
+    )
+
+    data_transformed = np.arcsinh(
+        10 ** dyn * data / norm
+    ) / np.arcsinh(
+        10 ** dyn
+    )
+    return data_transformed
