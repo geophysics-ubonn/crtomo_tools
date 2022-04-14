@@ -1372,7 +1372,11 @@ class tdMan(object):
         self._read_l2_coverage(tomodir)
         self.eps_data = self._read_eps_ctr(tomodir)
         # for simplicity, add configurations to psi data
-        if len(self.configs.configs) > 0 and len(self.eps_data) > 1:
+        has_eps_data = False
+        if isinstance(self.eps_data, list):
+            if len(self.eps_data) > 1:
+                has_eps_data = True
+        if len(self.configs.configs) > 0 and has_eps_data:
             for iteration in range(1, len(self.eps_data)):
                 for index, key in enumerate('abmn'):
                     self.eps_data[
