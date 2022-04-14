@@ -673,6 +673,7 @@ class eitMan(object):
                 figsize=(16 / 2.54, nrz * 3.5 / 2.54),
                 sharex=True, sharey=True,
             )
+            axes = np.atleast_2d(axes)
             for ax in axes.flat:
                 ax.set_visible(False)
 
@@ -734,7 +735,7 @@ class eitMan(object):
         for key, td in self.tds.items():
             td.model(**kwargs)
 
-    def measurements(self):
+    def measurements(self, **kwargs):
         """Return modeled measurements. If not already done, call CRMod for
         each frequency to actually compute the forward response.
 
@@ -746,7 +747,7 @@ class eitMan(object):
             3. dimension: 2: magnitude and phase (resistivity)
 
         """
-        m_all = np.array([self.tds[key].measurements() for key in
+        m_all = np.array([self.tds[key].measurements(**kwargs) for key in
                           sorted(self.tds.keys())])
         return m_all
 
