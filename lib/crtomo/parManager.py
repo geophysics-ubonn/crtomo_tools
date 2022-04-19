@@ -549,7 +549,7 @@ class ParMan(object):
         """
         pid = self.add_empty_dataset(background)
         self.add_gaussian_anomaly_to_parset(
-            pid, center, width, max_value
+            pid, center, np.sqrt(width), max_value
         )
         return pid
 
@@ -572,56 +572,53 @@ class ParMan(object):
         """
         xy = self.grid.get_element_centroids()
         # generates a 2D Gaussian distribution with
+        covariances = np.array(width) ** 2
         rv = multivariate_normal(
             center,
-            width,
+            covariances,
         )
         grid_values = rv.pdf(xy)
-        grid_values /= np.abs(grid_values).max()
+
+        if isinstance(width, (list, tuple)):
+            assert len(width) == 2, "need either one number or two"
+            std_x = width[0]
+            std_z = width[1]
+        else:
+            std_x = width
+            std_z = width
+        # peak value of stretched normal distribution
+        peak_x = 1 / (np.sqrt(2 * np.pi) * std_x)
+        peak_z = 1 / (np.sqrt(2 * np.pi) * std_z)
+        # resulting 2D peak
+        peak_value = peak_x * peak_z
+        grid_values /= peak_value
         grid_values *= max_value
         self.parsets[pid] = self.parsets[pid] + grid_values
 
-    def add_gaussian_grid(
-                self, pid, p0,
-                offset_x,
-                offset_z,
+    def add_gaussian_line(
+                self, pid,
+                p0,
+                length,
                 rotation,
+                spacing,
                 anomaly_peak,
                 anomaly_std,
-                space_x,
-                space_z,
             ):
-        """
-        Parameters
-        ----------
-        p0 : [x, z]
-            Reference point from which the anomaly grid will be initialized
-            from
-
-
-        """
-        # generate the positions of the anomalies
-        xlim, zlim = self.grid.get_minmax()
-        width = xlim[1] - xlim[0]
-        height = np.abs(zlim[1] - zlim[0])
-
-        # hack?
-        width *= 2
-        height *= 2
-
-        xpos = np.arange(0, width, step=space_x)
-        zpos = -np.arange(0, height, step=space_z)
-
-        X, Z = np.meshgrid(xpos, zpos)
+        xpos = np.arange(p0[0], length, step=spacing)
+        zpos = np.ones_like(xpos) * p0[1]
 
         # rotate
-        Xr = X * np.cos(
-            rotation * np.pi / 180) - Z * np.sin(rotation * np.pi / 180)
-        Zr = Z * np.cos(
-            rotation * np.pi / 180) + X * np.sin(rotation * np.pi / 180)
+        xr = xpos * np.cos(
+            rotation * np.pi / 180) - zpos * np.sin(rotation * np.pi / 180)
+        zr = zpos * np.cos(
+            rotation * np.pi / 180) + xpos * np.sin(rotation * np.pi / 180)
 
-        # translate final
-        Xr += offset_x
-        Zr += offset_z
+        for x, z in zip(xr, zr):
+            self.add_gaussian_anomaly_to_parset(
+                pid,
+                [x, z],
+                width=anomaly_std,
+                max_value=anomaly_peak,
+            )
 
-        return Xr, Zr
+        return xr, zr
