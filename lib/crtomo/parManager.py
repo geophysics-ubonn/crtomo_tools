@@ -622,3 +622,89 @@ class ParMan(object):
             )
 
         return xr, zr
+
+    def add_2d_cos_anomaly_line(
+            self, pid, p0, anomaly_width, anomaly_height, peak_value,
+            whole_mesh=False):
+        """Add one line of cos(x)cos(y) anomalies to a given parameter set. The
+        wavelength refers to half a period, with the maximum of the anomaly
+        centered on p0=[x0, z0].
+
+        Parameters
+        ----------
+        whole_mesh : bool, optional
+            If True, then fill the whole mesh with a cos(x)cos(y) pattern.
+
+
+        """
+        coords = self.grid.get_element_centroids()
+        norm = 2 * np.pi
+
+        wavelength_x = anomaly_width * 2
+        wavelength_z = anomaly_height * 2
+
+        boundary_y_min = p0[1] - (anomaly_width / 2)
+        boundary_y_max = p0[1] + (anomaly_height / 2)
+        if whole_mesh:
+            indices = np.arange(0, coords.shape[0]).astype(int)
+        else:
+            # restrict to to within a rectangular area
+            indices = np.where(
+                (coords[:, 1] > boundary_y_min) &
+                (coords[:, 1] < boundary_y_max)
+            )
+
+        anomaly = np.cos(
+            (coords[indices, 0] - p0[0]) * norm / wavelength_x
+        ) * np.cos(
+            (coords[indices, 1] - p0[1]) * norm / wavelength_z
+        ) * peak_value
+
+        paradd = np.zeros(coords.shape[0])
+        paradd[indices] += anomaly.squeeze()
+
+        self.parsets[pid] += paradd
+
+    def add_checkerboard_pattern(
+            self, pid, p0, anomaly_width, anomaly_height, peak_value,
+            ):
+        """
+
+        Note that if p0 is larger than a few anomaly sizes its possible that
+        the checkerboard pattern will only be applied to parts of the mesh!
+
+        """
+        xlims, zlims = self.grid.get_minmax()
+
+        x_positions = np.arange(
+            p0[0],
+            np.abs(xlims[1] - xlims[0]) + 4 * anomaly_width, anomaly_width * 2
+        ) - (
+            anomaly_width * 2
+        ) * np.ceil(np.abs(xlims[0] - p0[0]) / (anomaly_width * 2))
+
+        depth_sign = np.sign(zlims[0] - zlims[1])
+        z_positions = np.arange(
+            p0[1],
+            (zlims[0] - zlims[1]) +
+            depth_sign * 4 * anomaly_height, depth_sign * anomaly_height * 2
+        )
+        print(z_positions)
+        offset = (anomaly_height * 2) * np.ceil(np.abs(zlims[0] - p0[1]) / (
+            anomaly_height * 2))
+        print(offset)
+
+        coords = self.grid.get_element_centroids()
+        paradd = np.zeros(coords.shape[0])
+
+        for pos_x in x_positions:
+            for pos_z in z_positions:
+                indices = np.where(
+                    (coords[:, 0] >= pos_x) &
+                    (coords[:, 0] <= pos_x + anomaly_width) &
+                    (coords[:, 1] <= pos_z) &
+                    (coords[:, 1] >= (pos_z - anomaly_height))
+                )
+                paradd[indices] = peak_value
+
+        self.parsets[pid] += paradd
