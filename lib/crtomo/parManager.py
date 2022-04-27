@@ -625,7 +625,8 @@ class ParMan(object):
 
     def add_2d_cos_anomaly_line(
             self, pid, p0, anomaly_width, anomaly_height, peak_value,
-            whole_mesh=False):
+            area='only_one_y',
+            only_one_y_line=True, only_one_x_line=False, whole_mesh=False):
         """Add one line of cos(x)cos(y) anomalies to a given parameter set. The
         wavelength refers to half a period, with the maximum of the anomaly
         centered on p0=[x0, z0].
@@ -643,15 +644,23 @@ class ParMan(object):
         wavelength_x = anomaly_width * 2
         wavelength_z = anomaly_height * 2
 
-        boundary_y_min = p0[1] - (anomaly_width / 2)
-        boundary_y_max = p0[1] + (anomaly_height / 2)
-        if whole_mesh:
+        if area == 'all':
             indices = np.arange(0, coords.shape[0]).astype(int)
-        else:
+        elif area == 'only_one_y':
+            boundary_y_min = p0[1] - (anomaly_height / 2)
+            boundary_y_max = p0[1] + (anomaly_height / 2)
             # restrict to to within a rectangular area
             indices = np.where(
                 (coords[:, 1] > boundary_y_min) &
                 (coords[:, 1] < boundary_y_max)
+            )
+        elif area == 'only_one_x':
+            boundary_x_min = p0[0] - (anomaly_width / 2)
+            boundary_x_max = p0[0] + (anomaly_width / 2)
+            # restrict to to within a rectangular area
+            indices = np.where(
+                (coords[:, 0] > boundary_x_min) &
+                (coords[:, 0] < boundary_x_max)
             )
 
         anomaly = np.cos(
