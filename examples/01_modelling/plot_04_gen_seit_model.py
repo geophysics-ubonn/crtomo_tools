@@ -20,7 +20,7 @@ grid.plot_grid()
 
 ###############################################################################
 # define frequencies
-frequencies = np.logspace(-3, 3, 10)
+frequencies = np.logspace(-3, 3, 2)
 
 # create the eit manager
 eitman = crtomo.eitMan(frequencies=frequencies, grid=grid)
@@ -68,7 +68,7 @@ eitman.add_to_configs(configs)
 ###############################################################################
 # conduct forward modeling
 eitman.model()
-measurements = eitman.measurements()
+measurements = eitman.measurements(silent=True)
 
 ###############################################################################
 # modeled SIP signatures can be retrieved as a dict:
