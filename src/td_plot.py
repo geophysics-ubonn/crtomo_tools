@@ -240,6 +240,7 @@ def read_iter(use_fpi):
     # filename HAS to exist. Otherwise the inversion was not finished
     if(not os.path.isfile(filename)):
         print('Inversion was not finished! No last iteration found.')
+        return 0
 
     if(use_fpi is True):
         if(os.path.isfile(filename_rhosuffix)):
@@ -279,12 +280,14 @@ def list_datafiles():
     # list the files
     files = ['inv/coverage.mag']
     dtype = ['cov']
-    files.append(it_rho)
-    dtype.append('mag')
-    if is_cplx:
+    if isinstance(it_rho, str) or it_rho > 0:
+        files.append(it_rho)
+        dtype.append('mag')
+
+    if (isinstance(it_rho, str) or it_rho > 0) and is_cplx:
         files.append(it_rho.replace('mag', 'pha'))
         dtype.append('pha')
-    if is_fpi:
+    if (isinstance(it_phase, str) or it_phase > 0) and is_fpi:
         files.append(it_phase.replace('mag', 'pha'))
         dtype.append('pha_fpi')
 
@@ -294,6 +297,7 @@ def list_datafiles():
 def read_datafiles(files, dtype, column):
     '''Load the datafiles and return cov, mag, phase and fpi phase values.
     '''
+    mag = []
     pha = []
     pha_fpi = []
     for filename, filetype in zip(files, dtype):
@@ -741,6 +745,8 @@ def create_tdplot(plotman, cov, mag, pha, pha_fpi, alpha, options):
 def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
     '''Plot the data of the tomodir in individual plots.
     '''
+    if len(mag) == 0:
+        mag = np.ones(plotman.grid.nr_of_elements) * np.nan
     if cov is None:
         cov = np.ones_like(mag) * np.nan
 
@@ -825,7 +831,10 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
     try:
         mod_rho = np.genfromtxt('rho/rho.dat', skip_header=1, usecols=([0]))
         mod_pha = np.genfromtxt('rho/rho.dat', skip_header=1, usecols=([1]))
-        data = np.column_stack((data, mod_rho, mod_pha))
+        if data.size == 0:
+            data = np.column_stack((mod_rho, mod_pha))
+        else:
+            data = np.column_stack((data, mod_rho, mod_pha))
         titles.append('Model')
         titles.append('Model')
         unites.append('rho')
@@ -840,8 +849,13 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
         saves.append('phamod')
     except Exception:
         pass
+
     for datum, title, unit, vmin, vmax, cm, save in zip(
             np.transpose(data), titles, unites, vmins, vmaxs, cmaps, saves):
+        if len(datum) == 0:
+            continue
+        if np.all(np.isnan(datum)):
+            continue
         # print(save)
         # if save == 'fpi_imag':
         #     import IPython
