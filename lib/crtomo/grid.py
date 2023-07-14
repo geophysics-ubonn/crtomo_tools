@@ -230,10 +230,6 @@ class crt_grid(object):
         """
         nodes = {}
 
-        #   # prepare nodes
-        #   nodes_sorted = np.zeros((number_of_nodes, 3), dtype=float)
-        #   nodes = np.zeros((number_of_nodes, 3), dtype=float)
-
         # read in nodes
         nodes_raw = np.empty((self.header['nr_nodes'], 3), dtype=float)
         for nr in range(0, self.header['nr_nodes']):
@@ -248,7 +244,7 @@ class crt_grid(object):
         # check for CutMcK
         # The check is based on the first node, but if one node was renumbered,
         # so were all the others.
-        if(nodes_raw[:, 0] != list(range(1, nodes_raw.shape[0]))):
+        if(~np.all(nodes_raw[:, 0] == list(range(1, nodes_raw.shape[0] + 1)))):
             self.header['cutmck'] = True
             print(
                 'This grid was sorted using CutMcK. The nodes were resorted!')
