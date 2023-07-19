@@ -1076,6 +1076,10 @@ class tdMan(object):
         with open(voltage_file, 'r') as fid:
             items_first_line = fid.readline().strip().split(' ')
 
+        if int(items_first_line[0]) == 0:
+            # empty file
+            return
+
         individual_errors = False
         if len(items_first_line) == 1:
             # regular volt.dat file
@@ -1376,7 +1380,8 @@ class tdMan(object):
         if isinstance(self.eps_data, list):
             if len(self.eps_data) > 1:
                 has_eps_data = True
-        if len(self.configs.configs) > 0 and has_eps_data:
+        if self.configs.configs is not None and len(
+                self.configs.configs) > 0 and has_eps_data:
             for iteration in range(1, len(self.eps_data)):
                 for index, key in enumerate('abmn'):
                     self.eps_data[
