@@ -1441,12 +1441,21 @@ class tdMan(object):
             pids_cre = [x[0] for x in pids_sig]
             pids_cim = [x[1] for x in pids_sig]
         else:
-            pids_cre = None
-            pids_cim = None
+            if len(pids_pha) > 0:
+                pids_cre = []
+                pids_cim = []
+                for pid_rmag, pid_rpha in zip(pids_mag, pids_pha):
+                    # compute the admittances by hand
+                    impedance = self.parman.parsets[pid_rmag] * np.exp(
+                        1j * self.parman.parsets[pid_rpha] / 1000
+                    )
+                    admittance = 1 / impedance
+                    pids_cre += [self.parman.add_data(np.real(admittance))]
+                    pids_cim += [self.parman.add_data(np.imag(admittance))]
+            else:
+                pids_cre = None
+                pids_cim = None
 
-        # print(pids_sig)
-        # import IPython
-        # IPython.embed()
         self.assignments['inversion'] = {
             'rmag': pids_mag,
             'rpha': pids_pha,
