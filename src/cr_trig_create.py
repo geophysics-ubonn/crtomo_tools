@@ -117,14 +117,14 @@ class Mesh():
         # TODO: This search loop NEEDS to be replaced with something sane
         index = -1
         for nr, i in enumerate(self.Points):
-            if(np.all(i == p)):
+            if (np.all(i == p)):
                 print('Point already in list at index {0}'.format(nr))
                 if self.Charlengths[nr] > char_length:
                     print('Updating characteristic length')
                     self.Charlengths[nr] = char_length
                 return nr
 
-        if(index == -1):
+        if (index == -1):
             print('adding point:', p)
             self.Points.append(p)
             self.Charlengths.append(char_length)
@@ -157,7 +157,7 @@ class Mesh():
         """
         index = -1
         for nr, i in enumerate(search_list):
-            if(np.all(i == pair)):
+            if (np.all(i == pair)):
                 return nr
         return index
 
@@ -362,7 +362,7 @@ class Mesh():
         fid.close()
 
 
-def check_boundaries(boundaries):
+def _check_for_duplicate_boundary_nodes(boundaries):
     # generate a complex number for each (x,y) pair
     xy = boundaries[:, 0] + 1j * boundaries[:, 1]
     """
@@ -396,6 +396,28 @@ def check_boundaries(boundaries):
             print('lines: ')
             print(np.where(indices_rev == doublet)[0])
         raise Exception('Duplicate boundary coordinates found!')
+
+
+def _check_boundary_type_ordering(boundaries):
+    """Check that type 12 boundaries come before type 11 boundaries, and that
+    type 11 and type 12 boundaries are continuous
+    """
+    type_11_indices = np.where(boundaries[:, 2] == 11)[0]
+    type_12_indices = np.where(boundaries[:, 2] == 12)[0]
+
+    if len(type_12_indices):
+        # type 12 should be at the beginning
+        assert 0 in type_12_indices, \
+            "boundaries must begin with type 12 boundaries"
+
+        if len(type_11_indices):
+            assert type_11_indices.min() > type_12_indices.max(), \
+                "type 11 boundaries must come after type 12"
+
+
+def check_boundaries(boundaries):
+    _check_for_duplicate_boundary_nodes(boundaries)
+    _check_boundary_type_ordering(boundaries)
 
 
 def add_stabilizer_nodes(boundaries_raw, electrodes, nr_nodes_between):
@@ -482,7 +504,7 @@ def main():
 
     if os.path.isfile('extra_nodes.dat'):
         shutil.copy('extra_nodes.dat', directory + os.sep + 'extra_nodes.dat')
-    if(os.path.isfile('char_length.dat')):
+    if (os.path.isfile('char_length.dat')):
         shutil.copy('char_length.dat', directory + os.sep + 'char_length.dat')
     if os.path.isfile('extra_lines.dat'):
         shutil.copy('extra_lines.dat',
