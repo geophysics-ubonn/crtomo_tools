@@ -2,7 +2,7 @@
 """Thils file set ups matplotlib plot functions for the whole package.
 
 Import all necessary Matplotlib modules and set default options
-To use this module, import * from it:
+To use this module, call the setup() function.
 
 Examples
 --------
