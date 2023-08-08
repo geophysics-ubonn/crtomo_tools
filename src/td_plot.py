@@ -238,12 +238,12 @@ def read_iter(use_fpi):
     filename_rhosuffix = 'exe/inv.lastmod_rho'
     filename = 'exe/inv.lastmod'
     # filename HAS to exist. Otherwise the inversion was not finished
-    if(not os.path.isfile(filename)):
+    if (not os.path.isfile(filename)):
         print('Inversion was not finished! No last iteration found.')
         return 0
 
-    if(use_fpi is True):
-        if(os.path.isfile(filename_rhosuffix)):
+    if (use_fpi is True):
+        if (os.path.isfile(filename_rhosuffix)):
             filename = filename_rhosuffix
 
     linestring = open(filename, 'r').readline().strip()
@@ -297,9 +297,9 @@ def list_datafiles():
 def read_datafiles(files, dtype, column):
     '''Load the datafiles and return cov, mag, phase and fpi phase values.
     '''
-    mag = []
-    pha = []
-    pha_fpi = []
+    mag = None
+    pha = None
+    pha_fpi = None
     for filename, filetype in zip(files, dtype):
         if filetype == 'cov':
             cov = load_cov(filename)
@@ -597,7 +597,7 @@ def alpha_from_cov(plotman, alpha_cov):
     abscov = np.abs(load_cov(cov_file))
 
     if alpha_cov:
-        normcov = np.divide(abscov, 2.5)
+        normcov = np.divide(abscov, 3)
         normcov[np.where(normcov > 1)] = 1
         mask = np.subtract(1, normcov)
         alpha = plotman.parman.add_data(mask)
@@ -751,7 +751,7 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
         cov = np.ones_like(mag) * np.nan
 
     magunit = 'log_rho'
-    if not pha == []:
+    if pha is not None:
         [real, imag] = calc_complex(mag, pha)
         if options.c_in_log:
             real = np.log10(real)
@@ -759,7 +759,7 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
                 imag = np.log10(imag)
             imag[np.isinf(imag)] = np.nan
 
-        if not pha_fpi == []:
+        if pha_fpi is not None:
             [real_fpi, imag_fpi] = calc_complex(mag, pha_fpi)
             if options.cmaglin:
                 mag = np.power(10, mag)
