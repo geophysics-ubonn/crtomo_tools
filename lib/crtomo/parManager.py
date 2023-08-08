@@ -45,9 +45,9 @@ class ParMan(object):
         metadata, and resets the index variable
         """
         self.index = -1
-        del(self.parsets)
+        del (self.parsets)
         self.parsets = {}
-        del(self.metadata)
+        del (self.metadata)
         self.metadata = {}
 
     def add_data(self, data, metadata=None):
@@ -102,7 +102,7 @@ class ParMan(object):
         K = subdata.shape[0]
         if metadata is not None:
             if K > 1:
-                if(not isinstance(
+                if (not isinstance(
                    metadata, (list, tuple)) or len(metadata) != K):
                     raise Exception('metadata does not fit the provided data')
             else:
@@ -357,9 +357,45 @@ class ParMan(object):
         self.modify_polygon(pid, area_polygon, value)
 
     def modify_polygon(self, pid, polygon, value):
+        """Modify parts of a parameter set by modifying all elements within a
+        provided :class:`shapely.geometry.Polygon` instance. Hereby, an element
+        is modified if its center lies within the polygon.
+
+        Parameters
+        ----------
+        pid: int
+            id of parameter set to vary
+        polygon: :class:`shapely.geometry.Polygon` instance
+            polygon that determines the area to modify
+        value: float
+            value that is assigned to all elements in the polygon
+
+        Examples
+        --------
+        >>> import shapely.geometry
+            polygon = shapely.geometry.Polygon((
+                (2, 0), (4, -1), (2, -1)
+            ))
+            tdman.parman.modify_polygon_centroids(pid, polygon, 3)
+
+        """
+        centroids = self.grid.get_element_centroids()
+        # now determine elements in area
+        elements_in_area = []
+        for nr, centroid in enumerate(centroids):
+            if polygon.contains(shapgeo.Point(centroid)):
+                elements_in_area.append(nr)
+        # change the values
+        pid_clean = self._clean_pid(pid)
+        self.parsets[pid_clean][elements_in_area] = value
+
+    def modify_polygon_old(self, pid, polygon, value):
         """Modify parts of a parameter set by setting all parameters located
         in, or touching, the provided :class:`shapely.geometry.Polygon`
         instance.
+
+        WARNING: This implementation often leads to ragged borders in the
+        selected polygons. Use the new modify_polygon function!
 
         Parameters
         ----------
