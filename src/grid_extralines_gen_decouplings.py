@@ -24,51 +24,64 @@ Examples
 
     # enter the output directory of cr_trig_create.py
     grid_extralines_gen_decouplings.py
-    # this create the file decouplings.dat
 
+    # this creates the file decouplings.dat
     grid_extralines_gen_decouplings.py --plot_node_nrs --plot_elm_nrs
 
 """
+import sys
 import os
-from optparse import OptionParser
+# from optparse import OptionParser
+from argparse import ArgumentParser
 import numpy as np
-from crtomo.mpl_setup import *
+import crtomo.mpl
 import crtomo.grid as CRGrid
 
+import matplotlib.pylab as plt
+import matplotlib as mpl
 
-def handle_cmd_options():
-    parser = OptionParser()
-    parser.add_option(
+import IPython
+IPython
+
+crtomo.mpl.setup()
+
+
+def handle_cmd_options_v2():
+    parser = ArgumentParser()
+    parser.add_argument(
         '-e',
         "--elem",
         dest="elem_file",
-        type="string",
+        type=str,
         help="elem.dat file (default: elem.dat)",
         default="elem.dat",
     )
-    parser.add_option(
+    parser.add_argument(
         "--eps",
         dest="eps",
-        type="float",
+        type=float,
         help="User override for distance eps",
         default=None,
     )
-    parser.add_option(
+    parser.add_argument(
+        '-w',
         "--eta",
-        action="store",
+        action="append",
         dest="eta",
-        type="float",
-        help="User override for coupling coefficient",
-        default=0.001,
+        type=float,
+        help="User override for coupling coefficient (default: 0)",
+        # default=0.0,
     )
-    parser.add_option(
+    parser.add_argument(
         '-l',
         "--linefile",
-        dest="linefile",
-        help="Line file (default: extra_lines.dat)",
-        default='extra_lines.dat',
+        # dest="linefile",
+        action='append',
+        # type=str,
+        # help="Line file (default: extra_lines.dat)",
+        # default='extra_lines.dat',
     )
-    parser.add_option(
+    parser.add_argument(
         "-o",
         "--output",
         dest="output",
@@ -76,16 +89,17 @@ def handle_cmd_options():
         metavar="FILE", default="decouplings.dat",
     )
 
-    parser.add_option(
+    parser.add_argument(
+        '-linenr',
         "--ln",
         action="store",
         dest="line_nr",
-        type="int",
+        type=int,
         help="Process only one line with index N (zero indexed)",
         default=None,
     )
 
-    parser.add_option(
+    parser.add_argument(
         '--debug_plot',
         action='store_true',
         dest='debug_plot',
@@ -93,7 +107,7 @@ def handle_cmd_options():
         help='plot a debug plot',
     )
 
-    parser.add_option(
+    parser.add_argument(
         '--plot_node_nrs',
         action='store_true',
         dest='plot_node_nrs',
@@ -101,7 +115,7 @@ def handle_cmd_options():
         help='plot node numbers in the debug plot. default: False',
     )
 
-    parser.add_option(
+    parser.add_argument(
         '--plot_elm_nrs',
         action='store_true',
         dest='plot_elm_nrs',
@@ -109,8 +123,85 @@ def handle_cmd_options():
         help='plot elements numbers in the debug plot. default: False',
     )
 
-    (options, args) = parser.parse_args()
-    return options
+    args = parser.parse_args()
+    return args
+
+
+# def handle_cmd_options():
+#     parser = OptionParser()
+#     parser.add_option(
+#         '-e',
+#         "--elem",
+#         dest="elem_file",
+#         type="string",
+#         help="elem.dat file (default: elem.dat)",
+#         default="elem.dat",
+#     )
+#     parser.add_option(
+#         "--eps",
+#         dest="eps",
+#         type="float",
+#         help="User override for distance eps",
+#         default=None,
+#     )
+#     parser.add_option(
+#         "--eta",
+#         action="store",
+#         dest="eta",
+#         type="float",
+#         help="User override for coupling coefficient (default: 0)",
+#         default=0,
+#     )
+#     parser.add_option(
+#         '-l',
+#         "--linefile",
+#         dest="linefile",
+#         help="Line file (default: extra_lines.dat)",
+#         default='extra_lines.dat',
+#     )
+#     parser.add_option(
+#         "-o",
+#         "--output",
+#         dest="output",
+#         help="Output file (default: decouplings.dat)",
+#         metavar="FILE", default="decouplings.dat",
+#     )
+
+#     parser.add_option(
+#         "--ln",
+#         action="store",
+#         dest="line_nr",
+#         type="int",
+#         help="Process only one line with index N (zero indexed)",
+#         default=None,
+#     )
+
+#     parser.add_option(
+#         '--debug_plot',
+#         action='store_true',
+#         dest='debug_plot',
+#         default=True,
+#         help='plot a debug plot',
+#     )
+
+#     parser.add_option(
+#         '--plot_node_nrs',
+#         action='store_true',
+#         dest='plot_node_nrs',
+#         default=False,
+#         help='plot node numbers in the debug plot. default: False',
+#     )
+
+#     parser.add_option(
+#         '--plot_elm_nrs',
+#         action='store_true',
+#         dest='plot_elm_nrs',
+#         default=False,
+#         help='plot elements numbers in the debug plot. default: False',
+#     )
+
+#     (options, args) = parser.parse_args()
+#     return options
 
 
 def line_line_intersect(x, y):
@@ -202,7 +293,7 @@ def distances(x, y, px, py, plot=False):
 
 
 def get_decouplings_for_line(grid, line, settings, fids=None):
-    """Compute the element pairs for regulazisation decoupling, given a grid
+    """Compute the element pairs for regularisation decoupling, given a grid
     object and a line, denoted by start and end coordinates, in the grid.
 
     Parameters
@@ -326,7 +417,15 @@ def get_decouplings_for_line(grid, line, settings, fids=None):
 
 
 def check_options(options):
-    for filename in (options.elem_file, options.linefile):
+    if options.linefile is None:
+        options.linefile = ['extra_lines.dat', ]
+    if options.eta is None:
+        options.eta = [0.0, ]
+
+    assert len(options.linefile) == len(options.eta), \
+        "require same number of --linefile and --eta parameters"
+
+    for filename in [options.elem_file, ] + options.linefile:
         if not os.path.isfile(filename):
             raise IOError('File not found: {0}'.format(filename))
 
@@ -384,7 +483,7 @@ def debug_plot(grid, extra_lines, decoupling_elements, options,):
             z,
             '.-',
             color='r',
-            linestyle='dashed',
+            # linestyle='dashed',
             label=label,
         )
         label = ''
@@ -457,12 +556,15 @@ def debug_plot(grid, extra_lines, decoupling_elements, options,):
 
 
 def main():
-    options = handle_cmd_options()
+    # options = handle_cmd_options()
+    options = handle_cmd_options_v2()
+
     check_options(options)
+    # import IPython
+    # IPython.embed()
+    # exit()
     grid = CRGrid.crt_grid()
     grid.load_elem_file(options.elem_file)
-
-    extra_lines = np.atleast_2d(np.loadtxt(options.linefile))
 
     fids = []
     fids.append(
@@ -472,31 +574,43 @@ def main():
         open('debug_dist.dat', 'wb')
     )
     neighbors = None
-    if options.line_nr is None:
-        lines = extra_lines
-    else:
-        print('processing only line: {0}'.format(options.line_nr))
-        lines = (extra_lines[options.line_nr], )
-    for line in lines:
-        data = get_decouplings_for_line(
-            grid,
-            line,
-            {
-                'eps': options.eps,
-                'eta': options.eta,
-            },
-            fids
-        )
-        if neighbors is None:
-            neighbors = data
+
+    for linefile, eta in zip(options.linefile, options.eta):
+        extra_lines = np.atleast_2d(np.loadtxt(linefile))
+
+        if options.line_nr is None:
+            lines = extra_lines
         else:
-            try:
-                neighbors = np.vstack(
-                    (neighbors, data)
-                )
-            except:
-                import IPython
-                IPython.embed()
+            print('processing only line: {0}'.format(options.line_nr))
+            lines = (extra_lines[options.line_nr], )
+        for line in lines:
+            data = get_decouplings_for_line(
+                grid,
+                line,
+                {
+                    'eps': options.eps,
+                    'eta': eta,
+                },
+                fids
+            )
+            if neighbors is None:
+                neighbors = data
+            else:
+                #     neighbors = np.vstack(
+                #         (neighbors, data)
+                #     )
+
+                try:
+                    if data.size > 0:
+                        neighbors = np.vstack(
+                            (neighbors, data)
+                        )
+                except Exception as e:
+                    print('Exception')
+                    print(e)
+                    print(data)
+                    import IPython
+                    IPython.embed()
 
     for fid in fids:
         fid.close()
@@ -504,7 +618,7 @@ def main():
     with open(options.output, 'w') as fid:
         fid.write('{0}\n'.format(neighbors.shape[0]))
     with open(options.output, 'ab') as fid:
-        np.savetxt(fid, np.array(neighbors), fmt='%i %i %.2f')
+        np.savetxt(fid, np.array(neighbors), fmt='%i %i %.3f')
 
     if options.debug_plot:
         debug_plot(
