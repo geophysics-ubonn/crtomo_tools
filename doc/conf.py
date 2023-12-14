@@ -36,7 +36,6 @@ sys.path.append(
 extensions = [
     'matplotlib.sphinxext.plot_directive',
     'sphinx.ext.autodoc',
-    'sphinxcontrib.napoleon',
     'sphinx.ext.doctest',
     'sphinx.ext.todo',
     'sphinx.ext.mathjax',
@@ -46,35 +45,44 @@ extensions = [
     'sphinx.ext.intersphinx',
 ]
 
+# could also be 7 or 10
+if sys.version_info.minor <= 8:
+    extensions += ['sphinxcontrib.napoleon']
+else:
+    extensions += ['sphinx.ext.napoleon']
+
 napoleon_include_init_with_doc = True
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/', None),
     'numpy': ('https://docs.scipy.org/doc/numpy/', None),
     'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
-    'pandas': ('https://pandas-docs.github.io/pandas-docs-travis/', None),
+    # 'pandas': ('https://pandas-docs.github.io/pandas-docs-travis/', None),
+    'pandas': ('http://pandas.pydata.org/pandas-docs/stable/', None),
     'matplotlib': ('https://matplotlib.org/', None),
 }
 
 # Gallery conf
 sphinx_gallery_conf = {
     'examples_dirs': [
+        # '../new_ex/01_modelling',
         '../examples',
         '../examples/00_grids',
         '../examples/01_modelling',
     ],
+    'log_level': {'backreference_missing': 'debug'},
     'gallery_dirs': ['_examples'],
     'filename_pattern': 'plot_',
-    'abort_on_example_error': True,
-    'reference_url': {
-        # The module you locally document uses a None
-        'crtomo': None,
-        # External python modules use their documentation websites
-        'reda': 'https://matplotlib.org/',
-        'matplotlib': 'https://matplotlib.org/',
-        'numpy': 'http://docs.scipy.org/doc/numpy/',
-        'pandas': 'https://pandas.pydata.org/pandas-docs/stable/'
-    },
+    'abort_on_example_error': False,
+    # 'reference_url': {
+    #     # The module you locally document uses a None
+    #     'crtomo': None,
+    #     # External python modules use their documentation websites
+    #     'reda': 'https://matplotlib.org/',
+    #     'matplotlib': 'https://matplotlib.org/',
+    #     'numpy': 'http://docs.scipy.org/doc/numpy/',
+    #     'pandas': 'https://pandas.pydata.org/pandas-docs/stable/'
+    # },
 
     # Don't report time of fast scripts (< 10 sec)
     "min_reported_time": 10,
@@ -103,7 +111,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'crtomo tools'
-copyright = u'2017-2021, CRTomo contributors'
+copyright = u'2017-2023, CRTomo contributors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
