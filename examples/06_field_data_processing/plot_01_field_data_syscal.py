@@ -42,7 +42,7 @@ fig = ert.histogram(('r', 'rdiff', 'rho_a', 'rho_adiff', 'Iab'))
 plt.savefig('histogramms.png')
 
 ###############################################################################
-# Pseudosektionen plotten
+# plot pseudosection
 # -----------------------
 
 fig = ert.pseudosection('r')
@@ -78,12 +78,13 @@ crto.write_files_to_directory(ert.data, '.')
 ###############################################################################
 # Gitter und Daten einlesen
 # -------------------------
+grid = crtomo.crt_grid.create_surface_grid(
+    electrodes_x=list(range(30, 174, 3)),
+    char_lengths=[1.5, 10, 10, 10],
+)
 
-td_obj = crtomo.tdMan(
-    elem_file='elem.dat',
-    elec_file='elec.dat')
+td_obj = crtomo.tdMan(grid=grid)
 td_obj.read_voltages('volt.dat')
-
 
 ###############################################################################
 # Inversionseinstellungen
@@ -101,8 +102,7 @@ td_obj.crtomo_cfg['fpi_inv'] = 'F'
 # td_obj.crtomo_cfg['pha_abs'] = '0'
 ###############################################################################
 # invert
-td_obj.invert()
-
+td_obj.invert(cores=4)
 
 ###############################################################################
 # save tomodir
