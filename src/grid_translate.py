@@ -56,8 +56,11 @@ def main():
     options.center_x = 0.0
     options.center_y = 0.0
 
-    grid = CRGrid.crt_grid()
-    grid.load_elem_file(options.elem_file)
+    grid = CRGrid.crt_grid(
+        elem_file=options.elem_file,
+        elec_file='elec.dat'
+    )
+    # grid.load_elem_file(options.elem_file)
     rotated_nodes = translate_nodes(
         grid.nodes['raw'][:, 1:3],
         options.dx,
