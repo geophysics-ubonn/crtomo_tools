@@ -990,11 +990,11 @@ class crt_grid(object):
         minimum_z = np.min(electrodes[:, 1]) - depth
         # maximum_z = 0
 
-        boundary_noflow = 11
-        boundary_mixed = 12
+        boundary_noflow = 12
+        boundary_mixed = 11
 
         if force_neumann_only:
-            boundary_mixed = 11
+            boundary_mixed = 12
 
         # prepare extra lines
         extra_lines = []
