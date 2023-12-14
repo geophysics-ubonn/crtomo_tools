@@ -16,11 +16,10 @@ grid = crtomo.crt_grid.create_surface_grid(
     nr_electrodes=40,
     spacing=0.25,
     depth=10,
-    char_lengths=0.1,
+    char_lengths=[0.1, 0.5, 0.5, 0.5],
     left=5,
     right=5,
 )
-
 grid.plot_grid()
 
 grid.save_elem_file('elem.dat')
@@ -47,6 +46,7 @@ s_abs = np.abs(td.parman.parsets[2])
 threshold = np.quantile(s_abs, 0.75)
 s_abs[s_abs <= threshold] = 0
 s_abs[s_abs > threshold] = 1
+
 td.plot.plot_elements_to_ax(
     s_abs,
     ax=ax,
