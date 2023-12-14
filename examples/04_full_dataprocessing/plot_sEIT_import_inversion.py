@@ -26,6 +26,8 @@ seit.import_eit_fzj(
     'data/configs.dat'
 )
 print(seit.data[['a', 'b', 'm', 'n']].iloc[0:10])
+# In order to keep things fast, we only keep the following frequencies
+seit.keep_frequencies((1, 10, 100, 1000, 10000))
 ###############################################################################
 # compute geometric factors and correct for signs/phase shifts by pi
 settings = {
