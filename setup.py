@@ -32,7 +32,7 @@ if __name__ == '__main__':
         author_email='mweigand@geo.uni-bonn.de',
         url='https://github.com/geophysics-ubonn/crtomo_tools',
         entry_points=entry_points,
-        python_requires='>=3.11',
+        # python_requires='>=3.11',
         # entry_points={
         #     'console_scripts': [
         #         'td_test = td_test:main',
