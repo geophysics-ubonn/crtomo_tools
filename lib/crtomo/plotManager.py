@@ -330,7 +330,7 @@ class plotManager(object):
             At the moment no checks are made that the data fits the grid.
         ax : matplotlib.Axes, optional
             plot to this axes object, if provided
-        alpha_cid : int, optional
+        cid_alpha : int, optional
             if given, use the corresponding dataset in self.parman as the alpha
             channel. No checks are made if all values of this data set lie
             between 0 and 1 (0 being fully transparent, and 1 being opaque).
