@@ -289,6 +289,59 @@ gmsh_commands.dat (optional)
 If this file exists, the content will be appended to the commands.geo file used
 to create the grid (i.e. GMSH commands should be used).
 
+Introducing structures into a mesh using Inkscape
+"""""""""""""""""""""""""""""""""""""""""""""""""
+
+Summary:
+
+* Create a triangular mesh using cr_trig_create
+* Run grid_convert_boundary_to_svg to generate an svg file containing the mesh
+  boundaries
+* Open the svg file in Inkscape
+* Add layers with the following naming scheme:
+   * constraint_*
+   * special_*
+   * ???
+* For example: constraint_1
+   .. figure:: /figs_grid_creation/inkscape_layers.jpg
+       :scale: 60%
+* Add **straight lines** (SHIFT+F6) and define boundaries and regions (for
+  region, close the polygon)
+* Save to *out_modified2.svg* as **INKSCAPE Svg**
+
+   .. figure:: /figs_grid_creation/inkscape_savediag.jpg
+       :scale: 50%
+
+* Run *grid_parse_svg_to_files*
+* Create *extra_lines.dat*:
+
+   cat contraints_1.dat > extra_lines.dat
+* Regenerate the mesh:
+
+  cr_grid_create grid_with_constraints
+
+Example:
+
+* electrodes.dat:
+
+   0.0 0.0
+   5.0 0.0
+   10.0 0.0
+   15.0 0.0
+
+* boundaries.dat:
+
+  -10.0000 0.0000 12
+   0.0000 0.0000 12
+   5.0000 0.0000 12
+   10.0000 0.0000 12
+   15.0000 0.0000 12
+   25.0000 0.0000 11
+   25.0000 -10.0000 11
+   -10.0000 -10.0000 11
+
+* [...]
+
 Further Reading:
 """"""""""""""""
 
