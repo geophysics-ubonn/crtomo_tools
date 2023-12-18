@@ -294,25 +294,38 @@ Introducing structures into a mesh using Inkscape
 
 Summary:
 
-* Create a triangular mesh using cr_trig_create
-* Run grid_convert_boundary_to_svg to generate an svg file containing the mesh
-  boundaries
+* Create a triangular mesh using *cr_trig_create* (i.e., using
+  **electrodes.dat**, **boundaries.dat**, and **char_length.dat**)
+* Run *grid_convert_boundary_to_svg* to generate an svg file containing the mesh
+  boundaries (the file is called **out.svg**)
 * Open the svg file in Inkscape
-* Add layers with the following naming scheme:
-   * constraint_*
-   * special_*
-   * ???
+   * Add layers with one of the following naming schemes:
+      * constraint_*
+      * special_*
+      * ???
 * For example: constraint_1
    .. figure:: /figs_grid_creation/inkscape_layers.jpg
        :scale: 60%
 * Add **straight lines** (SHIFT+F6) and define boundaries and regions (for
-  region, close the polygon)
-* Save to *out_modified2.svg* as **INKSCAPE Svg**
+  region, close the polygon). It is not important to close the polygons if you
+  just want to add interfaces for regularization decoupling. However, in order
+  to modify forward models, it is advisable to close polygons (i.e., the last
+  line should end on the starting point of the first one).
+* Save the file to **out_modified2.svg** as type **Inkscape svg**
 
    .. figure:: /figs_grid_creation/inkscape_savediag.jpg
        :scale: 50%
 
-* Run *grid_parse_svg_to_files*
+* Run *grid_parse_svg_to_files*. This command should rename your original
+  **boundaries.dat** to **boundaries_orig.dat** and generate a new one that
+  incorporates any (required) structure on the boundaries.
+
+  The command will also generate two files for each layer defines in the svg
+  file:
+
+  * A file **[LAYER_NAME].dat** :
+  * A file **mdl_[LAYER_NAME].dat** :
+
 * Create *extra_lines.dat*:
 
    cat contraints_1.dat > extra_lines.dat
@@ -320,27 +333,7 @@ Summary:
 
   cr_grid_create grid_with_constraints
 
-Example:
-
-* electrodes.dat:
-
-   0.0 0.0
-   5.0 0.0
-   10.0 0.0
-   15.0 0.0
-
-* boundaries.dat:
-
-  -10.0000 0.0000 12
-   0.0000 0.0000 12
-   5.0000 0.0000 12
-   10.0000 0.0000 12
-   15.0000 0.0000 12
-   25.0000 0.0000 11
-   25.0000 -10.0000 11
-   -10.0000 -10.0000 11
-
-* [...]
+* See the corresponding example in "Examples: Grid handling"
 
 Further Reading:
 """"""""""""""""
