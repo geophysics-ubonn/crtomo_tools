@@ -2572,3 +2572,20 @@ i6,t105,g9.3,t117,f5.3)
             raise Exception('not implemented yet')
 
         return tdm_copy
+
+    def sensitivity_center_of_masses(self, mode='none'):
+        """
+
+        """
+        assert 'sensitivities' in self.a, \
+            "This function requires sensitivities"
+        mag_sens_indices = [
+            self.a['sensitivities'][key][0] for key in sorted(
+                self.a['sensitivities'].keys()
+            )
+        ]
+        coms = self.parman.center_of_mass_value_multiple(
+            mag_sens_indices,
+            mode=mode,
+        )
+        return coms
