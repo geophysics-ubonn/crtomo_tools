@@ -753,3 +753,49 @@ class ParMan(object):
                 paradd[indices] = peak_value
 
         self.parsets[pid] += paradd
+
+    def _com_data_trafo_mode(self, subdata, mode):
+        if mode == "none":
+            # just take the absolute values
+            s = np.abs(subdata)
+        elif mode == "log10":
+            # log10 values of absolutes
+            s = np.abs(np.log10(np.abs(subdata)))
+        elif mode == "sqrt":
+            # square roots of absolutes
+            s = np.sqrt(np.abs(subdata))
+        return s
+
+    def center_of_mass_value(self, pid, mode='log10'):
+        """Compute the center of mass value of a given parameter set.
+        """
+        centroids = self.grid.get_element_centroids()
+
+        # compute the integrative value
+        subdata = self.parsets[pid]
+        s = self._com_data_trafo_mode(subdata, mode)
+
+        com_x = np.sum(centroids[:, 0] * s) / np.sum(s)
+        com_y = np.sum(centroids[:, 1] * s) / np.sum(s)
+        # to check: do we need to norm here?
+
+        return [com_x, com_y]
+
+    def center_of_mass_value_multiple(self, pid_list, mode='none'):
+        print('center_of_mass_value_multiple')
+        centroids = self.grid.get_element_centroids()
+        values = np.vstack(
+            [self.parsets[index] for index in pid_list]
+        )
+        s = self._com_data_trafo_mode(values, mode)
+        xy = np.dot(s, centroids)
+
+        s_sum = np.sum(s, axis=1)
+
+        s_sum_stacked = np.tile(s_sum, (2, 1))
+        s_sum_T = s_sum_stacked.T
+
+        com = xy / s_sum_T
+        return com
+        # import IPython
+        # IPython.embed()
