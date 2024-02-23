@@ -27,7 +27,13 @@ def setup():
 
     import matplotlib.pyplot as plt
 
-    plt.style.use('seaborn')
+    mpl_version = [int(x) for x in mpl.__version__.split('.')]
+
+    if mpl_version[0] >= 3 and mpl_version[1] > 6:
+        plt.style.use("seaborn-v0_8")
+    else:
+        # old style for older matplotlib versions (<= 3.6)
+        plt.style.use("seaborn")
 
     general_settings()
 
