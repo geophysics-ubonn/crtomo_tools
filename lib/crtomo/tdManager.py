@@ -880,7 +880,7 @@ class tdMan(object):
         if self.assignments['sensitivities'] is None:
             self._check_state()
             if self.can_model:
-                self.model(sensitivities=True)
+                self.model(sensitivities=True, silent=True)
         cids = self.assignments['sensitivities'][config_nr]
         sens_data = [self.parman.parsets[cid] for cid in cids]
         meta_data = [self.parman.metadata[cid] for cid in cids]
