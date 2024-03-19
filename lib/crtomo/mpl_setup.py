@@ -25,8 +25,7 @@ mpl.rcParams["lines.markeredgewidth"] = 3.0
 mpl.rcParams["lines.markersize"] = 3.0
 mpl.rcParams["font.size"] = 8
 # mpl.rcParams['font.sans-serif'] = 'Droid Sans'
-
-mpl.rcParams['font.family'] = 'Open Sans'
+# mpl.rcParams['font.family'] = 'Open Sans'
 # mpl.rcParams['font.weight'] = 400
 mpl.rcParams['mathtext.default'] = 'regular'
 
