@@ -1219,6 +1219,11 @@ class tdMan(object):
               ):
         """Forward model the tomodir and read in the results
 
+        Note that this function will always do the full modeling. No caching
+        involved.
+
+        Please use .measurements to accessed cached measurements.
+
         Parameters
         ----------
         voltages : bool, optional
