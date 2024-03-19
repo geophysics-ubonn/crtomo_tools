@@ -1113,6 +1113,9 @@ class tdMan(object):
         N = (measurements[:, 1] % 1e4).astype(int)
         ABMN = np.vstack((A, B, M, N)).T
 
+        # it may happen that we need to switch signs of measurements
+        switch_signs = []
+
         if self.configs.configs is None:
             self.configs.configs = ABMN
         else:
@@ -1135,10 +1138,15 @@ class tdMan(object):
                        voltage_electrodes_are_switched):
 
                         if len(self.configs.measurements.keys()) > 0:
-                            raise Exception(
-                                'need to switch electrode polarity, but ' +
-                                'there are already measurements stored for ' +
-                                'the old configuration!')
+                            # print('asdasd')
+                            # import IPython
+                            # IPython.embed()
+                            # raise Exception(
+                            #     'need to switch electrode polarity, but ' +
+                            #     'there are already measurements stored for ' +
+                            #     'the old configuration!')
+                            # exit()
+                            switch_signs += [nr]
                         else:
                             # switch M/N in configurations
                             self.configs.configs[nr, :] = new_config
@@ -1147,6 +1155,9 @@ class tdMan(object):
                             'There was an error matching configurations of ' +
                             'voltages with configurations already imported'
                         )
+
+        # change sign of R measurements that require it
+        measurements[switch_signs, 2] *= -1
 
         # add measurements to the config instance
         mid_mag = self.configs.add_measurements(measurements[:, 2])
