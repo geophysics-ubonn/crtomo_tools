@@ -1025,7 +1025,8 @@ In the following certain parts of the file will be explained:
   be controlled.
 * Lines 75 to 87 hold various options.
 * Lines 89 to 101 contain fixed constants that are hardwired into the CRTomo code.
-* Line 103 separates information available before the inversion from inversion regarding the inversion process.
+* Line 103 separates information available before the inversion from inversion
+  regarding the inversion process.
 * Line 105 contains a header which describes all columns to follow.
 * Lines 107 to 174 contain information of the complex inversion.
 * Lines 178 to 195 contain information of the final phase improvement.
@@ -1046,8 +1047,8 @@ are displayed for each grid cell.
 
 The first row again contains the number of grid cells along with the normalized
 magnitude or phase misfit for the current inversion iteration. The following
-rows contain the x and z centroid coordinates and the magnitude (in :math:`\Omega m`)
-or phase (in :math:`mrad`) value for the corresponding cell.
+rows contain the x and z centroid coordinates and the magnitude (in
+:math:`\Omega m`) or phase (in :math:`mrad`) value for the corresponding cell.
 
 :math:`log_{10}(\rho) (\Omega m)`    :math:`\phi (mrad)`
 
@@ -1063,12 +1064,14 @@ run.ctr
 Provides an overview of the inversion process. Due to the adaption to screen
 output, this file look somewhat garbled when viewed in a text editor.
 
-If the inversion finished sucessfully, the used CPU time will be saved to the file (``grep "\^CPU" run.ctr``)
+If the inversion finished sucessfully, the used CPU time will be saved to the
+file (``grep "\^CPU" run.ctr``)
 
 voltXX.dat
 """"""""""
 
-``voltXX.dat`` contains the modelled resistances and phases for all measurement configurations for iteration XX.
+``voltXX.dat`` contains the modelled resistances and phases for all measurement
+configurations for iteration XX.
 
 ::
 
@@ -1086,10 +1089,11 @@ mod/
 crt-files/volt.dat
 """"""""""""""""""
 
-``volt.dat`` contains the modeled or measured resistances (not resistivities) for all measurement
-configurations defined in ``config.dat``. Multiple input formats are currently
-recognized. The input formats are partially determined by external switches and
-partially by certain key structures in the files themselfs:
+``volt.dat`` contains the modeled or measured resistances (not resistivities)
+for all measurement configurations defined in ``config.dat``. Multiple input
+formats are currently recognized. The input formats are partially determined by
+external switches and partially by certain key structures in the files
+themselfs:
 
 External switches:
 
@@ -1182,17 +1186,17 @@ Complex/FPI case: ::
 pot/pot.dat
 """""""""""
 
-Each ``pot.dat`` contains the modelled potential distribution for the corresponding
-current injection configuration defined in config.dat (assuming a unit current
-of 1 :math:`A`), i.e., the (consecutive) number in the file name corresponds to
-the line number (+1) in ``config.dat``. The potential values of the individual
-elements are listed as determined in ``elem.dat``.
+Each ``pot.dat`` contains the modelled potential distribution for the
+corresponding current injection configuration defined in config.dat (assuming a
+unit current of 1 :math:`A`), i.e., the (consecutive) number in the file name
+corresponds to the line number (+1) in ``config.dat``. The potential values of
+the individual elements are listed as determined in ``elem.dat``.
 
 * Line 1-End:
    * Column 1: x coordinate in m
    * Column 2: z coordinate in m
-   * Column 3: potential in V
-   * column 4: phase in mrad
+   * Column 3: real part of complex potential, [V]
+   * Column 4: imaginary part of complex potential, [V]
 
 
 rho/
