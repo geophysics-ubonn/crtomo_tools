@@ -43,18 +43,18 @@ jobs:
     - name: Build the documentation
       run: bash ./build_documentation_ci.sh
 
-    - name: Setup Pages
-      uses: actions/configure-pages@v4
+    # - name: Setup Pages
+    #   uses: actions/configure-pages@v4
 
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        # Upload the html page
-        path: 'doc/_build/html/'
+    # - name: Upload artifact
+    #   uses: actions/upload-pages-artifact@v3
+    #   with:
+    #     # Upload the html page
+    #     path: 'doc/_build/html/'
 
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v4
+    # - name: Deploy to GitHub Pages
+    #   id: deployment
+    #   uses: actions/deploy-pages@v4
 
     # - name: Artifacts
     #   uses: actions/upload-artifact@v4
