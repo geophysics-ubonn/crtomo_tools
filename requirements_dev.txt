@@ -1,2 +1,5 @@
 flake8
 pycodestyle
+sphinx-gallery
+sphinxcontrib-blockdiag
+sphinx-rtd-theme
