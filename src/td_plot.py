@@ -88,6 +88,11 @@ def handle_options():
                       dest="cmaglin",
                       help="linear colorbar for magnitude",
                       )
+    parser.add_option("--crholin",
+                      action="store_true",
+                      dest="crholin",
+                      help="linear colorbar for fwd model magnitude",
+                      )
     # geometric options
     parser.add_option('-x',
                       '--xmin',
@@ -805,7 +810,10 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
                      'fpi_phi', 'fpi_real', 'fpi_imag']
         else:
             if options.cmaglin:
+                print('Cmaglin')
+                print(mag, mag.min(), mag.max())
                 mag = np.power(10, mag)
+                print('after', mag.min(), mag.max())
                 magunit = 'rho'
             data = np.column_stack((mag, cov, pha, real, imag))
             titles = ['Magnitude', 'Coverage',
@@ -830,6 +838,8 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
         saves = ['rho', 'cov']
     try:
         mod_rho = np.genfromtxt('rho/rho.dat', skip_header=1, usecols=([0]))
+        if not options.crholin:
+            mod_rho = np.log10(mod_rho)
         mod_pha = np.genfromtxt('rho/rho.dat', skip_header=1, usecols=([1]))
         if data.size == 0:
             data = np.column_stack((mod_rho, mod_pha))
@@ -837,7 +847,10 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
             data = np.column_stack((data, mod_rho, mod_pha))
         titles.append('Model')
         titles.append('Model')
-        unites.append('rho')
+        if not options.crholin:
+            unites.append('log_rho')
+        else:
+            unites.append('rho')
         unites.append('phi')
         vmins.append(options.mag_vmin)
         vmins.append(options.pha_vmin)
@@ -847,7 +860,9 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
         cmaps.append('plasma')
         saves.append('rhomod')
         saves.append('phamod')
-    except Exception:
+    except Exception as e:
+        print(e)
+        print('BAD ERROR')
         pass
 
     for datum, title, unit, vmin, vmax, cm, save in zip(
@@ -860,9 +875,9 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
         # if save == 'fpi_imag':
         #     import IPython
         #     IPython.embed()
-        if save == 'rho' and options.cmaglin:
-            datum = np.power(10, datum)
-            unit = 'rho'
+        # if save == 'rho' and options.cmaglin:
+        #     datum = np.power(10, datum)
+        #     unit = 'rho'
 
         sizex, sizez = getfigsize(plotman)
         f, ax = plt.subplots(1, figsize=(sizex, sizez))
