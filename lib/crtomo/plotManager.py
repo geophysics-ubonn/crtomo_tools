@@ -153,7 +153,7 @@ class plotManager(object):
             return fig, ax, pc, cb
         return fig, ax, pc
 
-    def plot_nodes_contour_to_ax(self, nid, **kwargs):
+    def plot_nodes_contour_to_ax(self, ax, nid, **kwargs):
         """Plot node data to an axes object
 
         Parameters
@@ -172,13 +172,16 @@ class plotManager(object):
             if true, plot a colorbar next to the plot
         use_aspect: bool, optional
             plot grid in correct aspect ratio. Default: True
+        fill_contours: bool, optional (true)
+            If True, the fill the contours (contourf)
 
         """
-        if 'ax' not in kwargs:
-            fig, ax = plt.subplots(1, 1)
-        else:
-            ax = kwargs.get('ax')
+        # if 'ax' not in kwargs:
+        #     fig, ax = plt.subplots(1, 1)
+        # else:
+        #     ax = kwargs.get('ax')
 
+        fig = ax.get_figure()
         x = self.grid.nodes['presort'][:, 1]
         z = self.grid.nodes['presort'][:, 2]
         xz = np.vstack((x, z)).T
@@ -190,25 +193,39 @@ class plotManager(object):
         )
 
         values = np.array(self.nodeman.nodevals[nid])
+        if kwargs.get('converter', None) is not None:
+            values = kwargs['converter'](values)
         # linear
         # cubic
         cint = scipy.interpolate.griddata(
             xz,
             values,
             (X, Z),
-            method='linear',
+            method='cubic',
             # method='linear',
             # method='nearest',
             fill_value=np.nan,
         )
         cint_ma = np.ma.masked_invalid(cint)
 
-        pc = ax.contourf(
-            X, Z, cint_ma,
-            cmap=kwargs.get('cmap', 'jet'),
-            vmin=kwargs.get('cbmin', None),
-            vmax=kwargs.get('cbmax', None),
-        )
+        cmap = mpl.colormaps['turbo'].resampled(1)
+        if kwargs.get('fill_contours', True):
+            pc = ax.contourf(
+                X, Z, cint_ma,
+                cmap=kwargs.get('cmap', 'jet'),
+                vmin=kwargs.get('cbmin', None),
+                vmax=kwargs.get('cbmax', None),
+                levels=kwargs.get('cblevels', None)
+            )
+        else:
+            pc = ax.contour(
+                X, Z, cint_ma,
+                cmap=cmap,
+                vmin=kwargs.get('cbmin', None),
+                vmax=kwargs.get('cbmax', None),
+                levels=kwargs.get('cblevels', None),
+                alpha=kwargs.get('alpha', 1.0),
+            )
 
         # plot electrodes
         ax.scatter(
@@ -223,13 +240,42 @@ class plotManager(object):
         # )
         if kwargs.get('use_aspect', True):
             ax.set_aspect('equal')
+        ax.set_xlabel(kwargs.get('xlabel', 'x [m]'))
+        ax.set_ylabel(kwargs.get('zlabel', 'z [m]'))
+        # if kwargs.get('plot_colorbar', False):
+        #     fig = ax.get_figure()
+        #     cb = fig.colorbar(pc, ax=ax)
         if kwargs.get('plot_colorbar', False):
-            fig = ax.get_figure()
-            cb = fig.colorbar(pc, ax=ax)
+            divider = make_axes_locatable(ax)
+            cbposition = kwargs.get('cbposition', 'vertical')
+            if cbposition == 'horizontal':
+                ax_cb = divider.new_vertical(
+                    size=0.1, pad=0.4, pack_start=True
+                )
+            elif cbposition == 'vertical':
+                ax_cb = divider.new_horizontal(
+                    size=0.1, pad=0.4,
+                )
+            else:
+                raise Exception('cbposition not recognized')
+
+            fig.add_axes(ax_cb)
+
+            cb = fig.colorbar(
+                pc,
+                cax=ax_cb,
+                orientation=cbposition,
+                label=kwargs.get('cblabel', ''),
+                ticks=mpl.ticker.MaxNLocator(kwargs.get('cbnrticks', 3)),
+                format=kwargs.get('cbformat', None),
+                extend='both',
+            )
+
+        if kwargs.get('plot_colorbar', False):
             return fig, ax, pc, cb
         return fig, ax, pc
 
-    def plot_nodes_streamlines_to_ax(self, ax, cid, **kwargs):
+    def plot_nodes_current_streamlines_to_ax(self, ax, cid, model_pid, **kwargs):
         """
 
         """
@@ -238,10 +284,10 @@ class plotManager(object):
         z = self.grid.nodes['presort'][:, 2]
         xz = np.vstack((x, z)).T
 
-        # generate grid
+        # generate a fine grid
         X, Z = np.meshgrid(
-            np.linspace(x.min(), x.max(), 100),
-            np.linspace(z.min(), z.max(), 100),
+            np.linspace(x.min(), x.max(), 1000),
+            np.linspace(z.min(), z.max(), 1000),
         )
 
         values = np.array(self.nodeman.nodevals[cid])
@@ -252,44 +298,63 @@ class plotManager(object):
             xz,
             values,
             (X, Z),
-            method='linear',
+            method='cubic',
             # method='linear',
             # method='nearest',
             fill_value=np.nan,
         )
         cint_ma = np.ma.masked_invalid(cint)
 
-        print(cint_ma.shape)
+        # now compute the gradients in both directions, using the fine
+        # interpolation
         U, V = np.gradient(cint_ma)
 
-        current = np.sqrt(U ** 2 + V ** 2)
-        start_points = np.array((
-            (1.0, 0.0),
-            (11.0, 0.0),
-        ))
-        print(start_points.shape)
+        resistivity = self.parman.parsets[model_pid]
+        res = scipy.interpolate.griddata(
+            self.grid.get_element_centroids(),
+            resistivity,
+            (X, Z),
+            method='cubic',
+            # method='linear',
+            # method='nearest',
+            fill_value=np.nan,
+        )
+
+        jx = -U / res
+        jz = -V / res
+        # jx = U
+        # jz = V
+
+        # current = np.sqrt(U ** 2 + V ** 2)
+        # start_points = np.array((
+        #     (1.0, 0.0),
+        #     (11.0, 0.0),
+        # ))
+        # print(start_points.shape)
         ax.streamplot(
             X,
             Z,
-            V,
-            U,
-            density=2.0,
-            minlength=0.5,
+            jz,
+            jx,
+            density=kwargs.get('density', 2.0),
+            linewidth=kwargs.get('linewidth', 1.0),
+            minlength=kwargs.get('minlength', 0.5),
+            broken_streamlines=kwargs.get('broken_streamlines', False),
             # start_points=start_points,
         )
 
-        ax.contour(
-            X,
-            Z,
-            current,
-        )
+        # ax.contour(
+        #     X,
+        #     Z,
+        #     current,
+        # )
 
-        pc = ax.contourf(
-            X,
-            Z,
-            cint,
-            N=10,
-        )
+        # pc = ax.contourf(
+        #     X,
+        #     Z,
+        #     cint,
+        #     N=10,
+        # )
         # pc = ax.pcolormesh(
         #     X, Z, current,
         #     # vmin=-40,
@@ -310,10 +375,10 @@ class plotManager(object):
         #         return pc
         if kwargs.get('use_aspect', True):
             ax.set_aspect('equal')
-        if kwargs.get('plot_colorbar', False):
-            fig = ax.get_figure()
-            cb = fig.colorbar(pc)
-            return cb
+        # if kwargs.get('plot_colorbar', False):
+        #     fig = ax.get_figure()
+        #     cb = fig.colorbar(pc)
+        #     return cb
 
     def plot_elements_to_ax(self, cid, ax=None, **kwargs):
         """Plot element data (parameter sets).
@@ -445,7 +510,7 @@ class plotManager(object):
         # normalize data
         data_min = kwargs.get('cbmin', np.nanmin(subdata))
         data_max = kwargs.get('cbmax', np.nanmax(subdata))
-        if(data_min is not None and data_max is not None
+        if (data_min is not None and data_max is not None
                 and data_min == data_max):
             data_min -= 1
             data_max += 1
@@ -489,7 +554,7 @@ class plotManager(object):
                 self.grid.electrodes[:, 1],
                 self.grid.electrodes[:, 2],
                 color=self.grid.props['electrode_color'],
-                # clip_on=False,
+                clip_on=False,
             )
 
         ax.set_xlim(xmin, xmax)
@@ -606,4 +671,33 @@ def converter_asinh(data):
     ) / np.arcsinh(
         10 ** dyn
     )
+    return data_transformed
+
+
+def converter_sensitivity(data):
+    """
+
+    """
+    norm_value = np.abs(data).max()
+    sens_normed = data / norm_value
+
+    indices_gt_zero = data > 1e-5
+    indices_lt_zero = data < -1e-5
+
+    # map all values greater than zero to the range [0.5, 1]
+    x = np.log10(sens_normed[indices_gt_zero])
+    # log_norm_factor = np.abs(x).max()
+    log_norm_factor = -5
+    y1 = 1 - x / (2 * log_norm_factor)
+
+    # map all values smaller than zero to the range [0, 0.5]
+    x = np.log10(np.abs(sens_normed[indices_lt_zero]))
+    y = x / (2 * log_norm_factor)
+
+    y2 = np.abs(y)
+
+    # reassign values
+    data_transformed = np.ones_like(data) * 0.5
+    data_transformed[indices_gt_zero] = y1
+    data_transformed[indices_lt_zero] = y2
     return data_transformed
