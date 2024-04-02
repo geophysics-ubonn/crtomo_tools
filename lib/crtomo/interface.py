@@ -73,7 +73,7 @@ class crmod_interface(object):
         tdm.register_phase_model(pid_pha)
         return tdm
 
-    def forward_complex(self, log_sigma):
+    def forward_complex(self, log_sigma, silent=True):
         r"""Compute a model response, i.e. complex impedances
 
         Parameters
@@ -82,6 +82,8 @@ class crmod_interface(object):
             Model parameters. First column: :math:`log_e(\sigma)`, second
             column: :math:`\phi_{cond} [mrad]`.  If first dimension is of
             length one, assume phase values to be zero.
+        silent : bool (True)
+            If True, suppress output of CRMod
 
         Returns
         -------
@@ -97,7 +99,7 @@ class crmod_interface(object):
             rpha = -log_sigma[1, :]
         m = np.vstack((rmag, rpha)).T
         tdm = self._get_tdm(m)
-        measurements = tdm.measurements()
+        measurements = tdm.measurements(silent=silent)
         # convert R to log Y
         measurements[:, 0] = np.log(1.0 / measurements[:, 0])
         # convert rpha to cpha
