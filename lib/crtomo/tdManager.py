@@ -358,6 +358,12 @@ class tdMan(object):
             if os.path.isfile(config_file):
                 self.configs.load_crmod_config(config_file)
 
+            # forward model
+            rho_file = tomodir + os.sep + 'rho' + os.sep + 'rho.dat'
+            if os.path.isfile(rho_file):
+                pid_mag, pid_pha = self.parman.load_from_rho_file(rho_file)
+                self.register_forward_model(pid_mag, pid_pha)
+
             # load data/modeling results
             self._read_modeling_results(tomodir + os.sep + 'mod')
 
@@ -1368,6 +1374,7 @@ class tdMan(object):
             Path to tomodir
 
         """
+        print('Reading inversion results')
         self._read_inversion_results(tomodir)
         self._read_inversion_fwd_responses(tomodir)
         self.inv_stats = self._read_inv_ctr(tomodir)
