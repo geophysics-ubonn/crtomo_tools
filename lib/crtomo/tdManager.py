@@ -54,7 +54,7 @@ import re
 import os
 import tempfile
 import subprocess
-from io import StringIO
+from io import StringIO, BytesIO
 import itertools
 import functools
 
@@ -1079,8 +1079,14 @@ class tdMan(object):
         voltage_file : str
             Path to volt.dat file
         """
-        with open(voltage_file, 'r') as fid:
-            items_first_line = fid.readline().strip().split(' ')
+        if isinstance(voltage_file, (StringIO, BytesIO)):
+            fid = voltage_file
+        else:
+            fid = open(voltage_file, 'r')
+
+        items_first_line = fid.readline().strip().split(' ')
+        # rewind for reading of complete file later on
+        fid.seek(0)
 
         if int(items_first_line[0]) == 0:
             # empty file
@@ -1090,19 +1096,21 @@ class tdMan(object):
         if len(items_first_line) == 1:
             # regular volt.dat file
             measurements_raw = np.loadtxt(
-                voltage_file,
+                fid,
                 skiprows=1,
             )
         elif len(items_first_line) == 2 and items_first_line[1] == 'T':
             individual_errors = True
             # Individual data errors
-            with open(voltage_file, 'r') as fid:
-                measurements_raw = np.genfromtxt(
-                    fid,
-                    skip_header=1,
-                    max_rows=int(items_first_line[0]),
-                )
-                (norm_mag, norm_pha) = np.genfromtxt(fid, max_rows=1)
+            measurements_raw = np.genfromtxt(
+                fid,
+                skip_header=1,
+                max_rows=int(items_first_line[0]),
+            )
+            fid.seek(0)
+            (norm_mag, norm_pha) = np.genfromtxt(fid, max_rows=1)
+
+        fid.close()
 
         measurements = np.atleast_2d(measurements_raw)
 
@@ -1165,6 +1173,8 @@ class tdMan(object):
             mid_pha = self.configs.add_measurements(measurements[:, 3])
         else:
             mid_pha = None
+        # register those measurements as 'the measurements', used, e.g., for a
+        # subsequent inversion
         self.assignments['measurements'] = [mid_mag, mid_pha]
 
         if individual_errors:
