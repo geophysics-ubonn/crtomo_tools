@@ -49,6 +49,7 @@ import tempfile
 import subprocess
 import os
 import time
+import io
 
 import numpy as np
 import scipy.sparse
@@ -397,14 +398,21 @@ class crt_grid(object):
             raise Exception('Not enough neighbors in file')
 
     def load_elem_file(self, elem_file):
-        """
+        """Load a CRTomo/CRMod elem.dat mesh file from either a file, or from
+        stringIO
 
         """
-        with open(elem_file, 'r') as fid:
-            self._read_elem_header(fid)
-            self._read_elem_nodes(fid)
-            self._read_elem_elements(fid)
-            self._read_elem_neighbors(fid)
+        if isinstance(elem_file, (io.StringIO, io.BytesIO,)):
+            # the StringIO object can directly be used
+            fid = elem_file
+        else:
+            fid = open(elem_file, 'r')
+        self._read_elem_header(fid)
+        self._read_elem_nodes(fid)
+        self._read_elem_elements(fid)
+        self._read_elem_neighbors(fid)
+        fid.close()
+
         self._prepare_grids()
 
     def save_elem_file(self, output):
@@ -460,7 +468,13 @@ class crt_grid(object):
         np.savetxt(fid, self.header['element_infos'], fmt='%i')
 
     def load_elec_file(self, elec_file):
-        electrode_nodes_raw = np.loadtxt(elec_file, skiprows=1, dtype=int) - 1
+        if isinstance(elec_file, (io.StringIO, io.BytesIO,)):
+            # the StringIO object can directly be used
+            fid = elec_file
+        else:
+            fid = open(elec_file, 'r')
+        electrode_nodes_raw = np.loadtxt(fid, skiprows=1, dtype=int) - 1
+        fid.close()
         self.electrodes = self.nodes['presort'][electrode_nodes_raw]
         self.nr_of_electrodes = self.electrodes.shape[0]
 
