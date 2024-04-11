@@ -2625,3 +2625,24 @@ i6,t105,g9.3,t117,f5.3)
             mode=mode,
         )
         return coms
+
+    def plot_inversion_result_rmag(self, ):
+        """Plot the final inversion results, magnitude-results only
+
+        """
+        assert self.assignments['inversion'] is not None, \
+            'need inversion results to plot anything'
+        pid_mag = self.assignments['inversion']['rmag'][-1]
+
+        fig, ax = plt.subplots(1, 1, figsize=(16 / 2.54, 8 / 2.54))
+
+        self.plot.plot_elements_to_ax(
+            pid_mag,
+            ax=ax,
+            plot_colorbar=True,
+            cblabel=r'$|\rho| [\Omega m]$',
+        )
+
+        fig.tight_layout()
+        return fig, ax
+
