@@ -1752,7 +1752,8 @@ class tdMan(object):
                 tfile = StringIO(''.join(data))
                 df = pd.read_csv(
                     tfile,
-                    delim_whitespace=True,
+                    sep='\s+',
+                    # delim_whitespace=True,
                     na_values=['Infinity'],
                 )
                 dfs.append(df)
