@@ -54,7 +54,7 @@ import re
 import os
 import tempfile
 import subprocess
-from io import StringIO, BytesIO
+from io import StringIO
 import itertools
 import functools
 
@@ -1079,12 +1079,14 @@ class tdMan(object):
         voltage_file : str
             Path to volt.dat file
         """
-        if isinstance(voltage_file, (StringIO, BytesIO)):
+        if isinstance(voltage_file, (StringIO, )):
             fid = voltage_file
+            fid.seek(0)
         else:
             fid = open(voltage_file, 'r')
 
         items_first_line = fid.readline().strip().split(' ')
+
         # rewind for reading of complete file later on
         fid.seek(0)
 
