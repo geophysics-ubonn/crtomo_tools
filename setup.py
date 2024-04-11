@@ -41,12 +41,13 @@ if __name__ == '__main__':
         # package_dir={'': 'src/', 'crtomo': 'lib/crtomo'},
         package_dir={
             '': 'src',
-            'crtomo': 'lib/crtomo'
+            'crtomo': 'lib/crtomo',
+            'crtomo.notebook': 'lib/crtomo/notebook',
         },
         # packages=[''],
         # package_dir={'': 'lib', 'grid_tools': 'src/GRID_TOOLS'},
         # packages=find_packages(),
-        packages=['crtomo', ],
+        packages=['crtomo', 'crtomo.notebook', ],
         package_data={'crtomo': package_data},
         py_modules=scripts,
         # py_modules=[
