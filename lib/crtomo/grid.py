@@ -425,35 +425,51 @@ class crt_grid(object):
         filename: string
             output filename
         """
-        with open(output, 'wb') as fid:
-            self._write_elem_header(fid)
-            self._write_nodes(fid)
-            self._write_elements(fid)
-            self._write_neighbors(fid)
+        if isinstance(output, (io.StringIO, io.BytesIO,)):
+            fid = output
+        else:
+            fid = open(output, 'wb')
+        self._write_elem_header(fid)
+        self._write_nodes(fid)
+        self._write_elements(fid)
+        self._write_neighbors(fid)
+        if not isinstance(fid, io.BytesIO):
+            fid.close()
 
     def save_elec_file(self, filename):
-        with open(filename, 'wb') as fid:
-            fid.write(
-                bytes(
-                    '{0}\n'.format(int(self.electrodes.shape[0])),
-                    'utf-8',
-                )
+        if isinstance(filename, (io.StringIO, io.BytesIO,)):
+            fid = filename
+        else:
+            fid = open(filename, 'wb')
+        fid.write(
+            bytes(
+                '{0}\n'.format(int(self.electrodes.shape[0])),
+                'utf-8',
             )
-            # the + 1 fixes the zero-indexing
-            np.savetxt(fid, self.electrodes[:, 0].astype(int) + 1, fmt='%i')
+        )
+        # the + 1 fixes the zero-indexing
+        np.savetxt(
+            fid, self.electrodes[:, 0].astype(int) + 1, fmt='%i',
+            encoding='utf-8',
+        )
+        if not isinstance(fid, io.BytesIO):
+            fid.close()
 
     def _write_neighbors(self, fid):
         for key in (11, 12):
             if key in self.neighbors:
-                np.savetxt(fid, self.neighbors[key], fmt='%i')
+                np.savetxt(
+                    fid, self.neighbors[key], fmt='%i', encoding='utf-8'
+                )
 
     def _write_elements(self, fid):
         for dtype in self.header['element_infos'][:, 0]:
             for elm in self.element_data[dtype]:
-                np.savetxt(fid, np.atleast_2d(elm.nodes), fmt='%i')
+                np.savetxt(
+                    fid, np.atleast_2d(elm.nodes), fmt='%i', encoding='utf-8')
 
     def _write_nodes(self, fid):
-        np.savetxt(fid, self.nodes['raw'], fmt='%i %f %f')
+        np.savetxt(fid, self.nodes['raw'], fmt='%i %f %f', encoding='utf-8')
 
     def _write_elem_header(self, fid):
         fid.write(
@@ -465,7 +481,8 @@ class crt_grid(object):
                 'utf-8',
             )
         )
-        np.savetxt(fid, self.header['element_infos'], fmt='%i')
+        np.savetxt(
+            fid, self.header['element_infos'], fmt='%i', encoding='utf-8')
 
     def load_elec_file(self, elec_file):
         if isinstance(elec_file, (io.StringIO, io.BytesIO,)):
@@ -1095,19 +1112,25 @@ class crt_grid(object):
 
         np.savetxt(
             tempdir + os.sep + 'electrodes.dat', electrodes,
-            fmt='%.3f %.3f'
+            fmt='%.3f %.3f',
+            encoding='utf-8',
         )
-        np.savetxt(tempdir + os.sep + 'boundaries.dat', boundaries,
-                   fmt='%.3f %.3f %i')
+        np.savetxt(
+            tempdir + os.sep + 'boundaries.dat', boundaries,
+            fmt='%.3f %.3f %i',
+            encoding='utf-8',
+        )
         np.savetxt(
             tempdir + os.sep + 'char_length.dat',
-            np.atleast_1d(char_lengths)
+            np.atleast_1d(char_lengths),
+            encoding='utf-8',
         )
         if extra_lines:
             np.savetxt(
                 tempdir + os.sep + 'extra_lines.dat',
                 np.atleast_2d(extra_lines),
-                fmt='%.3f %.3f %.3f %.3f'
+                fmt='%.3f %.3f %.3f %.3f',
+                encoding='utf-8',
             )
         pwd = os.getcwd()
         os.chdir(tempdir)
