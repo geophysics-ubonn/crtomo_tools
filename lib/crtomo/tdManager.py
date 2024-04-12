@@ -49,14 +49,17 @@
       (sigma) and potential data (nodes) in j = sigma E
 
 """
+import time
 from glob import glob
 import re
 import os
 import tempfile
 import subprocess
+import io
 from io import StringIO
 import itertools
 import functools
+import tarfile
 
 import matplotlib.colors
 import matplotlib.cm
@@ -542,6 +545,139 @@ class tdMan(object):
         self.register_magnitude_model(pids[0])
         self.register_phase_model(pids[1])
         return pids
+
+    def save_to_tarfile(self):
+        """Save the current modeling/inversion data into a tarfile. Return the
+        file as an io.BytesIO object. The tar file is generated completely in
+        memory - no files are written to the disc
+
+        Returns
+        -------
+        tomodir_tar : io.BytesIO
+            Tomodir stored in tar file
+        """
+        tomodir = io.BytesIO()
+        tar = tarfile.open(fileobj=tomodir, mode='w:xz')
+
+        # prepare buffers and write them to the tar file
+        elem_data = io.BytesIO()
+        self.grid.save_elem_file(elem_data)
+        info = tarfile.TarInfo()
+        info.name = 'grid/elem.dat'
+        info.mtime = time.time()
+        info.size = elem_data.tell()
+        info.type = tarfile.REGTYPE
+        elem_data.seek(0)
+        tar.addfile(info, elem_data)
+
+        elec_data = io.BytesIO()
+        self.grid.save_elec_file(elec_data)
+        info = tarfile.TarInfo()
+        info.name = 'grid/elec.dat'
+        info.mtime = time.time()
+        info.size = elec_data.tell()
+        info.type = tarfile.REGTYPE
+        elec_data.seek(0)
+        tar.addfile(info, elec_data)
+
+        crtomo_cfg = io.BytesIO()
+        self.crtomo_cfg.write_to_file(crtomo_cfg)
+        info = tarfile.TarInfo()
+        info.name = 'exe/crtomo.cfg'
+        info.mtime = time.time()
+        info.size = crtomo_cfg.tell()
+        info.type = tarfile.REGTYPE
+        crtomo_cfg.seek(0)
+        tar.addfile(info, crtomo_cfg)
+
+        volt_data = io.BytesIO()
+        self.save_measurements(volt_data)
+        info = tarfile.TarInfo()
+        info.name = 'mod/volt.dat'
+        info.mtime = time.time()
+        info.size = volt_data.tell()
+        info.type = tarfile.REGTYPE
+        volt_data.seek(0)
+        tar.addfile(info, volt_data)
+
+        tar.close()
+        tomodir.seek(0)
+        return tomodir
+
+        # modelling
+        """
+        config/config.dat
+        rho/rho.dat
+
+        exe/crmod.cfg
+        exe/crtomo.cfg
+        exe/crt.noisemod
+        exe/electrode_capactitances.dat
+        [TODO] exe/decouplings.dat
+        exe/prior.model
+        [TODO]exe/crt.lamnull
+
+        mod/sens/*
+        [TODO] mod/volt.dat
+        [TODO] mod/pot/*
+
+        inv/cjg.ctr
+        inv/coverage.mag
+        coverage.mag.fpi
+        [TODO] inv/ata.diag
+        [TODO] inv/ata_reg.diag
+        [TODO] inv/cov1_m.diag
+        [TODO] inv/cov2_m.diag
+        [TODO] inv/res_m.diag
+        [TODO] inv/eps.ctr
+        [TODO] inv/inv.ctr
+        [TODO] inv/*.model
+        [TODO] inv/*.mag
+        [TODO] inv/*.pha
+        [TODO] inv/run.ctr
+        [TODO] inv/voltXX.dat
+        """
+
+
+
+
+
+
+
+
+
+
+
+        # file1 = io.BytesIO()
+        # content_file1 = 'Hi there\nNew line\n'.encode('utf-8')
+        # file1.write(content_file1)
+        # file1.seek(0)
+
+        # tar = tarfile.open(fileobj=target_file, mode='w:xz')
+
+        # info1 = tarfile.TarInfo()
+        # info1.name = 'subdir/File1.txt'
+        # info1.mtime = time.time()
+        # info1.size = len(content_file1)
+        # info1.type = tarfile.REGTYPE
+
+        # tar.addfile(info1, file1)
+        # tar.close()
+
+        # target_file.seek(0)
+        # print('Reading tar file from memory:')
+        # print(
+        #     target_file.read()
+        #     )
+        #     with open('test.tar.xz', 'wb') as fid:
+        #         target_file.seek(0)
+        #             fid.write(target_file.read())
+        #             # extract with tar xvJf test.tar.xz
+
+
+        #             ## Reading
+        #             tar = tarfile.open(fileobj=target_file, mode='r')
+
 
     def save_to_tomodir(self, directory, only_for_inversion=False):
         """Save the tomodir instance to a directory structure.
