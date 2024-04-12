@@ -30,6 +30,7 @@ TODO
 * we could also add help texts here for each parameter
 
 """
+import io
 
 
 class crmod_config(dict):
@@ -131,15 +132,26 @@ class crmod_config(dict):
         Write the configuration to a file. Use the correct order of values.
         """
         self._check_and_convert_bools()
-        fid = open(filename, 'w')
+
+        if isinstance(filename, io.BytesIO):
+            fid = filename
+        else:
+            fid = open(filename, 'wb')
 
         for key in self.key_order:
-            if(key == -1):
-                fid.write('\n')
+            if (key == -1):
+                fid.write(bytes('\n', 'utf-8'))
             else:
-                fid.write('{0}\n'.format(self[key]))
+                fid.write(
+                    bytes(
+                        '{0}\n'.format(self[key]),
+                        'utf-8',
+                    )
+                )
 
-        fid.close()
+        # do not close BytesIO stream
+        if not isinstance(filename, io.BytesIO):
+            fid.close()
 
     def __repr__(self):
         self._check_and_convert_bools()
@@ -260,15 +272,24 @@ class crtomo_config(dict):
     def write_to_file(self, filename):
         """ Write the configuration to a file. Use the correct order of values.
         """
-        fid = open(filename, 'w')
+        if isinstance(filename, io.BytesIO):
+            fid = filename
+        else:
+            fid = open(filename, 'wb')
 
         for key in self.key_order:
-            if(key == -1):
-                fid.write('\n')
+            if (key == -1):
+                fid.write(bytes('\n', 'utf-8'))
             else:
-                fid.write('{0}\n'.format(self[key]))
+                fid.write(
+                    bytes(
+                        '{0}\n'.format(self[key]),
+                        'utf-8',
+                    )
+                )
 
-        fid.close()
+        if not isinstance(filename, io.BytesIO):
+            fid.close()
 
     def copy(self):
         return self.__copy__()
@@ -313,7 +334,12 @@ class crtomo_config(dict):
         filename : str
             Path to crtomo.cfg file
         """
-        lines_raw = [x.strip() for x in open(filename, 'r').readlines()]
+        if isinstance(filename, io.BytesIO):
+            line_data = filename.readlines()
+        else:
+            with open(filename, 'r') as fid:
+                line_data = fid.readlines()
+        lines_raw = [x.strip() for x in line_data]
         key_index = 0
         for line in lines_raw:
             # ignore comments
