@@ -50,6 +50,7 @@
 
 """
 import time
+import datetime
 from glob import glob
 import re
 import os
@@ -373,6 +374,10 @@ class tdMan(object):
             # load inversion results
             self.read_inversion_results(tomodir)
 
+        # if tomodir_tarxz is not None:
+        #     # read from a tarxz file/BytesIO file
+        #     raise Exception('Reading from tar.xz files is not supported yet')
+
     def inv_get_last_pid(self, parameter):
         """Return the pid of the parameter set corresponding to the final
         inversion results of a given parameter. Return None if the parameter
@@ -637,17 +642,6 @@ class tdMan(object):
         [TODO] inv/run.ctr
         [TODO] inv/voltXX.dat
         """
-
-
-
-
-
-
-
-
-
-
-
         # file1 = io.BytesIO()
         # content_file1 = 'Hi there\nNew line\n'.encode('utf-8')
         # file1.write(content_file1)
@@ -674,10 +668,8 @@ class tdMan(object):
         #             fid.write(target_file.read())
         #             # extract with tar xvJf test.tar.xz
 
-
         #             ## Reading
         #             tar = tarfile.open(fileobj=target_file, mode='r')
-
 
     def save_to_tomodir(self, directory, only_for_inversion=False):
         """Save the tomodir instance to a directory structure.
@@ -1524,6 +1516,78 @@ class tdMan(object):
                 'Sorry, no measurements present, cannot model yet'
             )
             return 1
+
+    def invert_with_crhydra(self):
+        import cr_hydra.settings
+        import crh_add
+        import crh_retrieve
+        import hashlib
+        import platform
+
+        cr_hydra_config, error_code = cr_hydra.settings.get_config(True)
+        if error_code != 0:
+            assert ('No cr_hydra config file found. Cannot proceed')
+        print('cr_hydra config found. Proceeding')
+
+        print('Creating in-memory .tar.xz file of tomodir')
+        tarxz = self.save_to_tarfile()
+
+        # upload the simulation
+        crh_settings = {
+            'datetime_init': '{}'.format(
+                datetime.datetime.now(tz=datetime.timezone.utc)
+            ),
+        }
+        crh_settings['source_computer'] = platform.node()
+        crh_settings['sim_type'] = 'inv'
+        crh_settings['crh_file'] = 'jupyter-lab'
+        crh_settings['username'] = 'crtomo-tools'
+
+        engine = crh_add._get_db_engine(cr_hydra_config)
+        connection = engine.connect()
+
+        archive_file = 'dasdasd'
+        file_id = crh_add._upload_binary_data(
+            tarxz, archive_file, connection
+        )
+        crh_settings['tomodir_unfinished_file'] = file_id
+
+        sim_id = crh_add._upload_simulation(crh_settings, connection)
+        crh_settings['sim_id'] = sim_id
+        crh_add._activate_simulation(sim_id, connection)
+
+        print('cr_hydra simulation id:', sim_id)
+
+        # wait until the inversion finished
+        is_finished = None
+        while is_finished is None:
+            print('Waiting for inversion to finish')
+            time.sleep(5)
+            is_finished = crh_retrieve._is_finished(sim_id, connection)
+        print('Inversion finished')
+
+        print('Downloading')
+        # retrieve the inversion
+        # NOTE: This should be called from crh_retrieve
+        result = connection.execute(
+            crh_retrieve.text(
+                'select hash, data from binary_data where index=:data_id;'
+            ),
+            parameters={
+                'data_id': is_finished,
+            },
+        )
+        assert result.rowcount == 1
+        file_hash, binary_data = result.fetchone()
+
+        # check hash
+        m = hashlib.sha256()
+        m.update(binary_data)
+        assert file_hash == m.hexdigest(), "sha256 does not match"
+
+        result_data = io.BytesIO(bytes(binary_data))
+        with open('output.tar.xz', 'wb') as fid:
+            fid.write(result_data.read())
 
     def read_inversion_results(self, tomodir):
         """Import inversion results from a tomodir into this instance
