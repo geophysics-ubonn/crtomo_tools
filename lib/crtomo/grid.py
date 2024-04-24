@@ -110,6 +110,9 @@ class crt_grid(object):
         self.nr_of_nodes = None
         self.nr_of_electrodes = None
 
+        # can hold an KDTree of the element centroids
+        self.centroid_tree = None
+
         # will be used for caching by .get_element_centroids
         self.centroids = None
 
@@ -245,7 +248,10 @@ class crt_grid(object):
         # check for CutMcK
         # The check is based on the first node, but if one node was renumbered,
         # so were all the others.
-        if(~np.all(nodes_raw[:, 0] == list(range(1, nodes_raw.shape[0] + 1)))):
+        if (
+                ~np.all(
+                    nodes_raw[:, 0] == list(
+                        range(1, nodes_raw.shape[0] + 1)))):
             self.header['cutmck'] = True
             print(
                 'This grid was sorted using CutMcK. The nodes were resorted!')
@@ -253,7 +259,7 @@ class crt_grid(object):
             self.header['cutmck'] = False
 
         # Rearrange nodes when CutMcK was used.
-        if(self.header['cutmck']):
+        if (self.header['cutmck']):
             nodes_cutmck = np.empty_like(nodes_raw)
             nodes_cutmck_index = np.zeros(nodes_raw.shape[0], dtype=int)
             for node in range(0, self.header['nr_nodes']):
@@ -315,7 +321,7 @@ class crt_grid(object):
         TODO: We want some nice way of not needing to know in the future if we
               loaded triangles or quadratic elements.
         """
-        if(self.header['element_infos'][0, 2] == 3):
+        if (self.header['element_infos'][0, 2] == 3):
             print('Triangular grid found')
             self.grid_is_rectangular = False
 
@@ -507,7 +513,7 @@ class crt_grid(object):
         node number as in self.nodes['sorted']
         """
         elec_node_raw = int(self.electrodes[electrode - 1][0])
-        if(self.header['cutmck']):
+        if (self.header['cutmck']):
             elec_node = self.nodes['rev_cutmck_index'][elec_node_raw]
         else:
             elec_node = elec_node_raw - 1
@@ -540,6 +546,8 @@ class crt_grid(object):
             )
         ax.set_xlim(self.grid['x'].min(), self.grid['x'].max())
         ax.set_ylim(self.grid['z'].min(), self.grid['z'].max())
+        ax.set_xlabel('x [m]')
+        ax.set_ylabel('z [m]')
         # ax.autoscale_view()
         ax.set_aspect('equal')
 
@@ -750,6 +758,57 @@ class crt_grid(object):
 
     @property
     def element_neighbors(self):
+        if self.element_neighbors_data is not None:
+            return self.element_neighbors_data
+
+        if self.centroid_tree is None:
+            centroids = self.get_element_centroids()
+            self.centroid_tree = scipy.spatial.cKDTree(centroids)
+
+        max_nr_edges = self.header['element_infos'][0, 2]
+
+        A = self.get_element_areas().max()
+        # A = pi * r^2
+        radius = np.sqrt(A / np.pi)
+
+        # initialize the neighbor array
+        self.element_neighbors_data = []
+        self.element_neighbors_edges = []
+
+        print('Looking for neighbors (V2 with cKDTree)')
+        time_start = time.perf_counter()
+        for nr, element_nodes in enumerate(self.elements):
+            neighbors_edges = []
+            neighbors_indices = []
+            # r = set(self.centroid_tree.query(centroids[nr], max_nr_edges)[1])
+            r = set(
+                self.centroid_tree.query_ball_point(
+                    centroids[nr],
+                    2 * radius
+                )
+            )
+            for index in list(r):
+                el_test = self.elements[index]
+                intersect_nodes = np.intersect1d(element_nodes, el_test)
+                if len(intersect_nodes) == 2:
+                    neighbors_indices += [index]
+                    neighbors_edges += [intersect_nodes]
+                # if len(intersect_nodes) in (0, 1, 3):
+                #     r.remove(index)
+                # neighbors_edges.append(intersect_nodes)
+                if len(neighbors_indices) == max_nr_edges:
+                    break
+            self.element_neighbors_edges.append(neighbors_edges)
+            self.element_neighbors_data.append(neighbors_indices)
+
+        # import IPython
+        # IPython.embed()
+        time_end = time.perf_counter()
+        print('elapsed time: {} s'.format(time_end - time_start))
+        return self.element_neighbors_data
+
+    @property
+    def element_neighbors_old(self):
         """Return a list with element numbers (zero indexed) of neighboring
         elements. Note that the elements are not sorted. No spacial orientation
         can be inferred from the order of neighbors.
@@ -980,7 +1039,7 @@ class crt_grid(object):
 
         """
         # check if all required information are present
-        if(electrodes_x is None and
+        if (electrodes_x is None and
            (nr_electrodes is None or spacing is None)):
             raise Exception(
                 'You must provide either the parameter "electrodes_" or ' +
@@ -1173,8 +1232,10 @@ class crt_grid(object):
         )
         centroids = self.get_element_centroids()
 
-        tree = scipy.spatial.cKDTree(centroids)
-        element_indices = tree.query(points)[1]
+        if self.centroid_tree is None:
+            self.centroid_tree = scipy.spatial.cKDTree(centroids)
+
+        element_indices = self.centroid_tree.query(points)[1]
         return element_indices
 
     def get_element_indices_within_rectangle(self, xmin, xmax, zmin, zmax):
