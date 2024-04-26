@@ -1135,7 +1135,10 @@ class tdMan(object):
 
         def _rescale_sensitivity(sens_data):
             norm_value = np.abs(sens_data).max()
-            sens_normed = sens_data / norm_value
+            if norm_value == 0:
+                sens_normed = sens_data * 0
+            else:
+                sens_normed = sens_data / norm_value
 
             indices_gt_zero = sens_data > 1e-5
             indices_lt_zero = sens_data < -1e-5
