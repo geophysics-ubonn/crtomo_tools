@@ -10,7 +10,7 @@ import crtomo.grid as CRGrid
 
 # # environment variables
 #
-node_mark_size = float(os.environ.get('MARK_SIZE', 1.0))
+node_mark_size = float(os.environ.get('MARK_SIZE', 30.0))
 # line width
 cell_mark_size = float(os.environ.get('MARK_WIDTH', 1.0))
 cell_line_width = float(os.environ.get('CELL_WIDTH', 1.0))
