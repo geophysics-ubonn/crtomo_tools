@@ -235,6 +235,9 @@ class tdMan(object):
         # multiplied for each electrode
         self.electrode_admittance = None
 
+        # when calling CRTomo, store output here
+        self.crtomo_error_msg = None
+        self.crtomo_output = None
         self._initialize_components(kwargs)
 
     def __repr__(self):
@@ -1433,6 +1436,15 @@ class tdMan(object):
             if True, catch all outputs of the CRTomo call (default: True)
         cores : int, optional
             how many cores to use. (default 2)
+
+        Returns
+        -------
+        success: bool
+            False if an error was detected
+        error_msg: str
+            Error message. None if not error was encountered.
+        output: str
+            Output of the actual CRTomo call
         """
         nr_cores = kwargs.get('cores', 2)
         print('Attempting inversion in directory: {0}'.format(tempdir))
@@ -1447,8 +1459,9 @@ class tdMan(object):
         # store env variable
         env_omp = os.environ.get('OMP_NUM_THREADS', '')
         os.environ['OMP_NUM_THREADS'] = '{0}'.format(nr_cores)
+        output = None
         if catch_output:
-            subprocess.check_output(
+            output = subprocess.check_output(
                 binary,
                 shell=True,
                 stderr=subprocess.STDOUT,
@@ -1458,16 +1471,32 @@ class tdMan(object):
                 binary,
                 shell=True,
             )
+
         # reset environment variable
         os.environ['OMP_NUM_THREADS'] = env_omp
 
-        print('Inversion finished')
-        print('Attempting to import the results')
+        print('Inversion attempt finished')
+        if os.path.isfile('error.dat'):
+            error_message = open('error.dat', 'r').read()
+            success = False
+        else:
+            success = True
+            error_message = None
 
         os.chdir(pwd)
-        self.read_inversion_results(tempdir)
-        print('Statistics of last iteration:')
-        print(self.inv_stats.iloc[-1])
+        if success:
+            print('Attempting to import the results')
+            self.read_inversion_results(tempdir)
+            print('Statistics of last iteration:')
+            print(self.inv_stats.iloc[-1])
+        else:
+            print('There was an error while trying to invert')
+            print('Please see .crtomo_error_msg and .crtomo_output')
+
+        self.crtomo_output = output
+        self.crtomo_error_msg = error_message
+
+        return success
 
     def invert(self, output_directory=None, catch_output=True, **kwargs):
         """Invert this instance, and import the result files
@@ -1499,7 +1528,9 @@ class tdMan(object):
                 if not os.path.isdir(output_directory):
                     os.makedirs(output_directory)
                     tempdir = output_directory
-                    self._invert(tempdir, catch_output, **kwargs)
+                    success = self._invert(
+                        tempdir, catch_output, **kwargs
+                    )
                 else:
                     raise IOError(
                         'Output directory already exists: {0}'.format(
@@ -1508,9 +1539,14 @@ class tdMan(object):
                     )
             else:
                 with tempfile.TemporaryDirectory(dir=self.tempdir) as tempdir:
-                    self._invert(tempdir, catch_output, **kwargs)
+                    success = self._invert(
+                        tempdir, catch_output, **kwargs
+                    )
 
-            return 0
+            if success:
+                return 0
+            else:
+                return 1
         else:
             print(
                 'Sorry, no measurements present, cannot model yet'
