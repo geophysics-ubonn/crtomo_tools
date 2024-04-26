@@ -396,7 +396,7 @@ class tdMan(object):
         pid : int|None
             The parameter id, or None
         """
-        if('inversion' in self.a and parameter in self.a['inversion'] and
+        if ('inversion' in self.a and parameter in self.a['inversion'] and
                 len(self.a['inversion'][parameter]) > 0):
             pid = self.a['inversion'][parameter][-1]
             return pid
@@ -505,12 +505,12 @@ class tdMan(object):
     def _check_state(self):
         """Check if this instance can model and/or can invert
         """
-        if(self.grid is not None and
+        if (self.grid is not None and
            self.configs.configs is not None and
            self.assignments['forward_model'] is not None):
             self.can_model = True
 
-        if(self.grid is not None and
+        if (self.grid is not None and
            self.assignments['measurements'] is not None):
             self.can_invert = True
 
@@ -713,7 +713,7 @@ class tdMan(object):
 
         # modeling
         if not only_for_inversion:
-            if(self.configs.configs is not None and
+            if (self.configs.configs is not None and
                     self.assignments['forward_model'] is not None):
                 self.configs.write_crmod_config(
                     directory + os.sep + 'config/config.dat'
@@ -917,7 +917,7 @@ class tdMan(object):
         )
         # check if there are sensitivity files, and that the nr corresponds to
         # the nr of configs
-        if(len(sens_files) > 0 and
+        if (len(sens_files) > 0 and
            len(sens_files) == self.configs.nr_of_configs):
             print('reading sensitivities')
             self._read_sensitivities(mod_directory + os.sep + 'sens')
@@ -928,7 +928,7 @@ class tdMan(object):
         )
         # check if there are sensitivity files, and that the nr corresponds to
         # the nr of configs
-        if(len(pot_files) > 0 and
+        if (len(pot_files) > 0 and
            len(pot_files) == self.configs.nr_of_configs):
             print('reading potentials')
             self._read_potentials(mod_directory + os.sep + 'pot')
@@ -1275,7 +1275,7 @@ class tdMan(object):
                         old_config[2:4] == new_config[4:1:-1]
                     )
 
-                    if(current_electrodes_are_equal and
+                    if (current_electrodes_are_equal and
                        voltage_electrodes_are_switched):
 
                         if len(self.configs.measurements.keys()) > 0:
@@ -1284,8 +1284,8 @@ class tdMan(object):
                             # IPython.embed()
                             # raise Exception(
                             #     'need to switch electrode polarity, but ' +
-                            #     'there are already measurements stored for ' +
-                            #     'the old configuration!')
+                            #     'there are already measurements stored for '
+                            #     + 'the old configuration!')
                             # exit()
                             switch_signs += [nr]
                         else:
@@ -1985,7 +1985,7 @@ class tdMan(object):
             if not x[0]:
                 data = [y for y in x[1]]
                 if data[0].startswith('IT') or data[0].startswith('PIT'):
-                    del(data[0])
+                    del (data[0])
                 data[0] = data[0].replace('-Phase (rad)', '-Phase(rad)')
                 tfile = StringIO(''.join(data))
                 df = pd.read_csv(
@@ -2881,4 +2881,3 @@ i6,t105,g9.3,t117,f5.3)
 
         fig.tight_layout()
         return fig, ax
-
