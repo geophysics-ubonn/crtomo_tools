@@ -353,6 +353,10 @@ class tdMan(object):
             pm=self.parman,
         )
 
+        # store decoupling data for the inversion here
+        # will become a Yx3 array
+        self.decouplings = None
+
         # if we load from a tomodir, also load configs and inversion results
         if tomodir is not None:
             print('importing tomodir results')
@@ -360,6 +364,7 @@ class tdMan(object):
             crtomo_cfg_file = tomodir + os.sep + 'exe' + os.sep + 'crtomo.cfg'
             if os.path.isfile(crtomo_cfg_file):
                 self.crtomo_cfg.import_from_file(crtomo_cfg_file)
+
             # forward configurations
             config_file = tomodir + os.sep + 'config' + os.sep + 'config.dat'
             if os.path.isfile(config_file):
@@ -377,9 +382,54 @@ class tdMan(object):
             # load inversion results
             self.read_inversion_results(tomodir)
 
+            self.read_decouplings_file(
+                tomodir + os.sep + 'exe' + os.sep + 'decouplings.dat'
+            )
+
         # if tomodir_tarxz is not None:
         #     # read from a tarxz file/BytesIO file
         #     raise Exception('Reading from tar.xz files is not supported yet')
+
+    def read_decouplings_file(self, filename):
+        """Import decoupling data for the inversion. This is usally a file
+        called decouplings.dat in the exe/ directory of a tomodir, but we can
+        also read from an BytesIO object.
+
+        Do nothing if the file does not exist
+
+        Overwrite any existing decouplings
+        """
+        if not isinstance(filename, io.BytesIO):
+            if not os.path.isfile(filename):
+                return
+        decouplings = np.loadtxt(filename, skiprows=1)
+        assert decouplings.shape[1] == 3
+        if self.decouplings is not None:
+            print('WARNING: overwriting existing decouplings')
+            self.decouplings = decouplings
+
+    def save_decouplins_file(self, filename):
+        if self.decouplings is None:
+            return
+        if isinstance(filename, io.BytesIO):
+            fid = filename
+        else:
+            fid = open(filename, 'w')
+
+        fid.write('{}\n'.format(self.decouplings.shape[0]))
+        np.savetxt(fid, self.decouplings, fmt='%i %i %f')
+
+        if not isinstance(filename, io.BytesIO):
+            fid.close()
+
+    def add_to_decouplings(self, new_decouplings):
+        assert new_decouplings.shape[1] == 3
+        if self.decouplings is None:
+            self.decouplings = new_decouplings
+        self.decouplings = np.vstack((
+            self.decouplings,
+            new_decouplings
+        ))
 
     def inv_get_last_pid(self, parameter):
         """Return the pid of the parameter set corresponding to the final
@@ -598,6 +648,16 @@ class tdMan(object):
         crtomo_cfg.seek(0)
         tar.addfile(info, crtomo_cfg)
 
+        decouplings = io.BytesIO()
+        self.save_decouplins_file(decouplings)
+        info = tarfile.TarInfo()
+        info.name = 'exe/decouplings.dat'
+        info.mtime = time.time()
+        info.size = crtomo_cfg.tell()
+        info.type = tarfile.REGTYPE
+        decouplings.seek(0)
+        tar.addfile(info, decouplings)
+
         volt_data = io.BytesIO()
         self.save_measurements(volt_data)
         info = tarfile.TarInfo()
@@ -621,7 +681,7 @@ class tdMan(object):
         exe/crtomo.cfg
         exe/crt.noisemod
         exe/electrode_capactitances.dat
-        [TODO] exe/decouplings.dat
+        exe/decouplings.dat
         exe/prior.model
         [TODO]exe/crt.lamnull
 
@@ -704,11 +764,11 @@ class tdMan(object):
         self.create_tomodir(directory)
 
         self.grid.save_elem_file(
-            directory + os.sep + 'grid/elem.dat'
+            directory + os.sep + 'grid' + os.sep + 'elem.dat'
         )
 
         self.grid.save_elec_file(
-            directory + os.sep + 'grid/elec.dat'
+            directory + os.sep + 'grid' + os.sep + 'lec.dat'
         )
 
         # modeling
@@ -716,36 +776,38 @@ class tdMan(object):
             if (self.configs.configs is not None and
                     self.assignments['forward_model'] is not None):
                 self.configs.write_crmod_config(
-                    directory + os.sep + 'config/config.dat'
+                    directory + os.sep + 'config' + os.sep + 'config.dat'
                 )
 
             if self.assignments['forward_model'] is not None:
                 self.parman.save_to_rho_file(
-                    directory + os.sep + 'rho/rho.dat',
+                    directory + os.sep + 'rho' + os.sep + 'rho.dat',
                     self.assignments['forward_model'][0],
                     self.assignments['forward_model'][1],
                 )
 
             self.crmod_cfg.write_to_file(
-                directory + os.sep + 'exe/crmod.cfg'
+                directory + os.sep + 'exe' + os.sep + 'crmod.cfg'
             )
 
             if self.assignments['sensitivities'] is not None:
                 self._save_sensitivities(
-                    directory + os.sep + 'mod/sens',
+                    directory + os.sep + 'mod' + os.sep + 'sens',
                 )
 
             if self.assignments['potentials'] is not None:
                 self._save_potentials(
-                    directory + os.sep + 'mod/pot',
+                    directory + os.sep + 'mod' + os.sep + 'pot',
                 )
 
         # we always want to save the measurements
-        self.save_measurements(directory + os.sep + 'mod/volt.dat')
+        self.save_measurements(
+            directory + os.sep + 'mod' + os.sep + 'volt.dat'
+        )
 
         # inversion
         self.crtomo_cfg.write_to_file(
-            directory + os.sep + 'exe/crtomo.cfg'
+            directory + os.sep + 'exe' + os.sep + 'crtomo.cfg'
         )
 
         if self.electrode_admittance is not None:
@@ -753,8 +815,12 @@ class tdMan(object):
 
         if self.noise_model is not None:
             self.noise_model.write_crt_noisemod(
-                directory + os.sep + 'exe/crt.noisemod'
+                directory + os.sep + 'exe' + os.sep + 'crt.noisemod'
             )
+
+        self.save_decouplins_file(
+            directory + os.sep + 'exe' + os.sep + 'crt.noisemod'
+        )
 
         if not os.path.isdir(directory + os.sep + 'inv'):
             os.makedirs(directory + os.sep + 'inv')
@@ -2881,3 +2947,42 @@ i6,t105,g9.3,t117,f5.3)
 
         fig.tight_layout()
         return fig, ax
+
+    def plot_decouplings_to_ax(self, ax, plot_transistions=True):
+        """Visualize decouplings. Usually you may want to plot the mesh to this
+        axis first
+
+        Parameters
+        ----------
+        ax: matplotlib.Axes
+            Axis to plot to
+        plot_transistions: bool (True)
+            If True, then also visualize the decoupled transitions
+
+        """
+        if self.decouplings is None:
+            return
+
+        if plot_transistions:
+            centroids = self.grid.get_element_centroids()
+            for A, B, strength in self.decouplings:
+                A = int(A)
+                B = int(B)
+                ax.plot(
+                    [centroids[A][0], centroids[B][0]],
+                    [centroids[A][1], centroids[B][1]],
+                    color='green',
+                    linewidth=1.0 * strength + 0.1,
+                )
+
+        for element1, element2, strength in self.decouplings:
+            element1 = int(element1)
+            element2 = int(element2)
+
+            nodes = np.intersect1d(
+                self.grid.elements[element1],
+                self.grid.elements[element2]
+            )
+            (a_x, a_y) = self.grid.nodes['presort'][nodes[0]][1:3]
+            (b_x, b_y) = self.grid.nodes['presort'][nodes[1]][1:3]
+            ax.plot([a_x, b_x], [a_y, b_y], color='r')
