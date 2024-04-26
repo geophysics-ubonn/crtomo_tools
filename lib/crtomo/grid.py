@@ -112,6 +112,11 @@ class crt_grid(object):
 
         # can hold an KDTree of the element centroids
         self.centroid_tree = None
+        # can hold an KDTree of the node coordinates
+        self.node_tree = None
+
+        # can hold the distance matrix of the mesh, as a csr_array
+        self.distance_matrix = None
 
         # will be used for caching by .get_element_centroids
         self.centroids = None
@@ -1338,3 +1343,84 @@ class crt_grid(object):
             ][i].zcoords = self.element_data[
                 element_type
             ][i].zcoords[::-1]
+
+    def get_distance_matrix(self):
+        if self.distance_matrix is not None:
+            return self.distance_matrix
+
+        N = self.nr_of_nodes
+        self.distance_matrix = scipy.sparse.lil_array((N, N))
+        for element in self.elements:
+            # works only for triangles!
+            for a, b in zip((0, 1, 2), (1, 2, 0)):
+                index_a = element[a]
+                index_b = element[b]
+
+                coords_a = self.nodes['presort'][element[a]][1:3]
+                coords_b = self.nodes['presort'][element[b]][1:3]
+
+                # compute distance between nodes
+                distance = np.linalg.norm(
+                    coords_a - coords_b
+                )
+
+                self.distance_matrix[index_a, index_b] = distance
+                self.distance_matrix[index_b, index_a] = distance
+        return self.distance_matrix
+
+    def get_node_tree(self):
+        if self.node_tree is not None:
+            return self.node_tree
+        self.node_tree = scipy.spatial.KDTree(
+            self.nodes['presort'][:, 1:3]
+        )
+        return self.node_tree
+
+    def find_nearest_node(self, coords, return_node_coords=True):
+        node_tree = self.get_node_tree()
+        result = node_tree.query(coords, 1)[1]
+        if return_node_coords:
+            return result, self.nodes['presort'][result][1:3]
+        return result
+
+    def determine_path_along_nodes(self, start_coordinate, end_coordinate):
+        """
+
+        """
+        start, (sx, sy) = self.find_nearest_node(start_coordinate, True)
+        end, (ex, ey) = self.find_nearest_node(end_coordinate, True)
+
+        path_dist, path_pred = scipy.sparse.csgraph.shortest_path(
+            self.get_distance_matrix(),
+            directed=False,
+            return_predecessors=True,
+            unweighted=False,
+        )
+        path_nodes = []
+        path_pred[start]
+
+        # determine the nodes of the path
+        N = self.nr_of_elements
+        index = end
+        path_nodes += [end]
+        for i in range(N):
+            next_index = path_pred[start][index]
+            if next_index > 0:
+                path_nodes += [path_pred[start][index]]
+                index = next_index
+            else:
+                break
+
+        # determine elements adjacent to the path
+        el_pairs = []
+        for i in range(len(path_nodes) - 1):
+            a1 = path_nodes[i]
+            a2 = path_nodes[i+1]
+            relevant_elements = np.intersect1d(
+                np.where(np.any(self.elements == a1, axis=1))[0],
+                np.where(np.any(self.elements == a2, axis=1))[0]
+            )
+
+            if len(relevant_elements) == 2:
+                el_pairs += [np.hstack(([a1, a2], relevant_elements))]
+        return np.array(el_pairs)
