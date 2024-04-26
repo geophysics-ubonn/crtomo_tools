@@ -211,10 +211,10 @@ class ConfigManager(reda_config_mgr.ConfigManager):
         Parameters
         ----------
         data_source : string|numpy.ndarray
-            if this is a string, treat it as an input filename. If it is a Nx5
+            if this is a string, treat it as an input filename. If it is a Nx6
             or Nx3 numpy array, use this data directly
         is_forward_response : bool, optional
-            If True this indicated volt.dat file created by CRTomo during an
+            If True this indicates a volt.dat file created by CRTomo during an
             inversion run to store forward responses of a given model
             iteration. In this case the third data column indicates the wdfak
             parameter, i.e., it indicates if a given data point was excluded
