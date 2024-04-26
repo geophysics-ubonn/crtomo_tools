@@ -16,7 +16,8 @@ import reda
 ###############################################################################
 # create and save a FEM-grid
 grid = crtomo.crt_grid.create_surface_grid(
-    nr_electrodes=10, spacing=1,
+    nr_electrodes=10,
+    spacing=1,
     depth=4,
     char_lengths=0.2,
 )
@@ -41,7 +42,7 @@ for bg in (1, 10, 100, 1000):
     td.configs.add_to_configs(configs)
     td.add_homogeneous_model(bg, 0)
 
-    td.model(sensitivities=True)
+    td.model(sensitivities=True, silent=True)
     r = td.plot_sensitivity(0)
     with reda.CreateEnterDirectory('output_plot_00_sensitivity'):
         r[0].savefig('sensitivity_bg_{}.pdf'.format(bg), bbox_inches='tight')
