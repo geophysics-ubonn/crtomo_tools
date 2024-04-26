@@ -768,7 +768,7 @@ class tdMan(object):
         )
 
         self.grid.save_elec_file(
-            directory + os.sep + 'grid' + os.sep + 'lec.dat'
+            directory + os.sep + 'grid' + os.sep + 'elec.dat'
         )
 
         # modeling
