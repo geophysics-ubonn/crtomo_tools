@@ -4,19 +4,13 @@
 Parse a GMSH mesh and produce a FEM grid for CRMod/CRTomo. This script should
 not be called directly, as it requires the input and output files from
 "cr_trig_create.py".
-
-TODO
-----
-
-* the program at some point looks for nodes on the boundary line. Perhaps some
-  funtions in "grid_extralines_gen_decouplings.py" can be used here (code
-  deduplication and speed improvements)
-
-
 """
-from crtomo.mpl_setup import *
-mpl.rcParams['font.size'] = 6.0
+import time
+import crtomo.mpl
 import numpy as np
+
+plt, mpl = crtomo.mpl.setup()
+mpl.rcParams['font.size'] = 6.0
 
 
 def parse_gmsh(filename, boundary_file):
@@ -28,22 +22,22 @@ def parse_gmsh(filename, boundary_file):
 
     fid = open(filename, 'r')
     line = fid.readline()
-    while(line):
-        if(line.startswith('$MeshFormat')):
+    while (line):
+        if (line.startswith('$MeshFormat')):
             pass
-        elif(line.startswith('$Nodes')):
+        elif (line.startswith('$Nodes')):
             nodes = []
             line = fid.readline()
             nr_nodes = np.fromstring(line, dtype=int, count=1, sep=r'\n')
             nr_nodes
-            while(line):
+            while (line):
                 line = fid.readline()
-                if(line.startswith('$EndNodes')):
+                if (line.startswith('$EndNodes')):
                     break
                 node = np.fromstring(line, dtype=float, sep=' ')
                 nodes.append(node)
             mesh['nodes'] = nodes
-        elif(line.startswith('$Elements')):
+        elif (line.startswith('$Elements')):
             """
             Create a dictionary with the element types as keys. E.g.:
             elements['15'] provides all elements of type 15 (Points)
@@ -52,9 +46,9 @@ def parse_gmsh(filename, boundary_file):
             line = fid.readline()
             nr_elements = np.fromstring(line, dtype=int, count=1, sep=r'\n')
             nr_elements
-            while(line):
+            while (line):
                 line = fid.readline()
-                if(line.startswith('$EndElements')):
+                if (line.startswith('$EndElements')):
                     break
                 element = np.fromstring(line, dtype=int, sep=' ')
                 # el_nr = element[0]
@@ -65,7 +59,7 @@ def parse_gmsh(filename, boundary_file):
 
                 # now decide where to put it
                 key = str(el_type)
-                if(key in elements.keys()):
+                if (key in elements.keys()):
                     elements[key].append(el_nodes)
                 else:
                     elements[key] = []
@@ -80,7 +74,7 @@ def parse_gmsh(filename, boundary_file):
     # according to the element types
     boundaries = {}
 
-    if(boundary_file is not None):
+    if (boundary_file is not None):
         # load the original boundary lines
         # it is possible that GMSH added additional nodes on these lines, and
         # that is why we need to find all mesh lines that lie on these original
@@ -106,13 +100,13 @@ def parse_gmsh(filename, boundary_file):
                 oy1 = orig_line[1]
                 oy2 = orig_line[3]
 
-                if(orig_line[0] == orig_line[2]):
+                if (orig_line[0] == orig_line[2]):
                     # special case: we only need to find all lines with x1 ==
                     # x2 == x1_orig and y_min >= y_orig_min and y_max <=
                     # <_orig_max
                     for line in elements['1']:
-                        if(btype == '11'):
-                            if(line[0] == 48 and line[1] == 150):
+                        if (btype == '11'):
+                            if (line[0] == 48 and line[1] == 150):
                                 pass
                                 # print('Find all lines lying on the line: ')
                                 # print('This is the line')
@@ -136,7 +130,7 @@ def parse_gmsh(filename, boundary_file):
                         )
 
                         if np.isclose(x1, x2) and np.isclose(x2, ox1):
-                            if(y1 >= oy1 and y2 <= oy2):
+                            if (y1 >= oy1 and y2 <= oy2):
                                 found_one_line = True
                                 boundaries[btype].append(line)
 
@@ -158,31 +152,31 @@ def parse_gmsh(filename, boundary_file):
                         check = False
                         # check if x coordinates of the test line fit in the
                         # original line
-                        if(ox1 < ox2):
-                            if(x1 < x2):
-                                if((np.isclose(x1, ox1) or x1 > ox1) and
+                        if (ox1 < ox2):
+                            if (x1 < x2):
+                                if ((np.isclose(x1, ox1) or x1 > ox1) and
                                    (np.isclose(x2, ox2) or x2 < ox2)):
                                     check = True
                             else:
-                                if((np.isclose(x2, ox1) or x2 >= ox1) and
+                                if ((np.isclose(x2, ox1) or x2 >= ox1) and
                                    (np.isclose(x1, ox2) or x1 <= ox2)):
                                     check = True
                         else:
-                            if(x1 < x2):
-                                if((np.isclose(x1, ox2) or x1 >= ox2) and
+                            if (x1 < x2):
+                                if ((np.isclose(x1, ox2) or x1 >= ox2) and
                                    (np.isclose(x2, ox1) or x2 <= ox1)):
                                     check = True
                             else:
-                                if((np.isclose(x2, ox2) or x2 >= ox2) and
+                                if ((np.isclose(x2, ox2) or x2 >= ox2) and
                                    (np.isclose(x1, ox1) or x1 <= ox1)):
                                     check = True
 
                         # print('boundary check:', check)
-                        if(check):
+                        if (check):
                             # the line lies within the x-range of the orig line
                             ytest1 = slope * x1 + intersect
                             ytest2 = slope * x2 + intersect
-                            if(np.around(ytest1 - y1, 5) == 0 and
+                            if (np.around(ytest1 - y1, 5) == 0 and
                                np.around(ytest2 - y2, 5) == 0):
                                 boundaries[btype].append(line)
                                 # found = True
@@ -244,7 +238,7 @@ def debug_plot_mesh(mesh, boundary_elements):
     tx_size = np.abs(np.max(tx) - np.min(tx))
     ty_size = np.abs(np.max(ty) - np.min(ty))
 
-    if(plot_large):
+    if (plot_large):
         width = 10
     else:
         width = 7
@@ -294,7 +288,7 @@ def debug_plot_mesh(mesh, boundary_elements):
                label='electrodes')
 
     fig.tight_layout()
-    if(plot_large):
+    if (plot_large):
         dpi = 600
     else:
         dpi = 300
@@ -315,16 +309,16 @@ def get_header(mesh):
         diff2 = abs(triangle[0] - triangle[2])
         diff3 = abs(triangle[1] - triangle[2])
         diffm = max(diff1, diff2, diff3)
-        if(diffm > bandwidth):
+        if (diffm > bandwidth):
             bandwidth = diffm
 
     el_infos = []
     # triangles
     for element in ('2',):
         el = mesh['elements'][element]
-        if(element == '2'):
+        if (element == '2'):
             el_type = 3
-        elif(element == '1'):
+        elif (element == '1'):
             el_type = 12  # Neumann
         nr = len(el)
         nr_nodes = len(el[0])
@@ -332,11 +326,11 @@ def get_header(mesh):
 
     # boundary elements
     for btype in ('12', '11'):
-        if(btype in mesh['boundaries']):
+        if (btype in mesh['boundaries']):
             el_type = int(btype)
             nr = len(mesh['boundaries'][btype])
             nr_nodes = 2
-            if(nr > 0):
+            if (nr > 0):
                 nr_types += 1
                 el_infos.append((el_type, nr, nr_nodes))
 
@@ -365,7 +359,7 @@ def get_elements(mesh):
         el = mesh['elements'][element]
         for item in el:
             # the reverse should ensure counter-clockwise element nodes
-            if(element == '1'):
+            if (element == '1'):
                 # boundary elements
                 lst = item
             else:
@@ -379,14 +373,15 @@ def get_elements(mesh):
         for line in mesh['boundaries'][btype]:
             str_elements += '{0} {1}\n'.format(line[0], line[1])
 
-    return(str_elements)
+    return (str_elements)
 
 
-def get_ajd_bound(mesh):
+def get_adj_bound_v1(mesh):
     """
-    Determine triangular elements adjacend to the boundary elements
+    Determine triangular elements adjacent to the boundary elements
     """
-    print('Get elements adjacent to boundaries')
+    print('Get elements adjacent to boundaries V1')
+    start = time.perf_counter()
     boundary_elements = []
     str_adj_boundaries = ''
     # for boundary in mesh['elements']['1']:
@@ -396,12 +391,52 @@ def get_ajd_bound(mesh):
         indices = [nr if (boundary[0] in x and boundary[1] in x) else np.nan
                    for (nr, x) in enumerate(mesh['elements']['2'])]
         indices = np.array(indices)[~np.isnan(indices)]
-        if(len(indices) != 1):
+        # import IPython
+        # IPython.embed()
+        # exit()
+        if (len(indices) != 1):
             print('More than one neighbour found!')
-        elif(len(indices) == 0):
+        elif (len(indices) == 0):
             print('No neighbour found!')
         boundary_elements.append(indices[0])
         str_adj_boundaries += '{0}\n'.format(int(indices[0]) + 1)
+    end = time.perf_counter()
+    print('Elapsed time: {:.2}s'.format(end - start))
+    return str_adj_boundaries, boundary_elements
+
+
+def get_adj_bound_v2(mesh):
+    """
+    Determine triangular elements adjacent to the boundary elements
+    """
+    print('Get elements adjacent to boundaries V2')
+    start = time.perf_counter()
+    boundary_elements = []
+    str_adj_boundaries = ''
+    # for boundary in mesh['elements']['1']:
+    boundaries = mesh['boundaries']['12'] + mesh['boundaries']['11']
+    elements = np.array(mesh['elements']['2'])
+    for boundary in boundaries:
+        # # now find the triangle ('2') with two nodes equal to this boundary
+        # indices = [nr if (boundary[0] in x and boundary[1] in x) else np.nan
+        #            for (nr, x) in enumerate(mesh['elements']['2'])]
+        # indices = np.array(indices)[~np.isnan(indices)]
+        indices = np.intersect1d(
+            np.where(np.any(elements == boundary[0], axis=1))[0],
+            np.where(np.any(elements == boundary[1], axis=1))[0]
+        )
+
+        # import IPython
+        # IPython.embed()
+        # exit()
+        if (len(indices) != 1):
+            print('More than one neighbour found!')
+        elif (len(indices) == 0):
+            print('No neighbour found!')
+        boundary_elements.append(indices[0])
+        str_adj_boundaries += '{0}\n'.format(int(indices[0]) + 1)
+    end = time.perf_counter()
+    print('Elapsed time: {:.2}s'.format(end - start))
     return str_adj_boundaries, boundary_elements
 
 
@@ -441,13 +476,19 @@ def main():
     str_header = get_header(mesh)
     str_nodes = get_nodes(mesh)
     str_elements = get_elements(mesh)
-    str_adj_boundaries, boundary_elements = get_ajd_bound(mesh)
 
-    crt_mesh = str_header + str_nodes + str_elements + str_adj_boundaries
+    # v1 is slow....
+    # str_adj_boundaries1, boundary_elements1 = get_adj_bound_v1(mesh)
+    str_adj_boundaries2, boundary_elements2 = get_adj_bound_v2(mesh)
+    # import IPython
+    # IPython.embed()
+    # exit()
+
+    crt_mesh = str_header + str_nodes + str_elements + str_adj_boundaries2
 
     fid = open('../elem.dat', 'w')
     fid.write(crt_mesh)
     fid.close()
 
     write_elec_file('../electrode_positions.dat', mesh)
-    debug_plot_mesh(mesh, boundary_elements)
+    debug_plot_mesh(mesh, boundary_elements2)
