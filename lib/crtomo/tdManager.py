@@ -1990,7 +1990,7 @@ class tdMan(object):
                 tfile = StringIO(''.join(data))
                 df = pd.read_csv(
                     tfile,
-                    sep='\s+',
+                    sep=r'\s+',
                     # delim_whitespace=True,
                     na_values=['Infinity'],
                 )
