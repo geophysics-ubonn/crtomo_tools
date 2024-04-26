@@ -1,0 +1,28 @@
+---
+title: "Finite-Element Meshes"
+---
+
+The Finite-Element mesh is the discretised representation of the area of
+interest.
+The mesh is comprised of nodes (1D, points) and triangles (2D, constructed of
+three nodes each).
+Each triangle will later hold a constant subsurface property, such as
+resistivity magnitude or resistivity phase (sometimes also represented using a
+complex resistivity).
+
+The mesh also must include all electrode positions and must specify the type of
+**boundary condition** on each 1D boundary element.
+
+## What things to consider when creating a mesh?
+
+* In order to achieve suitable modelling accuracy, make sure to use a finer
+  mesh discretisation around electrodes. Also make sure to have at least 2
+  nodes between adjacent electrodes.
+
+* Even when using **mixed-boundary** conditions, make sure to add enough space
+  towards the nearest non-surface boundary. As a rule of thumb, use at least 2
+  electrode distances.
+
+* Make sure to add enough depth (z-direction) to the mesh. The absolute minimum
+  is 0.2 * maximum electrode distance.
+

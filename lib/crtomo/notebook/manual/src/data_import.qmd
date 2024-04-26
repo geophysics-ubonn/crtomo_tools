@@ -1,0 +1,6 @@
+---
+title: "Data Import"
+---
+
+Currently, only **IRIS Instruments Syscal Pro** .bin files can be imported.
+

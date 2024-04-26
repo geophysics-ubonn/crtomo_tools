@@ -19,6 +19,7 @@ for script in scripts:
 # package data
 os.chdir('lib/crtomo')
 package_data = glob.glob('debug_data/*')
+package_data += glob.glob('notebook/manual/html/**', recursive=True)
 os.chdir('../../')
 
 
