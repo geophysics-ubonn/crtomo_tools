@@ -275,7 +275,8 @@ class plotManager(object):
             return fig, ax, pc, cb
         return fig, ax, pc
 
-    def plot_nodes_current_streamlines_to_ax(self, ax, cid, model_pid, **kwargs):
+    def plot_nodes_current_streamlines_to_ax(
+            self, ax, cid, model_pid, **kwargs):
         """
 
         """
@@ -495,10 +496,14 @@ class plotManager(object):
         # IPython.embed()
         # color map
         cmap_name = kwargs.get('cmap_name', 'viridis')
-        cmap = mpl.cm.get_cmap(
-            cmap_name,
-            kwargs.get('cbsegments', None)
+        cmap = mpl.colormaps[cmap_name].resampled(
+            kwargs.get('cbsegments', 256)
         ).copy()
+
+        # cmap = mpl.cm.get_cmap(
+        #     cmap_name,
+        #     kwargs.get('cbsegments', None)
+        # ).copy()
         over = kwargs.get('over', cmap(1.0))
         under = kwargs.get('under', cmap(0.0))
 
