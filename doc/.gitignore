@@ -6,3 +6,4 @@ api/*.rst
 api/*.png
 api/*.pdf
 scripts/grid_tools/*.rst
+sg_execution_times.rst
