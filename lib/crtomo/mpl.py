@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Thils file set ups matplotlib plot functions for the whole package.
+"""This file set ups matplotlib plot functions for the whole package.
 
 Import all necessary Matplotlib modules and set default options
 To use this module, call the setup() function.
@@ -11,6 +11,11 @@ Examples
     >>> crtomo.mpl.setup()
 
 """
+
+
+def get_mpl_version():
+    import matplotlib as mpl
+    return [int(x) for x in mpl.__version__.split('.')]
 
 
 def setup():
@@ -47,6 +52,7 @@ def general_settings():
     """
     import matplotlib as mpl
     import matplotlib.pyplot as plt
+    plt
     mpl.rcParams['font.size'] = 7.0
     mpl.rcParams['axes.labelsize'] = 7.0
     mpl.rcParams['xtick.labelsize'] = 7.0
