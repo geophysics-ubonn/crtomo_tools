@@ -4,6 +4,23 @@
 Using Inkscape to define internal structure
 ===========================================
 
+It is possible to use Inkscape to define some of the internal structure of a FE
+mesh. This can be used to:
+
+    * define irregularly-shaped regions within a forward mesh
+    * define internal geometry that is later used for decoupling of the
+      regularization
+
+More information: https://geophysics-ubonn.github.io/crtomo_tools/grid_creation.html#introducing-structures-into-a-mesh-using-inkscape
+
+
+The basic procedure is as follows:
+
+    * Create input files for triangular mesh generation as usual:
+      **boundaries.dat**, **electrodes.dat**
+    * Following that, generate a .svg template of the mesh boundary by running
+      *grid_convert_boundary_to_svg*
+
 """
 ###############################################################################
 import os
