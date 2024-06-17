@@ -24,7 +24,6 @@ import numpy as np
 import crtomo.mpl
 import crtomo.mpl as mpl_style
 import matplotlib
-import matplotlib.cm as mpl_cm
 # import matplotlib.pyplot as plt
 # import matplotlib as mpl
 
@@ -898,7 +897,6 @@ def create_singleplots(plotman, cov, mag, pha, pha_fpi, alpha, options):
             vmin, vmax
         )
         # plot
-        cmap = mpl_cm.get_cmap(cm)
         # https://matplotlib.org/stable/api/prev_api_changes/api_changes_3.9.0.html#top-level-cmap-registration-and-access-functions-in-mpl-cm
         if mpl_version[0] <= 3 and mpl_version[1] < 9:
             cmap = mpl.cm.get_cmap(cm)
