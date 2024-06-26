@@ -13,6 +13,11 @@ Examples
 """
 
 
+def get_mpl_version():
+    import matplotlib as mpl
+    return [int(x) for x in mpl.__version__.split('.')]
+
+
 def setup():
     """import the matplotlib modules and set the style
     """
@@ -46,7 +51,7 @@ def general_settings():
     """general settings
     """
     import matplotlib as mpl
-    import matplotlib.pyplot as plt
+    # import matplotlib.pyplot as plt
     mpl.rcParams['font.size'] = 7.0
     mpl.rcParams['axes.labelsize'] = 7.0
     mpl.rcParams['xtick.labelsize'] = 7.0
