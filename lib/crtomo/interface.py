@@ -106,7 +106,7 @@ class crmod_interface(object):
         measurements[:, 1] *= -1
         return measurements
 
-    def J(self, log_sigma):
+    def J(self, log_sigma, silent=True):
         """Return the sensitivity matrix
 
         Parameters
@@ -121,6 +121,7 @@ class crmod_interface(object):
         tdm.model(
             sensitivities=True,
             # output_directory=stage_dir + 'modeling',
+            silent=silent,
         )
 
         measurements = tdm.measurements()
@@ -158,7 +159,7 @@ class crmod_interface(object):
 
         return sensitivities_log
 
-    def fwd_complex_R_sigma(self, model_ccomplex):
+    def fwd_complex_R_sigma(self, model_ccomplex, silent=False):
         """Compute the model response from linear complex conductivities
 
         Parameters
@@ -171,14 +172,14 @@ class crmod_interface(object):
         ) * 1000
         model_rmag_rpha = np.vstack((m_rmag, m_rpha)).T
         tdm = self._get_tdm(model_rmag_rpha)
-        measurements = tdm.measurements()
+        measurements = tdm.measurements(silent=silent)
         rmag = measurements[:, 0]
         rpha = measurements[:, 1]
 
         rcomplex = rmag * np.exp(1j * rpha / 1000)
         return rcomplex
 
-    def fwd_complex_R_rho(self, model_rcomplex):
+    def fwd_complex_R_rho(self, model_rcomplex, silent=False):
         """Compute the forward response.
 
         Parameters
@@ -198,14 +199,14 @@ class crmod_interface(object):
         ) * 1000
         model_rmag_rpha = np.vstack((m_rmag, m_rpha)).T
         tdm = self._get_tdm(model_rmag_rpha)
-        measurements = tdm.measurements()
+        measurements = tdm.measurements(silent=silent)
         rmag = measurements[:, 0]
         rpha = measurements[:, 1]
 
         rcomplex = rmag * np.exp(1j * rpha / 1000)
         return rcomplex
 
-    def J_complex_R_sigma(self, model_ccomplex):
+    def J_complex_R_sigma(self, model_ccomplex, silent=False):
         """Compute the Jacobian
 
         """
@@ -222,6 +223,7 @@ class crmod_interface(object):
         tdm.model(
             sensitivities=True,
             # output_directory=stage_dir + 'modeling',
+            silent=silent,
         )
 
         # measurements = tdm.measurements()

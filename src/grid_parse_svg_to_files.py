@@ -181,6 +181,7 @@ def main():
                     ax.set_title('DEBUG')
                     shapely.plotting.plot_line(boundary_line, ax=ax)
                     shapely.plotting.plot_line(line, ax=ax)
+                    fig.savefig('debug_grid_parse.jpg', dpi=300)
                     fig.show()
                     import IPython
                     IPython.embed()
@@ -196,12 +197,14 @@ def main():
                 lines_inside += [np.array([poly[i], poly[i + 1]]).flatten()]
 
         # shapely.plotting.plot_polygon(Polygon(boundaries[:, 0:2]), ax=ax)
+        fig.savefig('grid_parse_region_{}.jpg'.format(region_name), dpi=300)
         fig.show()
         fig, ax = plt.subplots()
         shapely.plotting.plot_polygon(Polygon(boundaries[:, 0:2]), ax=ax)
         l0 = lines_inside[0]
         ax.plot([l0[0], l0[2]], [l0[1], l0[3]], color='black', linewidth=10)
 
+        fig.savefig('grid_parse_lines.jpg', dpi=300)
         fig.show()
 
         # fixing end
@@ -237,4 +240,5 @@ def main():
         fmt="%.4f %.4f %i",
     )
 
+    fig.savefig('grid_parse_final.jpg', dpi=300)
     fig.show()

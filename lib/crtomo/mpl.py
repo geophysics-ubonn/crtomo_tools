@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Thils file set ups matplotlib plot functions for the whole package.
+"""This file set ups matplotlib plot functions for the whole package.
 
 Import all necessary Matplotlib modules and set default options
 To use this module, call the setup() function.

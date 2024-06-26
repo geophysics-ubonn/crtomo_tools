@@ -68,6 +68,7 @@ import numpy as np
 import pandas as pd
 
 import crtomo.mpl
+from crtomo.mpl import get_mpl_version
 
 import crtomo.binaries as CRBin
 import crtomo.grid as CRGrid
@@ -77,6 +78,7 @@ import crtomo.configManager as cConf
 import crtomo.cfg as CRcfg
 import crtomo.plotManager as PlotManager
 
+mpl_version = get_mpl_version()
 plt, mpl = crtomo.mpl.setup()
 mpl_version = crtomo.mpl.get_mpl_version()
 
@@ -1190,6 +1192,7 @@ class tdMan(object):
             cmap_jet = mpl.cm.get_cmap('jet')
         else:
             cmap_jet = mpl.colormaps['jet']
+
         colors = [cmap_jet(i) for i in np.arange(0, 1.1, 0.1)]
         cmap = matplotlib.colors.LinearSegmentedColormap.from_list(
             'jetn9', colors, N=9)
