@@ -78,6 +78,7 @@ import crtomo.cfg as CRcfg
 import crtomo.plotManager as PlotManager
 
 plt, mpl = crtomo.mpl.setup()
+mpl_version = crtomo.mpl.get_mpl_version()
 
 
 class noise_model(object):
@@ -1184,7 +1185,11 @@ class tdMan(object):
             cbmin = 0
             cbmax = 1
 
-        cmap_jet = matplotlib.cm.get_cmap('jet')
+        # https://matplotlib.org/stable/api/prev_api_changes/api_changes_3.9.0.html#top-level-cmap-registration-and-access-functions-in-mpl-cm
+        if mpl_version[0] <= 3 and mpl_version[1] < 9:
+            cmap_jet = mpl.cm.get_cmap('jet')
+        else:
+            cmap_jet = mpl.colormaps['jet']
         colors = [cmap_jet(i) for i in np.arange(0, 1.1, 0.1)]
         cmap = matplotlib.colors.LinearSegmentedColormap.from_list(
             'jetn9', colors, N=9)
@@ -2440,7 +2445,13 @@ i6,t105,g9.3,t117,f5.3)
 
         # update iterations
         g = df.groupby('main_iteration')
-        cm = mpl.cm.get_cmap('jet')
+
+        # https://matplotlib.org/stable/api/prev_api_changes/api_changes_3.9.0.html#top-level-cmap-registration-and-access-functions-in-mpl-cm
+        if mpl_version[0] <= 3 and mpl_version[1] < 9:
+            cm = mpl.cm.get_cmap('jet')
+        else:
+            cm = mpl.colormaps['jet']
+
         SM = mpl.cm.ScalarMappable(norm=None, cmap=cm)
         colors = SM.to_rgba(np.linspace(0, 1, g.ngroups))
         for color, (name, group) in zip(colors, g):
