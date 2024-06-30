@@ -530,9 +530,15 @@ class plotManager(object):
             alpha = self.parman.parsets[alpha_cid]
             # make sure this data set is normalized between 0 and 1
             if np.nanmin(alpha) < 0 or np.nanmax(alpha) > 1:
-                raise Exception(
-                    'alpha data set must be normalized between 0 and 1'
-                )
+                normcov = np.divide(np.abs(alpha), 3)
+                normcov[np.where(normcov > 1)] = 1
+                alpha = np.subtract(1, normcov)
+                # raise Exception(
+                #     'alpha data set must be normalized between 0 and 1'
+                # )
+            fcolors[:, 3] = alpha
+        elif isinstance(alpha_cid, np.ndarray):
+            alpha = alpha_cid
             fcolors[:, 3] = alpha
 
         all_xz = []
