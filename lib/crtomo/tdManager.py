@@ -66,6 +66,7 @@ import matplotlib.colors
 import matplotlib.cm
 import numpy as np
 import pandas as pd
+from reda.main import units as reda_units
 
 import crtomo.mpl
 from crtomo.mpl import get_mpl_version
@@ -349,6 +350,12 @@ class tdMan(object):
         if voltage_data is not None:
             cids = self.configs.load_crmod_data(voltage_data)
             self.assignments['measurements'] = cids
+
+        resistances = kwargs.get('resistances', None)
+
+        if resistances is not None:
+            cid_mag = self.configs.add_measurements(resistances)
+            self.register_measurements(mag=cid_mag)
 
         self.plot = PlotManager.plotManager(
             grid=self.grid,
@@ -2945,21 +2952,112 @@ i6,t105,g9.3,t117,f5.3)
         )
         return coms
 
-    def plot_inversion_result_rmag(self, ):
+    def plot_inversion_result_rmag(
+            self, figsize=None, log10=False, overlay_coverage=False,
+            **kwargs):
         """Plot the final inversion results, magnitude-results only
+
+        Parameters
+        ----------
+        figsize: (float, float)|None
+            Figure size of the matplotlib figure in inches.
+        log10: bool, default: False
+            Shortcut to force a log10 conversion of the resistivity data
+        overlay_coverage: bool, default: False
+            If True, use the cumulated coverage to adjust the transparency of
+            the plot
+        **kwargs: dict
+            will be propagated into self.plot.plot_elements_to_ax
+
+        Returns
+        -------
+        fig: matplotlib.Figure
+            The created figure
+        ax: matplotlib.Axes
+            Plot axes
 
         """
         assert self.assignments['inversion'] is not None, \
             'need inversion results to plot anything'
         pid_mag = self.assignments['inversion']['rmag'][-1]
 
-        fig, ax = plt.subplots(1, 1, figsize=(16 / 2.54, 8 / 2.54))
+        if 'plot_colorbar' not in kwargs:
+            kwargs['plot_colorbar'] = True
+        if 'cmap_name' not in kwargs:
+            kwargs['cmap_name'] = 'turbo'
+        if 'cblabel' not in kwargs:
+            kwargs['cblabel'] = reda_units.get_label('r', log10=log10)
+
+        if log10:
+            kwargs['converter'] = PlotManager.converter_abs_log10
+
+        if figsize is None:
+            figsize = (16 / 2.54, 8 / 2.54)
+
+        if overlay_coverage:
+            key = 'l1_dw_log10_norm'
+            if key in self.a['inversion']:
+                abscov = np.abs(
+                    self.parman.parsets[self.a['inversion'][key]]
+                )
+                normcov = np.divide(abscov, 3)
+                normcov[np.where(normcov > 1)] = 1
+                alpha_channel = np.subtract(1, normcov)
+
+                kwargs['cid_alpha'] = alpha_channel
+
+        fig, ax = plt.subplots(1, 1, figsize=figsize)
 
         self.plot.plot_elements_to_ax(
             pid_mag,
             ax=ax,
-            plot_colorbar=True,
-            cblabel=r'$|\rho| [\Omega m]$',
+            **kwargs,
+        )
+
+        fig.tight_layout()
+        return fig, ax
+
+    def plot_coverage(self, figsize=None, **kwargs):
+        """Plot the final cumulated coverage
+
+        Parameters
+        ----------
+        figsize: (float, float)|None
+            Figure size of the matplotlib figure in inches.
+        **kwargs: dict
+            will be propagated into self.plot.plot_elements_to_ax
+
+        Returns
+        -------
+        fig: matplotlib.Figure
+            The created figure
+        ax: matplotlib.Axes
+            Plot axes
+
+        """
+        assert self.assignments['inversion'] is not None, \
+            'need inversion results to plot anything'
+
+        if 'plot_colorbar' not in kwargs:
+            kwargs['plot_colorbar'] = True
+        if 'cmap_name' not in kwargs:
+            kwargs['cmap_name'] = 'turbo'
+        # if 'cblabel' not in kwargs:
+        #     kwargs['cblabel'] = r'$|\rho| [\Omega m]$'
+
+        if figsize is None:
+            figsize = (16 / 2.54, 8 / 2.54)
+
+        key = 'l1_dw_log10_norm'
+        if key in self.a['inversion']:
+            pid_l1_cov = self.a['inversion'][key]
+
+        fig, ax = plt.subplots(1, 1, figsize=figsize)
+
+        self.plot.plot_elements_to_ax(
+            pid_l1_cov,
+            ax=ax,
+            **kwargs,
         )
 
         fig.tight_layout()
@@ -3003,3 +3101,34 @@ i6,t105,g9.3,t117,f5.3)
             (a_x, a_y) = self.grid.nodes['presort'][nodes[0]][1:3]
             (b_x, b_y) = self.grid.nodes['presort'][nodes[1]][1:3]
             ax.plot([a_x, b_x], [a_y, b_y], color='r')
+
+    def plot_inversion_misfit_pseudosection(self):
+        if self.eps_data is None:
+            return
+        psi = self.eps_data[-1][['a', 'b', 'm', 'n', 'psi']]
+        rms = self.inv_stats.iloc[-1]['dataRMS']
+        from reda.plotters.pseudoplots import plot_pseudosection_type2
+        fig, ax, cb = plot_pseudosection_type2(
+            psi,
+            'psi',
+            markersize=100,
+            cmap='seismic',
+            cbmin=0,
+            cbmax=2,
+            title='RMS: {} Mag-Error: {} % + {}'.format(
+                rms,
+                self.crtomo_cfg['mag_rel'],
+                self.crtomo_cfg['mag_abs'],
+            ),
+        )
+
+        # import numpy as np
+        # import matplotlib.pylab as plt
+        # rms = 1 / np.sqrt(
+        # psi.shape[0]) * np.sqrt(np.sum(psi['psi'] ** 2))
+        # print('error weighted RMS:', rms)
+
+        # fig, ax = plt.subplots()
+        # _ = ax.hist(psi['psi'], 100)
+
+        return fig, ax, cb
