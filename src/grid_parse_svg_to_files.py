@@ -1,5 +1,20 @@
 #!/usr/bin/env python
-"""
+"""TODO: Description
+
+
+Output files
+------------
+
+For each layer specified in the parsed svg file, the following files will be
+written:
+
+    * all_[REGION_NAME].dat - the lines of the specified region, unmodified
+                              from the svg
+    * lne_[REGION_NAME].dat - all lines located within the boundary region. Use
+                              this file to create extra_lines.dat files for
+                              grid creation
+    * pts_[REGION_NAME].dat - the points of the intersection of the region with
+                              the boundary
 
 """
 import os
@@ -211,24 +226,31 @@ def main():
 
         # this file contains everything, unmodified
         np.savetxt(
-            'mdl_{}.dat'.format(region_name),
+            'all_{}.dat'.format(region_name),
             np.array(lines_unmodified),
             fmt="%.4f %.4f %.4f %.4f",
         )
 
+        # only the lines inside the mesh
         np.savetxt(
-            '{}.dat'.format(region_name),
+            'lne_{}.dat'.format(region_name),
             np.array(lines_inside),
             fmt="%.4f %.4f %.4f %.4f",
         )
 
-        # with open('mdl_{}.dat'.format(region_name), 'w') as fid:
-        #     for i in range(0, poly.shape[0] - 1):
-        #         fid.write('{} {} {} {}\n'.format(
-        #             poly[i][0], poly[i][1],
-        #             poly[i + 1][0], poly[i + 1][1],
-        #         ))
+        # compute the intersection of mesh and region and write out the points
+        poly_region = Polygon(np.array(lines_unmodified)[:, 0:2]).normalize()
+        area_reduced_to_boundary = boundary_area.intersection(
+            poly_region
+        ).normalize()
+        region_points = np.array(
+            area_reduced_to_boundary.boundary.coords
+        )[:-1, :]
 
+        filename = 'pts_{}.dat'.format(region_name)
+        np.savetxt(filename, region_points, fmt="%.4f")
+
+        # ?
         ax.plot(poly[:, 0], poly[:, 1])
 
     if os.path.isfile('boundaries.dat'):
