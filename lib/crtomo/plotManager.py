@@ -528,9 +528,13 @@ class plotManager(object):
         alpha_cid = kwargs.get('cid_alpha', None)
         if isinstance(alpha_cid, int):
             alpha = self.parman.parsets[alpha_cid]
+
+            sens_log_threshold = kwargs.get(
+                'alpha_sens_threshold', 3
+            )
             # make sure this data set is normalized between 0 and 1
             if np.nanmin(alpha) < 0 or np.nanmax(alpha) > 1:
-                normcov = np.divide(np.abs(alpha), 3)
+                normcov = np.divide(np.abs(alpha), sens_log_threshold)
                 normcov[np.where(normcov > 1)] = 1
                 alpha = np.subtract(1, normcov)
                 # raise Exception(
@@ -548,6 +552,7 @@ class plotManager(object):
 
         norm = kwargs.get('norm', None)
 
+        # the actual plotting
         collection = mpl.collections.PolyCollection(
             all_xz,
             edgecolor=fcolors,
