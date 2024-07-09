@@ -483,6 +483,7 @@ def main():
     pwdx = os.getcwd()
 
     electrodes = np.loadtxt('electrodes.dat')
+    assert electrodes.shape[1] == 2, "electrodes.dat must have 2 columns!"
     boundaries_raw = np.loadtxt('boundaries.dat')
 
     check_boundaries(boundaries_raw)
