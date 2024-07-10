@@ -11,7 +11,9 @@ mesh. This can be used to:
     * define internal geometry that is later used for decoupling of the
       regularization
 
-More information: https://geophysics-ubonn.github.io/crtomo_tools/grid_creation.html#introducing-structures-into-a-mesh-using-inkscape
+More information:
+
+https://geophysics-ubonn.github.io/crtomo_tools/grid_creation.html#introducing-structures-into-a-mesh-using-inkscape
 
 
 The basic procedure is as follows:
@@ -33,10 +35,15 @@ import crtomo
 from shapely.geometry import Polygon
 import matplotlib.pylab as plt
 ###############################################################################
+# We will store all output of this example in a subdirectory
+# Delete the directory before proceeding
 if os.path.isdir('tmp_triag_inkscape'):
     shutil.rmtree('tmp_triag_inkscape')
 
 ###############################################################################
+# Note: We use the contextmanager *reda.CreateEnterDirectory* to transparently
+# change our working directory. This ensures that all output files/directories
+# will be placed in the **tmp_triag_inkscape** directory
 with reda.CreateEnterDirectory('tmp_triag_inkscape'):
     with open('electrodes.dat', 'w') as fid:
         fid.write("""0.0 0.0
@@ -55,23 +62,34 @@ with reda.CreateEnterDirectory('tmp_triag_inkscape'):
 25.0000 -10.0000 11
 -10.0000 -10.0000 11""")
 
+###############################################################################
+# The **grid_convert_boundary_to_svg** commands takes a *boundaries.dat* file
+# and turns it into a simple svg file that can be opened with Inkscape.
+# Geometry is now added using straight lines. Each region is stored in a new
+# layer, whose name starts with *region_*
+# The output file is saved as *out_modified2.svg* with the type "Inkscape SVG"
 
 with reda.CreateEnterDirectory('tmp_triag_inkscape'):
     subprocess.call('grid_convert_boundary_to_svg', shell=True)
 
+# note: here we copy a pre-modified svg file
 with reda.CreateEnterDirectory('tmp_triag_inkscape'):
     shutil.copy('../data_02/out_modified2.svg', 'out_modified2.svg')
 
+# this command parses the out_modified2.svg file and creates multiple output
+# files
 with reda.CreateEnterDirectory('tmp_triag_inkscape'):
     subprocess.call('grid_parse_svg_to_files', shell=True)
 
 with reda.CreateEnterDirectory('tmp_triag_inkscape'):
-    shutil.copy('constraint_1.dat', 'extra_lines.dat')
+    shutil.copy('lne_constraint_1.dat', 'extra_lines.dat')
 
 with reda.CreateEnterDirectory('tmp_triag_inkscape'):
     subprocess.call('cr_trig_create grid', shell=True)
 
 ###############################################################################
+# Plot the resulting CRMod/CRTomo mesh
+
 with reda.CreateEnterDirectory('tmp_triag_inkscape'):
     grid = crtomo.crt_grid(
         elem_file='grid/elem.dat',
@@ -79,7 +97,7 @@ with reda.CreateEnterDirectory('tmp_triag_inkscape'):
     )
     pm = crtomo.ParMan(grid)
     pid = pm.add_empty_dataset(100)
-    region_lines = np.loadtxt('mdl_constraint_1.dat')
+    region_lines = np.loadtxt('all_constraint_1.dat')
 
     poly = Polygon(
         np.vstack(
@@ -99,9 +117,12 @@ with reda.CreateEnterDirectory('tmp_triag_inkscape'):
     fig.tight_layout()
     fig.savefig('model.jpg', dpi=300)
 
+###############################################################################
+# Now we can create a decouplings.dat file that can be used by CRTomo to
+# decouple regularization between adjacent cells
 with reda.CreateEnterDirectory('tmp_triag_inkscape'):
     subprocess.call(
         'grid_extralines_gen_decouplings -e grid/elem.dat '
-        '-l constraint_1.dat --debug_plot --eta 0.7',
+        '-l lne_constraint_1.dat --debug_plot --eta 0.7',
         shell=True
     )
