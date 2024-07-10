@@ -565,14 +565,26 @@ class crt_grid(object):
                 )
 
     def plot_grid(self, **kwargs):
-        """
+        """Plot the mesh
+
+        Parameters
+        ----------
+
         Other Parameters
         ----------------
         plot_electrode_numbers: bool, optional
             Plot electrode numbers in the grid, default: False
+
+        Returns
+        -------
+        fig: matplotlib.Figure
+            The Figure object
+        ax: matplotlib.Axes
+            The axes object the mesh was plotted to
         """
         fig, ax = plt.subplots(1, 1)
         self.plot_grid_to_ax(ax, **kwargs)
+        fig.tight_layout()
         return fig, ax
 
     def test_plot(self):
@@ -1424,3 +1436,6 @@ class crt_grid(object):
             if len(relevant_elements) == 2:
                 el_pairs += [np.hstack(([a1, a2], relevant_elements))]
         return np.array(el_pairs)
+
+    def get_polygon_from_file(self, filename):
+        pass

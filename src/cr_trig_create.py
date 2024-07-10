@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Create irregular (triangular) grids for CRMod/CRTomo from simple ascii input
+Create irregular (triangular) meshes for CRMod/CRTomo from simple ASCII input
 files.
 
 Create the input files "electrodes.dat", "boundaries.dat", "char_length.dat"
@@ -10,13 +10,17 @@ used to append GMSH commands at the end of the generated gmsh command file.
 Note that these command will be executed only after the initial meshing, but
 can be used to refine the mesh.
 
-Then run cr_trig_create.py.
+Then run the command `cr_trig_create`.
 
 If an (optional) parameter is provided, use this as the output directory. This
 directory must not exist. In case no parameter is given, create a random
 directory using the uuid module.
 
 The output directory is printed in the last line of program output.
+
+The command line interface is documented as follows:
+
+.. program-output:: cr_trig_create -h
 
 Examples:
 ---------

@@ -23,6 +23,7 @@ The basic procedure is as follows:
     * Following that, generate a .svg template of the mesh boundary by running
       *grid_convert_boundary_to_svg*
 
+
 """
 ###############################################################################
 import os
@@ -41,7 +42,8 @@ if os.path.isdir('tmp_triag_inkscape'):
     shutil.rmtree('tmp_triag_inkscape')
 
 ###############################################################################
-# Note: We use the contextmanager *reda.CreateEnterDirectory* to transparently
+# Note: We use the contextmanager
+# :py:class:`reda.utils.enter_directory.CreateEnterDirectory` to transparently
 # change our working directory. This ensures that all output files/directories
 # will be placed in the **tmp_triag_inkscape** directory
 with reda.CreateEnterDirectory('tmp_triag_inkscape'):
@@ -120,6 +122,8 @@ with reda.CreateEnterDirectory('tmp_triag_inkscape'):
 ###############################################################################
 # Now we can create a decouplings.dat file that can be used by CRTomo to
 # decouple regularization between adjacent cells
+#
+# .. program-output:: grid_extralines_gen_decouplings --help
 with reda.CreateEnterDirectory('tmp_triag_inkscape'):
     subprocess.call(
         'grid_extralines_gen_decouplings -e grid/elem.dat '
