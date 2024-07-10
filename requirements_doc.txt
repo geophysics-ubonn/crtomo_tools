@@ -1,6 +1,7 @@
 Sphinx>=1.5.2
 sphinxcontrib-napoleon>=0.6.0
 sphinxcontrib-blockdiag
+sphinxcontrib.programoutput
 sphinx-gallery
 pillow
 sphinx_rtd_theme
