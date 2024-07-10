@@ -35,6 +35,7 @@ sys.path.append(
 # ones.
 extensions = [
     'matplotlib.sphinxext.plot_directive',
+    'sphinxcontrib.programoutput',
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
     'sphinx.ext.todo',
@@ -53,6 +54,7 @@ else:
 
 napoleon_include_init_with_doc = True
 
+# python -msphinx.ext.intersphinx https://geophysics-ubonn.github.io/reda/objects.inv
 intersphinx_mapping = {
     'python': ('https://docs.python.org/', None),
     'numpy': ('https://docs.scipy.org/doc/numpy/', None),
@@ -60,6 +62,7 @@ intersphinx_mapping = {
     # 'pandas': ('https://pandas-docs.github.io/pandas-docs-travis/', None),
     'pandas': ('http://pandas.pydata.org/pandas-docs/stable/', None),
     'matplotlib': ('https://matplotlib.org/', None),
+    'reda': ('https://geophysics-ubonn.github.io/reda/', None),
 }
 
 # Gallery conf
@@ -73,7 +76,7 @@ sphinx_gallery_conf = {
     'log_level': {'backreference_missing': 'debug'},
     'gallery_dirs': ['_examples'],
     'filename_pattern': 'plot_',
-    'abort_on_example_error': False,
+    'abort_on_example_error': True,
     # 'reference_url': {
     #     # The module you locally document uses a None
     #     'crtomo': None,
@@ -92,6 +95,7 @@ sphinx_gallery_conf = {
 
     # Your documented modules. You can use a string or a list of strings
     'doc_module': 'crtomo',
+
     # 'capture_repr': ('_repr_html_', '__repr__'),
     'capture_repr': (),
     'download_all_examples': False,
