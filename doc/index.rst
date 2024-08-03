@@ -35,6 +35,19 @@ Contents:
    scripts/grid_tools/modules.rst
    api/modules.rst
 
+As short introduction to electrical modeling and inversion
+----------------------------------------------------------
+
+.. mermaid::
+
+   flowchart LR
+   mod
+   mod("Modeling")
+   inv
+   inv("Inversion")
+   mod --> |'forward modeling'| inv
+   inv --> |'inverse step'| mod
+
 
 Indices and tables
 ==================

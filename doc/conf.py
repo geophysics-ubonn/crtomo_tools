@@ -44,6 +44,7 @@ extensions = [
     'sphinx_gallery.gen_gallery',
     'sphinxcontrib.blockdiag',
     'sphinx.ext.intersphinx',
+    'sphinxcontrib.mermaid',
 ]
 
 # could also be 7 or 10
