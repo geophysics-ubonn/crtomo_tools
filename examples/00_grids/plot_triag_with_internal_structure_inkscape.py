@@ -36,7 +36,7 @@ import crtomo
 from shapely.geometry import Polygon
 import matplotlib.pylab as plt
 ###############################################################################
-# We will store all output of this example in a subdirectory
+# We will store all output of this example in a subdirectory.
 # Delete the directory before proceeding
 if os.path.isdir('tmp_triag_inkscape'):
     shutil.rmtree('tmp_triag_inkscape')
