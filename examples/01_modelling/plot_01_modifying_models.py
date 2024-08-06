@@ -13,24 +13,23 @@ values for the M model cells), while for complex resistivity modeling you need
 a resistivity and a phase array.
 
 Parameter sets are usually manager using the parameter manger class
-:py:class:`crtomo.ParManager.ParMan.modify_polygon`, which also has an alias to
+:py:class:`crtomo.ParManager.ParMan`, which also has an alias to
 `crtomo.ParMan`.
 
 If you are using a single-frequency tomodir object `tdm`
-(:py:class:'crtomo.tdMan`), one parameter manager is already initialized as
+(:py:class:`crtomo.tdMan`), one parameter manager is already initialized as
 `tdm.parman`.
 
 There are various ways to modify such an array
 
-* modify by index
-* modify by polygon
-* add Gaussian anomalies (link to other example)
-
+* modify by index: :py:meth:`crtomo.parManager.ParMan.modify_pixels`
+* modify rectangular area: :py:meth:`crtomo.parManager.ParMan.modify_area`
+* modify by polygon :py:meth:`crtomo.parManager.ParMan.modify_polygon`
+* add Gaussian anomalies. See this example here:
+  :ref:`_examples/01_modelling/plot_01_anomalies:generate gaussian models`
 
 """
 ###############################################################################
-import numpy as np
-
 import crtomo
 import matplotlib.pylab as plt
 ###############################################################################
@@ -50,25 +49,48 @@ pid_mag = parman.add_empty_dataset(value=100)
 ###############################################################################
 # Modify by polygon
 # -----------------
-# :py:meth:`crtomo.ParMan.modify_polygon`
+# Probably the most versatile method to modify a subsurface model is by
+# selecting cells using a polygon outline.
+# The relevant function for this is
+# :py:meth:`crtomo.parManager.ParMan.modify_polygon`
+# Note that only cells are selected whose center ob mass is located within the
+# polygon!
+#
+# It is advisable to create meshes that include the relevant polygon lines in
+# the mesh. Note that those meshes should only be used for forward modeling,
+# not for inverse modeling.
+# For advanced grid creating, please refer to
+# :ref:`grid_creation:irregular grids`, especially the inclusion of extra
+# lines: :ref:`grid_creation:extra_lines.dat (optional)`.
 from shapely.geometry import Polygon # noqa:402
 poly = Polygon([
     [0, 0],
-    [1, 0],
-    [1, -1],
-    [0, -2],
+    [2, 0],
+    [2, -1],
+    [0, -1.5],
 ])
 parman.modify_polygon(pid_mag, poly, 66)
 
 ###############################################################################
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(15 / 2.54, 7 / 2.54))
 plotman.plot_elements_to_ax(
     pid_mag,
     ax=ax,
     plot_colorbar=True,
+    cblabel=r'$\rho~[\Omega m]$',
+    title='Resistivity model'
 )
 # lets draw the original polygon
 from shapely.plotting import plot_polygon # noqa: 402
 plot_polygon(poly, ax=ax, color='k')
 
+# lets plot the center of masses
+ax.scatter(
+    grid.get_element_centroids()[:, 0],
+    grid.get_element_centroids()[:, 1],
+    color='r',
+    label='centroids',
+)
+ax.legend()
+fig.tight_layout()
 fig.savefig('out_03_model.jpg', dpi=300)

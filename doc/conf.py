@@ -45,7 +45,11 @@ extensions = [
     'sphinxcontrib.blockdiag',
     'sphinx.ext.intersphinx',
     'sphinxcontrib.mermaid',
+    'sphinx.ext.autosectionlabel',
 ]
+
+# Make sure the target is unique
+autosectionlabel_prefix_document = True
 
 # could also be 7 or 10
 if sys.version_info.minor <= 8:
@@ -171,7 +175,8 @@ pygments_style = 'sphinx'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 # html_theme = 'alabaster'
-html_theme = 'sphinx_rtd_theme'
+# html_theme = 'sphinx_rtd_theme'
+html_theme = 'furo'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

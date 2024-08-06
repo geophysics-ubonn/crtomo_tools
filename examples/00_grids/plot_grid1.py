@@ -25,8 +25,11 @@ This example only shows the usage of the former approach.
 import crtomo
 
 ###############################################################################
-# Create simple surface grids with this wrapper
-grid = crtomo.crt_grid.create_surface_grid(nr_electrodes=10, spacing=1.5)
+# Create a simple surface grid with this wrapper
+grid = crtomo.crt_grid.create_surface_grid(
+   nr_electrodes=10,
+   spacing=1.5,
+)
 grid.plot_grid()
 
 # number the electrodes (useful for numerical studies)
