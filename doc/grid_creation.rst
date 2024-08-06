@@ -292,7 +292,11 @@ to create the grid (i.e. GMSH commands should be used).
 Introducing structures into a mesh using Inkscape
 """""""""""""""""""""""""""""""""""""""""""""""""
 
-Summary:
+Sometimes, it can be useful to adapt the grid to certain geometries or structures (e.g., interfaces, anomalies with certain shapes, etc...).
+Furthermore, turning off the regularization along certain interfaces can allow for sharper contrasts at desired boundaries.
+For this, additional nodes can be included using svg files. Here, we show how both of these goals can be achieved via manipulation of the mesh using Inkscape.
+
+Exemplary workflow:
 
 * Create a triangular mesh using *cr_trig_create* (i.e., using
   **electrodes.dat**, **boundaries.dat**, and **char_length.dat**)
@@ -316,11 +320,11 @@ Summary:
    .. figure:: /figs_grid_creation/inkscape_savediag.jpg
        :scale: 50%
 
-* Run *grid_parse_svg_to_files*. This command should rename your original
+* Run *grid_parse_svg_to_files out_modified2.svg*. This command should rename your original
   **boundaries.dat** to **boundaries_orig.dat** and generate a new one that
   incorporates any (required) structure on the boundaries.
 
-  The command will also generate two files for each layer defines in the svg
+  The command will also generate two files for each layer defined in the svg
   file:
 
   * A file **[LAYER_NAME].dat** :
@@ -331,7 +335,7 @@ Summary:
    cat contraints_1.dat > extra_lines.dat
 * Regenerate the mesh:
 
-  cr_grid_create grid_with_constraints
+  cr_trig_create grid_with_constraints
 
 * See the corresponding example in "Examples: Grid handling"
 
