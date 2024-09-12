@@ -13,7 +13,7 @@ values for the M model cells), while for complex resistivity modeling you need
 a resistivity and a phase array.
 
 Parameter sets are usually manager using the parameter manger class
-:py:class:`crtomo.ParManager.ParMan`, which also has an alias to
+:py:class:`crtomo.parManager.ParMan`, which also has an alias to
 `crtomo.ParMan`.
 
 If you are using a single-frequency tomodir object `tdm`
@@ -26,7 +26,10 @@ There are various ways to modify such an array
 * modify rectangular area: :py:meth:`crtomo.parManager.ParMan.modify_area`
 * modify by polygon :py:meth:`crtomo.parManager.ParMan.modify_polygon`
 * add Gaussian anomalies. See this example here:
-  :ref:`_examples/01_modelling/plot_01_anomalies:generate gaussian models`
+  :ref:`sphx_glr__examples_01_modelling_plot_02_anomalies.py`
+* there is also the possibility to generate meshes that incorporate certain
+  subsurface structures. See this example:
+  :ref:`sphx_glr__examples_00_grids_plot_triag_with_internal_structure_inkscape.py`
 
 """
 ###############################################################################

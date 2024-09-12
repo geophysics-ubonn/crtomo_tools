@@ -139,7 +139,7 @@ release = '0.1'
 # non-false value, then it is used:
 # today = ''
 # Else, today_fmt is used as the format for a strftime call.
-# today_fmt = '%B %d, %Y'
+today_fmt = '%B %d, %Y'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -188,7 +188,7 @@ html_theme = 'furo'
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-html_title = "<project> v<release> documentation (<today>)"
+html_title = "CRTomo-tools documentation"
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 # html_short_title = None

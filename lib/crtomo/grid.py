@@ -890,7 +890,7 @@ class crt_grid(object):
 
         See PhD Thesis Roland Blaschek, eq. 3.48ff
 
-        ..math::
+        .. math::
 
             \Psi_m = ||\underline{\underline{W}}_m \underline{m}||^2_2\\
             = \sum_{j=1}^M \sum_{i=nb(j)} \alpha_{r_ij} |\frac{m_j -

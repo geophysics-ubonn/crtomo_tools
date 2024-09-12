@@ -1,3 +1,3 @@
-Examples: Modelling
--------------------
+Examples: Forward Modelling
+---------------------------
 
