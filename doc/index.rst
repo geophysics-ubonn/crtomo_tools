@@ -34,9 +34,7 @@ Getting started
 
 Application/Module Overview
 ---------------------------
-
-There are three primary software projects that will probably deal with:
-
+The workflow for the analysis of geoelectric measurements makes use of three different software packages. Each software package implements a key aspect of the workflow:
 * CRTomoMod (https://github.com/geophysics-ubonn/crtomo_stable): This is the
   core modeling and inversion code, implementing the Finite-Element based
   forward solver, as well as the non-linear, iterative, Gauss-Newton inversion
@@ -87,11 +85,11 @@ A short introduction to electrical modeling and inversion
 
    flowchart LR
    mod
-   mod("Modeling")
+   mod("State of physical parameter in the subsurface")
    inv
-   inv("Inversion")
-   mod --> |'forward modeling'| inv
-   inv --> |'inverse step'| mod
+   inv("Observations / Measurements")
+   mod --> |'Forward modeling'| inv
+   inv --> |'Inverse modeling'| mod
 
 Electrical Modeling
 ^^^^^^^^^^^^^^^^^^^
