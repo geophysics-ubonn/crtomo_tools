@@ -3,6 +3,7 @@ import numpy as np
 
 
 def main():
+    print('Loading boundaries.dat file')
     boundaries = np.loadtxt('boundaries.dat')
     # translate
     offset_x = np.min(boundaries[:, 0])
@@ -54,3 +55,5 @@ def main():
         fid.write('id="mesh_outline" />\n')
         fid.write('</g>\n')
         fid.write('</svg>\n')
+
+    print('Output .svg file written to: {}'.format(filename))

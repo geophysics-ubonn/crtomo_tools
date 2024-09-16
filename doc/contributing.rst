@@ -148,8 +148,8 @@ Update your forked repository branch **new_plot_script** on github:
    git push
 
 
-D. Extendxing the documentation
--------------------------------
+D. Extending the documentation
+------------------------------
 
 For documentation purposes we use the sphinx documentation system
 (https://www.sphinx-doc.org) and various plugins. Most notable we use the

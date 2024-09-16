@@ -25,7 +25,6 @@ The command to create irregular grids is: ::
 
     $ cr_trig_create.py
 
-
 You need to create the files described down below first (required files:
 ``electrodes.dat``, ``boundaries.dat``) to give the program the information
 about the grid it shall create.  Use the ``-h`` command to see the possible

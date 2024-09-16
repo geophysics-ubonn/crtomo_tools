@@ -1,47 +1,13 @@
 Basics
 ------
 
-
-
-RMS
-^^^
-
-.. math::
-
-   \text{RMS} = \sqrt{\frac{1}{N}\sum_i^N \left| \frac{d_i -
-         f(\underline{m})_i}{\epsilon_i}\right|^2}
-
-
-The RMS is a measure of how good or bad the forward model was fitted to the
-measurements within the specified error margin. It sums the differences between
-the measurements and the response of the forward model (synthetic measurements)
-weighted with the assumed error. Thus a sum of one means that the measurements
-are correctly described by the forward model created by the inversion. This is
-what we seek to do. Adapt your ``crtomo.cfg`` and rerun the inversion until you
-have a good RMS value (near to one, but not below one).
-
-A RMS value smaller than one means that the sum of differences between
-measurements and model responses is smaller than the assumed error, on average.
-We call this 'over-fitted'. Either the error assumption is wrong (the actual
-error is smaller than expected), or the inversion introduced artificial data
-into the process that has nothing to do with structures found in the
-subsurface. In most cases the error values are just too small.
-
-A RMS value greater than one indicates that the data was not described within
-the given error estimates, and shows larger average residuals (:math:`|d_k -
-f_k|`) than expected by the error estimates :math:`\epsilon_k`: :math:`|d_k
--f_k| < \epsilon_k`. This holds true ONLY for the average of all measurements,
-and therefore some data points :math:`d_i` can be estimated within the expected
-error margin while some show larger residuals.
-
 In the ``inv.ctr`` file the mag RMS is computed using only the magnitude error,
 while the phase RMS is computed only with the phase error. The data RMS uses
 the complex error composed of the square root of the sum of squares of
 magnitude and phase errors.
 
-
-Advanced usage
---------------
+Usage Aspects
+-------------
 
 Artificial Noise
 ^^^^^^^^^^^^^^^^

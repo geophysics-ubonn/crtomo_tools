@@ -5,11 +5,11 @@
 The original CRTomo code
 ========================
 
-.. todo::
+This section covers aspects of the original Fortran-based CRTomo/CRMod codes.
+These codes form the core of the modeling and inversion capabilities of the
+CRTomo ecosystem.
 
-    mw: We need a comprehensive list of output files for the different modes of
-    operation: (modeling/inversion) x (DC/complex/fpi) x (robust/non-robust) x
-    (with noise/wo noise). Use the command 'tree' to generate the directories
+The code can be found here: https://github.com/geophysics-ubonn/crtomo_stable
 
 .. toctree::
     :maxdepth: 2
