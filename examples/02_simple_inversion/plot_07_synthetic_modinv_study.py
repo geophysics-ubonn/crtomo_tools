@@ -1,27 +1,39 @@
 #!/USr/bin/env python
 # *-* coding: utf-8 *-*
-"""
+r"""
 Single frequency synthetic study
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This example aims to provide a full discussion of a single-frequency complex
 resistivity simulation study.
 A simulation study usually consists of the following steps:
-    1) Generate a Finite-Element mesh for the forward modeling step. This
-       includes defining the bounding geometry of the subsurface to investigate
-       (the *boundary*), electrode positions on the boundary and embedded in
-       the subsurface, as well as internal geometry.
 
-       Internal geometry reflects the geophysical scenario that is being
-       simulated and is usually driven by the *scientific research context* of
-       the study.
-    2) [TODO]
+1) Generate a Finite-Element mesh for the forward modeling step. This
+   includes defining the bounding geometry of the subsurface to investigate
+   (the *boundary*), electrode positions on the boundary and embedded in
+   the subsurface, as well as internal geometry.
 
-
+   Internal geometry reflects the geophysical scenario that is being
+   simulated and is usually driven by the *scientific research context* of
+   the study.
+2) Create a complex-resistivity subsurface model
+3) Generate measurement configurations
+4) Conduct the forward modeling
+5) Add normally-distributed noise to the synthetic data. Remove all data
+   points that have a resulting transfer impedance below 0 (CRMod
+   automatically outputs measurement configurations with positive geometric
+   factors. Therefore, all measurements :math:`<= 0 \Omega` are deemed as
+   physically unacceptable.
+6) Conduct an inversion using the synthetic data contaminated with
+   synthetic noise. Usually error estimates are chosen equal to the noise
+   distributions previously added. Depending on the scope of the synthetic
+   study, additional noise levels can be estimated to account for other
+   error components.
+7) Analyse inversion results.
 """
 ###############################################################################
-# we use a context manager from reda to place output files in a separate output
-# directory
+# Note that we use a context manager from reda to place output files in a
+# separate output directory
 import reda
 # imports required for the study
 import crtomo
@@ -30,18 +42,33 @@ import shapely.geometry
 import pylab as plt
 
 ###############################################################################
-# Generate a simple Finite-Element mesh for forward and inverse modeling
+# 1. Generate forward mesh
+# ------------------------
+# Generate a simple Finite-Element mesh for forward and inverse modeling.
+# For more information on mesh creation, please refer to
+# :ref:`grid_creation:irregular grids`.
+# :doc:`grid_creation`.
+
 grid = crtomo.crt_grid.create_surface_grid(
-    nr_electrodes=30, spacing=1, char_lengths=[0.3, 1, 1, 1]
+    nr_electrodes=30,
+    spacing=1,
+    # these lengths determine the size of mesh cells
+    char_lengths=[0.3, 1, 1, 1]
 )
+
 fig, ax = grid.plot_grid()
 with reda.CreateEnterDirectory('output_plot_07'):
     fig.savefig('grid.jpg', dpi=300, bbox_inches='tight')
 
 ###############################################################################
+# Create a tdManager instance used for single-frequency forward and inverse
+# modeling
 man = crtomo.tdMan(grid=grid)
 
 ###############################################################################
+# 2. Create complex-resistivity subsurface model
+# ----------------------------------------------
+
 pid_mag, pid_pha = man.add_homogeneous_model(
     magnitude=100, phase=-5
 )
@@ -89,16 +116,21 @@ with reda.CreateEnterDirectory('output_plot_07'):
     fig.savefig('model_phase.jpg', dpi=300)
 
 ###############################################################################
+# 3. Generate Measurement Configurations
+# --------------------------------------
 man.configs.gen_dipole_dipole(skipc=0)
 man.configs.gen_dipole_dipole(skipc=1)
 man.configs.gen_dipole_dipole(skipc=2)
 
 ###############################################################################
-# conduct forward modeling
+# 4. Generate Measurement Configurations
+# --------------------------------------
 rmag_rpha_mod = man.measurements()
 rmag = man.measurements()[:, 0]
 rpha = man.measurements()[:, 1]
 
+###############################################################################
+# Let's plot the results
 with reda.CreateEnterDirectory('output_plot_07'):
     fig, axes = plt.subplots(3, 1)
 
@@ -126,7 +158,9 @@ with reda.CreateEnterDirectory('output_plot_07'):
     fig.tight_layout()
     fig.savefig('modeled_data.jpg', dpi=300)
 
-# now add synthetic noise
+###############################################################################
+# 5. Add noise to synthetic data
+# ------------------------------
 # Important: ALWAYS initialize the random number generator using a seed!
 np.random.seed(2048)
 
@@ -155,7 +189,6 @@ rpha_with_noise = rpha + noise_rpha
 # subsequent inversion
 man.register_measurements(rmag_with_noise, rpha_with_noise)
 
-###############################################################################
 # Remove physically implausible negative magnitude values
 indices = np.where(rmag_with_noise <= 0)[0]
 man.configs.delete_data_points(indices)
@@ -179,9 +212,16 @@ tdman.crtomo_cfg['pha_abs'] = 0.5
 
 tdman.read_voltages('volt.dat')
 
+###############################################################################
+# 6. Conduct the actual inversion
+# -------------------------------
 # this command actually calls CRTomo and conducts the actual inversion
 tdman.invert()
+
 ###############################################################################
+# 7. Analyse inversion results
+# ----------------------------
+
 # The convergence behavior of the inversion is stored in a pandas.DataFrame:
 print(tdman.inv_stats)
 
@@ -192,15 +232,16 @@ final_rms_all, final_rms_mag, final_rms_pha = tdman.inv_stats.iloc[-1][
 print('Final RMS mag+pha:', final_rms_all)
 print('Final RMS mag:', final_rms_mag)
 print('Final RMS pha:', final_rms_pha)
+
 ###############################################################################
 # The primary convergence goal of the inversion is to reach an RMS near 1.
 # This would indicate that the data is described by the subsurface model within
 # their data bounds.
 # We do not care about update loops of the inversion. Therefore, filter the
 # convergence information and plot it.
-inv_stats_main = tdman.inv_stats.query('type=="main"')
+inv_stats_main = tdman.inv_stats.query('type=="main"').reset_index()
 
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(6, 4))
 ax.plot(
     inv_stats_main['dataRMS'], '.-', label=r'$\mathbf{RMS}_{\mathrm{all}}$')
 ax.plot(
@@ -270,9 +311,6 @@ fig, ax = tdman.show_parset(
 )
 ax.set_title('No mask', loc='left', fontsize=8)
 
-with reda.CreateEnterDirectory('output_plot_07'):
-    fig.savefig('inversion_result_rmag_complete.jpg')
-
 fig, ax = tdman.show_parset(
     tdman.a['inversion']['rmag'][-1],
     ax=axes[1],
@@ -290,8 +328,6 @@ fig, ax = tdman.show_parset(
     # default is: 3
     alpha_sens_threshold=2,
 )
-# with reda.CreateEnterDirectory('output_plot_07'):
-#     fig.savefig('inversion_result_rmag_cov_alpha.jpg')
 
 fig, ax = tdman.show_parset(
     tdman.a['inversion']['rmag'][-1],
@@ -330,4 +366,5 @@ fig, ax = tdman.show_parset(
 )
 with reda.CreateEnterDirectory('output_plot_07'):
     fig.savefig('inversion_result_rpha.jpg')
+
 # sphinx_gallery_thumbnail_number = -1
