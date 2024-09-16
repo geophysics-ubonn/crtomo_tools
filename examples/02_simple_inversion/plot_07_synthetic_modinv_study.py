@@ -3,10 +3,29 @@
 """
 Single frequency synthetic study
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This example aims to provide a full discussion of a single-frequency complex
+resistivity simulation study.
+A simulation study usually consists of the following steps:
+    1) Generate a Finite-Element mesh for the forward modeling step. This
+       includes defining the bounding geometry of the subsurface to investigate
+       (the *boundary*), electrode positions on the boundary and embedded in
+       the subsurface, as well as internal geometry.
+
+       Internal geometry reflects the geophysical scenario that is being
+       simulated and is usually driven by the *scientific research context* of
+       the study.
+    2) [TODO]
+
+
 """
 ###############################################################################
+# we use a context manager from reda to place output files in a separate output
+# directory
+import reda
 # imports required for the study
 import crtomo
+import numpy as np
 import shapely.geometry
 import pylab as plt
 
@@ -16,7 +35,8 @@ grid = crtomo.crt_grid.create_surface_grid(
     nr_electrodes=30, spacing=1, char_lengths=[0.3, 1, 1, 1]
 )
 fig, ax = grid.plot_grid()
-fig.savefig('grid.jpg')
+with reda.CreateEnterDirectory('output_plot_07'):
+    fig.savefig('grid.jpg', dpi=300, bbox_inches='tight')
 
 ###############################################################################
 man = crtomo.tdMan(grid=grid)
@@ -47,10 +67,26 @@ polygon = shapely.geometry.Polygon((
 ))
 man.parman.modify_polygon(pid_mag, polygon, 3)
 
-fig, ax = man.show_parset(pid_mag)
-fig.savefig('model_magnitude.jpg')
-fig, ax = man.show_parset(pid_pha)
-fig.savefig('model_phase.jpg')
+with reda.CreateEnterDirectory('output_plot_07'):
+    fig, axes = plt.subplots(2, 1, figsize=(8, 8), sharex=True)
+    fig, ax = man.show_parset(
+        pid_mag,
+        ax=axes[0],
+        plot_colorbar=True,
+        cblabel=r'$\rho~[\Omega m]$',
+        cmap_name='viridis',
+        title='Magnitude forward model',
+    )
+    fig.savefig('model_magnitude.jpg', dpi=300)
+    fig, ax = man.show_parset(
+        pid_pha,
+        ax=axes[1],
+        plot_colorbar=True,
+        cblabel=r'$\varphi~[mrad]$',
+        cmap_name='turbo',
+        title='Phase forward model',
+    )
+    fig.savefig('model_phase.jpg', dpi=300)
 
 ###############################################################################
 man.configs.gen_dipole_dipole(skipc=0)
@@ -60,18 +96,69 @@ man.configs.gen_dipole_dipole(skipc=2)
 ###############################################################################
 # conduct forward modeling
 rmag_rpha_mod = man.measurements()
+rmag = man.measurements()[:, 0]
+rpha = man.measurements()[:, 1]
 
-fig, axes = plt.subplots(2, 1)
-ax = axes[0]
-ax.hist(rmag_rpha_mod[:, 0], 100)
-ax.set_xlabel('magnitudes')
-ax = axes[1]
-ax.hist(rmag_rpha_mod[:, 1], 100)
-ax.set_xlabel('phases')
-fig.savefig('modeled_data.jpg')
+with reda.CreateEnterDirectory('output_plot_07'):
+    fig, axes = plt.subplots(3, 1)
+
+    ax = axes[0]
+    ax.set_title('Measured transfer resistances', loc='left', fontsize=8)
+    ax.hist(rmag_rpha_mod[:, 0], 100)
+    ax.set_xlabel(r'$R~[\Omega]$')
+    ax.set_ylabel('Count [-]')
+
+    ax = axes[1]
+    ax.set_title(
+        'Measured transfer resistances (log10)', loc='left', fontsize=8
+    )
+    ax.hist(rmag_rpha_mod[:, 0], 100)
+    ax.set_xlabel(r'$R~[\Omega]$')
+    ax.set_xscale('log')
+    ax.set_ylabel('Count [-]')
+
+    ax = axes[2]
+    ax.set_title('Phase measurements', loc='left', fontsize=8)
+    ax.hist(rmag_rpha_mod[:, 1], 100)
+    ax.set_xlabel('Phases [mrad]')
+    ax.set_ylabel('Count [-]')
+
+    fig.tight_layout()
+    fig.savefig('modeled_data.jpg', dpi=300)
 
 # now add synthetic noise
-# TODO
+# Important: ALWAYS initialize the random number generator using a seed!
+np.random.seed(2048)
+
+# absolute component in [Ohm ]
+noise_level_rmag_absolute = 0.01
+# relative component [0, 1]
+noise_level_rmag_relative = 0.05
+
+noise_rmag = np.random.normal(
+    loc=0,
+    scale=rmag * noise_level_rmag_relative + noise_level_rmag_absolute
+)
+
+rmag_with_noise = rmag + noise_rmag
+
+# 0.5 mrad absolute noise level
+noise_level_phases = 0.5
+
+noise_rpha = np.random.normal(
+    loc=0,
+    scale=noise_level_phases
+)
+rpha_with_noise = rpha + noise_rpha
+
+# register the noise-added data as new measurements and mark them for use in a
+# subsequent inversion
+man.register_measurements(rmag_with_noise, rpha_with_noise)
+
+###############################################################################
+# Remove physically implausible negative magnitude values
+indices = np.where(rmag_with_noise <= 0)[0]
+man.configs.delete_data_points(indices)
 
 man.save_measurements('volt.dat')
 
@@ -86,7 +173,9 @@ tdman = crtomo.tdMan(grid=grid)
 print(tdman.crtomo_cfg)
 
 # for example, let's change the relative magnitude error estimate to 7 %
-tdman.crtomo_cfg['mag_rel'] = 7
+tdman.crtomo_cfg['mag_rel'] = 5
+tdman.crtomo_cfg['mag_abs'] = 0.01
+tdman.crtomo_cfg['pha_abs'] = 0.5
 
 tdman.read_voltages('volt.dat')
 
@@ -97,30 +186,133 @@ tdman.invert()
 print(tdman.inv_stats)
 
 # save the RMS values of the final iteration
-rms_all, rms_mag, rms_pha = tdman.inv_stats.iloc[-1][
+final_rms_all, final_rms_mag, final_rms_pha = tdman.inv_stats.iloc[-1][
     ['dataRMS', 'magRMS', 'phaRMS']
 ].values
+print('Final RMS mag+pha:', final_rms_all)
+print('Final RMS mag:', final_rms_mag)
+print('Final RMS pha:', final_rms_pha)
+###############################################################################
+# The primary convergence goal of the inversion is to reach an RMS near 1.
+# This would indicate that the data is described by the subsurface model within
+# their data bounds.
+# We do not care about update loops of the inversion. Therefore, filter the
+# convergence information and plot it.
+inv_stats_main = tdman.inv_stats.query('type=="main"')
+
+fig, ax = plt.subplots()
+ax.plot(
+    inv_stats_main['dataRMS'], '.-', label=r'$\mathbf{RMS}_{\mathrm{all}}$')
+ax.plot(
+    inv_stats_main['magRMS'], '.-', label=r'$\mathbf{RMS}_{\mathrm{mag}}$')
+ax.plot(
+    inv_stats_main['phaRMS'], '.-', label=r'$\mathbf{RMS}_{\mathrm{pha}}$')
+ax.axhline(y=1.0, color='black', linestyle='dotted', label='target RMS')
+ax.legend()
+ax.set_xlabel('Iteration number')
+ax.set_ylabel('RMS~[-]')
+fig.tight_layout()
+
+with reda.CreateEnterDirectory('output_plot_07'):
+    fig.savefig(
+        'inversion_convergence_evolution.jpg', dpi=300, bbox_inches='tight'
+    )
+
 ###############################################################################
 # As a short reminder, this dictionary contains all information on where to
 # find data/results in the tdMan instance
 print(tdman.a)
 
 ###############################################################################
-# We can now visualize the inversion results
+# We can now visualize the inversion results.
+# First, plot the L1-Coverage to get an idea on the information distribution in
+# the subsurface.
+# We will later use the coverage to add transparency ('alpha') to our plots, or
+# to apply a filter mask to the results.
+# The intention here is to visually remove all pixels that definitively do not
+# hold useful subsurface information. Be careful: High sensitivities do not
+# always imply good recovery of the subsurface!
+fig, ax = tdman.show_parset(
+    tdman.a['inversion']['l1_dw_log10_norm'],
+    plot_colorbar=True,
+    cmap_name='magma',
+    xmin=-2,
+    xmax=32,
+    zmin=-8,
+    title='L1-Coverage (normalized)',
+    cblabel=r'$log_{10}(Cov_{L1}~[-])$',
+)
+with reda.CreateEnterDirectory('output_plot_07'):
+    fig.savefig('inversion_coverage_l1.jpg', dpi=300, bbox_inches='tight')
+
+log10_threshold = -2
+mask = (tdman.parman.parsets[
+    tdman.a['inversion']['l1_dw_log10_norm']
+] > log10_threshold).astype(int)
+
+###############################################################################
+# Plot Magnitude results:
+fig, axes = plt.subplots(3, 1, figsize=(8, 11), sharex=True)
+
 fig, ax = tdman.show_parset(
     tdman.a['inversion']['rmag'][-1],
+    ax=axes[0],
     cmap_name='viridis',
     plot_colorbar=True,
     cblabel=r'$\rho~[\Omega m]$',
     xmin=-2,
     xmax=32,
     zmin=-8,
-    title='Magnitude inversion (rms-all: {}, rms-mag: {}'.format(
-        rms_all, rms_mag
+    title='Magnitude inversion (rms-all: {}, rms-mag: {})'.format(
+        final_rms_all,
+        final_rms_mag
     ),
-
 )
-fig.savefig('inversion_result_rmag.jpg')
+ax.set_title('No mask', loc='left', fontsize=8)
+
+with reda.CreateEnterDirectory('output_plot_07'):
+    fig.savefig('inversion_result_rmag_complete.jpg')
+
+fig, ax = tdman.show_parset(
+    tdman.a['inversion']['rmag'][-1],
+    ax=axes[1],
+    cmap_name='viridis',
+    plot_colorbar=True,
+    cblabel=r'$\rho~[\Omega m]$',
+    xmin=-2,
+    xmax=32,
+    zmin=-8,
+    title='Magnitude inversion (rms-all: {}, rms-mag: {})'.format(
+        final_rms_all,
+        final_rms_mag
+    ),
+    cid_alpha=tdman.a['inversion']['l1_dw_log10_norm'],
+    # default is: 3
+    alpha_sens_threshold=2,
+)
+# with reda.CreateEnterDirectory('output_plot_07'):
+#     fig.savefig('inversion_result_rmag_cov_alpha.jpg')
+
+fig, ax = tdman.show_parset(
+    tdman.a['inversion']['rmag'][-1],
+    ax=axes[2],
+    cmap_name='viridis',
+    plot_colorbar=True,
+    cblabel=r'$\rho~[\Omega m]$',
+    xmin=-2,
+    xmax=32,
+    zmin=-8,
+    title='Magnitude inversion (rms-all: {}, rms-mag: {})'.format(
+        final_rms_all,
+        final_rms_mag
+    ),
+    cid_alpha=mask,
+)
+with reda.CreateEnterDirectory('output_plot_07'):
+    fig.savefig('inversion_result_rmag_cov_mask.jpg')
+
+###############################################################################
+# Phase inversion results:
 
 fig, ax = tdman.show_parset(
     tdman.a['inversion']['rpha'][-1],
@@ -130,8 +322,12 @@ fig, ax = tdman.show_parset(
     xmin=-2,
     xmax=32,
     zmin=-8,
-    title='Phase inversion result (rms-all: {}, rms-pha: {}'.format(
-        rms_all, rms_pha
+    title='Phase inversion result (rms-all: {}, rms-pha: {})'.format(
+        final_rms_all,
+        final_rms_mag
     ),
+    cid_alpha=mask,
 )
-fig.savefig('inversion_result_rpha.jpg')
+with reda.CreateEnterDirectory('output_plot_07'):
+    fig.savefig('inversion_result_rpha.jpg')
+# sphinx_gallery_thumbnail_number = -1
