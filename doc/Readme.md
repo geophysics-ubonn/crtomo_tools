@@ -1,7 +1,7 @@
 
 # Cross-References
 
-* Getting all defines inter-sphinx labels:
+* Getting all defined inter-sphinx labels:
 
 		python -msphinx.ext.intersphinx _build/html/objects.inv
 
