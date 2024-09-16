@@ -1214,7 +1214,16 @@ class tdMan(object):
         else:
             Nx = 2
 
-        fig, axes = plt.subplots(1, Nx, figsize=(15 / 2.54, 12 / 2.54))
+        axes = kwargs.get('axes', None)
+        if axes:
+            # assume axes to plot to were provided
+            if Nx == 2:
+                assert len(axes) == 2, "We need two axes"
+                fig = axes[0].get_figure()
+            else:
+                fig = axes.get_figure()
+        else:
+            fig, axes = plt.subplots(1, Nx, figsize=(15 / 2.54, 12 / 2.54))
         axes = np.atleast_1d(axes)
         # magnitude
         ax = axes[0]
