@@ -529,17 +529,37 @@ class plotManager(object):
         if isinstance(alpha_cid, int):
             alpha = self.parman.parsets[alpha_cid]
 
-            sens_log_threshold = kwargs.get(
+            sens_log_threshold_upper = kwargs.get(
                 'alpha_sens_threshold', 3
+            )
+            sens_log_threshold_lower = kwargs.get(
+                'alpha_sens_threshold_lower', None
             )
             # make sure this data set is normalized between 0 and 1
             if np.nanmin(alpha) < 0 or np.nanmax(alpha) > 1:
-                normcov = np.divide(np.abs(alpha), sens_log_threshold)
-                normcov[np.where(normcov > 1)] = 1
+                normcov = np.divide(
+                    np.abs(alpha),
+                    sens_log_threshold_upper
+                )
+                indices_upper = np.where(normcov > 1)
+
+                if sens_log_threshold_lower is not None:
+                    normcov_lower = np.divide(
+                        np.abs(alpha),
+                        sens_log_threshold_lower
+                    )
+                    indices_lower = np.where(normcov_lower <= 1)
+                    # these will be fully transparent
+                    normcov[indices_lower] = 0
+
+                # these will be fully opaque
+                normcov[indices_upper] = 1
+
                 alpha = np.subtract(1, normcov)
                 # raise Exception(
                 #     'alpha data set must be normalized between 0 and 1'
                 # )
+
             fcolors[:, 3] = alpha
         elif isinstance(alpha_cid, np.ndarray):
             alpha = alpha_cid
