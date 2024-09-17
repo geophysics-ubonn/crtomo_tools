@@ -208,7 +208,7 @@ class plotManager(object):
         )
         cint_ma = np.ma.masked_invalid(cint)
 
-        cmap = mpl.colormaps['turbo'].resampled(1)
+        cmap = mpl.cm.get_cmap('turbo', 1)
         if kwargs.get('fill_contours', True):
             pc = ax.contourf(
                 X, Z, cint_ma,
@@ -496,14 +496,14 @@ class plotManager(object):
         # IPython.embed()
         # color map
         cmap_name = kwargs.get('cmap_name', 'viridis')
-        cmap = mpl.colormaps[cmap_name].resampled(
-            kwargs.get('cbsegments', 256)
-        ).copy()
-
-        # cmap = mpl.cm.get_cmap(
-        #     cmap_name,
-        #     kwargs.get('cbsegments', None)
+        # cmap = mpl.colormaps[cmap_name].resampled(
+        #     kwargs.get('cbsegments', 256)
         # ).copy()
+
+        cmap = mpl.cm.get_cmap(
+            cmap_name,
+            kwargs.get('cbsegments', None)
+        ).copy()
         over = kwargs.get('over', cmap(1.0))
         under = kwargs.get('under', cmap(0.0))
 
