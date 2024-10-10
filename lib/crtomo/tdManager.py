@@ -66,6 +66,7 @@ import matplotlib.colors
 import matplotlib.cm
 import numpy as np
 import pandas as pd
+import reda
 from reda.main import units as reda_units
 
 import crtomo.mpl
@@ -3141,3 +3142,74 @@ i6,t105,g9.3,t117,f5.3)
         # _ = ax.hist(psi['psi'], 100)
 
         return fig, ax, cb
+
+    def get_fwd_reda_container(self):
+        """Return a REDA container, either reda.ERT, or reda.CR, with modeled
+        data
+
+        Returns
+        -------
+        container : reda.ERT|reda.CR|None
+        """
+        m_ids = self.a['measurements']
+        if m_ids is None:
+            return None
+
+        if len(m_ids) == 1:
+            # ERT
+            ert = reda.ERT()
+            data = np.hstack((
+                self.configs.configs,
+                self.configs.measurements[m_ids[0]][:, np.newaxis],
+            ))
+            df = pd.DataFrame(
+                data,
+                columns=['a', 'b', 'm', 'n', 'r', 'rpha'],
+            )
+            ert.add_dataframe(df)
+            return ert
+        elif len(m_ids) == 2:
+            # Complex-resistivity
+            cr = reda.CR()
+            data = np.hstack((
+                self.configs.configs,
+                self.configs.measurements[m_ids[0]][:, np.newaxis],
+                self.configs.measurements[m_ids[1]][:, np.newaxis],
+            ))
+            df = pd.DataFrame(
+                data,
+                columns=['a', 'b', 'm', 'n', 'r', 'rpha'],
+            )
+            cr.add_dataframe(df)
+            return cr
+        return None
+
+    def plot_pseudo_locs(self, spacing=1.0):
+        """Plot pseudo-locations of measurement configurations.
+        This function does not take into account real electrode locations.
+        However, for surface configurations a 'spacing' parameter can be
+        provided
+
+        Parameters
+        ----------
+        spacing: float, default=1.0
+            Electrode spacing
+        """
+        ert = reda.ERT()
+        data = np.hstack((
+            self.configs.configs,
+            np.ones(self.configs.configs.shape[0])[:, np.newaxis],
+        ))
+        df = pd.DataFrame(
+            data,
+            columns=['a', 'b', 'm', 'n', 'r'],
+        )
+        ert.add_dataframe(df)
+        fig, ax, cb = ert.pseudosection_type2(
+            markersize=100,
+            spacing=spacing,
+            xlabel='X-Center [m]',
+            ylabel='Pseudodepth [m]',
+        )
+        cb.remove()
+        return fig, ax
