@@ -419,7 +419,7 @@ class tdMan(object):
             print('WARNING: overwriting existing decouplings')
             self.decouplings = decouplings
 
-    def save_decouplins_file(self, filename):
+    def save_decouplings_file(self, filename):
         if self.decouplings is None:
             return
         if isinstance(filename, io.BytesIO):
@@ -434,6 +434,8 @@ class tdMan(object):
             fid.close()
 
     def add_to_decouplings(self, new_decouplings):
+        """
+        """
         assert new_decouplings.shape[1] == 3
         if self.decouplings is None:
             self.decouplings = new_decouplings
@@ -660,7 +662,7 @@ class tdMan(object):
         tar.addfile(info, crtomo_cfg)
 
         decouplings = io.BytesIO()
-        self.save_decouplins_file(decouplings)
+        self.save_decouplings_file(decouplings)
         info = tarfile.TarInfo()
         info.name = 'exe/decouplings.dat'
         info.mtime = time.time()
@@ -829,8 +831,8 @@ class tdMan(object):
                 directory + os.sep + 'exe' + os.sep + 'crt.noisemod'
             )
 
-        self.save_decouplins_file(
-            directory + os.sep + 'exe' + os.sep + 'crt.noisemod'
+        self.save_decouplings_file(
+            directory + os.sep + 'exe' + os.sep + 'decouplings.dat'
         )
 
         if not os.path.isdir(directory + os.sep + 'inv'):
