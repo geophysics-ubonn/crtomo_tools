@@ -17,7 +17,7 @@ from crtomo.grid import crt_grid
 
 
 class crmod_interface(object):
-    def __init__(self, grid, configs, tempdir=None):
+    def __init__(self, grid, configs, tempdir=None, crmod_cfg=None):
         """Initialize the CRMod interface
 
         Parameters
@@ -39,6 +39,11 @@ class crmod_interface(object):
         self.grid = grid
         self.configs = configs
         self.tempdir = tempdir
+        if crmod_cfg is not None:
+            assert isinstance(crmod_cfg, dict), "CRMod config must be a dict"
+            self.crmod_cfg = crmod_cfg
+        else:
+            self.crmod_cfg = {}
 
     def _get_tdm(self, m):
         """For a given model of resistivity magnitudes and phases, return a
@@ -71,6 +76,10 @@ class crmod_interface(object):
         else:
             pid_pha = tdm.parman.add_data(np.zeros(m.shape[0]))
         tdm.register_phase_model(pid_pha)
+
+        tdm.crmod_cfg.update(self.crmod_cfg)
+        import IPython
+        IPython.embed()
         return tdm
 
     def forward_complex(self, log_sigma, silent=True):
