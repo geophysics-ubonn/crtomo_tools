@@ -792,7 +792,7 @@ class crt_grid(object):
         self.element_neighbors_data = []
         self.element_neighbors_edges = []
 
-        print('Looking for neighbors (V2 with cKDTree)')
+        # print('Looking for neighbors (V2 with cKDTree)')
         time_start = time.perf_counter()
         for nr, element_nodes in enumerate(self.elements):
             neighbors_edges = []
