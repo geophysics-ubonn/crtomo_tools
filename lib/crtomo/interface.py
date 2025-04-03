@@ -78,8 +78,8 @@ class crmod_interface(object):
         tdm.register_phase_model(pid_pha)
 
         tdm.crmod_cfg.update(self.crmod_cfg)
-        import IPython
-        IPython.embed()
+        # import IPython
+        # IPython.embed()
         return tdm
 
     def forward_complex(self, log_sigma, silent=True):
@@ -163,9 +163,6 @@ class crmod_interface(object):
         factor = - 1 / (m_rep * measurements_rep)
         sensitivities_log = factor * sensitivities_lin
 
-        #         import IPython
-        #         IPython.embed()
-
         return sensitivities_log
 
     def fwd_complex_R_sigma(self, model_ccomplex, silent=False):
@@ -194,7 +191,7 @@ class crmod_interface(object):
         Parameters
         ----------
         model_rcomplex : size M numpy.ndarray
-            Complex forward model, complex resistivities
+            Complex forward model, complex resistivities (linear)
 
         Returns
         -------
