@@ -634,6 +634,9 @@ class step_raw_visualization(base_step):
             plot_rpha = cr.plot_histogram(column='rpha', log10=True)
             self.results['hist_rpha'] = plot_rpha
 
+        fig_pseudo_log10_r = cr.pseudosection_type1(column='r', log10=True)
+        self.results['ps_log10_r'] = fig_pseudo_log10_r
+
         self.results['cr'] = cr
 
         self.transfer_input_new_to_applied()
@@ -688,6 +691,12 @@ class step_raw_visualization(base_step):
         with self.widgets['output']:
             fig_rmag = self.results['hist_r_log10']['all']
             display(fig_rmag)
+            if 'hist_rpha' in self.results:
+                display(self.results['hist_rpha']['all'])
+
+            if 'ps_log10_r' in self.results:
+                # first entry is the fig object
+                display(self.results['ps_log10_r'][0])
 
         feedback.value = 'Plots were generated'
 
