@@ -51,6 +51,7 @@ binaries = {
             'CRTomo_master_{}'.format(platform.node()),
         ],
         'Windows': [
+            r'CRTomo.exe',
             r'C:\crtomo\bin\crtomo.exe',
         ]
     },
@@ -62,6 +63,7 @@ binaries = {
             'CRMod_master_{}'.format(platform.node()),
         ],
         'Windows': [
+            r'CRMod.exe',
             r'C:\crtomo\bin\crmod.exe',
         ]
     },
@@ -72,6 +74,7 @@ binaries = {
             'CutMcK_master_{}'.format(platform.node()),
         ],
         'Windows': [
+            r'CutMcK.exe',
             r'C:\crtomo\bin\cutmck.exe',
         ]
     },
