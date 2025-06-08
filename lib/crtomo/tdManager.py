@@ -1309,8 +1309,10 @@ class tdMan(object):
         if isinstance(voltage_file, (StringIO, )):
             fid = voltage_file
             fid.seek(0)
+            working_on_file = False
         else:
             fid = open(voltage_file, 'r')
+            working_on_file = True
 
         items_first_line = fid.readline().strip().split(' ')
 
@@ -1318,6 +1320,8 @@ class tdMan(object):
         fid.seek(0)
 
         if int(items_first_line[0]) == 0:
+            if working_on_file:
+                fid.close()
             # empty file
             return
 
@@ -1339,7 +1343,8 @@ class tdMan(object):
             fid.seek(0)
             (norm_mag, norm_pha) = np.genfromtxt(fid, max_rows=1)
 
-        fid.close()
+        if working_on_file:
+            fid.close()
 
         measurements = np.atleast_2d(measurements_raw)
 
@@ -1555,18 +1560,20 @@ class tdMan(object):
         # store env variable
         env_omp = os.environ.get('OMP_NUM_THREADS', '')
         os.environ['OMP_NUM_THREADS'] = '{0}'.format(nr_cores)
-        output = None
-        if catch_output:
+        try:
             output = subprocess.check_output(
                 binary,
                 shell=True,
                 stderr=subprocess.STDOUT,
             )
-        else:
-            subprocess.call(
-                binary,
-                shell=True,
-            )
+        except subprocess.CalledProcessError as error:
+            print('CRTomo returned a non-zero exit code')
+            print('Return code: {}'.format(error.returncode))
+            print(error.output)
+            raise Exception('CRTomo calling error')
+
+        if catch_output:
+            print(output)
 
         # reset environment variable
         os.environ['OMP_NUM_THREADS'] = env_omp
