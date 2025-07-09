@@ -1180,8 +1180,8 @@ class tdMan(object):
         if config_nr is not None:
             cids = self.assignments['sensitivities'][config_nr]
 
-            sens_mag = self.parman.parsets[cids[0]]
-            sens_pha = self.parman.parsets[cids[1]]
+            sens_mag = self.parman.parsets[cids[0]].copy()
+            sens_pha = self.parman.parsets[cids[1]].copy()
         else:
             sens_mag = sens_data[:, 0]
             sens_pha = sens_data[:, 1]
@@ -1231,6 +1231,8 @@ class tdMan(object):
         # magnitude
         ax = axes[0]
         cid = self.parman.add_data(sens_mag)
+
+        # we always plot the first subplot, the magnitude
         fig, ax, cnorm, cmap, cb, sM = self.plot.plot_elements_to_ax(
             cid=cid,
             ax=ax,
