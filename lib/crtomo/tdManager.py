@@ -1192,8 +1192,9 @@ class tdMan(object):
             cbmin = sens_mag.min()
             cbmax = sens_mag.max()
         else:
-            _rescale_sensitivity(sens_mag)
-            _rescale_sensitivity(sens_pha)
+            sens_mag /= np.abs(sens_mag).max()
+            # _rescale_sensitivity(sens_mag)
+            # _rescale_sensitivity(sens_pha)
             cbmin = 0
             cbmax = 1
 
@@ -1242,6 +1243,7 @@ class tdMan(object):
             cbsegments=18,
             cbmin=cbmin,
             cbmax=cbmax,
+            cblabel='asinh-transformed sensitivity',
             bad='white',
             # cbmin=-cblim,
             # cbmax=cblim,
@@ -1255,16 +1257,25 @@ class tdMan(object):
             # xmin=-0.25,
             # xmax=10,
             # zmin=-2,
+            converter=PlotManager.converter_asinh,
         )
         if not absv:
-            cb.set_ticks([0, 0.25, 0.5, 0.75, 1])
+            # for the asinh converter
+            cb.set_ticks([-1, 0, 1])
             cb.set_ticklabels([
                 '-1',
-                r'$-10^{-2.5}$',
                 '0',
-                r'$10^{-2.5}$',
                 '1',
             ])
+            pass
+            # cb.set_ticks([0, 0.25, 0.5, 0.75, 1])
+            # cb.set_ticklabels([
+            #     '-1',
+            #     r'$-10^{-2.5}$',
+            #     '0',
+            #     r'$10^{-2.5}$',
+            #     '1',
+            # ])
 
         # self.plot.plot_elements_to_ax(
         #     cid=cids[0],
