@@ -24,12 +24,23 @@ plt.rcParams["figure.autolayout"] = True  # This does not seem to work?!
 ###############################################################################
 # create and save a FEM-grid
 grid = crtomo.crt_grid.create_surface_grid(
-    nr_electrodes=10,
+    nr_electrodes=8,
     spacing=1,
-    depth=4,
-    char_lengths=0.05,
+    # char_lengths=0.05,
+    char_lengths=[0.05, 0.1, 0.1, 0.1],
+    depth=8,
     left=5,
     right=5,
+    internal_lines=[
+        [4, -1, 6, -1],
+        [4, -2, 6, -2],
+        [4, -1, 4, -2],
+        [6, -1, 6, -2],
+        [0, -1, 3, -1],
+        [0, -2, 3, -2],
+        [0, -1, 0, -2],
+        [3, -1, 3, -2],
+    ],
 )
 
 fig, ax = grid.plot_grid()
@@ -47,9 +58,8 @@ with reda.CreateEnterDirectory('output_plot_00_sensitivity'):
 ###############################################################################
 # create the measurement configuration
 configs = np.array((
-    (1, 4, 10, 7),
+    (1, 2, 7, 6),
 ))
-
 
 ###############################################################################
 # for different background, plot the sensitivities
@@ -65,7 +75,7 @@ for bg in (1, 10, 100, 1000):
         [6, -2],
         [4, -2],
     ])
-    td.parman.modify_polygon(pid_mag, poly, 50)
+    td.parman.modify_polygon(pid_mag, poly, 1)
 
     poly = Polygon([
         [0, -1],
@@ -76,7 +86,9 @@ for bg in (1, 10, 100, 1000):
     td.parman.modify_polygon(pid_pha, poly, -150)
 
     td.model(sensitivities=True, silent=True)
-    fig, ax = td.plot_sensitivity(0)
+
+    # plot both mag and pha sensitivities
+    fig, ax = td.plot_sensitivity(config_nr=0)
     # sphinx_gallery_start_ignore
     axes = fig.get_axes()
     axes[0].set_title("Magnitude Sensitivity", fontsize=8, loc='left')
@@ -94,9 +106,10 @@ for bg in (1, 10, 100, 1000):
             bbox_inches='tight'
         )
 
-    fig, ax = td.plot_sensitivity(0, mag_only=True)
+    # create another plot that only shows the magnitude sensitivity
+    fig, ax = td.plot_sensitivity(config_nr=0, mag_only=True)
     # sphinx_gallery_start_ignore
-    ax[0].set_title("Phase")
+    ax[0].set_title("Magnitude Sensitivity", fontsize=8, loc='left')
     fig.get_axes()[1]._colorbar.set_label("S [V/Ohm m]", fontsize="x-small")
     fig.set_size_inches(6, 2)
     fig.set_dpi(300)
