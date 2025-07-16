@@ -3018,7 +3018,7 @@ i6,t105,g9.3,t117,f5.3)
         if 'cmap_name' not in kwargs:
             kwargs['cmap_name'] = 'turbo'
         if 'cblabel' not in kwargs:
-            kwargs['cblabel'] = reda_units.get_label('r', log10=log10)
+            kwargs['cblabel'] = reda_units.get_label('rho', log10=log10)
 
         if log10:
             kwargs['converter'] = PlotManager.converter_abs_log10
