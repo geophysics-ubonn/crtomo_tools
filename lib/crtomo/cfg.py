@@ -69,7 +69,8 @@ class crmod_config(dict):
             'fictitious_sink',
             'sink_node',
             'boundary_values',
-            'boundary_file'
+            'boundary_file',
+            'mswitch',
         )
 
         # boolean options
@@ -126,6 +127,7 @@ class crmod_config(dict):
         self['sink_node'] = '1660'  # ! fictitious sink node number
         self['boundary_values'] = 'F'  # ! boundary values ?
         self['boundary_file'] = 'boundary.dat'
+        self['mswitch'] = 0
 
     def write_to_file(self, filename):
         """
