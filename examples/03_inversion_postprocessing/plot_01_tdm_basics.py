@@ -15,14 +15,14 @@ In this example we will explore the various functionalities of the tdManager.
 """
 ###############################################################################
 # we need the crtomo module to continue
-
+import matplotlib.pylab as plt
 import crtomo
 # the pprint module is used just to prettify the output of this example, please
 # ignore for further use
 import pprint
 
 ###############################################################################
-# load inversion results from an already-finished tomodir
+# Load previously-generated inversion results from an already-finished tomodir
 tdm = crtomo.tdMan(tomodir='tomodir')
 
 ###############################################################################
@@ -86,4 +86,24 @@ cre_final_inversion = tdm.inv_last_cre_parset()
 cim_final_inversion = tdm.inv_last_cim_parset()
 
 ###############################################################################
+# Plot the final magnitude result
+fig, ax = tdm.plot_inversion_result_rmag()
+
+###############################################################################
+# Now let us extract a vertical slice of the final magnitude result
+# this is a Nx3 matrix: x, z, value columns
+extracted_data = tdm.extract_along_line(
+    tdm.a['inversion']['rmag'][-1],
+    [2, 0],
+    [2, -2],
+    20
+)
+
+fig, ax = plt.subplots()
+ax.plot(
+    extracted_data[:, 2],
+    extracted_data[:, 1],
+)
+ax.set_xlabel(r'$\rho~[\Omega m]$')
+ax.set_ylabel('depth [m]')
 # TODO: Extract from point, line, polygon, rectangle

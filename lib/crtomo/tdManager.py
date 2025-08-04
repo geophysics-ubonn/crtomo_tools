@@ -1180,8 +1180,8 @@ class tdMan(object):
         if config_nr is not None:
             cids = self.assignments['sensitivities'][config_nr]
 
-            sens_mag = self.parman.parsets[cids[0]]
-            sens_pha = self.parman.parsets[cids[1]]
+            sens_mag = self.parman.parsets[cids[0]].copy()
+            sens_pha = self.parman.parsets[cids[1]].copy()
         else:
             sens_mag = sens_data[:, 0]
             sens_pha = sens_data[:, 1]
@@ -1192,8 +1192,9 @@ class tdMan(object):
             cbmin = sens_mag.min()
             cbmax = sens_mag.max()
         else:
-            _rescale_sensitivity(sens_mag)
-            _rescale_sensitivity(sens_pha)
+            sens_mag /= np.abs(sens_mag).max()
+            # _rescale_sensitivity(sens_mag)
+            # _rescale_sensitivity(sens_pha)
             cbmin = 0
             cbmax = 1
 
@@ -1231,6 +1232,8 @@ class tdMan(object):
         # magnitude
         ax = axes[0]
         cid = self.parman.add_data(sens_mag)
+
+        # we always plot the first subplot, the magnitude
         fig, ax, cnorm, cmap, cb, sM = self.plot.plot_elements_to_ax(
             cid=cid,
             ax=ax,
@@ -1240,6 +1243,7 @@ class tdMan(object):
             cbsegments=18,
             cbmin=cbmin,
             cbmax=cbmax,
+            cblabel='asinh-transformed sensitivity',
             bad='white',
             # cbmin=-cblim,
             # cbmax=cblim,
@@ -1253,16 +1257,25 @@ class tdMan(object):
             # xmin=-0.25,
             # xmax=10,
             # zmin=-2,
+            converter=PlotManager.converter_asinh,
         )
         if not absv:
-            cb.set_ticks([0, 0.25, 0.5, 0.75, 1])
+            # for the asinh converter
+            cb.set_ticks([-1, 0, 1])
             cb.set_ticklabels([
                 '-1',
-                r'$-10^{-2.5}$',
                 '0',
-                r'$10^{-2.5}$',
                 '1',
             ])
+            pass
+            # cb.set_ticks([0, 0.25, 0.5, 0.75, 1])
+            # cb.set_ticklabels([
+            #     '-1',
+            #     r'$-10^{-2.5}$',
+            #     '0',
+            #     r'$10^{-2.5}$',
+            #     '1',
+            # ])
 
         # self.plot.plot_elements_to_ax(
         #     cid=cids[0],
@@ -3005,7 +3018,7 @@ i6,t105,g9.3,t117,f5.3)
         if 'cmap_name' not in kwargs:
             kwargs['cmap_name'] = 'turbo'
         if 'cblabel' not in kwargs:
-            kwargs['cblabel'] = reda_units.get_label('r', log10=log10)
+            kwargs['cblabel'] = reda_units.get_label('rho', log10=log10)
 
         if log10:
             kwargs['converter'] = PlotManager.converter_abs_log10
