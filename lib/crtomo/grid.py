@@ -466,6 +466,10 @@ class crt_grid(object):
         if not isinstance(fid, io.BytesIO):
             fid.close()
 
+    def save_elem_elec_files(self, file_elem='elem.dat', file_elec='elec.dat'):
+        self.save_elem_file(file_elem)
+        self.save_elec_file(file_elec)
+
     def _write_neighbors(self, fid):
         for key in (11, 12):
             if key in self.neighbors:
@@ -1439,3 +1443,9 @@ class crt_grid(object):
 
     def get_polygon_from_file(self, filename):
         pass
+
+
+# technically, a grid is a regular mesh
+# we mostly use triangular elements now, so the term mesh should be used
+class mesh(crt_grid):
+    pass
