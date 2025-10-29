@@ -2873,30 +2873,69 @@ i6,t105,g9.3,t117,f5.3)
         self.plot.plot_elements_to_ax(pid, ax=ax, **kwargs)
         return fig, ax
 
-    def plot_forward_models(self):
+    def plot_forward_models(self, mag_only=False, separate_figures=False,
+                            **kwargs):
         """Plot the forward models (requires the forward models to be loaded)
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
+
         """
         pids_rho = self.assignments.get('forward_model', None)
+
         if pids_rho is None:
             raise Exception('you need to load the forward model first')
-        fig, axes = plt.subplots(1, 2, figsize=(16 / 2.54, 8 / 2.54))
-        ax = axes[0]
-        self.plot.plot_elements_to_ax(
-            pids_rho[0],
-            ax=ax,
-            plot_colorbar=True,
-            cblabel=r'$|\rho| [\Omega m]$',
-        )
 
-        ax = axes[1]
-        self.plot.plot_elements_to_ax(
-            pids_rho[1],
-            ax=ax,
-            plot_colorbar=True,
-            cblabel=r'$\phi [mrad]$',
-        )
-        fig.tight_layout()
-        return fig, axes
+        figsize = kwargs.pop("figsize", (16 / 2.54, 8 / 2.54))
+        ax_mag = None
+        ax_pha = None
+        if mag_only:
+            # only one axis
+            fig_mag, ax_mag = plt.subplots(1, 1, figsize=figsize)
+        else:
+            if separate_figures:
+                fig_mag, ax_mag = plt.subplots(1, 1, figsize=figsize)
+                fig_pha, ax_pha = plt.subplots(1, 1, figsize=figsize)
+            else:
+                fig, axes = plt.subplots(1, 2, figsize=figsize)
+                ax_mag = axes[0]
+                ax_pha = axes[1]
+
+        if ax_mag is not None:
+            ax = ax_mag
+            self.plot.plot_elements_to_ax(
+                pids_rho[0],
+                ax=ax,
+                plot_colorbar=True,
+                cblabel=r'$|\rho| [\Omega m]$',
+                **kwargs
+            )
+
+        if ax_pha is not None:
+            ax = ax_pha
+            self.plot.plot_elements_to_ax(
+                pids_rho[1],
+                ax=ax,
+                plot_colorbar=True,
+                cblabel=r'$\phi [mrad]$',
+                **kwargs
+            )
+
+        if mag_only:
+            fig_mag.tight_layout()
+            return fig_mag, ax_mag
+        else:
+            if separate_figures:
+                fig_mag.tight_layout()
+                fig_pha.tight_layout()
+                return [fig_mag, fig_pha], [ax_mag, ax_pha]
+            else:
+                fig.tight_layout()
+                return fig, axes
 
     @functools.wraps(pM.ParMan.extract_points)
     def extract_points(self, pid, points):
