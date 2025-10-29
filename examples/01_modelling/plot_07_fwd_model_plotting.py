@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # *-* coding: utf-8 *-*
 """
-Plot forward models
-^^^^^^^^^^^^^^^^^^^
+Plot sEIT forward models
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 Test plotting forward models for different mesh boundaries.
 
