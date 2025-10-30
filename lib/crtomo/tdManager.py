@@ -3173,7 +3173,7 @@ i6,t105,g9.3,t117,f5.3)
             (b_x, b_y) = self.grid.nodes['presort'][nodes[1]][1:3]
             ax.plot([a_x, b_x], [a_y, b_y], color='r')
 
-    def plot_inversion_misfit_pseudosection(self):
+    def plot_inversion_misfit_pseudosection(self, **kwargs):
         if self.eps_data is None:
             return
         psi = self.eps_data[-1][['a', 'b', 'm', 'n', 'psi']]
@@ -3182,7 +3182,6 @@ i6,t105,g9.3,t117,f5.3)
         fig, ax, cb = plot_pseudosection_type2(
             psi,
             'psi',
-            markersize=100,
             cmap='seismic',
             cbmin=0,
             cbmax=2,
@@ -3191,6 +3190,7 @@ i6,t105,g9.3,t117,f5.3)
                 self.crtomo_cfg['mag_rel'],
                 self.crtomo_cfg['mag_abs'],
             ),
+            interpolate=kwargs.pop("interpolate", False)
         )
 
         # import numpy as np
