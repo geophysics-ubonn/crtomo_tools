@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # *-* coding: utf-8 *-*
+
 """
 Forward Modeling with CRMod
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -45,6 +46,8 @@ fig, axes = tdm.plot_forward_models(mag_only=False)
 ###############################################################################
 # Two lists are returned, each containing either two figures, or two axes
 figs, axes = tdm.plot_forward_models(mag_only=False, separate_figures=True)
+figs[0].suptitle('Magnitude model')
+figs[1].suptitle('Phase model')
 
 ###############################################################################
 # Compute FEM solution using CRMod:
@@ -55,3 +58,18 @@ tdm.model(silent=True)
 # First column: resistances, second column: phase values [mrad]
 measurements = tdm.measurements()
 print(measurements)
+
+###############################################################################
+
+# Let's plot a pseudo-section of the modelled data
+ert = tdm.get_fwd_reda_container()
+print(ert)
+print(ert.data)
+# compute geometric factors
+ert.compute_K_analytical(spacing=1)
+# type 2 pseudosection
+fig, ax, cb = ert.pseudosection_type2('rho_a', interpolate=False, spacing=1)
+# type 2 pseudosection, interpolated
+fig, ax, cb = ert.pseudosection_type2('rho_a', interpolate=True, spacing=1)
+
+# sphinx_gallery_multi_image = "single"

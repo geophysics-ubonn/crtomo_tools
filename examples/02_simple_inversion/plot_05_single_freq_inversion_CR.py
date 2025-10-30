@@ -16,6 +16,7 @@ import os
 
 import numpy as np
 
+import crtomo
 import reda
 import reda.utils.geometric_factors as geom_facs
 from reda.utils.fix_sign_with_K import fix_sign_with_K
@@ -30,7 +31,7 @@ cr.import_crtomo_data('data/volt.dat')
 # this is a container measurement, we need to compute geometric factors using
 
 # numerical modeling
-# Note that this only work if CRMod is available
+# Note that this only works if CRMod is available
 settings = {
     'rho': 100,
     'elem': 'data/elem.dat',
@@ -75,7 +76,6 @@ with reda.CreateEnterDirectory(output_directory):
 ###############################################################################
 # alternatively: directly create a tdman object that represents a
 # single-frequency inversion with CRTomo
-import crtomo
 grid = crtomo.crt_grid('data/elem.dat', 'data/elec.dat')
 tdman = cr.export_to_crtomo_td_manager(grid, norrec='nor')
 

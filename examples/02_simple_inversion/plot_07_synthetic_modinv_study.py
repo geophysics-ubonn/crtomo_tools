@@ -53,7 +53,18 @@ grid = crtomo.crt_grid.create_surface_grid(
     nr_electrodes=30,
     spacing=1,
     # these lengths determine the size of mesh cells
-    char_lengths=[0.3, 1, 1, 1]
+    char_lengths=[0.3, 0.8, 0.3, 0.3],
+    internal_lines=[
+        [1, -1, 5, -1],
+        [1, -5, 5, -5],
+        [1, -1, 1, -5],
+        [5, -1, 5, -5],
+        # phase anomaly
+        [15, -3, 20, -3],
+        [15, -7, 20, -7],
+        [15, -3, 15, -7],
+        [20, -3, 20, -7],
+    ],
 )
 
 fig, ax = grid.plot_grid()
@@ -69,11 +80,12 @@ man = crtomo.tdMan(grid=grid)
 # 2. Create complex-resistivity subsurface model
 # ----------------------------------------------
 
+# [magnitude] = Ohm m
+# [phase] = mrad
 pid_mag, pid_pha = man.add_homogeneous_model(
-    magnitude=100, phase=-5
+    magnitude=100,
+    phase=-5
 )
-# import IPython
-# IPython.embed()
 
 man.parman.modify_area(
     pid_mag,
@@ -84,13 +96,16 @@ man.parman.modify_area(
 
 man.parman.modify_area(
     pid_pha,
-    xmin=1, xmax=5,
-    zmin=-3, zmax=-2,
+    xmin=15, xmax=20,
+    zmin=-3, zmax=-7,
     value=-30
 )
 
+# note: we can also modify the subsurface using polygons
+# note that here we did NOT make sure that the polygon edges are present in the
+# mesh, leading to a ragged appearance in the model
 polygon = shapely.geometry.Polygon((
-    (2, 0), (4, -1), (2, -1)
+    (10, -2), (14, -3), (12, -5)
 ))
 man.parman.modify_polygon(pid_mag, polygon, 3)
 
@@ -123,11 +138,20 @@ man.configs.gen_dipole_dipole(skipc=1)
 man.configs.gen_dipole_dipole(skipc=2)
 
 ###############################################################################
-# 4. Generate Measurement Configurations
-# --------------------------------------
+# 4. Generate synthetic measurements
+# ----------------------------------
 rmag_rpha_mod = man.measurements()
 rmag = man.measurements()[:, 0]
 rpha = man.measurements()[:, 1]
+
+ert = man.get_fwd_reda_container()
+print(ert)
+# compute geometric factors
+ert.compute_K_analytical(spacing=1)
+# type 2 pseudosection
+fig, ax, cb = ert.pseudosection_type2('rho_a', interpolate=False, spacing=1)
+# type 2 pseudosection, interpolated
+fig, ax, cb = ert.pseudosection_type2('rho_a', interpolate=True, spacing=1)
 
 ###############################################################################
 # Let's plot the results
@@ -196,7 +220,7 @@ man.configs.delete_data_points(indices)
 man.save_measurements('volt.dat')
 
 ###############################################################################
-# prepare the inversion
+# Prepare the inversion
 # note that we create another tdMan class instance for the inversion. This is
 # not necessarily required, but serves nicely to separate the different steps
 # of the inversion
@@ -263,6 +287,10 @@ with reda.CreateEnterDirectory('output_plot_07'):
 # As a short reminder, this dictionary contains all information on where to
 # find data/results in the tdMan instance
 print(tdman.a)
+
+###############################################################################
+tdman.plot_inversion_misfit_pseudosection()
+tdman.plot_inversion_misfit_pseudosection(interpolate=True)
 
 ###############################################################################
 # We can now visualize the inversion results.
@@ -368,3 +396,4 @@ with reda.CreateEnterDirectory('output_plot_07'):
     fig.savefig('inversion_result_rpha.jpg')
 
 # sphinx_gallery_thumbnail_number = -1
+# sphinx_gallery_multi_image = "single"
