@@ -422,7 +422,8 @@ class crt_grid(object):
         self._read_elem_nodes(fid)
         self._read_elem_elements(fid)
         self._read_elem_neighbors(fid)
-        fid.close()
+        if not isinstance(fid, (io.StringIO, io.BytesIO)):
+            fid.close()
 
         self._prepare_grids()
 
@@ -463,7 +464,7 @@ class crt_grid(object):
             fid, self.electrodes[:, 0].astype(int) + 1, fmt='%i',
             encoding='utf-8',
         )
-        if not isinstance(fid, io.BytesIO):
+        if not isinstance(fid, (io.StringIO, io.BytesIO)):
             fid.close()
 
     def save_elem_elec_files(self, file_elem='elem.dat', file_elec='elec.dat'):
@@ -506,7 +507,8 @@ class crt_grid(object):
         else:
             fid = open(elec_file, 'r')
         electrode_nodes_raw = np.loadtxt(fid, skiprows=1, dtype=int) - 1
-        fid.close()
+        if not isinstance(fid, (io.StringIO, io.BytesIO)):
+            fid.close()
         self.electrodes = self.nodes['presort'][electrode_nodes_raw]
         self.nr_of_electrodes = self.electrodes.shape[0]
 
