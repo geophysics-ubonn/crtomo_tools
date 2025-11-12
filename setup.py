@@ -44,11 +44,16 @@ if __name__ == '__main__':
             '': 'src',
             'crtomo': 'lib/crtomo',
             'crtomo.notebook': 'lib/crtomo/notebook',
+            'crtomo.notebook.steps': 'lib/crtomo/notebook/steps',
         },
         # packages=[''],
         # package_dir={'': 'lib', 'grid_tools': 'src/GRID_TOOLS'},
         # packages=find_packages(),
-        packages=['crtomo', 'crtomo.notebook', ],
+        packages=[
+            'crtomo',
+            'crtomo.notebook',
+            'crtomo.notebook.steps',
+        ],
         package_data={'crtomo': package_data},
         py_modules=scripts,
         # py_modules=[
