@@ -3274,3 +3274,12 @@ i6,t105,g9.3,t117,f5.3)
         )
         cb.remove()
         return fig, ax
+
+    def get_invstats(self, with_updates=False):
+        if self.inv_stats is None:
+            return None
+
+        if with_updates:
+            return self.inv_stats
+        else:
+            return self.inv_stats.query("type == 'main'")
