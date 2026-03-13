@@ -271,7 +271,7 @@ class crt_grid(object):
                 new_index = np.where(nodes_raw[:, 0].astype(int) == (node + 1))
                 nodes_cutmck[new_index[0], 1:3] = nodes_raw[node, 1:3]
                 nodes_cutmck[new_index[0], 0] = new_index[0]
-                nodes_cutmck_index[node] = new_index[0]
+                nodes_cutmck_index[node] = new_index[0].item()
             # sort them
             nodes_sorted = nodes_cutmck[nodes_cutmck_index, :]
             nodes['presort'] = nodes_cutmck
