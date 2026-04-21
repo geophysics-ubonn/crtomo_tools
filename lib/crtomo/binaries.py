@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # *-* coding: utf-8 *-*
 """provide a simple OS-agnostic interface to various binary paths, e.g., for
-GMSH oder CRTomo.
+GMSH or CRTomo.
 
 At the moment all paths are hard-coded, but this interface could be extended
 to using a configuration file.
@@ -43,6 +43,9 @@ binaries = {
             r'C:\crtomo\bin\gmsh.exe',
             'gmsh.exe',
         ],
+        'Darwin': [
+            'gmsh',
+        ],
     },
     'CRTomo': {
         'Linux': [
@@ -53,7 +56,10 @@ binaries = {
         'Windows': [
             r'CRTomo.exe',
             r'C:\crtomo\bin\crtomo.exe',
-        ]
+        ],
+        'Darwin': [
+            'CRTomo',
+        ],
     },
     'CRMod': {
         'Linux': [
@@ -65,7 +71,10 @@ binaries = {
         'Windows': [
             r'CRMod.exe',
             r'C:\crtomo\bin\crmod.exe',
-        ]
+        ],
+        'Darwin': [
+            'CRMod',
+        ],
     },
     'CutMcK': {
         'Linux': [
@@ -76,9 +85,11 @@ binaries = {
         'Windows': [
             r'CutMcK.exe',
             r'C:\crtomo\bin\cutmck.exe',
-        ]
+        ],
+        'Darwin': [
+            'CutMcK',
+        ],
     },
-
 }
 
 
