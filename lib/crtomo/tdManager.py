@@ -3296,3 +3296,30 @@ i6,t105,g9.3,t117,f5.3)
             return self.inv_stats
         else:
             return self.inv_stats.query("type == 'main'")
+
+    def remove_negative_resistance_measurements(self):
+        """Remove all measurements with zero or less resistance.
+
+        This function is mainly useful for synthetic measurements - for
+        advanced filtering, use the REDA library.
+
+        This function does nothing if no measurements were registered for
+        inversion (i.e., with .register_measurements).
+
+        """
+        if "measurements" not in self.assignments:
+            return
+        if self.a['measurements'] is None:
+            return
+
+        # now assume we got a list here
+        mid_mag, mid_pha = self.a['measurements']
+
+        if mid_mag is None:
+            return
+
+        # find negative (or zero) resistances
+        indices = np.where(self.configs.measurements[mid_mag] <= 0)[0]
+
+        # delete the corresponding data points
+        self.configs.delete_data_points(indices)
