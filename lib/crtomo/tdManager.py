@@ -1583,6 +1583,19 @@ class tdMan(object):
             print('CRTomo returned a non-zero exit code')
             print('Return code: {}'.format(error.returncode))
             print(error.output)
+            if os.path.isfile('error.dat'):
+                error_message = open('error.dat', 'r').read()
+                print('')
+                print('')
+                print("#" * 80)
+                print("#" * 80)
+                print("#" * 80)
+                print('Error message produced by CRTomo in error.dat:')
+                print('')
+                print(error_message)
+                print("#" * 80)
+                print("#" * 80)
+                print("#" * 80)
             raise Exception('CRTomo calling error')
 
         if catch_output:
