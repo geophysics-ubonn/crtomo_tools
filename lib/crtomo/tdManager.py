@@ -3103,6 +3103,67 @@ i6,t105,g9.3,t117,f5.3)
         fig.tight_layout()
         return fig, ax
 
+    def plot_inversion_result_rpha(
+            self, figsize=None, log10=False, overlay_coverage=False,
+            **kwargs):
+        """Plot the final inversion results, phase results only
+
+        Parameters
+        ----------
+        figsize: (float, float)|None
+            Figure size of the matplotlib figure in inches.
+        overlay_coverage: bool, default: False
+            If True, use the cumulated coverage to adjust the transparency of
+            the plot
+        **kwargs: dict
+            will be propagated into self.plot.plot_elements_to_ax
+
+        Returns
+        -------
+        fig: matplotlib.Figure
+            The created figure
+        ax: matplotlib.Axes
+            Plot axes
+
+        """
+        assert self.assignments['inversion'] is not None, \
+            'need inversion results to plot anything'
+        pid_pha = self.assignments['inversion']['rpha'][-1]
+
+        if 'plot_colorbar' not in kwargs:
+            kwargs['plot_colorbar'] = True
+        if 'cmap_name' not in kwargs:
+            kwargs['cmap_name'] = 'turbo'
+        if 'cblabel' not in kwargs:
+            kwargs['cblabel'] = reda_units.get_label('rpha', log10=False)
+
+        if figsize is None:
+            # defaults, in [cm]
+            figsize = (16 / 2.54, 8 / 2.54)
+
+        if overlay_coverage:
+            key = 'l1_dw_log10_norm'
+            if key in self.a['inversion']:
+                abscov = np.abs(
+                    self.parman.parsets[self.a['inversion'][key]]
+                )
+                normcov = np.divide(abscov, 3)
+                normcov[np.where(normcov > 1)] = 1
+                alpha_channel = np.subtract(1, normcov)
+
+                kwargs['cid_alpha'] = alpha_channel
+
+        fig, ax = plt.subplots(1, 1, figsize=figsize)
+
+        self.plot.plot_elements_to_ax(
+            pid_pha,
+            ax=ax,
+            **kwargs,
+        )
+
+        fig.tight_layout()
+        return fig, ax
+
     def plot_coverage(self, figsize=None, **kwargs):
         """Plot the final cumulated coverage
 
