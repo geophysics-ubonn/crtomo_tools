@@ -1596,6 +1596,8 @@ class tdMan(object):
                 print("#" * 80)
                 print("#" * 80)
                 print("#" * 80)
+
+            os.chdir(pwd)
             raise Exception('CRTomo calling error')
 
         if catch_output:
