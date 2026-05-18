@@ -214,8 +214,7 @@ rpha_with_noise = rpha + noise_rpha
 man.register_measurements(rmag_with_noise, rpha_with_noise)
 
 # Remove physically implausible negative magnitude values
-indices = np.where(rmag_with_noise <= 0)[0]
-man.configs.delete_data_points(indices)
+man.remove_negative_resistance_measurements()
 
 man.save_measurements('volt.dat')
 
