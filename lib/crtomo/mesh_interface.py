@@ -93,6 +93,17 @@ class CRTomoGMSHMeshGenerator():
                 return None, None
             return None
 
+        if extra_lines is not None:
+            extra_lines_crop = self.crop_lines_to_boundary(
+                boundaries,
+                extra_lines
+            )
+            boundaries = self._extra_lines_add_to_boundaries(
+                boundaries, extra_lines_crop
+            )
+        else:
+            extra_lines_crop = None
+
         # debug
         # workdir = 'mesh_gen'
         # os.makedirs(workdir, exist_ok=True)
@@ -106,8 +117,8 @@ class CRTomoGMSHMeshGenerator():
         np.savetxt('electrodes.dat', electrodes)
         if char_lengths is not None:
             np.savetxt('char_length.dat', char_lengths)
-        if extra_lines is not None and len(extra_lines) > 0:
-            np.savetxt('extra_lines.dat', extra_lines)
+        if extra_lines_crop is not None and len(extra_lines) > 0:
+            np.savetxt('extra_lines.dat', extra_lines_crop)
         if extra_nodes is not None:
             np.savetxt('extra_nodes.dat', extra_nodes)
 
@@ -260,6 +271,7 @@ class CRTomoGMSHMeshGenerator():
                             continue
 
                         # make sure we are not only dealing with endpoints
+                        # TODO: This check seems odd
                         check_con_end = (
                             line1.coords[0] == line2.coords[0] or
                             line1.coords[0] == line2.coords[1] or
@@ -307,6 +319,85 @@ class CRTomoGMSHMeshGenerator():
         # print('done')
         return extra_lines_in
 
+    def crop_lines_to_boundary(self, boundaries, extra_lines, round_dec=4):
+        """Take all extra_lines and make sure the either lie completely in the
+        boundary region, or crop them to lie on the boundary
+
+        Round coordinates to four decimal points.
+
+        """
+        ls_boundary = self._boundaries_to_polygon(boundaries)
+
+        extra_lines_new = []
+        for line_coords in extra_lines:
+            line = shapely.geometry.LineString(
+                (
+                    (line_coords[0], line_coords[1]),
+                    (line_coords[2], line_coords[3]),
+                )
+            )
+            if ls_boundary.contains(line):
+                extra_lines_new += [line_coords]
+            else:
+                line_crop = ls_boundary.intersection(line)
+                extra_lines_new += [
+                    [
+                        line_crop.coords[0][0],
+                        line_crop.coords[0][1],
+                        line_crop.coords[1][0],
+                        line_crop.coords[1][1],
+                    ]
+                ]
+        extra_lines_new = np.array(extra_lines_new).round(round_dec)
+        return extra_lines_new
+
+    def _extra_lines_add_to_boundaries(self, boundaries, extra_lines):
+        """Add all start/end points of the extra lines lying on the boundary to
+        the boundary, of not already present
+        """
+        boundary_lines = self._boundaries_to_lines(boundaries)
+
+        points = []
+        for (x1, y1, x2, y2) in extra_lines:
+            points += [shapely.geometry.Point((x1, y1))]
+            points += [shapely.geometry.Point((x2, y2))]
+
+        for point in points:
+            index = 0
+            while index < len(boundary_lines):
+
+                bline = boundary_lines[index][0]
+                btype = boundary_lines[index][1]
+
+                # check if line is crossed by line_cross
+                if point.intersects(bline):
+                    # now make sure the point is not already start/end point
+                    check_endpoints = (
+                        point.x == bline.coords[0][0] and
+                        point.y == bline.coords[0][1]
+                    ) or (
+                        point.x == bline.coords[1][0] and
+                        point.y == bline.coords[1][1]
+                    )
+                    if not check_endpoints:
+                        print(
+                            'POINT {} must be inserted on boundary', point
+                        )
+                        splits = [
+                            [x, btype] for x in split(bline, point).geoms
+                        ]
+                        boundary_lines = boundary_lines[
+                            0:index
+                        ] + splits + boundary_lines[
+                            index + 1:
+                        ]
+                        index += 1
+
+                index += 1
+            boundaries_new = self._lines_to_crt_boundaries(boundary_lines)
+
+        return boundaries_new
+
     def gen_mesh_with_polygons(self, boundaries, electrodes, char_lengths=None,
                                polygons=None, additional_lines=None):
         """
@@ -331,13 +422,16 @@ class CRTomoGMSHMeshGenerator():
         if polygons is None:
             polygons = []
         for polygon in polygons:
-            # polygon = polygon.normalize().reverse()
+            # check if the polygon touches the boundary
             if not ls_boundary.contains_properly(polygon):
+                # it does, we need to add all intersection points to the
+                # boundaries
+
                 # print('intersetion with boundary')
                 # 1. crop polygon to boundary
                 poly_int = ls_boundary.intersection(polygon)
-                # print(type(poly_int))
-                # #fig, ax = plt.subplots()
+
+                # fig, ax = plt.subplots()
                 # shapely.plotting.plot_polygon(ls_boundary)
                 # shapely.plotting.plot_polygon(poly_int)
 

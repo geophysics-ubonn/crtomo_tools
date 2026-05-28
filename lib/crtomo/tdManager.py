@@ -1605,7 +1605,7 @@ class tdMan(object):
             os.chdir(pwd)
             raise Exception('CRTomo calling error')
 
-        if catch_output:
+        if not catch_output:
             print(output)
 
         # reset environment variable

@@ -3,6 +3,7 @@ from crtomo.tdManager import noise_model
 from crtomo.grid import crt_grid
 from crtomo.grid import mesh
 from crtomo.mesh_interface import CRTomoGMSHMeshGenerator
+from crtomo.mesh_decoupling import CRTomoDecouplingLines
 from crtomo.plotManager import plotManager as pltMan
 from crtomo.parManager import ParMan as ParMan
 from crtomo.eitManager import eitMan
@@ -11,6 +12,7 @@ from crtomo.status import td_is_finished
 from crtomo.status import seitdir_is_finished
 
 mesh_gen = CRTomoGMSHMeshGenerator()
+mesh_decouplings = CRTomoDecouplingLines()
 
 __all__ = [
     'pltMan',
@@ -25,4 +27,5 @@ __all__ = [
     'seitdir_is_finished',
     'ParMan',
     'mesh_gen',
+    'mesh_decouplings',
 ]
