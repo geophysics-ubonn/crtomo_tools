@@ -1,8 +1,10 @@
 import os
 import shutil
 import subprocess
+import tempfile
 
 import numpy as np
+shutil
 
 
 class CRTomoDecouplingLines():
@@ -20,12 +22,14 @@ class CRTomoDecouplingLines():
         pwd = os.getcwd()
 
         workdir = 'tmp_dec'
-        if os.path.isdir(workdir):
-            print('Removing old worktree')
-            shutil.rmtree(workdir)
+        workdir = tempfile.TemporaryDirectory()
+        # if os.path.isdir(workdir):
+        #     # print('Removing old worktree')
+        #     shutil.rmtree(workdir)
 
-        os.makedirs(workdir)
-        os.chdir(workdir)
+        # os.makedirs(workdir)
+        os.chdir(workdir.name)
+
         mesh.save_elem_elec_files()
         np.savetxt('extra_lines.dat', dec_lines)
 
