@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # *-* coding: utf-8 *-*
 """
-Creating and handling meshes
-============================
+Creating and handling meshes 1
+==============================
 
 Grids for CRTomo can be created in multiple ways. We now support two ways:
 

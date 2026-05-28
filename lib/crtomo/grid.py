@@ -57,8 +57,14 @@ from scipy.spatial.distance import pdist
 import scipy.spatial
 import pandas as pd
 
+from .mesh_interface import CRTomoGMSHMeshGenerator
+from .mesh_decoupling import CRTomoDecouplingLines
+
 import crtomo.mpl
 plt, mpl = crtomo.mpl.setup()
+
+CRTomoGMSHMeshGenerator
+CRTomoDecouplingLines
 
 
 class crt_grid(object):
@@ -144,7 +150,7 @@ class crt_grid(object):
         output_str += 'number of electrodes: {0}\n'.format(
             self.nr_of_electrodes
         )
-        output_str += 'grid dimsensions: \n'
+        output_str += 'mesh dimensions: \n'
         xlim, zlim = self.get_minmax()
         output_str += 'X: {0} {1} \n'.format(*xlim)
         output_str += 'Z: {0} {1} \n'.format(*zlim)
@@ -592,6 +598,16 @@ class crt_grid(object):
         self.plot_grid_to_ax(ax, **kwargs)
         fig.tight_layout()
         return fig, ax
+
+    def plot(self, **kwargs):
+        """Shortcut to .plot_grid
+        """
+        return self.plot_grid(**kwargs)
+
+    def plot_mesh(self, **kwargs):
+        """Shortcut to .plot_grid
+        """
+        return self.plot_grid(**kwargs)
 
     def test_plot(self):
         # play with plot routines
