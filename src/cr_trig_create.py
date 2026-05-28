@@ -346,6 +346,8 @@ class Mesh():
         # fid.write('Coherence;\n')
         self.write_extra_nodes(fid)
         # fid.write('Coherence;\n')
+
+        fid.write('//extra lines\n')
         for index in self.ExtraLineIndices:
             fid.write('Line {' + '{0}'.format(index) + '} In Surface {7};\n')
 
