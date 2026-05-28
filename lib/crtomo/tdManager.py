@@ -402,7 +402,7 @@ class tdMan(object):
         #     raise Exception('Reading from tar.xz files is not supported yet')
 
     def read_decouplings_file(self, filename):
-        """Import decoupling data for the inversion. This is usally a file
+        """Import decoupling data for the inversion. This is usually a file
         called decouplings.dat in the exe/ directory of a tomodir, but we can
         also read from an BytesIO object.
 
@@ -434,7 +434,12 @@ class tdMan(object):
             fid.close()
 
     def add_to_decouplings(self, new_decouplings):
-        """
+        """Add new lines to the decouplings
+
+        Parameters
+        ----------
+        decoupling: np.array Nx3
+            Element indices for decouplings and strength (0.0-1.0)
         """
         assert new_decouplings.shape[1] == 3
         if self.decouplings is None:
