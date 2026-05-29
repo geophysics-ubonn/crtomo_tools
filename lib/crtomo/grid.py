@@ -576,7 +576,7 @@ class crt_grid(object):
                     bbox=dict(boxstyle='circle', facecolor='red', alpha=0.8)
                 )
 
-    def plot_grid(self, **kwargs):
+    def plot_grid(self, figsize=None, title=None, dpi=150, **kwargs):
         """Plot the mesh
 
         Parameters
@@ -594,8 +594,12 @@ class crt_grid(object):
         ax: matplotlib.Axes
             The axes object the mesh was plotted to
         """
-        fig, ax = plt.subplots(1, 1)
+        if figsize is None:
+            figsize = (16 / 2.54, 9 / 2.54)
+        fig, ax = plt.subplots(1, 1, figsize=figsize, dpi=dpi)
         self.plot_grid_to_ax(ax, **kwargs)
+        if title is not None:
+            ax.set_title(title)
         fig.tight_layout()
         return fig, ax
 
