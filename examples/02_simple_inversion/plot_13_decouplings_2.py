@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 r"""
-Generating regularization decouplings
-=====================================
+Gegularization decouplings 2
+============================
 
 """
 ###############################################################################
