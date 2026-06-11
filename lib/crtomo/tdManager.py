@@ -1438,6 +1438,9 @@ class tdMan(object):
 
     def _model(self, voltages, sensitivities, potentials, tempdir,
                silent=False):
+        """The actual forward modelling function
+
+        """
         self._check_state()
         if self.can_model:
             if not silent:
@@ -1454,13 +1457,26 @@ class tdMan(object):
             self.save_to_tomodir('.')
             os.chdir('exe')
             binary = CRBin.get('CRMod')
-            return_text = subprocess.check_output(
-                binary,
-                shell=True,
-                stderr=subprocess.STDOUT,
-            )
-            if not silent:
-                print(return_text)
+            try:
+                return_text = subprocess.check_output(
+                    binary,
+                    shell=True,
+                    stderr=subprocess.STDOUT,
+                )
+                if not silent:
+                    print(return_text)
+            except Exception as e:
+                print('-' * 60)
+                print('-' * 60)
+                print('-' * 60)
+                print('ERROR calling CRMod!')
+                print(e)
+                if os.path.isfile('error.dat'):
+                    print(
+                        open('error.dat', 'r').read()
+                    )
+
+                os.chdir(pwd)
 
             # print('Return text:', return_text)
             # restore the configuration
