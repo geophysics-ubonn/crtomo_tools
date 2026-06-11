@@ -1,5 +1,9 @@
 """
 
+TODO:
+    * Fix crossing extra-lines
+    * extralines: fix problems with common start/end nodes
+
 """
 import tempfile
 import numpy as np
@@ -9,6 +13,10 @@ import crtomo
 
 import shapely
 from shapely.ops import split
+
+
+class MeshGenElecsNotInBoundry(Exception):
+    pass
 
 
 def poly_to_linestring(in_polygon):
@@ -78,6 +86,14 @@ class CRTomoGMSHMeshGenerator():
                 return False
         return True
 
+    def check_elecs_included_in_boundary(self, boundaries, electrodes):
+        """Electrode coordinates must be included exactly on the boundary
+
+        raise MeshGenElecsNotInBoundry if there are missing electrodes
+
+        """
+        pass
+
     def gen_mesh(self, boundaries, electrodes, char_lengths=None,
                  extra_lines=None, extra_nodes=None,
                  return_output=False,
@@ -101,6 +117,7 @@ class CRTomoGMSHMeshGenerator():
             boundaries = self._extra_lines_add_to_boundaries(
                 boundaries, extra_lines_crop
             )
+            extra_lines_crop = self.fix_extra_lines(extra_lines_crop)
         else:
             extra_lines_crop = None
 
@@ -182,7 +199,10 @@ class CRTomoGMSHMeshGenerator():
         return np.array(boundaries)
 
     def fix_extra_lines(self, extra_lines_in):
-        # print('fix_extra_lines')
+        """
+
+        """
+        print('fix_extra_lines')
 
         # first fix: find parallel, overlapping lines and split them
         # accordingly
@@ -231,7 +251,7 @@ class CRTomoGMSHMeshGenerator():
 
         # second fix: find lines that have their start point in existing lines
         # print('------------------------------------------------')
-        # print('Second fix')
+        print('Second fix')
         index = 0
         while index < len(extra_lines_in):
             line1c = extra_lines_in[index]
@@ -271,7 +291,6 @@ class CRTomoGMSHMeshGenerator():
                             continue
 
                         # make sure we are not only dealing with endpoints
-                        # TODO: This check seems odd
                         check_con_end = (
                             line1.coords[0] == line2.coords[0] or
                             line1.coords[0] == line2.coords[1] or
@@ -279,16 +298,17 @@ class CRTomoGMSHMeshGenerator():
                             line1.coords[1] == line2.coords[1]
                         )
                         if check_con_end:
-                            # print('   line just connect at ends')
+                            # print('   line just connects at ends')
                             index2 += 1
                             continue
+
                         check_ends_here = (
                             intersection.coords[0] == line1.coords[0] or
                             intersection.coords[0] == line1.coords[1]
                         )
                         if check_ends_here:
                             # split line2
-                            # print('   splitting line2', index, index2)
+                            print('   splitting line2', index, index2)
                             line2_split = split(line2, intersection)
                             # print(line2_split)
                             elines = np.array((
@@ -311,7 +331,78 @@ class CRTomoGMSHMeshGenerator():
                                 elines,
                                 extra_lines_in[index2+1:, :],
                             ))
+                            index2 += 1
+                            continue
+
+                        # check if they cross somewhere not at the end points
+                        check_cross_in_lines = (
+                            intersection.coords[0] != line1.coords[0] and
+                            intersection.coords[0] != line1.coords[1] and
+                            intersection.coords[0] != line2.coords[0] and
+                            intersection.coords[0] != line2.coords[1]
+                        )
+                        if check_cross_in_lines:
+                            # print('Lines cross somewhere along both lines')
+                            # split both lines
+                            # print('before')
+                            # print(extra_lines_in)
+                            line1_split = split(line1, intersection)
+                            line2_split = split(line2, intersection)
+                            coords1 = np.array((
+                                (
+                                    line1_split.geoms[0].coords[0][0],
+                                    line1_split.geoms[0].coords[0][1],
+                                    line1_split.geoms[0].coords[1][0],
+                                    line1_split.geoms[0].coords[1][1],
+                                ),
+                                (
+                                    line1_split.geoms[1].coords[0][0],
+                                    line1_split.geoms[1].coords[0][1],
+                                    line1_split.geoms[1].coords[1][0],
+                                    line1_split.geoms[1].coords[1][1],
+                                ),
+                            ))
+                            coords2 = np.array((
+                                (
+                                    line2_split.geoms[0].coords[0][0],
+                                    line2_split.geoms[0].coords[0][1],
+                                    line2_split.geoms[0].coords[1][0],
+                                    line2_split.geoms[0].coords[1][1],
+                                ),
+                                (
+                                    line2_split.geoms[1].coords[0][0],
+                                    line2_split.geoms[1].coords[0][1],
+                                    line2_split.geoms[1].coords[1][0],
+                                    line2_split.geoms[1].coords[1][1],
+                                ),
+                            ))
+                            # sort indices
+                            index_a = min(index, index2)
+                            index_b = max(index, index2)
+                            # print('index a/b', index_a, index_b)
+
+                            extra_lines_in = np.vstack((
+                                extra_lines_in[0:index_a],
+                                coords1,
+                                coords2,
+                                extra_lines_in[index_a + 1:index_b, :],
+                                extra_lines_in[index_b + 1:, :],
+                            ))
+                            # print('after fixing')
+                            # print(extra_lines_in)
+                            # to be REALLY sure, we restart the check after
+                            # such a split
+                            # why? I _think_ it would be hard to keep track of
+                            # all the lines in case of multiple crosses
+                            index = -1
+                            index2 = -1
+                            continue
+
                         index2 += 1
+                if index == -1:
+                    # this indicates we want to restart
+                    index2 += 1
+                    break
 
                 index2 += 1
             index += 1
