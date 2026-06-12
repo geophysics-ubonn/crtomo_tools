@@ -120,6 +120,12 @@ def get(binary_name, raise_error=True):
         valid_file = shutil.which(filename)
         if valid_file:
             return os.path.abspath(valid_file)
+
+    # as a last resort, try which
+    binary_path = shutil.which(binary_name)
+    if binary_path is not None:
+        return binary_path
+
     # If we reach this location, then no valid file could be found
     if raise_error:
         raise IOError(
