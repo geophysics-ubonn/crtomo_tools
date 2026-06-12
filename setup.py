@@ -5,7 +5,7 @@ import glob
 
 scripts = glob.glob('src/*.py')
 
-version_long = '0.4'
+version_long = '0.5'
 
 # generate entry points
 entry_points = {'console_scripts': []}
@@ -45,6 +45,7 @@ if __name__ == '__main__':
             'crtomo': 'lib/crtomo',
             'crtomo.notebook': 'lib/crtomo/notebook',
             'crtomo.notebook.steps': 'lib/crtomo/notebook/steps',
+            'crtomo.struc_interp': 'lib/crtomo/struc_interp',
         },
         # packages=[''],
         # package_dir={'': 'lib', 'grid_tools': 'src/GRID_TOOLS'},
@@ -53,6 +54,7 @@ if __name__ == '__main__':
             'crtomo',
             'crtomo.notebook',
             'crtomo.notebook.steps',
+            'crtomo.struc_interp',
         ],
         package_data={'crtomo': package_data},
         py_modules=scripts,
