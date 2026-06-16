@@ -33,11 +33,11 @@ jobs:
     - name: Install dependencies
       run: sudo apt -y update && sudo apt install virtualenvwrapper gmsh tree texlive texlive-latex-extra cm-super-minimal dvipng
 
-    - name: Install CRTomo
-      run: |
-          wget https://github.com/geophysics-ubonn/crtomo_stable/releases/download/v1.8.0/crtomomod_1.8.0_amd64.deb
-          pwd
-          sudo dpkg -i crtomomod_1.8.0_amd64.deb
+    # - name: Install CRTomo
+    #   run: |
+    #       wget https://github.com/geophysics-ubonn/crtomo_stable/releases/download/v1.8.0/crtomomod_1.8.0_amd64.deb
+    #       pwd
+    #       sudo dpkg -i crtomomod_1.8.0_amd64.deb
 
     - name: Create virtualenv
       run: bash ./recreate_venv.sh
