@@ -42,7 +42,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx_gallery.gen_gallery',
-    # 'sphinxcontrib.blockdiag',
+    'sphinxcontrib.blockdiag',
     'sphinx.ext.intersphinx',
     'sphinxcontrib.mermaid',
     'sphinx.ext.autosectionlabel',

@@ -34,7 +34,10 @@ Getting started
 
 Application/Module Overview
 ---------------------------
-The workflow for the analysis of geoelectric measurements makes use of three different software packages. Each software package implements a key aspect of the workflow:
+The workflow for the analysis of geoelectric measurements makes use of three
+different software packages. Each software package implements a key aspect of
+the workflow:
+
 * CRTomoMod (https://github.com/geophysics-ubonn/crtomo_stable): This is the
   core modeling and inversion code, implementing the Finite-Element based
   forward solver, as well as the non-linear, iterative, Gauss-Newton inversion
@@ -268,6 +271,8 @@ Contents
    contributing.rst
    scripts/grid_tools/modules.rst
    api/crtomo.rst
+   api/modules.rst
+
 
 Indices and tables
 ==================
