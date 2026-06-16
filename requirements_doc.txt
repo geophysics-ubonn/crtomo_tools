@@ -9,3 +9,5 @@ sphinxcontrib-mermaid
 furo
 pygimli
 pycrtomomod
+# otherwise, sphinxcontrib-blockdiag will not work
+setuptools<=80.10.2
