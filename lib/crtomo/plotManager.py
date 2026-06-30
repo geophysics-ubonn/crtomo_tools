@@ -501,9 +501,11 @@ class plotManager(object):
         # ).copy()
 
         cmap = mpl.colormaps.get_cmap(
-            cmap_name,
-            kwargs.get('cbsegments', None)
-        ).copy()
+            cmap_name
+        )
+        if kwargs.get('cbsegments', None) is not None:
+            cmap = cmap.resampled(kwargs.get('cbsegment'))
+
         over = kwargs.get('over', cmap(1.0))
         under = kwargs.get('under', cmap(0.0))
 
@@ -520,7 +522,7 @@ class plotManager(object):
             data_min -= 1
             data_max += 1
         cnorm = mpl.colors.Normalize(vmin=data_min, vmax=data_max)
-        scalarMap = mpl.colormaps.ScalarMappable(norm=cnorm, cmap=cmap)
+        scalarMap = mpl.cm.ScalarMappable(norm=cnorm, cmap=cmap)
         fcolors = scalarMap.to_rgba(subdata)
         scalarMap.set_array(subdata)
 
