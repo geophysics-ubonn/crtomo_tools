@@ -208,7 +208,7 @@ class plotManager(object):
         )
         cint_ma = np.ma.masked_invalid(cint)
 
-        cmap = mpl.cm.get_cmap('turbo', 1)
+        cmap = mpl.colormaps.get_cmap('turbo', 1)
         if kwargs.get('fill_contours', True):
             pc = ax.contourf(
                 X, Z, cint_ma,
@@ -500,7 +500,7 @@ class plotManager(object):
         #     kwargs.get('cbsegments', 256)
         # ).copy()
 
-        cmap = mpl.cm.get_cmap(
+        cmap = mpl.colormaps.get_cmap(
             cmap_name,
             kwargs.get('cbsegments', None)
         ).copy()
@@ -520,7 +520,7 @@ class plotManager(object):
             data_min -= 1
             data_max += 1
         cnorm = mpl.colors.Normalize(vmin=data_min, vmax=data_max)
-        scalarMap = mpl.cm.ScalarMappable(norm=cnorm, cmap=cmap)
+        scalarMap = mpl.colormaps.ScalarMappable(norm=cnorm, cmap=cmap)
         fcolors = scalarMap.to_rgba(subdata)
         scalarMap.set_array(subdata)
 
