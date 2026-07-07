@@ -208,7 +208,7 @@ class plotManager(object):
         )
         cint_ma = np.ma.masked_invalid(cint)
 
-        cmap = mpl.colormaps.get_cmap('turbo', 1)
+        cmap = mpl.colormaps.get_cmap('turbo')
         if kwargs.get('fill_contours', True):
             pc = ax.contourf(
                 X, Z, cint_ma,
@@ -504,7 +504,7 @@ class plotManager(object):
             cmap_name
         )
         if kwargs.get('cbsegments', None) is not None:
-            cmap = cmap.resampled(kwargs.get('cbsegment'))
+            cmap = cmap.resampled(kwargs.get('cbsegments'))
 
         over = kwargs.get('over', cmap(1.0))
         under = kwargs.get('under', cmap(0.0))
