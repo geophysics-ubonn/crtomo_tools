@@ -3372,6 +3372,78 @@ i6,t105,g9.3,t117,f5.3)
         cb.remove()
         return fig, ax
 
+    def plot_pseudosection(self, mid=None, **kwargs):
+        """Create a pseudosection plot of a specified measurement.
+
+        Return None, None if no forward measurement are available.
+
+        Parameters
+        ----------
+
+        Kwargs
+        ------
+        interpolate: boolean (True)
+            Interpolate plots
+        cmap: str ('seismic')
+            A matplotlib colormap
+        cbmin: float (None)
+            Minimum of colormap
+        cbmax: float (None)
+            Minimum of colormap
+        title: str ('')
+            Title of plot
+        cblal: float (None)
+            Colorbar label
+
+        Example
+        -------
+        >>> import crtomo
+        ... import matplotlib.pylab as plt
+        ... import numpy as np
+        ... mesh = crtomo.crt_grid.create_surface_grid(
+        ...     nr_electrodes=10,
+        ...     spacing=0.4,
+        ...     lines=[-0.5, ],
+        ...     left=3,
+        ...     right=3,
+        ...     depth=5,
+        ...     char_lengths=[0.05, 0.25, 0.25, 0.25],
+        ... )
+        ... # fig, ax = mesh.plot_grid()
+        ... # fig.show()
+        ... tdm = crtomo.tdMan(grid=mesh)
+        ... pid_mag, pid_pha = tdm.add_homogeneous_model(100, 0)
+        ... tdm.parman.modify_area(pid_mag, 0, 4, -0.5, 0, 1000)
+        ... tdm.configs.gen_dipole_dipole(stepc=1, skipc=0)
+        ... tdm.measurements()
+        ... # plot first measurement
+        ... fig, ax = tdm.plot_pseudosection(0)
+        ... fig.show()
+
+        """
+        from reda.plotters.pseudoplots import plot_pseudosection_type2
+
+        if mid is None:
+            print('No mid specified. Returning None')
+            return None
+
+        data = pd.DataFrame(self.configs.configs, columns=['a', 'b', 'm', 'n'])
+        data['values'] = self.configs.measurements[mid]
+
+        fig, ax, cb = plot_pseudosection_type2(
+            data,
+            'values',
+            cmap=kwargs.pop('cmap', 'seismic'),
+            cmin=kwargs.pop('cmin', None),
+            cmax=kwargs.pop('cmax', None),
+            title=kwargs.pop('title', ''),
+            interpolate=kwargs.pop("interpolate", True),
+            cblabel=kwargs.pop("cblabel", ""),
+            **kwargs,
+        )
+
+        return fig, ax
+
     def get_invstats(self, with_updates=False):
         if self.inv_stats is None:
             return None
