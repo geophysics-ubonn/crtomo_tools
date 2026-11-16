@@ -514,6 +514,8 @@ class plotManager(object):
         cmap.set_under(under)
         cmap.set_bad(bad)
 
+        norm = kwargs.get('norm', None)
+
         # normalize data
         data_min = kwargs.get('cbmin', np.nanmin(subdata))
         data_max = kwargs.get('cbmax', np.nanmax(subdata))
@@ -521,10 +523,23 @@ class plotManager(object):
                 and data_min == data_max):
             data_min -= 1
             data_max += 1
-        cnorm = mpl.colors.Normalize(vmin=data_min, vmax=data_max)
-        scalarMap = mpl.cm.ScalarMappable(norm=cnorm, cmap=cmap)
-        fcolors = scalarMap.to_rgba(subdata)
-        scalarMap.set_array(subdata)
+
+        if norm is None:
+            cnorm = mpl.colors.Normalize(vmin=data_min, vmax=data_max)
+            scalarMap = mpl.cm.ScalarMappable(norm=cnorm, cmap=cmap)
+
+            # this array holds the actual plot data
+            fcolors = scalarMap.to_rgba(subdata)
+            scalarMap.set_array(subdata)
+        else:
+            scalarMap = mpl.cm.ScalarMappable(
+                norm=norm, cmap=cmap,
+            )
+
+            # this array holds the actual plot data
+            fcolors = scalarMap.to_rgba(subdata)
+            scalarMap.set_array(subdata)
+            cnorm = norm
 
         # if applicable, apply alpha values
         alpha_cid = kwargs.get('cid_alpha', None)
@@ -571,8 +586,6 @@ class plotManager(object):
         for x, z in zip(self.grid.grid['x'], self.grid.grid['z']):
             tmp = np.vstack((x, z)).T
             all_xz.append(tmp)
-
-        norm = kwargs.get('norm', None)
 
         # the actual plotting
         collection = mpl.collections.PolyCollection(
@@ -624,12 +637,17 @@ class plotManager(object):
 
             ax.get_figure().add_axes(ax_cb)
 
+            if norm is not None:
+                ticker = kwargs.get('cb_ticker', None)
+            else:
+                ticker = mpl.ticker.MaxNLocator(kwargs.get('cbnrticks', 3))
+
             cb = fig.colorbar(
                 scalarMap,
                 cax=ax_cb,
                 orientation=cbposition,
                 label=kwargs.get('cblabel', ''),
-                ticks=mpl.ticker.MaxNLocator(kwargs.get('cbnrticks', 3)),
+                ticks=ticker,
                 format=kwargs.get('cbformat', None),
                 extend='both',
             )
