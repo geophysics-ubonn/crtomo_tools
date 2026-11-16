@@ -72,10 +72,10 @@ poly = Polygon([
     [2, -1],
     [0, -1.5],
 ])
-parman.modify_polygon(pid_mag, poly, 66)
+parman.modify_polygon(pid_mag, poly, value=66)
 
 ###############################################################################
-fig, ax = plt.subplots(figsize=(15 / 2.54, 7 / 2.54))
+fig, ax = plt.subplots(figsize=(25 / 2.54, 9 / 2.54))
 plotman.plot_elements_to_ax(
     pid_mag,
     ax=ax,

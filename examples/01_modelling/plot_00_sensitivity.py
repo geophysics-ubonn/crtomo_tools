@@ -23,7 +23,7 @@ plt.rcParams["figure.autolayout"] = True  # This does not seem to work?!
 
 ###############################################################################
 # create and save a FEM-grid
-grid = crtomo.crt_grid.create_surface_grid(
+mesh = crtomo.crt_grid.create_surface_grid(
     nr_electrodes=8,
     spacing=1,
     # char_lengths=0.05,
@@ -43,7 +43,7 @@ grid = crtomo.crt_grid.create_surface_grid(
     ],
 )
 
-fig, ax = grid.plot_grid()
+fig, ax = mesh.plot_grid()
 # sphinx_gallery_start_ignore
 # Explicitly state the expression "fig", to make it caught by sphinx_gallery.
 # fig.set_size_inches(4, 1.75)
@@ -52,8 +52,8 @@ fig
 # sphinx_gallery_end_ignore
 
 with reda.CreateEnterDirectory('output_plot_00_sensitivity'):
-    grid.save_elem_file('elem.dat')
-    grid.save_elec_file('elec.dat')
+    mesh.save_elem_file('elem.dat')
+    mesh.save_elec_file('elec.dat')
 
 ###############################################################################
 # create the measurement configuration
@@ -64,7 +64,7 @@ configs = np.array((
 ###############################################################################
 # for different background, plot the sensitivities
 for bg in (1, 10, 100, 1000):
-    td = crtomo.tdMan(grid=grid)
+    td = crtomo.tdMan(grid=mesh)
     td.configs.add_to_configs(configs)
     pid_mag, pid_pha = td.add_homogeneous_model(bg, 0)
 
@@ -124,3 +124,5 @@ for bg in (1, 10, 100, 1000):
     # sphinx_gallery_start_ignore
     # sphinx_gallery_multi_image_block = "single"
     # sphinx_gallery_end_ignore
+
+# sphinx_gallery_thumbnail_number = -1
