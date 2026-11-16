@@ -390,8 +390,14 @@ class crt_grid(object):
             min, max values of grid dimensions in z direction (downwards)
 
         """
-        x_minmax = [np.min(self.grid['x']), np.max(self.grid['x'].max())]
-        z_minmax = [np.min(self.grid['z']), np.max(self.grid['z'].max())]
+        x_minmax = [
+            np.min(self.grid['x']).item(),
+            np.max(self.grid['x'].max()).item()
+        ]
+        z_minmax = [
+            np.min(self.grid['z']).item(),
+            np.max(self.grid['z'].max()).item()
+        ]
         return x_minmax, z_minmax
 
     def _read_elem_neighbors(self, fid):
