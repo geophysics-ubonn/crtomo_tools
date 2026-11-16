@@ -64,6 +64,7 @@ import tarfile
 
 import matplotlib.colors
 import matplotlib.cm
+from matplotlib.colors import AsinhNorm
 import numpy as np
 import pandas as pd
 import reda
@@ -1003,7 +1004,6 @@ class tdMan(object):
         # the nr of configs
         if (len(sens_files) > 0 and
            len(sens_files) == self.configs.nr_of_configs):
-            print('reading sensitivities')
             self._read_sensitivities(mod_directory + os.sep + 'sens')
 
         # same for potentials
@@ -1014,7 +1014,6 @@ class tdMan(object):
         # the nr of configs
         if (len(pot_files) > 0 and
            len(pot_files) == self.configs.nr_of_configs):
-            print('reading potentials')
             self._read_potentials(mod_directory + os.sep + 'pot')
 
     def _read_sensitivities(self, sens_dir):
@@ -1127,6 +1126,17 @@ class tdMan(object):
         absv : bool, optional
             If true, plot absolute values of sensitivity
 
+        axes: None|tuple
+        figsize: None|tuple
+        cmap: None|str
+        cmap_phase: None|str
+        over: None|float
+        under: None|float
+        bad: None|float
+        cbsegments: None|int
+        cblabel : None|str
+
+
         Returns
         -------
         fig
@@ -1232,37 +1242,39 @@ class tdMan(object):
             else:
                 fig = axes.get_figure()
         else:
-            fig, axes = plt.subplots(1, Nx, figsize=(15 / 2.54, 12 / 2.54))
+            figsize = kwargs.get("figsize", (16 / 2.54, 12 / 2.54))
+            fig, axes = plt.subplots(1, Nx, figsize=figsize)
         axes = np.atleast_1d(axes)
         # magnitude
         ax = axes[0]
-        cid = self.parman.add_data(sens_mag)
+        # cid = self.parman.add_data(sens_mag)
+
+        norm = AsinhNorm(
+            np.quantile(
+                np.abs(sens_mag),
+                0.1,
+            )
+        )
+
+        xlims, zlims = self.grid.get_minmax()
 
         # we always plot the first subplot, the magnitude
         fig, ax, cnorm, cmap, cb, sM = self.plot.plot_elements_to_ax(
-            cid=cid,
+            sens_mag,
             ax=ax,
             plot_colorbar=True,
             # cmap_name='seismic',
-            cmap_name='jet_r',
-            cbsegments=18,
+            cmap_name=kwargs.get('cmap', 'jet_r'),
+            cbsegments=kwargs.get("cbsegments", 18),
             cbmin=cbmin,
             cbmax=cbmax,
-            cblabel='asinh-transformed sensitivity',
+            cblabel=kwargs.get("cblabel", "normed sensitivity"),
             bad='white',
-            # cbmin=-cblim,
-            # cbmax=cblim,
-            # converter=converter_pm_log10,
-            # norm = colors.SymLogNorm(
-            #     linthresh=0.03,
-            #     linscale=0.03,
-            #     vmin=-1.0,
-            #     vmax=1.0
-            # ),
-            # xmin=-0.25,
-            # xmax=10,
-            # zmin=-2,
-            converter=PlotManager.converter_asinh,
+            # converter=PlotManager.converter_asinh,
+            norm=norm,
+            xmin=kwargs.get("xmin", xlims[0]),
+            xmax=kwargs.get("xmax", xlims[1]),
+            zmin=kwargs.get("zmin", zlims[0]),
         )
         if not absv:
             # for the asinh converter
@@ -1272,35 +1284,31 @@ class tdMan(object):
                 '0',
                 '1',
             ])
-            pass
-            # cb.set_ticks([0, 0.25, 0.5, 0.75, 1])
-            # cb.set_ticklabels([
-            #     '-1',
-            #     r'$-10^{-2.5}$',
-            #     '0',
-            #     r'$10^{-2.5}$',
-            #     '1',
-            # ])
-
-        # self.plot.plot_elements_to_ax(
-        #     cid=cids[0],
-        #     ax=ax,
-        # )
 
         if not mag_only:
-            cid = self.parman.add_data(sens_pha)
+            assert np.any(sens_pha > 0), \
+                "Error: All phase sensitivities are zero!"
+            norm = AsinhNorm(
+                np.quantile(
+                    np.abs(sens_pha),
+                    0.1,
+                )
+            )
             # plot phase
             ax = axes[1]
             fig, ax, cnorm, cmap, cb, sM = self.plot.plot_elements_to_ax(
-                cid=cid,
+                sens_pha,
                 ax=ax,
                 plot_colorbar=True,
-                # cmap_name='seismic',
-                cmap_name='jet_r',
+                cmap_name=kwargs.get("cmap_phase", "jet_r"),
                 cbsegments=18,
                 cbmin=cbmin,
                 cbmax=cbmax,
                 bad='white',
+                norm=norm,
+                xmin=kwargs.get("xmin", xlims[0]),
+                xmax=kwargs.get("xmax", xlims[1]),
+                zmin=kwargs.get("zmin", zlims[0]),
             )
             if not absv:
                 cb.set_ticks([0, 0.25, 0.5, 0.75, 1])
